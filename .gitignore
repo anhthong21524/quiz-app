@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.pnpm-store/
+.env
+playwright-report/
+test-results/
+coverage/
+apps/web/.vite/
+*.log
+.DS_Store
+

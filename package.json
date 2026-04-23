@@ -1,0 +1,19 @@
+{
+  "name": "quiz-app",
+  "private": true,
+  "packageManager": "pnpm@9.0.0",
+  "scripts": {
+    "postinstall": "pnpm --filter @quiz-app/shared build",
+    "dev": "concurrently -k -n shared,api,web -c cyan,green,magenta \"pnpm --filter @quiz-app/shared dev\" \"pnpm --filter @quiz-app/api dev\" \"pnpm --filter @quiz-app/web dev\"",
+    "build": "pnpm -r --if-present build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r --if-present test",
+    "test:e2e:install": "pnpm --filter @quiz-app/e2e exec playwright install",
+    "test:e2e": "pnpm --filter @quiz-app/e2e test"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.1",
+    "concurrently": "^9.2.1",
+    "typescript": "^5.9.3"
+  }
+}

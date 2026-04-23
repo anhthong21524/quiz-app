@@ -1,0 +1,30 @@
+{
+  "name": "@quiz-app/api",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpile-only --project tsconfig.json src/main.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node dist/main.js",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "dependencies": {
+    "@nestjs/common": "^11.1.6",
+    "@nestjs/config": "^4.0.2",
+    "@nestjs/core": "^11.1.6",
+    "@nestjs/mongoose": "^11.0.3",
+    "@nestjs/platform-express": "^11.1.6",
+    "@quiz-app/shared": "workspace:*",
+    "class-transformer": "^0.5.1",
+    "class-validator": "^0.14.2",
+    "mongoose": "^8.18.1",
+    "reflect-metadata": "^0.2.2",
+    "rxjs": "^7.8.2"
+  },
+  "devDependencies": {
+    "@types/node": "^24.6.1",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  }
+}
+

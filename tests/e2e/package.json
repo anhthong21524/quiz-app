@@ -1,0 +1,14 @@
+{
+  "name": "@quiz-app/e2e",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "install:browsers": "playwright install",
+    "test": "playwright test",
+    "lint": "tsc --noEmit -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.55.1",
+    "typescript": "^5.9.3"
+  }
+}
