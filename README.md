@@ -4,6 +4,8 @@
 
 `quiz-app` is a production-ready pnpm workspace that combines a Vue 3 quiz authoring frontend, a NestJS backend API, a shared TypeScript contracts package, and Playwright end-to-end coverage. The API uses MongoDB Atlas when `MONGODB_URI` is configured and falls back to an in-memory repository for local-first development so the workspace can start immediately.
 
+The web app now includes a split-layout authentication screen styled to match the provided design reference, with stable tab switching between `Sign in` and `Create account`.
+
 ## Tech stack
 
 - Frontend: Vue 3, Vite, TypeScript, Pinia, Vue Router, Axios
@@ -86,3 +88,9 @@ quiz-app/
 - Configure `MONGODB_URI` and `DATABASE_NAME` to use MongoDB Atlas in development or production.
 - Without `MONGODB_URI`, the API stores data in memory so local startup stays frictionless.
 - Set `VITE_API_BASE_URL` if the frontend should target a non-default API origin.
+
+## Auth UI notes
+
+- The auth card keeps a stable width and height when switching between `Sign in` and `Create account`.
+- The left branding copy rotates automatically on a timer and is no longer tied to the selected auth tab.
+- The current authentication view is implemented in `apps/web/src/views/LoginView.vue`.
