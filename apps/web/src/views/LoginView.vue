@@ -1,5 +1,9 @@
 <script setup lang="ts">
+import axios from "axios";
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
+import { useRouter } from "vue-router";
+import { setAuthenticated } from "../services/auth-session";
+import { httpClient } from "../services/http";
 
 type FormErrors = {
   email: string;
@@ -15,6 +19,9 @@ type BrandMessage = {
 };
 
 const BRAND_ROTATION_MS = 4000;
+const ADMIN_EMAIL = "admin@quiz.app";
+const ADMIN_PASSWORD = "admin1234";
+
 const brandMessages: BrandMessage[] = [
   {
     title: "Learn by doing",
@@ -26,8 +33,8 @@ const brandMessages: BrandMessage[] = [
   }
 ];
 
-const email = ref("");
-const password = ref("");
+const email = ref(ADMIN_EMAIL);
+const password = ref(ADMIN_PASSWORD);
 const showPassword = ref(false);
 const isSubmitting = ref(false);
 const authMode = ref<AuthMode>("signIn");
@@ -45,6 +52,7 @@ const submitLabel = computed(() => (isSignIn.value ? "Sign in ->" : "Create acco
 const loadingLabel = computed(() =>
   isSignIn.value ? "Signing in..." : "Creating account..."
 );
+const router = useRouter();
 
 let brandRotationTimer: number | undefined;
 
@@ -90,8 +98,8 @@ const clearPasswordError = () => {
 };
 
 const resetFormState = () => {
-  email.value = "";
-  password.value = "";
+  email.value = isSignIn.value ? ADMIN_EMAIL : "";
+  password.value = isSignIn.value ? ADMIN_PASSWORD : "";
   showPassword.value = false;
   isSubmitting.value = false;
   errors.email = "";
@@ -105,6 +113,11 @@ const switchMode = (mode: AuthMode) => {
 };
 
 const handleSubmit = async () => {
+  if (!isSignIn.value) {
+    errors.form = "Account creation is disabled. Sign in with the admin account instead.";
+    return;
+  }
+
   if (!validateForm()) {
     return;
   }
@@ -113,17 +126,21 @@ const handleSubmit = async () => {
   errors.form = "";
 
   try {
-    // TODO: Replace this timeout with the real auth API call when backend auth is ready.
-    await new Promise((resolve) => window.setTimeout(resolve, 1200));
+    await httpClient.post("/auth/login", {
+      email: email.value,
+      password: password.value
+    });
 
-    // TODO: Handle the real success path, such as storing auth state and redirecting.
-    console.info(`${authMode.value} submitted`, { email: email.value });
+    setAuthenticated(true);
+    await router.push({ name: "home" });
   } catch (error) {
     console.error(error);
-    // TODO: Map backend auth errors into field or form errors when API integration exists.
-    errors.form = isSignIn.value
-      ? "We couldn't sign you in right now. Please try again."
-      : "We couldn't create your account right now. Please try again.";
+    if (axios.isAxiosError<{ message?: string | string[] }>(error)) {
+      const message = error.response?.data?.message;
+      errors.form = Array.isArray(message) ? message.join(", ") : message ?? "Invalid email or password.";
+    } else {
+      errors.form = "We couldn't sign you in right now. Please try again.";
+    }
   } finally {
     isSubmitting.value = false;
   }
