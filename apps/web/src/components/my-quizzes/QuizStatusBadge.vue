@@ -18,13 +18,13 @@ function statusClass() {
 
 <style scoped>
 .status-badge {
-  min-height: 28px;
+  min-height: 26px;
   border-radius: 999px;
   padding: 0 12px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 800;
   white-space: nowrap;
 }

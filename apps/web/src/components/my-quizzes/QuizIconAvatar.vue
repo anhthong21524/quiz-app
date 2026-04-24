@@ -93,8 +93,8 @@ defineProps<{
 
 <style scoped>
 .quiz-avatar {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: 10px;
   display: grid;
   place-items: center;
@@ -102,8 +102,8 @@ defineProps<{
 }
 
 .quiz-avatar svg {
-  width: 22px;
-  height: 22px;
+  width: 20px;
+  height: 20px;
 }
 
 .quiz-avatar.is-mathematics,

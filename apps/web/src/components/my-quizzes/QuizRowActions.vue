@@ -37,12 +37,12 @@ defineProps<{
 .row-actions {
   display: inline-flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
 }
 
 .icon-button {
-  width: 32px;
-  height: 32px;
+  width: 30px;
+  height: 30px;
   border: 0;
   border-radius: 9px;
   display: grid;
@@ -60,7 +60,7 @@ defineProps<{
 }
 
 .icon-button svg {
-  width: 19px;
-  height: 19px;
+  width: 18px;
+  height: 18px;
 }
 </style>

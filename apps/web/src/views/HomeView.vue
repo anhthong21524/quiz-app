@@ -397,8 +397,9 @@ const featuredQuiz = computed(() =>
 .stat-card,
 .recent-card {
   background: #ffffff;
-  border: 1px solid rgba(226, 223, 218, 0.92);
-  box-shadow: 0 10px 26px rgba(46, 35, 20, 0.06);
+  border: var(--surface-border);
+  border-radius: var(--surface-radius);
+  box-shadow: var(--surface-shadow);
 }
 
 .hero-card {
@@ -406,7 +407,6 @@ const featuredQuiz = computed(() =>
   grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
   gap: 16px;
   padding: 34px 30px;
-  border-radius: 20px;
   overflow: hidden;
   background:
     radial-gradient(circle at left top, rgba(233, 248, 238, 0.9), transparent 40%),
@@ -438,9 +438,9 @@ const featuredQuiz = computed(() =>
   margin: 0;
   max-width: 460px;
   color: #182033;
-  font-size: clamp(2.2rem, 4vw, 3.2rem);
+  font-size: 3rem;
   line-height: 1.08;
-  letter-spacing: -0.05em;
+  letter-spacing: 0;
 }
 
 .hero-meta {
@@ -660,7 +660,6 @@ const featuredQuiz = computed(() =>
 
 .recent-card {
   padding: 14px 0 10px;
-  border-radius: 20px;
   overflow: hidden;
 }
 
@@ -807,9 +806,7 @@ const featuredQuiz = computed(() =>
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0;
-  border-radius: 20px;
-  overflow: hidden;
+  gap: 20px;
 }
 
 .stat-card {
@@ -817,12 +814,7 @@ const featuredQuiz = computed(() =>
   align-items: center;
   gap: 18px;
   min-height: 138px;
-  padding: 28px 30px;
-  border-right: 1px solid rgba(238, 239, 238, 0.9);
-}
-
-.stat-card:last-child {
-  border-right: 0;
+  padding: 24px;
 }
 
 .stat-icon {
@@ -897,18 +889,17 @@ const featuredQuiz = computed(() =>
 
   .stats-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 1px;
-    background: rgba(238, 239, 238, 0.9);
-  }
-
-  .stat-card {
-    border-right: 0;
+    gap: 20px;
   }
 }
 
 @media (max-width: 720px) {
   .hero-card {
     padding: 26px 22px;
+  }
+
+  .hero-copy h1 {
+    font-size: 2.15rem;
   }
 
   .hero-actions {
@@ -970,7 +961,7 @@ const featuredQuiz = computed(() =>
   .recent-table tr {
     margin-bottom: 14px;
     border: 1px solid #edf0f2;
-    border-radius: 18px;
+    border-radius: 16px;
     background: #ffffff;
     box-shadow: 0 8px 22px rgba(34, 24, 12, 0.04);
     overflow: hidden;

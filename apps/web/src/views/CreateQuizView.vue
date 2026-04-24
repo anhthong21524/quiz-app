@@ -308,12 +308,12 @@ function exitFlow() {
 </script>
 
 <template>
-  <section class="w-full rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white px-4 py-5 shadow-[0_10px_26px_rgba(46,35,20,0.06)] sm:px-5 sm:py-6">
-    <div class="mx-auto w-full max-w-[1140px] space-y-6">
+  <section class="w-full">
+    <div class="mx-auto w-full max-w-[1180px] space-y-5">
       <div class="space-y-3">
         <div class="space-y-2">
-          <h1 class="text-4xl font-extrabold tracking-tight text-slate-900">Create new quiz</h1>
-          <p class="max-w-2xl text-base text-slate-500">
+          <h1 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">Create new quiz</h1>
+          <p class="max-w-2xl text-sm text-slate-500 sm:text-base">
             {{
               currentStep === 1
                 ? "Set up the basic details for your quiz before adding questions."
@@ -359,21 +359,21 @@ function exitFlow() {
       </div>
 
       <div v-if="currentStep === 1">
-        <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-          <div class="space-y-6">
-            <section class="space-y-4">
+        <div class="rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-5 shadow-[0_10px_26px_rgba(46,35,20,0.06)]">
+          <div class="space-y-5">
+            <section class="space-y-3">
               <div class="space-y-1">
-                <h2 class="text-2xl font-bold text-slate-900">Basic information</h2>
+                <h2 class="text-xl font-bold text-slate-900">Basic information</h2>
               </div>
 
-              <div class="space-y-4">
+              <div class="space-y-3">
                 <label class="block space-y-2">
                   <span class="text-sm font-semibold text-slate-700">Quiz title</span>
                   <input
                     v-model="configuration.title"
                     type="text"
                     placeholder="e.g. Mathematics Quiz #1"
-                    class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   />
                   <p v-if="validationErrors.title" class="text-sm font-medium text-red-500">
                     {{ validationErrors.title }}
@@ -384,7 +384,7 @@ function exitFlow() {
                   <span class="text-sm font-semibold text-slate-700">Subject / Domain</span>
                   <select
                     v-model="configuration.subject"
-                    class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   >
                     <option disabled value="">Select a subject</option>
                     <option v-for="subject in subjectOptions" :key="subject" :value="subject">
@@ -398,12 +398,12 @@ function exitFlow() {
               </div>
             </section>
 
-            <section class="space-y-4 border-t border-gray-100 pt-6">
+            <section class="space-y-3 border-t border-gray-100 pt-5">
               <div class="space-y-1">
-                <h2 class="text-2xl font-bold text-slate-900">Quiz setup</h2>
+                <h2 class="text-xl font-bold text-slate-900">Quiz setup</h2>
               </div>
 
-              <div class="space-y-4">
+              <div class="space-y-3">
                 <label class="block space-y-2">
                   <div class="flex items-center justify-between gap-3">
                     <span class="text-sm font-semibold text-slate-700">Number of questions</span>
@@ -414,7 +414,7 @@ function exitFlow() {
                     type="number"
                     :min="minQuestions"
                     :max="maxQuestions"
-                    class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 sm:max-w-[16rem]"
+                    class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 sm:max-w-[14rem]"
                   />
                   <p v-if="validationErrors.numberOfQuestions" class="text-sm font-medium text-red-500">
                     {{ validationErrors.numberOfQuestions }}
@@ -428,7 +428,7 @@ function exitFlow() {
                       v-for="difficulty in difficultyOptions"
                       :key="difficulty"
                       type="button"
-                      class="inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-3 text-base font-semibold transition"
+                      class="inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition"
                       :class="
                         configuration.difficulty === difficulty
                           ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
@@ -461,7 +461,7 @@ function exitFlow() {
 
             <button
               type="button"
-              class="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 py-3.5 text-base font-bold text-white shadow-sm transition hover:bg-emerald-700"
+              class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-base font-bold text-white shadow-sm transition hover:bg-emerald-700"
               @click="goToQuestionsStep"
             >
               <span>Create questions</span>
@@ -474,15 +474,15 @@ function exitFlow() {
       </div>
 
       <div v-else class="space-y-4">
-        <div class="items-stretch gap-3 xl:grid xl:grid-cols-[minmax(0,1.95fr)_260px]">
-          <div class="rounded-2xl border border-gray-100 bg-white p-5 shadow-sm sm:p-6">
-            <div v-if="currentQuestion" class="space-y-5">
+        <div class="items-stretch gap-5 xl:grid xl:grid-cols-[minmax(0,1.95fr)_260px]">
+          <div class="rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-5 shadow-[0_10px_26px_rgba(46,35,20,0.06)]">
+            <div v-if="currentQuestion" class="space-y-4">
               <label class="block space-y-2">
                 <span class="text-sm font-semibold text-slate-700">Question</span>
                 <textarea
                   :value="currentQuestion.questionText"
                   rows="3"
-                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   placeholder="Write your question here..."
                   @input="updateQuestionText(($event.target as HTMLTextAreaElement).value)"
                 ></textarea>
@@ -538,7 +538,7 @@ function exitFlow() {
                 <textarea
                   :value="currentQuestion.explanation"
                   rows="2"
-                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   placeholder="Explain why the correct answer is right..."
                   @input="updateExplanation(($event.target as HTMLTextAreaElement).value)"
                 ></textarea>
@@ -555,7 +555,7 @@ function exitFlow() {
             </div>
           </div>
 
-          <div class="mt-3 flex h-full flex-col gap-3 xl:mt-0">
+          <div class="mt-5 flex h-full flex-col gap-5 xl:mt-0">
             <QuestionNavigator
               :questions="questions"
               :current-question-index="currentQuestionIndex"
@@ -565,7 +565,7 @@ function exitFlow() {
 
             <button
               type="button"
-              class="inline-flex w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-emerald-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
+              class="inline-flex h-11 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
               @click="saveAndNext"
             >
               <span>Save</span>

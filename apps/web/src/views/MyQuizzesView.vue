@@ -289,13 +289,17 @@ function isContinueEditingQuiz(quiz: MyQuiz) {
 <style scoped>
 .my-quizzes-page {
   display: grid;
+  min-height: 100%;
 }
 
 .quiz-manager-card {
-  border: 1px solid rgba(226, 223, 218, 0.92);
-  border-radius: 20px;
+  min-height: 100%;
+  border: var(--surface-border);
+  border-radius: var(--surface-radius);
+  display: flex;
+  flex-direction: column;
   background: rgba(255, 255, 255, 0.98);
-  box-shadow: 0 10px 26px rgba(46, 35, 20, 0.06);
+  box-shadow: var(--surface-shadow);
 }
 
 .new-quiz-button {
@@ -331,13 +335,13 @@ function isContinueEditingQuiz(quiz: MyQuiz) {
   display: grid;
   grid-template-columns: minmax(240px, 1fr) minmax(0, auto) auto;
   align-items: center;
-  gap: 16px;
-  padding: 28px;
+  gap: 14px;
+  padding: 24px;
 }
 
 .search-control,
 .select-control {
-  min-height: 44px;
+  min-height: 40px;
   border: 1px solid #dfe4ea;
   border-radius: 10px;
   display: flex;
@@ -395,7 +399,7 @@ function isContinueEditingQuiz(quiz: MyQuiz) {
 
 .select-control select {
   width: 100%;
-  min-height: 44px;
+  min-height: 40px;
   border: 0;
   outline: none;
   appearance: none;
@@ -425,8 +429,8 @@ function isContinueEditingQuiz(quiz: MyQuiz) {
 }
 
 .view-toggle-button {
-  width: 52px;
-  height: 44px;
+  width: 44px;
+  height: 40px;
   border: 0;
   display: grid;
   place-items: center;
@@ -466,7 +470,7 @@ function isContinueEditingQuiz(quiz: MyQuiz) {
 
 .quiz-table th,
 .quiz-table td {
-  padding: 14px 28px;
+  padding: 10px 24px;
   border-bottom: 1px solid #edf0f2;
   text-align: left;
 }
@@ -614,7 +618,8 @@ function isContinueEditingQuiz(quiz: MyQuiz) {
 
 .quiz-pagination {
   min-height: 74px;
-  padding: 18px 28px;
+  margin-top: auto;
+  padding: 18px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;

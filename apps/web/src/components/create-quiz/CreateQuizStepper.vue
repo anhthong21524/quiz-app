@@ -33,22 +33,22 @@ function isClickable(step: CreateQuizStep) {
 </script>
 
 <template>
-  <div class="flex items-center gap-4 overflow-x-auto py-1">
+  <div class="flex items-center gap-3 overflow-x-auto py-1">
     <template v-for="(step, index) in steps" :key="step.step">
       <button
         type="button"
-        class="flex items-center gap-3"
+        class="flex items-center gap-3 rounded-xl pr-1 transition disabled:opacity-100"
         :class="isClickable(step.step) ? 'cursor-pointer' : 'cursor-default'"
         :disabled="!isClickable(step.step)"
         @click="emit('select', step.step)"
       >
         <span
-          class="flex h-8 w-8 items-center justify-center rounded-full border text-sm font-semibold transition-colors"
+          class="flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold transition-colors"
           :class="
             isCompleted(step.step)
-              ? 'border-emerald-600 bg-emerald-600 text-white'
+              ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
               : isActive(step.step)
-                ? 'border-emerald-600 bg-emerald-600 text-white'
+                ? 'border-emerald-600 bg-emerald-600 text-white shadow-[0_0_0_4px_rgba(16,185,129,0.12)]'
                 : 'border-gray-200 bg-gray-100 text-gray-500'
           "
         >
@@ -66,9 +66,13 @@ function isClickable(step: CreateQuizStep) {
         </span>
 
         <span
-          class="whitespace-nowrap text-base font-semibold"
+          class="whitespace-nowrap text-sm font-semibold transition-colors sm:text-base"
           :class="
-            isCompleted(step.step) || isActive(step.step) ? 'text-gray-900' : 'text-gray-400'
+            isActive(step.step)
+              ? 'text-emerald-700'
+              : isCompleted(step.step)
+                ? 'text-gray-900'
+                : 'text-gray-400'
           "
         >
           {{ step.label }}
@@ -77,7 +81,7 @@ function isClickable(step: CreateQuizStep) {
 
       <div
         v-if="index < steps.length - 1"
-        class="h-px min-w-16 flex-1 rounded-full"
+        class="h-0.5 min-w-12 flex-1 rounded-full"
         :class="currentStep > step.step ? 'bg-emerald-500' : 'bg-gray-200'"
       ></div>
     </template>
