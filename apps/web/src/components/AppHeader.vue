@@ -30,9 +30,9 @@ function navigateToEditor() {
   router.push({ name: "create-quiz" });
 }
 
-function navigateToQuizzes() {
+function navigateToProfile() {
   closeMenus();
-  router.push({ name: "quizzes" });
+  router.push({ name: "profile" });
 }
 
 function toggleUserMenu() {
@@ -169,9 +169,7 @@ onBeforeUnmount(() => {
         </button>
 
         <div v-if="isUserMenuOpen" class="user-menu-popover">
-          <button class="user-menu-item" type="button" @click="navigateToQuizzes">
-            My Quizzes
-          </button>
+          <button class="user-menu-item" type="button" @click="navigateToProfile">Profile</button>
           <button class="user-menu-item" type="button" @click="signOut">Sign out</button>
         </div>
       </div>

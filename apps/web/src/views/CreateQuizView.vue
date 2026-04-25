@@ -46,6 +46,8 @@ const optionLabels = ["A", "B", "C", "D", "E", "F"];
 
 const currentStep = ref<1 | 2>(1);
 const currentQuestionIndex = ref(0);
+const draggedOptionIndex = ref<number | null>(null);
+const dragTargetOptionIndex = ref<number | null>(null);
 const validationErrors = reactive<ValidationErrors>({});
 
 const configuration = reactive<ConfigurationForm>({
@@ -265,9 +267,76 @@ function deleteOption(optionIndex: number) {
   markQuestionAsDraft(currentQuestionIndex.value);
 }
 
+function resetOptionDragState() {
+  draggedOptionIndex.value = null;
+  dragTargetOptionIndex.value = null;
+}
+
+function beginOptionDrag(optionIndex: number, event: DragEvent) {
+  draggedOptionIndex.value = optionIndex;
+  dragTargetOptionIndex.value = optionIndex;
+
+  if (event.dataTransfer) {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("text/plain", optionIndex.toString());
+  }
+}
+
+function enterOptionDropTarget(optionIndex: number) {
+  if (draggedOptionIndex.value === null) {
+    return;
+  }
+
+  dragTargetOptionIndex.value = optionIndex;
+}
+
+function updateOptionDragOver(optionIndex: number, event: DragEvent) {
+  if (draggedOptionIndex.value === null) {
+    return;
+  }
+
+  dragTargetOptionIndex.value = optionIndex;
+  if (event.dataTransfer) {
+    event.dataTransfer.dropEffect = "move";
+  }
+}
+
+function reorderOptions(fromIndex: number, toIndex: number) {
+  const question = currentQuestion.value;
+  if (
+    !question ||
+    fromIndex === toIndex ||
+    fromIndex < 0 ||
+    toIndex < 0 ||
+    fromIndex >= question.options.length ||
+    toIndex >= question.options.length
+  ) {
+    return;
+  }
+
+  const nextOptions = [...question.options];
+  const [movedOption] = nextOptions.splice(fromIndex, 1);
+  nextOptions.splice(toIndex, 0, movedOption);
+  question.options = relabelOptions(nextOptions);
+  markQuestionAsDraft(currentQuestionIndex.value);
+}
+
+function dropOption(optionIndex: number, event: DragEvent) {
+  const transferIndex = event.dataTransfer?.getData("text/plain");
+  const parsedIndex = transferIndex ? Number(transferIndex) : Number.NaN;
+  const fromIndex = draggedOptionIndex.value ?? (Number.isInteger(parsedIndex) ? parsedIndex : null);
+
+  if (fromIndex !== null) {
+    reorderOptions(fromIndex, optionIndex);
+  }
+
+  resetOptionDragState();
+}
+
 function selectQuestion(index: number) {
   currentQuestionIndex.value = index;
   validationErrors.question = undefined;
+  resetOptionDragState();
 }
 
 function saveAndNext() {
@@ -517,9 +586,16 @@ function exitFlow() {
                     :key="option.id"
                     :option="option"
                     :can-delete="currentQuestion.options.length > minimumOptionCount"
+                    :is-dragging="draggedOptionIndex === optionIndex"
+                    :is-drag-target="dragTargetOptionIndex === optionIndex && draggedOptionIndex !== optionIndex"
                     @update-text="updateOptionText(optionIndex, $event)"
                     @toggle-correct="toggleCorrectOption(optionIndex)"
                     @delete="deleteOption(optionIndex)"
+                    @drag-start="beginOptionDrag(optionIndex, $event)"
+                    @drag-enter="enterOptionDropTarget(optionIndex)"
+                    @drag-over="updateOptionDragOver(optionIndex, $event)"
+                    @drop="dropOption(optionIndex, $event)"
+                    @drag-end="resetOptionDragState"
                   />
                 </div>
 

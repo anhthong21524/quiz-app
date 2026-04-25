@@ -5,6 +5,9 @@ import LoginView from "../views/LoginView.vue";
 import MyQuizzesView from "../views/MyQuizzesView.vue";
 import CreateQuizView from "../views/CreateQuizView.vue";
 import QuizEditorView from "../views/QuizEditorView.vue";
+import ProfileView from "../views/ProfileView.vue";
+import AccountSettingsView from "../views/AccountSettingsView.vue";
+import PasswordSettingsView from "../views/PasswordSettingsView.vue";
 import { applySeo } from "../services/seo";
 
 export const router = createRouter({
@@ -55,6 +58,57 @@ export const router = createRouter({
           breadcrumbs: [
             { name: "Dashboard", path: "/" },
             { name: "My Quizzes", path: "/quizzes" }
+          ]
+        }
+      }
+    },
+    {
+      path: "/profile",
+      name: "profile",
+      component: ProfileView,
+      meta: {
+        requiresAuth: true,
+        seo: {
+          title: "Profile",
+          description: "Manage your personal information and profile settings in Quiz App.",
+          canonicalPath: "/profile",
+          breadcrumbs: [
+            { name: "Dashboard", path: "/" },
+            { name: "Profile", path: "/profile" }
+          ]
+        }
+      }
+    },
+    {
+      path: "/account",
+      name: "account",
+      component: AccountSettingsView,
+      meta: {
+        requiresAuth: true,
+        seo: {
+          title: "Account",
+          description: "Manage account settings for your Quiz App account.",
+          canonicalPath: "/account",
+          breadcrumbs: [
+            { name: "Dashboard", path: "/" },
+            { name: "Account", path: "/account" }
+          ]
+        }
+      }
+    },
+    {
+      path: "/password",
+      name: "password",
+      component: PasswordSettingsView,
+      meta: {
+        requiresAuth: true,
+        seo: {
+          title: "Password",
+          description: "Manage password settings for your Quiz App account.",
+          canonicalPath: "/password",
+          breadcrumbs: [
+            { name: "Dashboard", path: "/" },
+            { name: "Password", path: "/password" }
           ]
         }
       }

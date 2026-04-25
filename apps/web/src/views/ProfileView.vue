@@ -1,0 +1,356 @@
+<script setup lang="ts">
+import { computed } from "vue";
+import SettingsPageLayout from "../components/settings/SettingsPageLayout.vue";
+
+type ProfileDetail = {
+  label: string;
+  value: string;
+  icon: "language" | "timezone" | "theme";
+};
+
+const fallbackProfile = {
+  fullName: "Alex Johnson",
+  email: "alex.johnson@example.com",
+  memberSince: "May 10, 2024",
+  language: "English",
+  timezone: "(UTC+07:00) Bangkok, Hanoi, Jakarta",
+  preferredTheme: "Light"
+};
+
+const profile = computed(() => fallbackProfile);
+
+const profileDetails = computed<ProfileDetail[]>(() => [
+  {
+    label: "Language",
+    value: profile.value.language,
+    icon: "language"
+  },
+  {
+    label: "Timezone",
+    value: profile.value.timezone,
+    icon: "timezone"
+  },
+  {
+    label: "Preferred theme",
+    value: profile.value.preferredTheme,
+    icon: "theme"
+  }
+]);
+
+function editProfile() {
+  console.info("Edit profile clicked");
+}
+</script>
+
+<template>
+  <SettingsPageLayout
+    active-section="profile"
+    title="Profile"
+    subtitle="Manage your personal information and profile settings."
+    title-id="profile-title"
+  >
+      <article class="profile-card" aria-label="Profile summary">
+        <div class="profile-summary">
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar" aria-hidden="true">
+              <svg viewBox="0 0 120 120" fill="currentColor">
+                <circle cx="60" cy="44" r="19" />
+                <path d="M28 93c5.5-21 58.5-21 64 0Z" />
+              </svg>
+            </div>
+
+            <button class="avatar-edit-button" type="button" aria-label="Edit avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+                <path
+                  d="M7 8.5h2.3l1.2-2h3l1.2 2H17a2 2 0 0 1 2 2v6.25a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V10.5a2 2 0 0 1 2-2Z"
+                  stroke-linejoin="round"
+                />
+                <circle cx="12" cy="13.5" r="2.8" />
+              </svg>
+            </button>
+          </div>
+
+          <div class="profile-identity">
+            <dl>
+              <div>
+                <dt>Full name</dt>
+                <dd>{{ profile.fullName }}</dd>
+              </div>
+              <div>
+                <dt>Email</dt>
+                <dd>{{ profile.email }}</dd>
+              </div>
+            </dl>
+          </div>
+        </div>
+
+        <button class="edit-profile-button" type="button" @click="editProfile">
+          Edit profile
+        </button>
+
+        <div class="member-row">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="4" y="5" width="16" height="15" rx="2" />
+            <path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round" />
+          </svg>
+          <span>Member since</span>
+          <strong>{{ profile.memberSince }}</strong>
+        </div>
+      </article>
+
+      <article class="profile-details-card" aria-label="Profile details">
+        <div v-for="detail in profileDetails" :key="detail.label" class="detail-row">
+          <div class="detail-label">
+            <svg
+              v-if="detail.icon === 'language'"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <circle cx="12" cy="12" r="8" />
+              <path d="M4 12h16M12 4a13 13 0 0 1 0 16M12 4a13 13 0 0 0 0 16" stroke-linecap="round" />
+            </svg>
+            <svg
+              v-else-if="detail.icon === 'timezone'"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <circle cx="12" cy="12" r="8.5" />
+              <path d="M12 7v5l3.25 2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <svg
+              v-else
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.8"
+            >
+              <path d="M12 4a8 8 0 0 0 0 16h1.2a1.7 1.7 0 0 0 .5-3.32l-.8-.24a1.45 1.45 0 0 1 .43-2.84H15a5 5 0 0 0 0-10h-3Z" />
+              <circle cx="7.8" cy="11" r="1" fill="currentColor" stroke="none" />
+              <circle cx="10.2" cy="8.2" r="1" fill="currentColor" stroke="none" />
+            </svg>
+            <span>{{ detail.label }}</span>
+          </div>
+
+          <strong>{{ detail.value }}</strong>
+        </div>
+      </article>
+  </SettingsPageLayout>
+</template>
+
+<style scoped>
+.profile-card,
+.profile-details-card {
+  border: 1px solid #dfe5ea;
+  border-radius: 14px;
+  background: #ffffff;
+}
+
+.profile-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 26px;
+  padding: 28px 28px 0;
+}
+
+.profile-summary {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.profile-avatar-wrap {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.profile-avatar {
+  width: 140px;
+  height: 140px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: linear-gradient(180deg, #f0f1f4 0%, #e6e9ee 100%);
+  color: #969da8;
+}
+
+.profile-avatar svg {
+  width: 112px;
+  height: 112px;
+  transform: translateY(10px);
+}
+
+.avatar-edit-button {
+  position: absolute;
+  right: -8px;
+  bottom: 8px;
+  width: 46px;
+  height: 46px;
+  border: 0;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  color: #182033;
+  box-shadow: 0 8px 18px rgba(30, 41, 59, 0.12);
+}
+
+.avatar-edit-button svg {
+  width: 21px;
+  height: 21px;
+}
+
+.profile-identity dl {
+  margin: 0;
+  display: grid;
+  gap: 24px;
+}
+
+.profile-identity dt {
+  color: #657286;
+  font-weight: 700;
+}
+
+.profile-identity dd {
+  margin: 4px 0 0;
+  color: #182033;
+  font-size: 1.2rem;
+  font-weight: 800;
+  overflow-wrap: anywhere;
+}
+
+.edit-profile-button {
+  align-self: start;
+  min-height: 42px;
+  padding: 0 18px;
+  border: 1.5px solid #10b981;
+  border-radius: 9px;
+  background: #ffffff;
+  color: #10b981;
+  font-weight: 800;
+  white-space: nowrap;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.edit-profile-button:hover {
+  transform: translateY(-1px);
+  background: #10b981;
+  color: #ffffff;
+}
+
+.member-row {
+  grid-column: 1 / -1;
+  min-height: 84px;
+  border-top: 1px solid #dfe5ea;
+  display: grid;
+  grid-template-columns: auto minmax(120px, auto) 1fr;
+  align-items: center;
+  gap: 18px;
+  color: #182033;
+}
+
+.member-row svg {
+  width: 24px;
+  height: 24px;
+}
+
+.member-row span {
+  font-weight: 700;
+}
+
+.member-row strong {
+  font-size: 1.02rem;
+}
+
+.profile-details-card {
+  padding: 8px 28px;
+}
+
+.detail-row {
+  min-height: 70px;
+  display: grid;
+  grid-template-columns: minmax(190px, 0.35fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 24px;
+}
+
+.detail-row + .detail-row {
+  border-top: 1px solid #dfe5ea;
+}
+
+.detail-label {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  color: #182033;
+  font-weight: 700;
+}
+
+.detail-label svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+
+.detail-row strong {
+  color: #182033;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 720px) {
+  .profile-card {
+    grid-template-columns: 1fr;
+    padding: 24px 20px 0;
+  }
+
+  .profile-summary {
+    align-items: flex-start;
+    gap: 22px;
+  }
+
+  .edit-profile-button {
+    justify-self: start;
+  }
+
+  .profile-details-card {
+    padding: 6px 20px;
+  }
+}
+
+@media (max-width: 560px) {
+  .profile-summary {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .member-row,
+  .detail-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    align-items: start;
+    padding: 18px 0;
+  }
+
+  .member-row {
+    min-height: auto;
+  }
+
+  .detail-row {
+    min-height: auto;
+  }
+
+  .detail-label {
+    justify-content: flex-start;
+  }
+}
+</style>

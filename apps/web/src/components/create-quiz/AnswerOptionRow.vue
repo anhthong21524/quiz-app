@@ -4,17 +4,33 @@ import type { QuestionOption } from "./types";
 const props = defineProps<{
   option: QuestionOption;
   canDelete: boolean;
+  isDragging?: boolean;
+  isDragTarget?: boolean;
 }>();
 
 const emit = defineEmits<{
   updateText: [value: string];
   toggleCorrect: [];
   delete: [];
+  dragStart: [event: DragEvent];
+  dragEnter: [];
+  dragOver: [event: DragEvent];
+  drop: [event: DragEvent];
+  dragEnd: [];
 }>();
 </script>
 
 <template>
-  <div class="flex items-center gap-2.5">
+  <div
+    class="flex items-center gap-2.5 rounded-xl transition"
+    :class="[
+      isDragging ? 'opacity-50' : '',
+      isDragTarget ? 'bg-emerald-50 ring-2 ring-emerald-200' : ''
+    ]"
+    @dragenter.prevent="emit('dragEnter')"
+    @dragover.prevent="emit('dragOver', $event)"
+    @drop.prevent="emit('drop', $event)"
+  >
     <button
       type="button"
       class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-semibold transition"
@@ -47,7 +63,14 @@ const emit = defineEmits<{
       @input="emit('updateText', ($event.target as HTMLInputElement).value)"
     />
 
-    <span class="hidden text-gray-300 md:inline-flex" aria-hidden="true">
+    <button
+      type="button"
+      draggable="true"
+      class="hidden h-9 w-7 shrink-0 cursor-grab items-center justify-center rounded-lg text-gray-300 transition hover:bg-gray-50 hover:text-gray-500 active:cursor-grabbing md:inline-flex"
+      :aria-label="`Drag option ${option.label}`"
+      @dragstart="emit('dragStart', $event)"
+      @dragend="emit('dragEnd')"
+    >
       <svg viewBox="0 0 20 20" fill="currentColor" class="h-5 w-5">
         <circle cx="6" cy="5" r="1.1" />
         <circle cx="6" cy="10" r="1.1" />
@@ -56,7 +79,7 @@ const emit = defineEmits<{
         <circle cx="14" cy="10" r="1.1" />
         <circle cx="14" cy="15" r="1.1" />
       </svg>
-    </span>
+    </button>
 
     <button
       type="button"
