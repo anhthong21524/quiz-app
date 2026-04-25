@@ -7,7 +7,7 @@ test("create and publish a quiz", async ({ page }) => {
   await page.getByRole("textbox", { name: "Password" }).fill("admin1234");
   await page.getByRole("button", { name: "Sign in ->" }).click();
 
-  await expect(page.getByRole("heading", { name: "Create, manage, and publish quizzes faster" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Chemistry Basics" })).toBeVisible();
 
   await page.goto("/editor");
 
@@ -28,7 +28,9 @@ test("create and publish a quiz", async ({ page }) => {
   await page.getByRole("main").getByRole("button", { name: "Create quiz" }).click();
   await page.getByRole("link", { name: "My Quizzes" }).first().click();
 
-  await expect(page.getByText("Platform onboarding")).toBeVisible();
-  await page.getByRole("button", { name: "Publish" }).click();
-  await expect(page.getByText("published")).toBeVisible();
+  const quizTable = page.getByRole("table");
+  const quizRow = quizTable.getByRole("row").filter({ hasText: "Platform onboarding" });
+  await expect(quizRow).toBeVisible();
+  await quizRow.getByRole("button", { name: "Publish" }).click();
+  await expect(quizRow.getByText("Published")).toBeVisible();
 });

@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /login
+Allow: /favicon.svg
+Allow: /og-image.svg
+Allow: /site.webmanifest
+Disallow: /$
+Disallow: /home
+Disallow: /quizzes
+Disallow: /create-quiz
+Disallow: /editor
+Disallow: /api
+
+Sitemap: http://localhost:3000/sitemap.xml

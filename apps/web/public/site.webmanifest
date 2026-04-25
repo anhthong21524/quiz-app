@@ -1,0 +1,17 @@
+{
+  "name": "Quiz App",
+  "short_name": "Quiz App",
+  "description": "Create, manage, and publish quizzes from one focused web workspace.",
+  "start_url": "/login",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#10b981",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "64x64",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

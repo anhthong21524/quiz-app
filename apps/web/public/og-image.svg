@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title description">
+  <title id="title">Quiz App social preview</title>
+  <desc id="description">A green Quiz App preview image for creating, managing, and publishing quizzes.</desc>
+  <rect width="1200" height="630" fill="#f8fafc" />
+  <rect x="80" y="80" width="1040" height="470" rx="28" fill="#ffffff" stroke="#dfe7ef" stroke-width="2" />
+  <rect x="146" y="150" width="126" height="126" rx="28" fill="#10b981" />
+  <path
+    d="M185 181h48M197 181v58a13 13 0 0 0 26 0v-58M178 262h62"
+    fill="none"
+    stroke="#ffffff"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="10"
+  />
+  <circle cx="210" cy="238" r="7" fill="#ffffff" />
+  <text x="320" y="205" fill="#0f172a" font-family="DM Sans, Arial, sans-serif" font-size="66" font-weight="800">Quiz App</text>
+  <text x="320" y="272" fill="#475569" font-family="DM Sans, Arial, sans-serif" font-size="30" font-weight="500">Create, manage, and publish quizzes from one focused workspace.</text>
+  <g transform="translate(150 340)">
+    <rect width="900" height="72" rx="18" fill="#ecfdf5" />
+    <circle cx="45" cy="36" r="16" fill="#10b981" />
+    <rect x="84" y="25" width="520" height="22" rx="11" fill="#bbf7d0" />
+    <rect x="650" y="24" width="170" height="24" rx="12" fill="#10b981" />
+  </g>
+  <g transform="translate(150 435)">
+    <rect width="900" height="72" rx="18" fill="#f8fafc" stroke="#e2e8f0" />
+    <circle cx="45" cy="36" r="16" fill="#cbd5e1" />
+    <rect x="84" y="25" width="430" height="22" rx="11" fill="#e2e8f0" />
+    <rect x="650" y="24" width="170" height="24" rx="12" fill="#dbeafe" />
+  </g>
+</svg>

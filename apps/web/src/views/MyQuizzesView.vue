@@ -1,20 +1,26 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
-import QuizIconAvatar from "../components/my-quizzes/QuizIconAvatar.vue";
-import QuizRowActions from "../components/my-quizzes/QuizRowActions.vue";
-import QuizStatusBadge from "../components/my-quizzes/QuizStatusBadge.vue";
-import { myQuizzes, type MyQuiz, type MyQuizStatus } from "../data/my-quizzes";
-
-type ViewMode = "list" | "grid";
+import { QuizStatus, type Quiz } from "@quiz-app/shared";
+import QuizCardList from "../components/my-quizzes/QuizCardList.vue";
+import QuizEmptyState from "../components/my-quizzes/QuizEmptyState.vue";
+import QuizGrid from "../components/my-quizzes/QuizGrid.vue";
+import QuizPagination from "../components/my-quizzes/QuizPagination.vue";
+import QuizTable from "../components/my-quizzes/QuizTable.vue";
+import QuizToolbar from "../components/my-quizzes/QuizToolbar.vue";
+import type { QuizListItem, ViewMode } from "../components/my-quizzes/types";
+import { myQuizzes, type MyQuizStatus } from "../data/my-quizzes";
+import { useQuizStore } from "../stores/quizzes";
 
 const router = useRouter();
+const quizStore = useQuizStore();
 
 const searchQuery = ref("");
 const selectedStatus = ref<MyQuizStatus | "All status">("All status");
 const selectedSubject = ref("All subjects");
 const selectedSort = ref("last-updated");
 const viewMode = ref<ViewMode>("list");
+const busyQuizId = ref<string | null>(null);
 
 const statusOptions: Array<MyQuizStatus | "All status"> = [
   "All status",
@@ -23,15 +29,35 @@ const statusOptions: Array<MyQuizStatus | "All status"> = [
   "Draft"
 ];
 
+onMounted(async () => {
+  if (!quizStore.items.length) {
+    await quizStore.loadQuizzes();
+  }
+});
+
+const seededQuizzes = computed<QuizListItem[]>(() =>
+  myQuizzes.map((quiz) => ({
+    ...quiz,
+    source: "seeded"
+  }))
+);
+
+const apiQuizzes = computed<QuizListItem[]>(() => quizStore.items.map(mapApiQuiz));
+
+const allQuizzes = computed<QuizListItem[]>(() => [
+  ...apiQuizzes.value,
+  ...seededQuizzes.value
+]);
+
 const subjectOptions = computed(() => [
   "All subjects",
-  ...Array.from(new Set(myQuizzes.map((quiz) => quiz.subject))).sort()
+  ...Array.from(new Set(allQuizzes.value.map((quiz) => quiz.subject))).sort()
 ]);
 
 const filteredQuizzes = computed(() => {
   const normalizedSearch = searchQuery.value.trim().toLowerCase();
 
-  const matchingQuizzes = myQuizzes.filter((quiz) => {
+  const matchingQuizzes = allQuizzes.value.filter((quiz) => {
     const matchesSearch =
       !normalizedSearch ||
       quiz.title.toLowerCase().includes(normalizedSearch) ||
@@ -71,225 +97,155 @@ function createQuiz() {
   router.push({ name: "create-quiz" });
 }
 
-function isContinueEditingQuiz(quiz: MyQuiz) {
-  return quiz.id === "chemistry-basics";
+function formatLastUpdated(value?: string) {
+  if (!value) {
+    return "Not saved yet";
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(new Date(value));
+}
+
+function mapQuizStatus(status: QuizStatus): MyQuizStatus {
+  if (status === QuizStatus.PUBLISHED) {
+    return "Published";
+  }
+
+  if (status === QuizStatus.IN_PROGRESS) {
+    return "In progress";
+  }
+
+  return "Draft";
+}
+
+function mapApiQuiz(quiz: Quiz): QuizListItem {
+  const id = quiz.id ?? quiz.title;
+
+  return {
+    id,
+    apiId: quiz.id,
+    apiStatus: quiz.status,
+    source: "api",
+    title: quiz.title,
+    subject: "Custom",
+    questions: quiz.questions.length,
+    status: mapQuizStatus(quiz.status),
+    lastUpdated: quiz.updatedAt ?? quiz.createdAt ?? "",
+    lastUpdatedLabel: formatLastUpdated(quiz.updatedAt ?? quiz.createdAt),
+    icon: "knowledge"
+  };
+}
+
+function openQuiz(quiz: QuizListItem) {
+  if (quiz.apiId) {
+    router.push({ name: "edit-quiz", params: { id: quiz.apiId } });
+  }
+}
+
+async function togglePublished(quiz: QuizListItem) {
+  if (!quiz.apiId || busyQuizId.value) {
+    return;
+  }
+
+  busyQuizId.value = quiz.apiId;
+  try {
+    await quizStore.setQuizPublished(
+      quiz.apiId,
+      quiz.apiStatus !== QuizStatus.PUBLISHED
+    );
+  } finally {
+    busyQuizId.value = null;
+  }
 }
 </script>
 
 <template>
   <section class="my-quizzes-page">
+    <header class="my-quizzes-heading">
+      <h1>My Quizzes</h1>
+      <p>Manage your quiz drafts, published quizzes, and API-backed editor work.</p>
+    </header>
+
     <section class="quiz-manager-card" aria-labelledby="my-quizzes-list-title">
       <h2 id="my-quizzes-list-title" class="sr-only">My quizzes list</h2>
 
-      <div class="quiz-toolbar">
-        <label class="search-control">
-          <span class="sr-only">Search quizzes</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <circle cx="11" cy="11" r="7" />
-            <path d="m16.5 16.5 3.5 3.5" stroke-linecap="round" />
-          </svg>
-          <input v-model="searchQuery" type="search" placeholder="Search quizzes..." />
-        </label>
+      <QuizToolbar
+        v-model:search-query="searchQuery"
+        v-model:selected-status="selectedStatus"
+        v-model:selected-subject="selectedSubject"
+        v-model:selected-sort="selectedSort"
+        v-model:view-mode="viewMode"
+        :status-options="statusOptions"
+        :subject-options="subjectOptions"
+      />
 
-        <div class="filter-group">
-          <label class="select-control">
-            <span class="sr-only">Filter by status</span>
-            <select v-model="selectedStatus">
-              <option v-for="status in statusOptions" :key="status" :value="status">
-                {{ status }}
-              </option>
-            </select>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="m7 10 5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </label>
-
-          <label class="select-control">
-            <span class="sr-only">Filter by subject</span>
-            <select v-model="selectedSubject">
-              <option v-for="subject in subjectOptions" :key="subject" :value="subject">
-                {{ subject }}
-              </option>
-            </select>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="m7 10 5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </label>
-
-          <label class="select-control sort-control">
-            <span class="sr-only">Sort quizzes</span>
-            <select v-model="selectedSort">
-              <option value="last-updated">Sort by: Last updated</option>
-              <option value="title">Sort by: Title</option>
-              <option value="questions">Sort by: Questions</option>
-            </select>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="m7 10 5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </label>
-        </div>
-
-        <div class="view-toggle" role="group" aria-label="Choose quiz view">
-          <button
-            class="view-toggle-button"
-            :class="{ 'is-active': viewMode === 'list' }"
-            type="button"
-            aria-label="List view"
-            :aria-pressed="viewMode === 'list'"
-            @click="viewMode = 'list'"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
-              <path d="M8 6h12M8 12h12M8 18h12" stroke-linecap="round" />
-              <path d="M4 6h.01M4 12h.01M4 18h.01" stroke-linecap="round" />
-            </svg>
-          </button>
-          <button
-            class="view-toggle-button"
-            :class="{ 'is-active': viewMode === 'grid' }"
-            type="button"
-            aria-label="Grid view"
-            :aria-pressed="viewMode === 'grid'"
-            @click="viewMode = 'grid'"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
-              <path d="M5 5h5v5H5zM14 5h5v5h-5zM5 14h5v5H5zM14 14h5v5h-5z" stroke-linejoin="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
+      <p v-if="quizStore.error" class="quiz-error">{{ quizStore.error }}</p>
 
       <template v-if="filteredQuizzes.length">
-        <div v-if="viewMode === 'list'" class="quiz-table-shell">
-          <table class="quiz-table">
-            <thead>
-              <tr>
-                <th>Quiz title</th>
-                <th>Subject</th>
-                <th>Questions</th>
-                <th>Status</th>
-                <th>Last updated</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr
-                v-for="quiz in filteredQuizzes"
-                :key="quiz.id"
-                :class="{ 'is-highlighted': isContinueEditingQuiz(quiz) }"
-              >
-                <td>
-                  <div class="quiz-title-cell">
-                    <QuizIconAvatar :icon="quiz.icon" />
-                    <span>{{ quiz.title }}</span>
-                  </div>
-                </td>
-                <td>{{ quiz.subject }}</td>
-                <td>{{ quiz.questions }}</td>
-                <td><QuizStatusBadge :status="quiz.status" /></td>
-                <td>{{ quiz.lastUpdatedLabel }}</td>
-                <td><QuizRowActions :title="quiz.title" /></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+        <template v-if="viewMode === 'list'">
+          <QuizTable
+            :quizzes="filteredQuizzes"
+            :busy-quiz-id="busyQuizId"
+            @view="openQuiz"
+            @edit="openQuiz"
+            @toggle-published="togglePublished"
+          />
+          <QuizCardList
+            :quizzes="filteredQuizzes"
+            :busy-quiz-id="busyQuizId"
+            @view="openQuiz"
+            @edit="openQuiz"
+            @toggle-published="togglePublished"
+          />
+        </template>
 
-        <div v-if="viewMode === 'list'" class="quiz-card-list">
-          <article
-            v-for="quiz in filteredQuizzes"
-            :key="`${quiz.id}-card`"
-            class="quiz-mobile-card"
-            :class="{ 'is-highlighted': isContinueEditingQuiz(quiz) }"
-          >
-            <div class="mobile-card-header">
-              <div class="quiz-title-cell">
-                <QuizIconAvatar :icon="quiz.icon" />
-                <span>{{ quiz.title }}</span>
-              </div>
-              <QuizStatusBadge :status="quiz.status" />
-            </div>
+        <QuizGrid
+          v-else
+          :quizzes="filteredQuizzes"
+          :busy-quiz-id="busyQuizId"
+          @view="openQuiz"
+          @edit="openQuiz"
+          @toggle-published="togglePublished"
+        />
 
-            <dl class="mobile-card-meta">
-              <div>
-                <dt>Subject</dt>
-                <dd>{{ quiz.subject }}</dd>
-              </div>
-              <div>
-                <dt>Questions</dt>
-                <dd>{{ quiz.questions }}</dd>
-              </div>
-              <div>
-                <dt>Last updated</dt>
-                <dd>{{ quiz.lastUpdatedLabel }}</dd>
-              </div>
-            </dl>
-
-            <QuizRowActions class="card-actions" :title="quiz.title" />
-          </article>
-        </div>
-
-        <div v-else class="quiz-grid">
-          <article
-            v-for="quiz in filteredQuizzes"
-            :key="`${quiz.id}-grid`"
-            class="quiz-grid-card"
-            :class="{ 'is-highlighted': isContinueEditingQuiz(quiz) }"
-          >
-            <div class="grid-card-topline">
-              <QuizIconAvatar :icon="quiz.icon" />
-              <QuizStatusBadge :status="quiz.status" />
-            </div>
-
-            <div class="grid-card-copy">
-              <h3>{{ quiz.title }}</h3>
-              <p>{{ quiz.subject }} &middot; {{ quiz.questions }} questions</p>
-            </div>
-
-            <div class="grid-card-footer">
-              <span>{{ quiz.lastUpdatedLabel }}</span>
-              <QuizRowActions class="card-actions" :title="quiz.title" />
-            </div>
-          </article>
-        </div>
-
-        <footer class="quiz-pagination">
-          <p>{{ showingCopy }}</p>
-
-          <nav class="pagination-controls" aria-label="Quiz pagination">
-            <button class="pagination-button" type="button" disabled aria-label="Previous page">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
-                <path d="m15 6-6 6 6 6" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
-            <button class="pagination-button is-active" type="button" aria-label="Page 1">1</button>
-            <button class="pagination-button" type="button" disabled aria-label="Next page">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
-                <path d="m9 6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
-          </nav>
-        </footer>
+        <QuizPagination :showing-copy="showingCopy" />
       </template>
 
-      <div v-else class="empty-state">
-        <div class="empty-illustration" aria-hidden="true">
-          <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M15 8h14l6 6v24a3 3 0 0 1-3 3H15a3 3 0 0 1-3-3V11a3 3 0 0 1 3-3Z" />
-            <path d="M29 8v7h7" />
-            <path d="M18 23h12M18 30h8" stroke-linecap="round" />
-          </svg>
-        </div>
-        <h3>No quizzes yet</h3>
-        <p>Create your first quiz to start building your question library.</p>
-        <button class="new-quiz-button" type="button" @click="createQuiz">Create quiz</button>
-      </div>
+      <QuizEmptyState v-else @create="createQuiz" />
     </section>
   </section>
 </template>
 
-<style scoped>
+<style>
 .my-quizzes-page {
   display: grid;
+  gap: 18px;
   min-height: 100%;
+}
+
+.my-quizzes-heading {
+  display: grid;
+  gap: 6px;
+}
+
+.my-quizzes-heading h1,
+.my-quizzes-heading p {
+  margin: 0;
+}
+
+.my-quizzes-heading h1 {
+  color: #182033;
+  font-size: 2rem;
+  line-height: 1.15;
+}
+
+.my-quizzes-heading p {
+  color: #657286;
 }
 
 .quiz-manager-card {
@@ -337,6 +293,13 @@ function isContinueEditingQuiz(quiz: MyQuiz) {
   align-items: center;
   gap: 14px;
   padding: 24px;
+}
+
+.quiz-error {
+  margin: 0;
+  padding: 0 24px 18px;
+  color: #b91c1c;
+  font-weight: 700;
 }
 
 .search-control,

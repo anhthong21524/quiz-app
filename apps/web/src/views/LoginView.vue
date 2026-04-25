@@ -2,8 +2,8 @@
 import axios from "axios";
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import { login } from "../services/auth-api";
 import { setAuthenticated } from "../services/auth-session";
-import { httpClient } from "../services/http";
 
 type FormErrors = {
   email: string;
@@ -46,6 +46,9 @@ const errors = reactive<FormErrors>({
 });
 
 const isSignIn = computed(() => authMode.value === "signIn");
+const authTitle = computed(() =>
+  isSignIn.value ? "Sign in to Quiz App" : "Create your Quiz App account"
+);
 const passwordInputType = computed(() => (showPassword.value ? "text" : "password"));
 const panelContent = computed(() => brandMessages[activeBrandIndex.value]);
 const submitLabel = computed(() => (isSignIn.value ? "Sign in ->" : "Create account ->"));
@@ -126,7 +129,7 @@ const handleSubmit = async () => {
   errors.form = "";
 
   try {
-    await httpClient.post("/auth/login", {
+    await login({
       email: email.value,
       password: password.value
     });
@@ -180,7 +183,7 @@ onBeforeUnmount(() => {
 
         <Transition name="brand-copy" mode="out-in">
           <div :key="activeBrandIndex" class="brand-copy">
-            <h1>{{ panelContent.title }}</h1>
+            <h2>{{ panelContent.title }}</h2>
             <p>{{ panelContent.description }}</p>
           </div>
         </Transition>
@@ -188,6 +191,8 @@ onBeforeUnmount(() => {
 
       <main class="form-panel">
         <div class="form-shell">
+          <h1 class="auth-title">{{ authTitle }}</h1>
+
           <div class="tabs" role="tablist" aria-label="Authentication options">
             <button
               type="button"
@@ -532,7 +537,7 @@ onBeforeUnmount(() => {
   transform: translateY(10px);
 }
 
-.brand-copy h1 {
+.brand-copy h2 {
   margin: 0;
   max-width: 220px;
   color: #ffffff;
@@ -565,7 +570,15 @@ onBeforeUnmount(() => {
   max-width: 460px;
   margin: 0 auto;
   display: grid;
-  gap: 20px;
+  gap: 16px;
+}
+
+.auth-title {
+  margin: 0;
+  color: #1a1a1a;
+  font-size: 28px;
+  line-height: 1.2;
+  letter-spacing: 0;
 }
 
 .form-stage {
@@ -868,7 +881,7 @@ onBeforeUnmount(() => {
     padding: 32px 28px;
   }
 
-  .brand-copy h1 {
+  .brand-copy h2 {
     font-size: 34px;
   }
 }

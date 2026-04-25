@@ -2,6 +2,7 @@
 import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { Question } from "@quiz-app/shared";
+import QuizQuestionEditor from "../components/editor/QuizQuestionEditor.vue";
 import { useQuizStore } from "../stores/quizzes";
 
 interface QuizFormState {
@@ -93,6 +94,10 @@ function removeQuestion(index: number) {
   form.questions.splice(index, 1);
 }
 
+function updateQuestion(index: number, question: Question) {
+  form.questions.splice(index, 1, question);
+}
+
 function addOption(index: number) {
   form.questions[index].options.push("");
 }
@@ -132,9 +137,9 @@ async function submitQuiz() {
   <section class="card stack">
     <div>
       <p class="eyebrow">Quiz Editor</p>
-      <h2 class="section-title">
+      <h1 class="section-title">
         {{ isEditing ? "Refine your quiz draft" : "Create a new quiz" }}
-      </h2>
+      </h1>
     </div>
 
     <p v-if="quizStore.error" class="error">{{ quizStore.error }}</p>
@@ -162,64 +167,17 @@ async function submitQuiz() {
           <button class="secondary" type="button" @click="addQuestion">Add question</button>
         </div>
 
-        <article
+        <QuizQuestionEditor
           v-for="(question, questionIndex) in form.questions"
           :key="questionIndex"
-          class="question-card stack"
-        >
-          <label class="field">
-            <span>Prompt</span>
-            <input
-              v-model="question.prompt"
-              :name="`question-${questionIndex}-prompt`"
-              required
-              placeholder="What does composable mean in Vue?"
-            />
-          </label>
-
-          <div class="stack">
-            <label
-              v-for="(option, optionIndex) in question.options"
-              :key="optionIndex"
-              class="field"
-            >
-              <span>Option {{ optionIndex + 1 }}</span>
-              <div class="actions">
-                <input
-                  v-model="question.options[optionIndex]"
-                  :name="`question-${questionIndex}-option-${optionIndex}`"
-                  required
-                  placeholder="Answer option"
-                />
-                <button
-                  class="danger"
-                  type="button"
-                  @click="removeOption(questionIndex, optionIndex)"
-                >
-                  Remove
-                </button>
-              </div>
-            </label>
-          </div>
-
-          <div class="actions">
-            <button class="secondary" type="button" @click="addOption(questionIndex)">
-              Add option
-            </button>
-            <label class="field" style="min-width: 180px;">
-              <span>Correct option</span>
-              <input
-                v-model.number="question.correctOptionIndex"
-                type="number"
-                min="0"
-                :max="question.options.length - 1"
-              />
-            </label>
-            <button class="danger" type="button" @click="removeQuestion(questionIndex)">
-              Remove question
-            </button>
-          </div>
-        </article>
+          :model-value="question"
+          :question-index="questionIndex"
+          :can-remove="form.questions.length > 1"
+          @update:model-value="updateQuestion(questionIndex, $event)"
+          @add-option="addOption(questionIndex)"
+          @remove-option="removeOption(questionIndex, $event)"
+          @remove-question="removeQuestion(questionIndex)"
+        />
       </section>
 
       <div class="actions">

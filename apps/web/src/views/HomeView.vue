@@ -93,7 +93,7 @@ const recentQuizzes = computed<RecentQuiz[]>(() => [
     subject: "Mathematics",
     questions: 20,
     status: "Published",
-    updatedAt: "May 15, 2024 • 2:30 PM",
+    updatedAt: "May 15, 2024 \u00b7 2:30 PM",
     actionLabel: "View",
     icon: "math",
     action: goToMyQuizzes
@@ -103,7 +103,7 @@ const recentQuizzes = computed<RecentQuiz[]>(() => [
     subject: "Science",
     questions: 15,
     status: "In progress",
-    updatedAt: "May 14, 2024 • 11:45 AM",
+    updatedAt: "May 14, 2024 \u00b7 11:45 AM",
     actionLabel: "Continue",
     icon: "science",
     action: goToLatestQuiz
@@ -113,7 +113,7 @@ const recentQuizzes = computed<RecentQuiz[]>(() => [
     subject: "Geography",
     questions: 10,
     status: "Published",
-    updatedAt: "May 13, 2024 • 9:20 AM",
+    updatedAt: "May 13, 2024 \u00b7 9:20 AM",
     actionLabel: "View",
     icon: "geography",
     action: goToMyQuizzes
@@ -123,7 +123,7 @@ const recentQuizzes = computed<RecentQuiz[]>(() => [
     subject: "English",
     questions: 25,
     status: "Unpublished",
-    updatedAt: "May 12, 2024 • 4:10 PM",
+    updatedAt: "May 12, 2024 \u00b7 4:10 PM",
     actionLabel: "Edit",
     icon: "english",
     action: goToMyQuizzes
@@ -133,7 +133,7 @@ const recentQuizzes = computed<RecentQuiz[]>(() => [
     subject: "Science",
     questions: 18,
     status: "In progress",
-    updatedAt: "May 11, 2024 • 3:05 PM",
+    updatedAt: "May 11, 2024 \u00b7 3:05 PM",
     actionLabel: "Continue",
     icon: "biology",
     action: goToLatestQuiz

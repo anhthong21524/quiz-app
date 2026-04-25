@@ -5,10 +5,19 @@
 # Stack Summary
 
 - Package manager: `pnpm` workspace
-- Frontend: Vue 3, Vite, TypeScript, Pinia, Vue Router
+- Frontend: Vue 3, Vite, TypeScript, Pinia, Vue Router, Axios, Tailwind CSS
 - Backend: NestJS, TypeScript, Mongoose, class-validator
 - Shared package: `packages/shared`
 - End-to-end tests: Playwright
+
+# Local Runtime Defaults
+
+- Web app: `http://localhost:3000`
+- API base URL: `http://localhost:3001/api`
+- API port: `3001`
+- CORS frontend origin: `http://localhost:3000`
+- Optional persistence: configure `MONGODB_URI`; otherwise the API uses the in-memory quiz repository.
+- Local login fixture: `admin@quiz.app` / `admin1234`
 
 # Repository Structure
 
@@ -31,7 +40,8 @@
 # Safety Rules
 
 - Prefer editing source files under `apps/*/src`, `packages/shared/src`, and `tests/e2e/specs`.
-- Do not hand-edit generated output under `dist/` or dependencies under `node_modules/`.
+- For docs-only requests, keep changes scoped to the requested Markdown files.
+- Do not hand-edit generated output under `dist/`, dependencies under `node_modules/`, or Playwright output under `tests/e2e/test-results/`.
 - Do not introduce new tools, config systems, or architectural layers unless the task explicitly requires them.
 - Preserve the in-memory API fallback when `MONGODB_URI` is not configured unless the task is specifically about persistence.
 - Avoid changing unrelated docs or application code when the task is limited to Codex/project setup.
@@ -43,8 +53,10 @@
 - `pnpm test:e2e`
 
 Notes:
+
 - On Windows PowerShell, use `pnpm.cmd` if script execution blocks `pnpm.ps1`.
 - `pnpm test:e2e` starts the workspace through Playwright's `webServer` config and is slower than `lint` or `build`.
+- For Markdown-only edits, `git diff --check` is usually enough unless the requested change affects runnable examples or commands.
 
 # Expected Final Output
 
