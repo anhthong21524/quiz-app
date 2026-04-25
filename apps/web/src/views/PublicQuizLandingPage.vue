@@ -89,65 +89,13 @@ async function startQuiz() {
   }
 }
 
-function exitQuiz() {
-  router.push({ name: "login" });
-}
-
 onMounted(loadQuiz);
 </script>
 
 <template>
-  <main class="min-h-screen overflow-hidden bg-[#f8f4ef] text-[#111827]">
-    <header class="relative z-10 border-b border-slate-200/80 bg-white/95 px-5 py-5 shadow-sm">
-      <div class="mx-auto flex max-w-7xl items-center justify-between gap-4">
-        <RouterLink class="inline-flex items-center gap-4" :to="{ name: 'login' }">
-          <span
-            class="grid h-12 w-12 place-items-center rounded-xl bg-emerald-600 text-white shadow-lg shadow-emerald-600/20"
-            aria-hidden="true"
-          >
-            <svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="1.8">
-              <path d="M8 5h8" stroke-linecap="round" />
-              <path d="M10 5v9a2 2 0 1 0 4 0V5" stroke-linecap="round" />
-              <path d="M7 19h10" stroke-linecap="round" />
-            </svg>
-          </span>
-          <span class="text-2xl font-extrabold tracking-normal sm:text-3xl">Quiz App</span>
-        </RouterLink>
-
-        <button
-          class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-bold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700 sm:px-5 sm:text-base"
-          type="button"
-          @click="exitQuiz"
-        >
-          <svg viewBox="0 0 24 24" class="h-5 w-5" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <path d="M15 8V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-3" stroke-linecap="round" />
-            <path d="M10 12h11m0 0-3-3m3 3-3 3" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          Exit quiz
-        </button>
-      </div>
-    </header>
-
-    <section
-      class="relative mx-auto grid min-h-[calc(100vh-5.5rem)] max-w-7xl grid-rows-[1fr_auto] px-5 py-6 sm:py-8 lg:px-8"
-    >
-      <div class="pointer-events-none absolute inset-0 hidden lg:block" aria-hidden="true">
-        <div class="absolute left-12 top-44 h-20 w-20 rounded-full bg-amber-200/70 shadow-2xl shadow-amber-200/50"></div>
-        <div class="absolute left-20 top-72 h-28 w-40 rotate-[-10deg] rounded-2xl border border-amber-100 bg-white/60 shadow-xl shadow-slate-900/5"></div>
-        <div class="absolute left-24 top-[21rem] h-2 w-28 rounded-full bg-amber-200/70"></div>
-        <div class="absolute left-28 top-[23rem] h-2 w-24 rounded-full bg-amber-200/70"></div>
-        <div class="absolute right-20 top-40 text-7xl font-black text-slate-300/70">?</div>
-        <div class="absolute right-24 top-80 h-28 w-44 rotate-[12deg] rounded-2xl border border-slate-200 bg-white/70 shadow-xl shadow-slate-900/5"></div>
-        <div class="absolute right-16 top-[28rem] h-4 w-48 rounded-full bg-emerald-100/80"></div>
-        <div class="absolute left-8 top-72 h-36 w-36 rounded-full border-2 border-dashed border-slate-300/70"></div>
-        <div class="absolute right-10 top-64 h-44 w-44 rounded-full border-2 border-dashed border-slate-300/70"></div>
-        <div class="absolute left-14 top-28 h-3 w-3 rounded-full border-4 border-amber-200"></div>
-        <div class="absolute right-36 top-36 h-3 w-3 rounded-full border-4 border-emerald-200"></div>
-        <div class="absolute bottom-28 left-48 h-3 w-3 rotate-45 bg-emerald-200"></div>
-        <div class="absolute bottom-24 right-48 h-3 w-3 rotate-45 bg-amber-200"></div>
-      </div>
-
-      <div class="relative z-10 grid place-items-center">
+  <div>
+    <section class="mx-auto max-w-7xl px-5 py-6 sm:py-8 lg:px-8">
+      <div class="grid place-items-center">
         <article
           class="w-full max-w-3xl rounded-3xl border border-slate-200 bg-white p-6 shadow-2xl shadow-slate-900/10 sm:p-8 lg:p-10"
         >
@@ -235,24 +183,6 @@ onMounted(loadQuiz);
               </div>
             </div>
 
-            <section class="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-5 sm:p-6">
-              <div class="flex gap-4">
-                <span class="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-emerald-600 text-white" aria-hidden="true">
-                  <svg viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor">
-                    <path d="M12 2.5 5 5.6v5.7c0 4.25 2.92 8.23 7 9.2 4.08-.97 7-4.95 7-9.2V5.6l-7-3.1Zm3.9 7.85-4.55 4.55a1 1 0 0 1-1.42 0L8.1 13.07l1.42-1.42 1.12 1.12 3.84-3.84 1.42 1.42Z" />
-                  </svg>
-                </span>
-                <div>
-                  <h2 class="text-lg font-extrabold tracking-normal">Before you start</h2>
-                  <ul class="mt-3 grid gap-2 text-sm leading-6 text-slate-600 sm:text-base">
-                    <li>You need to provide your name.</li>
-                    <li>The timer will start when you begin the quiz.</li>
-                    <li>Your answers are saved automatically.</li>
-                  </ul>
-                </div>
-              </div>
-            </section>
-
             <div class="grid gap-3">
               <label class="text-lg font-extrabold" for="taker-name">
                 Your name <span class="text-red-500">*</span>
@@ -299,47 +229,6 @@ onMounted(loadQuiz);
         </article>
       </div>
 
-      <div class="relative z-10 mx-auto mt-8 grid w-full max-w-5xl gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <div class="flex items-start gap-4 rounded-2xl bg-white/60 p-4 backdrop-blur">
-          <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600" aria-hidden="true">
-            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor"><path d="M12 2.5 5 5.6v5.7c0 4.25 2.92 8.23 7 9.2 4.08-.97 7-4.95 7-9.2V5.6l-7-3.1Zm3.5 7.85-4.2 4.2-2.05-2.05 1.25-1.25.8.8 2.95-2.95 1.25 1.25Z" /></svg>
-          </span>
-          <div>
-            <h2 class="font-extrabold tracking-normal">Public Quiz</h2>
-            <p class="mt-1 text-sm leading-6 text-slate-600">Anyone with the link can participate</p>
-          </div>
-        </div>
-
-        <div class="flex items-start gap-4 rounded-2xl bg-white/60 p-4 backdrop-blur">
-          <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600" aria-hidden="true">
-            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor"><path d="M9.6 16.2 5.9 12.5l1.4-1.4 2.3 2.3 7.1-7.1 1.4 1.4-8.5 8.5Z" /></svg>
-          </span>
-          <div>
-            <h2 class="font-extrabold tracking-normal">Fair & Secure</h2>
-            <p class="mt-1 text-sm leading-6 text-slate-600">All submissions are recorded and reviewed</p>
-          </div>
-        </div>
-
-        <div class="flex items-start gap-4 rounded-2xl bg-white/60 p-4 backdrop-blur">
-          <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600" aria-hidden="true">
-            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor"><path d="M19 18H7a5 5 0 0 1-.83-9.93A6.5 6.5 0 0 1 18.6 10.2 3.9 3.9 0 0 1 19 18Zm-6.1-6.6h-1.8v2H9l3 3 3-3h-2.1v-2Z" /></svg>
-          </span>
-          <div>
-            <h2 class="font-extrabold tracking-normal text-emerald-700">Auto-save</h2>
-            <p class="mt-1 text-sm leading-6 text-slate-600">Your progress is saved automatically</p>
-          </div>
-        </div>
-
-        <div class="flex items-start gap-4 rounded-2xl bg-white/60 p-4 backdrop-blur">
-          <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600" aria-hidden="true">
-            <svg viewBox="0 0 24 24" class="h-6 w-6" fill="currentColor"><path d="M5 20V9h4v11H5Zm5 0V4h4v16h-4Zm5 0v-7h4v7h-4Z" /></svg>
-          </span>
-          <div>
-            <h2 class="font-extrabold tracking-normal">Instant Results</h2>
-            <p class="mt-1 text-sm leading-6 text-slate-600">See your score and review answers at the end</p>
-          </div>
-        </div>
-      </div>
     </section>
-  </main>
+  </div>
 </template>

@@ -25,7 +25,6 @@ const emit = defineEmits<{
       v-for="quiz in quizzes"
       :key="`${quiz.id}-card`"
       class="quiz-mobile-card"
-      :class="{ 'is-highlighted': quiz.id === 'chemistry-basics' }"
     >
       <div class="mobile-card-header">
         <div class="quiz-title-cell">
@@ -54,7 +53,7 @@ const emit = defineEmits<{
         class="card-actions"
         :title="quiz.title"
         :status="quiz.status"
-        :is-api-quiz="quiz.source === 'api'"
+        :is-api-quiz="Boolean(quiz.apiId)"
         @view="emit('view', quiz)"
         @edit="emit('edit', quiz)"
         @publish="emit('publish', quiz)"

@@ -6,14 +6,19 @@ import QuizCardList from "../components/my-quizzes/QuizCardList.vue";
 import QuizEmptyState from "../components/my-quizzes/QuizEmptyState.vue";
 import QuizGrid from "../components/my-quizzes/QuizGrid.vue";
 import QuizPagination from "../components/my-quizzes/QuizPagination.vue";
+import QuizStatsBar from "../components/my-quizzes/QuizStatsBar.vue";
 import QuizTable from "../components/my-quizzes/QuizTable.vue";
 import QuizToolbar from "../components/my-quizzes/QuizToolbar.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 import ShareModal from "../components/ShareModal.vue";
 import SectionErrorState from "../components/feedback/SectionErrorState.vue";
 import QuizListSkeleton from "../components/loading/QuizListSkeleton.vue";
-import type { QuizListItem, ViewMode } from "../components/my-quizzes/types";
-import { myQuizzes, type MyQuizStatus } from "../data/my-quizzes";
+import type {
+  MyQuizIcon,
+  MyQuizStatus,
+  QuizListItem,
+  ViewMode
+} from "../components/my-quizzes/types";
 import { useQuizStore } from "../stores/quizzes";
 import { useToast } from "../composables/useToast";
 
@@ -74,29 +79,17 @@ async function retryLoadQuizzes() {
   await quizStore.loadQuizzes();
 }
 
-const seededQuizzes = computed<QuizListItem[]>(() =>
-  myQuizzes.map((quiz) => ({
-    ...quiz,
-    source: "seeded"
-  }))
-);
-
 const apiQuizzes = computed<QuizListItem[]>(() => quizStore.items.map(mapApiQuiz));
-
-const allQuizzes = computed<QuizListItem[]>(() => [
-  ...apiQuizzes.value,
-  ...seededQuizzes.value
-]);
 
 const subjectOptions = computed(() => [
   "All subjects",
-  ...Array.from(new Set(allQuizzes.value.map((quiz) => quiz.subject))).sort()
+  ...Array.from(new Set(apiQuizzes.value.map((quiz) => quiz.subject))).sort()
 ]);
 
 const filteredQuizzes = computed(() => {
   const normalizedSearch = searchQuery.value.trim().toLowerCase();
 
-  const matchingQuizzes = allQuizzes.value.filter((quiz) => {
+  const matchingQuizzes = apiQuizzes.value.filter((quiz) => {
     const matchesSearch =
       !normalizedSearch ||
       quiz.title.toLowerCase().includes(normalizedSearch) ||
@@ -132,6 +125,30 @@ const showingCopy = computed(() => {
   return `Showing 1 to ${quizCount} of ${quizCount} quizzes`;
 });
 
+// ── Empty-state helpers ───────────────────────────────────────
+// True when there are quizzes in total but the active filters match none.
+const hasAnyQuizzes = computed(() => apiQuizzes.value.length > 0);
+
+const isFilteredEmpty = computed(
+  () =>
+    !quizStore.error &&
+    !isInitialLoad.value &&
+    hasAnyQuizzes.value &&
+    filteredQuizzes.value.length === 0
+);
+
+// ── Dashboard stats (UX-5) ───────────────────────────────────
+const publishedCount = computed(
+  () => apiQuizzes.value.filter((q) => q.status === "Published").length
+);
+const draftCount = computed(() => apiQuizzes.value.length - publishedCount.value);
+
+function clearFilters() {
+  searchQuery.value = "";
+  selectedStatus.value = "All status";
+  selectedSubject.value = "All subjects";
+}
+
 function createQuiz() {
   router.push({ name: "create-quiz" });
 }
@@ -156,20 +173,33 @@ function mapQuizStatus(status: QuizStatus): MyQuizStatus {
   return "Unpublished";
 }
 
+function getQuizIcon(subject?: string): MyQuizIcon {
+  const normalizedSubject = subject?.trim().toLowerCase() ?? "";
+
+  if (normalizedSubject.includes("math")) return "mathematics";
+  if (normalizedSubject.includes("science") || normalizedSubject.includes("chem")) return "science";
+  if (normalizedSubject.includes("geo")) return "geography";
+  if (normalizedSubject.includes("english") || normalizedSubject.includes("grammar")) return "english";
+  if (normalizedSubject.includes("physics")) return "physics";
+  if (normalizedSubject.includes("history")) return "history";
+  return "knowledge";
+}
+
 function mapApiQuiz(quiz: Quiz): QuizListItem {
   const id = quiz.id ?? quiz.title;
+  const subject = quiz.subject ?? "Custom";
 
   return {
     id,
     apiId: quiz.id,
-    source: "api",
+    slug: quiz.slug,
     title: quiz.title,
-    subject: quiz.subject ?? "Custom",
+    subject,
     questions: quiz.questions.length,
     status: mapQuizStatus(quiz.status),
     lastUpdated: quiz.updatedAt ?? quiz.createdAt ?? "",
     lastUpdatedLabel: formatLastUpdated(quiz.updatedAt ?? quiz.createdAt),
-    icon: "knowledge"
+    icon: getQuizIcon(subject)
   };
 }
 
@@ -201,11 +231,11 @@ function editQuiz(quiz: QuizListItem) {
       confirmLabel: "Edit anyway",
       danger: false,
       onConfirm: async () => {
-        router.push({ name: "edit-quiz", params: { id: quiz.apiId! } });
+        router.push({ name: "edit-quiz-questions", params: { id: quiz.apiId! } });
       }
     });
   } else {
-    router.push({ name: "edit-quiz", params: { id: quiz.apiId } });
+    router.push({ name: "edit-quiz-questions", params: { id: quiz.apiId } });
   }
 }
 
@@ -281,10 +311,11 @@ function shareQuiz(quiz: QuizListItem) {
   if (!quiz.apiId) return;
 
   const baseUrl = import.meta.env.VITE_SITE_URL ?? window.location.origin;
+  const identifier = quiz.slug ?? quiz.apiId;
   shareState.value = {
     open: true,
     title: quiz.title,
-    url: `${baseUrl}/quiz/${quiz.apiId}`
+    url: `${baseUrl}/q/${identifier}`
   };
 }
 
@@ -296,6 +327,16 @@ function shareQuiz(quiz: QuizListItem) {
       <h1>My Quizzes</h1>
       <p>Manage your quiz drafts, published quizzes, and API-backed editor work.</p>
     </header>
+
+    <!-- UX-5: Dashboard stats / empty-dashboard state.
+         Shows a skeleton while the initial load runs, a welcome banner when
+         there are no quizzes yet, or live stat pills once quizzes exist. -->
+    <QuizStatsBar
+      :total="apiQuizzes.length"
+      :published="publishedCount"
+      :drafts="draftCount"
+      :loading="isInitialLoad"
+    />
 
     <section
       class="quiz-manager-card"
@@ -374,7 +415,13 @@ function shareQuiz(quiz: QuizListItem) {
             <QuizPagination :showing-copy="showingCopy" />
           </template>
 
-          <QuizEmptyState v-else @create="createQuiz" />
+          <!-- UX-4: no-quizzes (first-time) vs no-results (filtered empty) -->
+          <QuizEmptyState
+            v-else
+            :variant="isFilteredEmpty ? 'no-results' : 'no-quizzes'"
+            @create="createQuiz"
+            @clear-filters="clearFilters"
+          />
         </div>
       </Transition>
     </section>
@@ -449,7 +496,8 @@ function shareQuiz(quiz: QuizListItem) {
 }
 
 .quiz-manager-card {
-  min-height: 100%;
+  height: 632px;
+  min-height: 632px;
   border: var(--surface-border);
   border-radius: var(--surface-radius);
   display: flex;
@@ -615,7 +663,9 @@ function shareQuiz(quiz: QuizListItem) {
 
 .quiz-table-shell {
   width: 100%;
-  overflow-x: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
   border-top: 1px solid #edf0f2;
 }
 
@@ -654,10 +704,6 @@ function shareQuiz(quiz: QuizListItem) {
   background: #fbfdfb;
 }
 
-.quiz-table tbody tr.is-highlighted {
-  background: #f2fbf6;
-}
-
 .quiz-title-cell {
   display: flex;
   align-items: center;
@@ -684,12 +730,6 @@ function shareQuiz(quiz: QuizListItem) {
   border-radius: 16px;
   background: #ffffff;
   box-shadow: 0 8px 22px rgba(34, 24, 12, 0.04);
-}
-
-.quiz-mobile-card.is-highlighted,
-.quiz-grid-card.is-highlighted {
-  border-color: #c8f1dd;
-  background: #f4fbf7;
 }
 
 .quiz-mobile-card {
@@ -733,8 +773,12 @@ function shareQuiz(quiz: QuizListItem) {
 
 .quiz-grid {
   display: grid;
+  flex: 1 1 auto;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-content: start;
   gap: 16px;
+  min-height: 0;
+  overflow: auto;
   padding: 18px;
 }
 
@@ -774,6 +818,7 @@ function shareQuiz(quiz: QuizListItem) {
 }
 
 .quiz-pagination {
+  flex: 0 0 auto;
   min-height: 74px;
   margin-top: auto;
   padding: 18px 24px;
@@ -823,8 +868,9 @@ function shareQuiz(quiz: QuizListItem) {
 }
 
 .empty-state {
+  flex: 1 1 auto;
   margin: 0;
-  min-height: 360px;
+  min-height: 0;
   border-top: 1px solid #edf0f2;
   display: grid;
   place-items: center;
@@ -904,6 +950,11 @@ function shareQuiz(quiz: QuizListItem) {
 }
 
 @media (max-width: 860px) {
+  .quiz-manager-card {
+    height: 620px;
+    min-height: 620px;
+  }
+
   .new-quiz-button {
     width: 100%;
   }
@@ -936,6 +987,10 @@ function shareQuiz(quiz: QuizListItem) {
 
   .quiz-card-list {
     display: grid;
+    flex: 1 1 auto;
+    align-content: start;
+    min-height: 0;
+    overflow: auto;
   }
 
   .quiz-grid {

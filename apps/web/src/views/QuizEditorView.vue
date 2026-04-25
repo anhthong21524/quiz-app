@@ -3,6 +3,7 @@ import { computed, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { Question } from "@quiz-app/shared";
 import QuizQuestionEditor from "../components/editor/QuizQuestionEditor.vue";
+import EditorEmptyQuestions from "../components/editor/EditorEmptyQuestions.vue";
 import FullPageErrorState from "../components/feedback/FullPageErrorState.vue";
 import ActionErrorMessage from "../components/feedback/ActionErrorMessage.vue";
 import EditorFormSkeleton from "../components/loading/EditorFormSkeleton.vue";
@@ -21,16 +22,13 @@ const quizStore = useQuizStore();
 const isSaving = ref(false);
 const saveError = ref<string | null>(null);
 
+// New quizzes start with an empty question list so UX-6 (EditorEmptyQuestions)
+// is shown immediately, guiding the user to add their first question explicitly.
+// Existing quizzes are populated from the API via populateForm().
 const form = reactive<QuizFormState>({
   title: "",
   description: "",
-  questions: [
-    {
-      prompt: "",
-      options: ["", ""],
-      correctOptionIndex: 0
-    }
-  ]
+  questions: []
 });
 
 const quizId = computed(() => route.params.id?.toString());
@@ -65,7 +63,8 @@ function populateForm() {
 function resetForm() {
   form.title = "";
   form.description = "";
-  form.questions = [createEmptyQuestion()];
+  // Start fresh with no questions so the EditorEmptyQuestions state appears.
+  form.questions = [];
 }
 
 async function loadQuiz(id: string) {
@@ -97,10 +96,7 @@ function addQuestion() {
 }
 
 function removeQuestion(index: number) {
-  if (form.questions.length === 1) {
-    return;
-  }
-
+  // Allow removing down to 0 — EditorEmptyQuestions will show instead.
   form.questions.splice(index, 1);
 }
 
@@ -125,6 +121,12 @@ function removeOption(questionIndex: number, optionIndex: number) {
 }
 
 async function submitQuiz() {
+  // Client-side guard: a quiz with no questions cannot be saved.
+  if (form.questions.length === 0) {
+    saveError.value = "Add at least one question before saving your quiz.";
+    return;
+  }
+
   isSaving.value = true;
   saveError.value = null;
   try {
@@ -196,9 +198,29 @@ async function retrySave() {
 
       <section class="stack">
         <div class="actions" style="justify-content: space-between; align-items: center;">
-          <h3 style="margin: 0;">Questions</h3>
-          <button class="secondary" type="button" @click="addQuestion">Add question</button>
+          <h3 style="margin: 0;">
+            Questions
+            <span v-if="form.questions.length" style="font-size: 0.82rem; font-weight: 600; color: #8a93a3; margin-left: 8px;">
+              {{ form.questions.length }}
+            </span>
+          </h3>
+          <!-- Only show the "Add question" button when there's already at least one.
+               When zero, the EditorEmptyQuestions CTA is the primary entry point. -->
+          <button
+            v-if="form.questions.length > 0"
+            class="secondary"
+            type="button"
+            @click="addQuestion"
+          >
+            Add question
+          </button>
         </div>
+
+        <!-- UX-6: no questions yet — inline empty state with guided CTA -->
+        <EditorEmptyQuestions
+          v-if="form.questions.length === 0"
+          @add-question="addQuestion"
+        />
 
         <QuizQuestionEditor
           v-for="(question, questionIndex) in form.questions"

@@ -6,6 +6,7 @@ import {
   QuizRepository,
   UpdateQuizData
 } from "../../domain/quiz.repository";
+import { slugifyTitle } from "../persistence/mappers";
 
 @Injectable()
 export class InMemoryQuizRepository implements QuizRepository {
@@ -14,14 +15,17 @@ export class InMemoryQuizRepository implements QuizRepository {
   async create(data: CreateQuizData): Promise<Quiz> {
     const timestamp = new Date().toISOString();
     const id = randomUUID();
+    const slug = slugifyTitle(data.title) + "-" + id.replace(/-/g, "").slice(-6);
     const quiz: Quiz = {
       id,
+      slug,
       title: data.title,
       description: data.description,
       ownerId: data.ownerId,
       ownerEmail: data.ownerEmail,
       subject: data.subject,
       difficulty: data.difficulty,
+      timeLimit: data.timeLimit ?? null,
       status: QuizStatus.IN_PROGRESS,
       questions: data.questions.map((question) => ({
         ...question,
@@ -43,8 +47,23 @@ export class InMemoryQuizRepository implements QuizRepository {
       );
   }
 
+  async findPublished(): Promise<Quiz[]> {
+    return Array.from(this.quizzes.values())
+      .filter((quiz) => quiz.status === QuizStatus.PUBLISHED)
+      .sort((left, right) =>
+        (right.updatedAt ?? "").localeCompare(left.updatedAt ?? "")
+      );
+  }
+
   async findById(id: string): Promise<Quiz | null> {
     return this.quizzes.get(id) ?? null;
+  }
+
+  async findBySlug(slug: string): Promise<Quiz | null> {
+    for (const quiz of this.quizzes.values()) {
+      if ((quiz.slug ?? slugifyTitle(quiz.title)) === slug) return quiz;
+    }
+    return null;
   }
 
   async update(id: string, ownerId: string, data: UpdateQuizData): Promise<Quiz | null> {
@@ -56,6 +75,7 @@ export class InMemoryQuizRepository implements QuizRepository {
     const updated: Quiz = {
       ...current,
       ...data,
+      slug: data.title ? slugifyTitle(data.title) + "-" + id.replace(/-/g, "").slice(-6) : current.slug,
       questions:
         data.questions?.map((question) => ({
           ...question,

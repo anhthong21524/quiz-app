@@ -1,6 +1,7 @@
-import { ConflictException, Inject, Injectable, OnModuleInit, UnauthorizedException } from "@nestjs/common";
+import { ConflictException, Inject, Injectable, Logger, OnModuleInit, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
+import { AuthTokens, AuthUser } from "@quiz-app/shared";
 import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
 import { USER_REPOSITORY, User, UserRepository } from "./infrastructure/persistence/user.repository";
@@ -18,6 +19,7 @@ const scrypt = promisify(scryptCallback) as (
 
 @Injectable()
 export class AuthService implements OnModuleInit {
+  private readonly logger = new Logger(AuthService.name);
   private readonly adminEmail: string;
   private readonly adminPassword: string;
   private readonly refreshSecret: string;
@@ -44,6 +46,9 @@ export class AuthService implements OnModuleInit {
     if (!existing) {
       const { passwordHash, passwordSalt } = await this.hashPassword(this.adminPassword);
       await this.userRepository.create({ email: this.adminEmail, passwordHash, passwordSalt });
+      this.logger.log(`Admin account seeded: ${this.adminEmail}`);
+    } else {
+      this.logger.log(`Admin account already exists: ${this.adminEmail}`);
     }
   }
 
@@ -61,13 +66,13 @@ export class AuthService implements OnModuleInit {
         });
       }
     }
-    return this.issueTokens({ sub: user.id, email: user.email });
+    return this.issueTokens({ sub: user.id, email: user.email }, user);
   }
 
-  async getProfile(sub: string): Promise<{ email: string; avatarUrl?: string } | null> {
+  async getProfile(sub: string): Promise<AuthUser | null> {
     const user = await this.userRepository.findById(sub);
     if (!user) return null;
-    return { email: user.email, ...(user.avatarUrl ? { avatarUrl: user.avatarUrl } : {}) };
+    return this.toAuthUser(user);
   }
 
   async register(email: string, password: string) {
@@ -91,7 +96,7 @@ export class AuthService implements OnModuleInit {
       passwordSalt
     });
 
-    return this.issueTokens({ sub: user.id, email: user.email });
+    return this.issueTokens({ sub: user.id, email: user.email }, user);
   }
 
   async login(email: string, password: string) {
@@ -108,7 +113,7 @@ export class AuthService implements OnModuleInit {
       throw new UnauthorizedException("Invalid email or password.");
     }
 
-    return this.issueTokens({ sub: user.id, email: user.email });
+    return this.issueTokens({ sub: user.id, email: user.email }, user);
   }
 
   async refresh(refreshToken: string) {
@@ -121,7 +126,11 @@ export class AuthService implements OnModuleInit {
         secret: this.refreshSecret
       });
       this.validRefreshTokens.delete(refreshToken);
-      return this.issueTokens({ sub: payload.sub, email: payload.email });
+      const user = await this.userRepository.findById(payload.sub);
+      return this.issueTokens(
+        { sub: payload.sub, email: user?.email ?? payload.email },
+        user ?? undefined
+      );
     } catch {
       this.validRefreshTokens.delete(refreshToken);
       throw new UnauthorizedException("Invalid or expired refresh token.");
@@ -138,7 +147,7 @@ export class AuthService implements OnModuleInit {
     return { message: "Signed out successfully." };
   }
 
-  private issueTokens(payload: TokenPayload) {
+  private issueTokens(payload: TokenPayload, user?: User): AuthTokens {
     const accessToken = this.jwtService.sign(payload, { expiresIn: "15m" });
     const refreshToken = this.jwtService.sign(payload, {
       secret: this.refreshSecret,
@@ -149,8 +158,12 @@ export class AuthService implements OnModuleInit {
     return {
       accessToken,
       refreshToken,
-      user: { email: payload.email }
+      user: user ? this.toAuthUser(user) : { email: payload.email }
     };
+  }
+
+  private toAuthUser(user: User): AuthUser {
+    return { email: user.email, ...(user.avatarUrl ? { avatarUrl: user.avatarUrl } : {}) };
   }
 
   private normalizeEmail(email: string) {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 
@@ -8,7 +8,11 @@ const route = useRoute();
 const router = useRouter();
 const isMobileNavOpen = ref(false);
 const isPublicPage = computed(() =>
-  route.name === "home" || route.name === "about" || route.name === "login"
+  route.name === "home" ||
+  route.name === "public-quizzes" ||
+  route.name === "about" ||
+  route.name === "login" ||
+  route.name === "public-quiz"
 );
 
 const username = computed(() => {
@@ -24,12 +28,18 @@ const username = computed(() => {
 
 const avatarUrl = computed(() => authStore.user?.avatarUrl ?? "");
 
+onMounted(() => {
+  if (authStore.isAuthenticated) {
+    void authStore.syncProfile();
+  }
+});
+
 const activeNav = computed(() => {
   if (route.name === "home") {
     return "home";
   }
 
-  if (route.name === "quizzes") {
+  if (route.name === "public-quizzes" || route.name === "quizzes") {
     return "quizzes";
   }
 
@@ -108,7 +118,7 @@ watch(() => route.fullPath, closeMenus);
         <RouterLink
           class="public-nav-link"
           :class="{ 'is-active': activeNav === 'quizzes' }"
-          :to="{ name: 'quizzes' }"
+          :to="{ name: 'public-quizzes' }"
         >
           Quizzes
         </RouterLink>
@@ -153,7 +163,7 @@ watch(() => route.fullPath, closeMenus);
         <RouterLink
           class="public-mobile-nav-link"
           :class="{ 'is-active': activeNav === 'quizzes' }"
-          :to="{ name: 'quizzes' }"
+          :to="{ name: 'public-quizzes' }"
           @click="closeMenus"
         >
           Quizzes
@@ -193,7 +203,13 @@ watch(() => route.fullPath, closeMenus);
       </svg>
     </button>
 
-    <RouterLink class="brand-lockup" :to="{ name: 'quizzes' }" @click="closeMenus">
+    <RouterLink
+      class="brand-lockup"
+      :to="{ name: 'management' }"
+      title="Go to management home"
+      aria-label="Quiz App — go to management home"
+      @click="closeMenus"
+    >
       <div class="brand-badge" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="M8 5h8" stroke-linecap="round" />

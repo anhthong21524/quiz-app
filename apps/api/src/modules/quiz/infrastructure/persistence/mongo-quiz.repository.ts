@@ -1,13 +1,13 @@
 import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Quiz, QuizStatus } from "@quiz-app/shared";
-import { Model, Connection, connect } from "mongoose";
+import { Model, Connection, Types, connect } from "mongoose";
 import {
   CreateQuizData,
   QuizRepository,
   UpdateQuizData
 } from "../../domain/quiz.repository";
-import { normalizeQuiz } from "./mappers";
+import { normalizeQuiz, slugifyTitle } from "./mappers";
 import { QuizEntity, QuizSchema } from "./quiz.schema";
 
 @Injectable()
@@ -60,8 +60,12 @@ export class MongoQuizRepository
   }
 
   async create(data: CreateQuizData): Promise<Quiz> {
+    const id = new Types.ObjectId();
+    const slug = slugifyTitle(data.title) + "-" + id.toString().slice(-6);
     const quiz = await this.getModel().create({
+      _id: id,
       ...data,
+      slug,
       status: QuizStatus.IN_PROGRESS
     });
     return normalizeQuiz(quiz.toObject());
@@ -72,14 +76,39 @@ export class MongoQuizRepository
     return quizzes.map((quiz) => normalizeQuiz(quiz));
   }
 
+  async findPublished(): Promise<Quiz[]> {
+    const quizzes = await this.getModel()
+      .find({ status: QuizStatus.PUBLISHED })
+      .sort({ updatedAt: -1 })
+      .lean();
+    return quizzes.map((quiz) => normalizeQuiz(quiz));
+  }
+
   async findById(id: string): Promise<Quiz | null> {
+    if (!Types.ObjectId.isValid(id)) return null;
     const quiz = await this.getModel().findById(id).lean();
     return quiz ? normalizeQuiz(quiz) : null;
   }
 
+  async findBySlug(slug: string): Promise<Quiz | null> {
+    const bySlug = await this.getModel().findOne({ slug }).lean();
+    if (bySlug) return normalizeQuiz(bySlug);
+
+    // Fallback: find published quizzes whose title produces the same slug
+    const candidates = await this.getModel()
+      .find({ slug: { $exists: false } })
+      .lean();
+    const match = candidates.find((q) => slugifyTitle(q.title) === slug);
+    return match ? normalizeQuiz(match) : null;
+  }
+
   async update(id: string, ownerId: string, data: UpdateQuizData): Promise<Quiz | null> {
+    const updateData = {
+      ...data,
+      ...(data.title ? { slug: slugifyTitle(data.title) + "-" + id.slice(-6) } : {})
+    };
     const quiz = await this.getModel()
-      .findOneAndUpdate({ _id: id, ownerId }, data, {
+      .findOneAndUpdate({ _id: id, ownerId }, updateData, {
         new: true,
         runValidators: true
       })

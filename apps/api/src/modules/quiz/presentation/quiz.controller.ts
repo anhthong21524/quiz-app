@@ -18,6 +18,18 @@ export class QuizController {
     return this.quizService.findAll(request.user);
   }
 
+  @Get("public")
+  @Public()
+  findPublished() {
+    return this.quizService.findPublished();
+  }
+
+  @Get("slug/:slug")
+  @Public()
+  findBySlug(@Param("slug") slug: string) {
+    return this.quizService.findBySlug(slug);
+  }
+
   @Get(":id")
   @Public()
   findById(@Param("id") id: string) {

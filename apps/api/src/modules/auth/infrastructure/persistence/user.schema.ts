@@ -5,17 +5,17 @@ export class UserEntity {
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
   email!: string;
 
-  @Prop()
-  passwordHash?: string;
+  @Prop({ type: String, default: null })
+  passwordHash?: string | null;
 
-  @Prop()
-  passwordSalt?: string;
+  @Prop({ type: String, default: null })
+  passwordSalt?: string | null;
 
-  @Prop({ sparse: true })
-  googleSub?: string;
+  @Prop({ type: String, sparse: true, default: null })
+  googleSub?: string | null;
 
-  @Prop()
-  avatarUrl?: string;
+  @Prop({ type: String, default: null })
+  avatarUrl?: string | null;
 }
 
 export const UserSchema = SchemaFactory.createForClass(UserEntity);

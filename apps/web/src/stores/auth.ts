@@ -121,10 +121,11 @@ export const useAuthStore = defineStore("auth", {
     async refresh(): Promise<string> {
       if (!this.refreshToken) throw new Error("No refresh token available.");
       const result = await apiRefresh(this.refreshToken);
+      this.user = result.user;
       this.accessToken = result.accessToken;
       this.refreshToken = result.refreshToken;
       this.status = "authenticated";
-      saveToStorage({ user: this.user, accessToken: result.accessToken, refreshToken: result.refreshToken });
+      saveToStorage({ user: result.user, accessToken: result.accessToken, refreshToken: result.refreshToken });
       return result.accessToken;
     },
 

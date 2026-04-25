@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { computed, reactive, ref } from "vue";
-import { useRouter } from "vue-router";
-import type { Question } from "@quiz-app/shared";
+import { computed, reactive, ref, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import type { Question, Quiz } from "@quiz-app/shared";
 import AnswerOptionRow from "../components/create-quiz/AnswerOptionRow.vue";
 import CreateQuizStepper from "../components/create-quiz/CreateQuizStepper.vue";
 import QuestionNavigator from "../components/create-quiz/QuestionNavigator.vue";
+import FullPageErrorState from "../components/feedback/FullPageErrorState.vue";
+import EditorFormSkeleton from "../components/loading/EditorFormSkeleton.vue";
 import { useToast } from "../composables/useToast";
 import { useQuizStore } from "../stores/quizzes";
 import type {
@@ -16,15 +18,20 @@ import type {
 
 interface ConfigurationForm {
   title: string;
+  description: string;
   subject: string;
   numberOfQuestions: number;
   difficulty: DifficultyLevel;
+  timeLimitEnabled: boolean;
+  timeLimitMinutes: number | null;
 }
 
 interface ValidationErrors {
   title?: string;
+  description?: string;
   subject?: string;
   numberOfQuestions?: string;
+  timeLimitMinutes?: string;
   question?: string;
 }
 
@@ -32,39 +39,39 @@ const router = useRouter();
 const quizStore = useQuizStore();
 const { show: showToast } = useToast();
 
-const subjectOptions = [
-  "Mathematics",
-  "Science",
-  "History",
-  "Geography",
-  "English",
-  "Programming"
-];
-
 const difficultyOptions: DifficultyLevel[] = ["Easy", "Medium", "Hard"];
 const maxQuestions = 50;
 const minQuestions = 1;
+const maxTimeLimitMinutes = 180;
+const defaultTimeLimitMinutes = 30;
 const maxOptions = 6;
 const minimumOptionCount = 2;
 const defaultOptionCount = 4;
 const optionLabels = ["A", "B", "C", "D", "E", "F"];
 
+const route = useRoute();
 const currentStep = ref<1 | 2>(1);
 const currentQuestionIndex = ref(0);
 const draggedOptionIndex = ref<number | null>(null);
 const dragTargetOptionIndex = ref<number | null>(null);
 const isSaving = ref(false);
+const originalDescription = ref("");
 const validationErrors = reactive<ValidationErrors>({});
 
 const configuration = reactive<ConfigurationForm>({
   title: "Quiz 1",
+  description: "",
   subject: "Science",
   numberOfQuestions: 1,
-  difficulty: "Easy"
+  difficulty: "Easy",
+  timeLimitEnabled: false,
+  timeLimitMinutes: null
 });
 
 const questions = ref<CreateQuizQuestion[]>([]);
 
+const quizId = computed(() => route.params.id?.toString());
+const isEditing = computed(() => Boolean(quizId.value));
 const currentQuestion = computed(() => questions.value[currentQuestionIndex.value]);
 const completedQuestions = computed(
   () => questions.value.filter((question) => question.status === "completed").length
@@ -72,6 +79,38 @@ const completedQuestions = computed(
 const progressPercent = computed(() =>
   questions.value.length ? Math.round((completedQuestions.value / questions.value.length) * 100) : 0
 );
+const loadError = computed(() =>
+  quizStore.error && !quizStore.isLoading ? quizStore.error : null
+);
+const pageTitle = computed(() => (isEditing.value ? "Edit quiz" : "Create new quiz"));
+const stepIntro = computed(() => {
+  if (currentStep.value === 1) {
+    return isEditing.value
+      ? "Review the quiz details before updating questions."
+      : "Set up the basic details for your quiz before adding questions.";
+  }
+
+  return isEditing.value
+    ? "Update and organize your questions before saving changes."
+    : "Write and organize your questions before saving the quiz.";
+});
+const baseSubjectOptions = [
+  "Mathematics",
+  "Science",
+  "History",
+  "Geography",
+  "English",
+  "Programming"
+];
+const subjectOptions = computed(() => {
+  const currentSubject = configuration.subject.trim();
+
+  if (currentSubject && !baseSubjectOptions.includes(currentSubject)) {
+    return [currentSubject, ...baseSubjectOptions];
+  }
+
+  return baseSubjectOptions;
+});
 
 function createId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
@@ -104,6 +143,31 @@ function createEmptyQuestion(index: number): CreateQuizQuestion {
   };
 }
 
+function resetValidationErrors() {
+  validationErrors.title = undefined;
+  validationErrors.description = undefined;
+  validationErrors.subject = undefined;
+  validationErrors.numberOfQuestions = undefined;
+  validationErrors.timeLimitMinutes = undefined;
+  validationErrors.question = undefined;
+}
+
+function resetFlow() {
+  configuration.title = "Quiz 1";
+  configuration.description = "";
+  configuration.subject = "Science";
+  configuration.numberOfQuestions = 1;
+  configuration.difficulty = "Easy";
+  configuration.timeLimitEnabled = false;
+  configuration.timeLimitMinutes = null;
+  questions.value = [];
+  originalDescription.value = "";
+  currentQuestionIndex.value = 0;
+  currentStep.value = 1;
+  resetValidationErrors();
+  resetOptionDragState();
+}
+
 function getDraftStatus(question: CreateQuizQuestion): QuestionStatus {
   const hasQuestionText = question.questionText.trim().length > 0;
   const hasOptionText = question.options.some((option) => option.text.trim().length > 0);
@@ -132,6 +196,8 @@ function isQuestionComplete(question: CreateQuizQuestion) {
 
 function validateConfiguration() {
   validationErrors.title = configuration.title.trim() ? undefined : "Quiz title is required.";
+  validationErrors.description =
+    configuration.description.length <= 500 ? undefined : "Description must be 500 characters or fewer.";
   validationErrors.subject = configuration.subject ? undefined : "Subject is required.";
 
   if (
@@ -144,7 +210,26 @@ function validateConfiguration() {
     validationErrors.numberOfQuestions = undefined;
   }
 
-  return !validationErrors.title && !validationErrors.subject && !validationErrors.numberOfQuestions;
+  const timeLimitMinutes = configuration.timeLimitMinutes;
+  if (configuration.timeLimitEnabled) {
+    validationErrors.timeLimitMinutes =
+      timeLimitMinutes !== null &&
+      Number.isInteger(timeLimitMinutes) &&
+      timeLimitMinutes >= 1 &&
+      timeLimitMinutes <= maxTimeLimitMinutes
+        ? undefined
+        : "Time limit must be between 1 and 180 minutes.";
+  } else {
+    validationErrors.timeLimitMinutes = undefined;
+  }
+
+  return (
+    !validationErrors.title &&
+    !validationErrors.description &&
+    !validationErrors.subject &&
+    !validationErrors.numberOfQuestions &&
+    !validationErrors.timeLimitMinutes
+  );
 }
 
 function syncQuestionPlaceholders() {
@@ -162,6 +247,76 @@ function syncQuestionPlaceholders() {
   currentQuestionIndex.value = Math.min(currentQuestionIndex.value, nextQuestions.length - 1);
 }
 
+function mapQuestionToDraft(question: Question, index: number): CreateQuizQuestion {
+  const options = question.options.map((option, optionIndex) =>
+    createOption(optionIndex, option, optionIndex === question.correctOptionIndex)
+  );
+
+  while (options.length < minimumOptionCount) {
+    options.push(createOption(options.length));
+  }
+
+  const draftQuestion: CreateQuizQuestion = {
+    id: question.id ?? createId(`question-${index + 1}`),
+    questionText: question.prompt,
+    options: relabelOptions(options),
+    multipleCorrect: false,
+    explanation: "",
+    status: "empty"
+  };
+
+  draftQuestion.status = isQuestionComplete(draftQuestion)
+    ? "completed"
+    : getDraftStatus(draftQuestion);
+
+  return draftQuestion;
+}
+
+function populateEditFlow(quiz: Quiz) {
+  configuration.title = quiz.title;
+  configuration.description = quiz.description;
+  configuration.subject = quiz.subject ?? "";
+  configuration.numberOfQuestions = Math.min(
+    maxQuestions,
+    Math.max(minQuestions, quiz.questions.length || minQuestions)
+  );
+  configuration.difficulty = quiz.difficulty ?? "Easy";
+  configuration.timeLimitEnabled = quiz.timeLimit !== null && quiz.timeLimit !== undefined;
+  configuration.timeLimitMinutes = quiz.timeLimit ?? null;
+  originalDescription.value = quiz.description;
+  questions.value = quiz.questions.length
+    ? quiz.questions.map(mapQuestionToDraft)
+    : [createEmptyQuestion(0)];
+  currentQuestionIndex.value = 0;
+  currentStep.value = 2;
+  resetValidationErrors();
+  resetOptionDragState();
+}
+
+async function loadQuizForEditing(id: string) {
+  try {
+    const quiz = await quizStore.loadQuiz(id);
+    populateEditFlow(quiz);
+  } catch {
+    // quizStore.error is shown by loadError.
+  }
+}
+
+watch(
+  quizId,
+  async (id) => {
+    if (!id) {
+      quizStore.activeQuiz = null;
+      quizStore.error = null;
+      resetFlow();
+      return;
+    }
+
+    await loadQuizForEditing(id);
+  },
+  { immediate: true }
+);
+
 function goToQuestionsStep() {
   if (!validateConfiguration()) {
     return;
@@ -170,6 +325,17 @@ function goToQuestionsStep() {
   syncQuestionPlaceholders();
   currentQuestionIndex.value = 0;
   currentStep.value = 2;
+}
+
+function setUnlimitedTimeLimit() {
+  configuration.timeLimitEnabled = false;
+  configuration.timeLimitMinutes = null;
+  validationErrors.timeLimitMinutes = undefined;
+}
+
+function setTimedTimeLimit() {
+  configuration.timeLimitEnabled = true;
+  configuration.timeLimitMinutes = configuration.timeLimitMinutes ?? defaultTimeLimitMinutes;
 }
 
 function markQuestionAsDraft(index: number) {
@@ -387,6 +553,16 @@ function validateAllQuestions() {
 }
 
 function createQuizDescription() {
+  const description = configuration.description.trim();
+
+  if (description) {
+    return description;
+  }
+
+  if (isEditing.value && originalDescription.value.trim()) {
+    return originalDescription.value.trim();
+  }
+
   return `${configuration.subject} quiz (${configuration.difficulty} difficulty).`;
 }
 
@@ -416,10 +592,11 @@ async function submitQuiz() {
       description: createQuizDescription(),
       subject: configuration.subject,
       difficulty: configuration.difficulty,
+      timeLimit: configuration.timeLimitEnabled ? configuration.timeLimitMinutes : null,
       questions: questions.value.map(toQuestionPayload)
-    });
+    }, quizId.value);
 
-    showToast("Quiz saved successfully");
+    showToast(isEditing.value ? "Quiz updated successfully" : "Quiz saved successfully");
     await router.push({ name: "quizzes" });
   } catch {
     const message = quizStore.error?.userMessage ?? "Failed to save quiz. Please try again.";
@@ -431,6 +608,11 @@ async function submitQuiz() {
 }
 
 async function saveAndNext() {
+  if (isEditing.value) {
+    await submitQuiz();
+    return;
+  }
+
   if (!validateCurrentQuestion()) {
     return;
   }
@@ -460,17 +642,26 @@ function exitFlow() {
 </script>
 
 <template>
-  <section class="w-full">
+  <FullPageErrorState
+    v-if="loadError && isEditing"
+    :message="loadError.userMessage"
+    :retryable="loadError.isRetryable"
+    :loading="quizStore.isLoading"
+    retry-label="Reload quiz"
+    action-label="Back to My Quizzes"
+    action-href="/quizzes"
+    @retry="loadQuizForEditing(quizId!)"
+  />
+
+  <EditorFormSkeleton v-else-if="quizStore.isLoading && isEditing" />
+
+  <section v-else class="w-full">
     <div class="mx-auto w-full max-w-[1180px] space-y-5">
       <div class="space-y-3">
         <div class="space-y-2">
-          <h1 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">Create new quiz</h1>
+          <h1 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">{{ pageTitle }}</h1>
           <p class="max-w-2xl text-sm text-slate-500 sm:text-base">
-            {{
-              currentStep === 1
-                ? "Set up the basic details for your quiz before adding questions."
-                : "Write and organize your questions before saving the quiz."
-            }}
+            {{ stepIntro }}
           </p>
         </div>
 
@@ -533,6 +724,23 @@ function exitFlow() {
                 </label>
 
                 <label class="block space-y-2">
+                  <div class="flex items-center justify-between gap-3">
+                    <span class="text-sm font-semibold text-slate-700">Quiz description</span>
+                    <span class="text-sm text-slate-400">{{ configuration.description.length }} / 500</span>
+                  </div>
+                  <textarea
+                    v-model="configuration.description"
+                    rows="3"
+                    maxlength="500"
+                    placeholder="Describe what learners will practice in this quiz."
+                    class="w-full resize-y rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                  ></textarea>
+                  <p v-if="validationErrors.description" class="text-sm font-medium text-red-500">
+                    {{ validationErrors.description }}
+                  </p>
+                </label>
+
+                <label class="block space-y-2">
                   <span class="text-sm font-semibold text-slate-700">Subject / Domain</span>
                   <select
                     v-model="configuration.subject"
@@ -572,6 +780,86 @@ function exitFlow() {
                     {{ validationErrors.numberOfQuestions }}
                   </p>
                 </label>
+
+                <div class="space-y-2">
+                  <span class="text-sm font-semibold text-slate-700">Time limit</span>
+                  <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
+                    <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
+                      <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-slate-700">
+                        <input
+                          type="radio"
+                          name="time-limit-mode"
+                          class="sr-only"
+                          :checked="!configuration.timeLimitEnabled"
+                          @change="setUnlimitedTimeLimit"
+                        />
+                        <span
+                          class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
+                          :class="
+                            !configuration.timeLimitEnabled
+                              ? 'border-emerald-600 bg-emerald-600 text-white'
+                              : 'border-gray-300 bg-white text-transparent'
+                          "
+                        >
+                          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3">
+                            <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </span>
+                        <span>Unlimited (no time limit)</span>
+                      </label>
+
+                      <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-slate-700">
+                        <input
+                          type="radio"
+                          name="time-limit-mode"
+                          class="sr-only"
+                          :checked="configuration.timeLimitEnabled"
+                          @change="setTimedTimeLimit"
+                        />
+                        <span
+                          class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
+                          :class="
+                            configuration.timeLimitEnabled
+                              ? 'border-emerald-600 bg-emerald-600 text-white'
+                              : 'border-gray-300 bg-white text-transparent'
+                          "
+                        >
+                          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3">
+                            <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </span>
+                        <span>Set time limit</span>
+                      </label>
+                    </div>
+
+                    <label
+                      class="flex h-11 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100 sm:w-[28rem]"
+                      :class="!configuration.timeLimitEnabled ? 'opacity-60' : ''"
+                    >
+                      <span class="sr-only">Time limit minutes</span>
+                      <input
+                        v-model.number="configuration.timeLimitMinutes"
+                        type="number"
+                        min="1"
+                        :max="maxTimeLimitMinutes"
+                        :placeholder="String(defaultTimeLimitMinutes)"
+                        class="min-w-0 flex-1 border-0 bg-white px-4 text-slate-900 outline-none placeholder:text-gray-400"
+                        @click="setTimedTimeLimit"
+                        @focus="setTimedTimeLimit"
+                      />
+                      <span class="grid min-w-24 place-items-center border-l border-gray-200 bg-gray-50 px-4 text-sm font-medium text-slate-600">
+                        minutes
+                      </span>
+                    </label>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-x-5 gap-y-1">
+                    <p class="text-sm text-slate-500">Set how many minutes users have to complete this quiz.</p>
+                    <span class="shrink-0 text-sm text-slate-400">1 - 180 minutes</span>
+                  </div>
+                  <p v-if="validationErrors.timeLimitMinutes" class="text-sm font-medium text-red-500">
+                    {{ validationErrors.timeLimitMinutes }}
+                  </p>
+                </div>
 
                 <div class="space-y-2">
                   <span class="text-sm font-semibold text-slate-700">Difficulty level</span>
@@ -616,7 +904,7 @@ function exitFlow() {
               class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-base font-bold text-white shadow-sm transition hover:bg-emerald-700"
               @click="goToQuestionsStep"
             >
-              <span>Create questions</span>
+              <span>{{ isEditing ? "Update questions" : "Create questions" }}</span>
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                 <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
@@ -730,7 +1018,7 @@ function exitFlow() {
               :class="{ 'cursor-not-allowed opacity-75': isSaving }"
               @click="saveAndNext"
             >
-              <span>{{ isSaving ? "Saving..." : "Save" }}</span>
+              <span>{{ isSaving ? "Saving..." : isEditing ? "Update" : "Save" }}</span>
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                 <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>

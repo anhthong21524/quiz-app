@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MyQuizStatus } from "../../data/my-quizzes";
+import type { MyQuizStatus } from "./types";
 
 const props = defineProps<{
   status: MyQuizStatus;

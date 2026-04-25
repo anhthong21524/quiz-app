@@ -53,28 +53,27 @@ function isPublicQuizApiResponse(data: unknown): data is PublicQuizApiResponse {
   return typeof data === "object" && data !== null && "title" in data;
 }
 
-const demoPublicQuizzes: Record<string, PublicQuizInfo> = {
-  "general-knowledge-quiz": {
-    id: "general-knowledge-quiz",
-    slug: "general-knowledge-quiz",
-    title: "General Knowledge Quiz",
-    description:
-      "Test your knowledge with 10 multiple-choice questions covering a variety of general topics.",
-    questionCount: 10,
-    timeLimit: 15,
-    questionType: "Multiple Choice",
-    isPublished: true
-  }
-};
+function isPublicQuizApiResponseList(data: unknown): data is PublicQuizApiResponse[] {
+  return Array.isArray(data) && data.every(isPublicQuizApiResponse);
+}
+
+function slugifyTitle(title: string) {
+  return title
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
 
 function normalizeQuiz(data: PublicQuizApiResponse, fallbackSlug: string): PublicQuizInfo {
   const id = data.id ?? data._id ?? fallbackSlug;
   const questionCount = data.questionCount ?? data.questions?.length ?? 0;
   const isPublished = data.isPublished ?? data.status === QuizStatus.PUBLISHED;
+  const slug = data.slug ?? id ?? slugifyTitle(data.title) ?? fallbackSlug;
 
   return {
     id,
-    slug: data.slug ?? fallbackSlug,
+    slug,
     title: data.title,
     description: data.description ?? "",
     questionCount,
@@ -84,8 +83,15 @@ function normalizeQuiz(data: PublicQuizApiResponse, fallbackSlug: string): Publi
   };
 }
 
-function fallbackQuizBySlug(slug: string): PublicQuizInfo | null {
-  return demoPublicQuizzes[slug] ?? null;
+export async function getPublicQuizzes(): Promise<PublicQuizInfo[]> {
+  const response = await httpClient.get<unknown>("/quizzes/public");
+  if (!isPublicQuizApiResponseList(response.data)) {
+    throw new Error("Public quizzes endpoint returned an incompatible response.");
+  }
+
+  return response.data
+    .map((quiz) => normalizeQuiz(quiz, quiz.slug ?? quiz.id ?? quiz._id ?? slugifyTitle(quiz.title)))
+    .filter((quiz) => quiz.isPublished);
 }
 
 export async function getPublicQuizBySlug(slug: string): Promise<PublicQuizInfo | null> {
@@ -97,7 +103,7 @@ export async function getPublicQuizBySlug(slug: string): Promise<PublicQuizInfo 
 
     return normalizeQuiz(response.data, slug);
   } catch {
-    // TODO: Replace this fallback after the API exposes a public slug endpoint.
+    // Compatibility path for API data created before slugs were first-class.
   }
 
   try {
@@ -108,10 +114,8 @@ export async function getPublicQuizBySlug(slug: string): Promise<PublicQuizInfo 
 
     return normalizeQuiz(response.data, slug);
   } catch {
-    // TODO: Remove this compatibility path once slugs are first-class in the API.
+    return null;
   }
-
-  return fallbackQuizBySlug(slug);
 }
 
 export async function createQuizAttempt(

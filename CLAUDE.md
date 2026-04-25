@@ -65,15 +65,18 @@ tests/e2e/    — Playwright tests
 
 Global `ValidationPipe` is configured with `whitelist: true`, `forbidNonWhitelisted: true`, and `transform: true`.
 
-`apps/api/src/modules/auth/` contains a simple auth module:
-- `AuthController` — handles `POST /auth/login`
-- `AuthService` — validates hardcoded admin credentials (`admin@quiz.app` / `admin1234`) and returns a user object; no JWT tokens
+`apps/api/src/modules/auth/` contains the auth module:
+- `AuthController` — handles login, register, refresh, logout, profile, avatar, and Google OAuth endpoints
+- `AuthService` — issues JWT access tokens (15 min) and refresh tokens (7 days); seeds an admin account from `AUTH_ADMIN_EMAIL` / `AUTH_ADMIN_PASSWORD` env vars (defaults: `admin@quiz.app` / `admin1234`) on startup; supports Google OAuth via Passport
+- Passwords are hashed with `scrypt`. Routes are protected globally by a JWT guard; mark public routes with `@Public()`.
+
+Key auth env vars: `JWT_SECRET`, `AUTH_ADMIN_EMAIL`, `AUTH_ADMIN_PASSWORD`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 
 ### Frontend
 
 Vue 3 SFCs with Pinia for state (`useQuizStore` in `stores/`), Vue Router for navigation, and Axios via `services/http.ts`. The API base URL comes from `src/config/env.ts` which reads `VITE_API_BASE_URL`. Quiz API calls live in `services/quiz-api.ts`; auth API calls live in `services/auth-api.ts`; store actions wrap them with loading/error state.
 
-Auth state is stored in `sessionStorage` via `services/auth-session.ts` (`isAuthenticated`, `setAuthenticated`). The router guard in `router/index.ts` redirects unauthenticated users to `/login` for protected routes, and redirects authenticated users away from `/login`.
+Auth tokens (access + refresh) are stored in `sessionStorage`. The router guard in `router/index.ts` redirects unauthenticated users to `/login` for protected routes (`requiresAuth: true`), and redirects authenticated users away from `/login` to `/management`.
 
 SEO metadata (title, description, canonical, breadcrumbs) is applied per-route via `services/seo.ts` in a `router.afterEach` hook.
 
@@ -81,21 +84,51 @@ SEO metadata (title, description, canonical, breadcrumbs) is applied per-route v
 
 | Route | View | Auth Required |
 |-------|------|---------------|
-| `/` | `HomeView` (Dashboard) | Yes |
-| `/login` | `LoginView` | No (bare layout) |
-| `/quizzes` | `MyQuizzesView` | Yes |
-| `/create-quiz` | `CreateQuizView` | Yes |
-| `/editor` | `QuizEditorView` (new quiz) | Yes |
-| `/editor/:id` | `QuizEditorView` (edit quiz) | Yes |
+| `/` | `HomeView` (public landing) | No |
+| `/about` | `AboutView` | No |
+| `/quizzes` | `PublicQuizzesView` (browse published quizzes) | No |
+| `/login` | `LoginView` | No |
+| `/auth/callback` | `AuthCallbackView` (Google OAuth) | No (bare layout) |
+| `/q/:slug` | `PublicQuizLandingPage` | No (bare layout) |
+| `/q/:slug/take` | `PublicQuizTakeView` | No (bare layout) |
+| `/management` | `ManagementView` (dashboard) | Yes |
+| `/management/quizzes` | `MyQuizzesView` | Yes |
+| `/management/profile` | `ProfileView` | Yes |
+| `/management/account` | `AccountSettingsView` | Yes |
+| `/management/password` | `PasswordSettingsView` | Yes |
+| `/management/create-quiz` | `CreateQuizView` (new quiz) | Yes |
+| `/management/quizzes/:id/questions` | `CreateQuizView` (edit questions) | Yes |
+| `/management/editor` | `QuizEditorView` (new quiz) | Yes |
+| `/management/editor/:id` | `QuizEditorView` (edit quiz) | Yes |
+
+Legacy paths (`/quizzes`, `/editor`, `/editor/:id`, etc.) redirect to their `/management/*` equivalents.
 
 ### API Endpoints
 
-| Method | Path | Action |
-|--------|------|--------|
-| POST | `/auth/login` | Sign in (hardcoded admin) |
-| POST | `/api/quizzes` | Create quiz |
-| GET | `/api/quizzes` | List all quizzes |
-| GET | `/api/quizzes/:id` | Get quiz by ID |
-| PATCH | `/api/quizzes/:id` | Update quiz |
-| PATCH | `/api/quizzes/:id/publish` | Publish quiz |
-| PATCH | `/api/quizzes/:id/unpublish` | Unpublish quiz |
+#### Auth (`/auth`)
+
+| Method | Path | Auth | Action |
+|--------|------|------|--------|
+| POST | `/auth/login` | Public | Sign in, returns JWT tokens |
+| POST | `/auth/register` | Public | Register new account |
+| POST | `/auth/refresh` | Public | Refresh access token |
+| POST | `/auth/logout` | Public | Invalidate refresh token |
+| GET | `/auth/me` | Required | Get current user profile |
+| PATCH | `/auth/me/avatar` | Required | Update avatar URL |
+| GET | `/auth/google/status` | Public | Check if Google OAuth is enabled |
+| GET | `/auth/google` | Public | Initiate Google OAuth flow |
+| GET | `/auth/google/callback` | Public | Google OAuth callback |
+
+#### Quizzes (`/api/quizzes`)
+
+| Method | Path | Auth | Action |
+|--------|------|------|--------|
+| GET | `/api/quizzes` | Required | List quizzes for current user |
+| GET | `/api/quizzes/public` | Public | List all published quizzes |
+| GET | `/api/quizzes/:id` | Public | Get quiz by ID |
+| POST | `/api/quizzes` | Required | Create quiz |
+| PATCH | `/api/quizzes/:id` | Required | Update quiz |
+| PATCH | `/api/quizzes/:id/publish` | Required | Publish quiz |
+| PATCH | `/api/quizzes/:id/unpublish` | Required | Unpublish quiz |
+| DELETE | `/api/quizzes/:id` | Required | Delete quiz (204) |
+| POST | `/api/quizzes/:id/duplicate` | Required | Duplicate quiz |

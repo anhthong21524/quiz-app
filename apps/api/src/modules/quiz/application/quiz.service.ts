@@ -28,6 +28,15 @@ export class QuizService {
     return this.quizRepository.findAll(user.id);
   }
 
+  findPublished() {
+    return this.quizRepository.findPublished();
+  }
+
+  async findBySlug(slug: string) {
+    const quiz = await this.quizRepository.findBySlug(slug);
+    return this.requireQuiz(quiz, slug);
+  }
+
   async findById(id: string) {
     const quiz = await this.quizRepository.findById(id);
     return this.requireQuiz(quiz, id);

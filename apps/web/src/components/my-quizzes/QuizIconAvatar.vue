@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { MyQuizIcon } from "../../data/my-quizzes";
+import type { MyQuizIcon } from "./types";
 
 defineProps<{
   icon: MyQuizIcon;

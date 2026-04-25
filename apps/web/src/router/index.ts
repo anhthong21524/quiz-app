@@ -4,6 +4,8 @@ import { useGlobalLoading } from "../composables/useGlobalLoading";
 import HomeView from "../views/HomeView.vue";
 import AboutView from "../views/AboutView.vue";
 import LoginView from "../views/LoginView.vue";
+import ManagementView from "../views/ManagementView.vue";
+import PublicQuizzesView from "../views/PublicQuizzesView.vue";
 import MyQuizzesView from "../views/MyQuizzesView.vue";
 import CreateQuizView from "../views/CreateQuizView.vue";
 import QuizEditorView from "../views/QuizEditorView.vue";
@@ -54,6 +56,22 @@ export const router = createRouter({
       }
     },
     {
+      path: "/quizzes",
+      name: "public-quizzes",
+      component: PublicQuizzesView,
+      meta: {
+        seo: {
+          title: "Public Quizzes",
+          description: "Browse published public quizzes and start one without signing in.",
+          canonicalPath: "/quizzes",
+          breadcrumbs: [
+            { name: "Home", path: "/" },
+            { name: "Public Quizzes", path: "/quizzes" }
+          ]
+        }
+      }
+    },
+    {
       path: "/login",
       name: "login",
       component: LoginView,
@@ -77,7 +95,6 @@ export const router = createRouter({
       name: "public-quiz",
       component: PublicQuizLandingPage,
       meta: {
-        bareLayout: true,
         seo: {
           title: "Public Quiz",
           description: "Enter your name and start a public Quiz App quiz.",
@@ -100,11 +117,17 @@ export const router = createRouter({
     },
     {
       path: "/management",
-      redirect: { name: "quizzes" }
-    },
-    {
-      path: "/quizzes",
-      redirect: { name: "quizzes" }
+      name: "management",
+      component: ManagementView,
+      meta: {
+        requiresAuth: true,
+        seo: {
+          title: "Management",
+          description: "Your Quiz App management dashboard — stats, recent quizzes, and quick actions.",
+          canonicalPath: "/management",
+          breadcrumbs: [{ name: "Management", path: "/management" }]
+        }
+      }
     },
     {
       path: "/profile",
@@ -216,6 +239,24 @@ export const router = createRouter({
       }
     },
     {
+      path: managementPath("/quizzes/:id/questions"),
+      name: "edit-quiz-questions",
+      component: CreateQuizView,
+      props: true,
+      meta: {
+        requiresAuth: true,
+        seo: {
+          title: "Edit Quiz",
+          description: "Edit quiz configuration and questions in the guided quiz builder.",
+          breadcrumbs: [
+            { name: "Management", path: "/management" },
+            { name: "My Quizzes", path: managementPath("/quizzes") },
+            { name: "Edit Questions", path: managementPath("/quizzes") }
+          ]
+        }
+      }
+    },
+    {
       path: managementPath("/editor"),
       name: "editor",
       component: QuizEditorView,
@@ -264,7 +305,7 @@ router.beforeEach((to) => {
   }
 
   if (to.name === "login" && authenticated) {
-    return { name: "quizzes" };
+    return { name: "management" };
   }
 
   globalLoading.start();

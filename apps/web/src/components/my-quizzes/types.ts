@@ -1,11 +1,24 @@
-import type { QuizStatus } from "@quiz-app/shared";
-import type { MyQuiz } from "../../data/my-quizzes";
-
 export type ViewMode = "list" | "grid";
-export type QuizSource = "seeded" | "api";
+export type MyQuizStatus = "Published" | "In progress" | "Unpublished";
 
-export interface QuizListItem extends MyQuiz {
-  source: QuizSource;
+export type MyQuizIcon =
+  | "mathematics"
+  | "science"
+  | "geography"
+  | "knowledge"
+  | "english"
+  | "physics"
+  | "history";
+
+export interface QuizListItem {
+  id: string;
   apiId?: string;
-  apiStatus?: QuizStatus;
+  slug?: string;
+  title: string;
+  subject: string;
+  questions: number;
+  status: MyQuizStatus;
+  lastUpdated: string;
+  lastUpdatedLabel: string;
+  icon: MyQuizIcon;
 }

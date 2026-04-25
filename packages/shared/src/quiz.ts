@@ -15,12 +15,14 @@ export interface Question {
 
 export interface Quiz {
   id?: string;
+  slug?: string;
   title: string;
   description: string;
   ownerId?: string;
   ownerEmail?: string;
   subject?: string;
   difficulty?: QuizDifficulty;
+  timeLimit?: number | null;
   status: QuizStatus;
   questions: Question[];
   createdAt?: string;

@@ -35,12 +35,18 @@ export class QuizEntity {
   @Prop({ enum: ["Easy", "Medium", "Hard"] })
   difficulty?: "Easy" | "Medium" | "Hard";
 
+  @Prop({ type: Number, default: null, min: 1, max: 180 })
+  timeLimit?: number | null;
+
   @Prop({
     type: String,
     enum: Object.values(QuizStatus),
     default: QuizStatus.IN_PROGRESS
   })
   status!: QuizStatus;
+
+  @Prop({ trim: true, index: true, sparse: true })
+  slug?: string;
 
   @Prop({ type: [QuestionSchema], default: [] })
   questions!: QuestionEntity[];

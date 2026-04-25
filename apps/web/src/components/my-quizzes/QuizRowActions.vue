@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount } from "vue";
-import type { MyQuizStatus } from "../../data/my-quizzes";
+import type { MyQuizStatus } from "./types";
 
 const props = defineProps<{
   title: string;

@@ -6,6 +6,7 @@ export interface QuizPayload {
   description: string;
   subject?: string;
   difficulty?: Quiz["difficulty"];
+  timeLimit?: number | null;
   questions: Quiz["questions"];
 }
 

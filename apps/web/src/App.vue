@@ -8,7 +8,11 @@ import GlobalLoadingBar from "./components/GlobalLoadingBar.vue";
 const route = useRoute();
 const useBareLayout = computed(() => route.meta.bareLayout === true);
 const usePublicLayout = computed(() =>
-  route.name === "home" || route.name === "about" || route.name === "login"
+  route.name === "home" ||
+  route.name === "public-quizzes" ||
+  route.name === "about" ||
+  route.name === "login" ||
+  route.name === "public-quiz"
 );
 </script>
 

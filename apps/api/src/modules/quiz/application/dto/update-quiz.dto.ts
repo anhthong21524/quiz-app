@@ -2,9 +2,12 @@ import { Type } from "class-transformer";
 import {
   IsIn,
   IsArray,
+  IsInt,
   IsOptional,
   IsString,
+  Max,
   MaxLength,
+  Min,
   ValidateNested
 } from "class-validator";
 import { QuestionDto } from "./question.dto";
@@ -28,6 +31,12 @@ export class UpdateQuizDto {
   @IsOptional()
   @IsIn(["Easy", "Medium", "Hard"])
   difficulty?: "Easy" | "Medium" | "Hard";
+
+  @IsOptional()
+  @IsInt()
+  @Min(1)
+  @Max(180)
+  timeLimit?: number | null;
 
   @IsOptional()
   @IsArray()
