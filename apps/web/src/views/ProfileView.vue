@@ -62,6 +62,24 @@ function openAvatarPicker() {
   avatarInput.value?.click();
 }
 
+function compressImage(dataUrl: string, maxSize: number, quality: number): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => {
+      const scale = Math.min(1, maxSize / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext("2d");
+      if (!ctx) { reject(new Error("canvas unavailable")); return; }
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      resolve(canvas.toDataURL("image/jpeg", quality));
+    };
+    img.onerror = () => reject(new Error("image load failed"));
+    img.src = dataUrl;
+  });
+}
+
 function handleAvatarUpload(event: Event) {
   const input = event.target as HTMLInputElement;
   const file = input.files?.[0];
@@ -96,7 +114,8 @@ function handleAvatarUpload(event: Event) {
     input.value = "";
 
     try {
-      await authStore.updateAvatar(reader.result);
+      const compressed = await compressImage(reader.result, 256, 0.8);
+      await authStore.updateAvatar(compressed);
     } catch {
       avatarError.value = "Failed to upload avatar. Please try again.";
     } finally {

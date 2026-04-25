@@ -6,7 +6,11 @@ Allow: /og-image.svg
 Allow: /site.webmanifest
 Disallow: /$
 Disallow: /home
+Disallow: /management
 Disallow: /quizzes
+Disallow: /profile
+Disallow: /account
+Disallow: /password
 Disallow: /create-quiz
 Disallow: /editor
 Disallow: /api

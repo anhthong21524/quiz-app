@@ -152,7 +152,7 @@ function mapApiQuiz(quiz: Quiz): QuizListItem {
     apiId: quiz.id,
     source: "api",
     title: quiz.title,
-    subject: "Custom",
+    subject: quiz.subject ?? "Custom",
     questions: quiz.questions.length,
     status: mapQuizStatus(quiz.status),
     lastUpdated: quiz.updatedAt ?? quiz.createdAt ?? "",

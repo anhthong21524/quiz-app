@@ -18,6 +18,10 @@ export class InMemoryQuizRepository implements QuizRepository {
       id,
       title: data.title,
       description: data.description,
+      ownerId: data.ownerId,
+      ownerEmail: data.ownerEmail,
+      subject: data.subject,
+      difficulty: data.difficulty,
       status: QuizStatus.IN_PROGRESS,
       questions: data.questions.map((question) => ({
         ...question,
@@ -31,19 +35,21 @@ export class InMemoryQuizRepository implements QuizRepository {
     return quiz;
   }
 
-  async findAll(): Promise<Quiz[]> {
-    return Array.from(this.quizzes.values()).sort((left, right) =>
-      (right.updatedAt ?? "").localeCompare(left.updatedAt ?? "")
-    );
+  async findAll(ownerId: string): Promise<Quiz[]> {
+    return Array.from(this.quizzes.values())
+      .filter((quiz) => quiz.ownerId === ownerId)
+      .sort((left, right) =>
+        (right.updatedAt ?? "").localeCompare(left.updatedAt ?? "")
+      );
   }
 
   async findById(id: string): Promise<Quiz | null> {
     return this.quizzes.get(id) ?? null;
   }
 
-  async update(id: string, data: UpdateQuizData): Promise<Quiz | null> {
+  async update(id: string, ownerId: string, data: UpdateQuizData): Promise<Quiz | null> {
     const current = this.quizzes.get(id);
-    if (!current) {
+    if (!current || current.ownerId !== ownerId) {
       return null;
     }
 
@@ -62,17 +68,22 @@ export class InMemoryQuizRepository implements QuizRepository {
     return updated;
   }
 
-  async updateStatus(id: string, status: QuizStatus): Promise<Quiz | null> {
-    return this.update(id, { status });
+  async updateStatus(id: string, ownerId: string, status: QuizStatus): Promise<Quiz | null> {
+    return this.update(id, ownerId, { status });
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string, ownerId: string): Promise<boolean> {
+    const current = this.quizzes.get(id);
+    if (!current || current.ownerId !== ownerId) {
+      return false;
+    }
+
     return this.quizzes.delete(id);
   }
 
-  async duplicate(id: string): Promise<Quiz | null> {
+  async duplicate(id: string, ownerId: string): Promise<Quiz | null> {
     const quiz = this.quizzes.get(id);
-    if (!quiz) return null;
+    if (!quiz || quiz.ownerId !== ownerId) return null;
 
     const timestamp = new Date().toISOString();
     const newId = randomUUID();

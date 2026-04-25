@@ -5,6 +5,10 @@ export function normalizeQuiz(document: {
   id?: string;
   title: string;
   description: string;
+  ownerId?: string;
+  ownerEmail?: string;
+  subject?: string;
+  difficulty?: Quiz["difficulty"];
   status: Quiz["status"];
   questions: Quiz["questions"];
   createdAt?: Date | string;
@@ -18,6 +22,10 @@ export function normalizeQuiz(document: {
         : document._id?.toString()),
     title: document.title,
     description: document.description,
+    ownerId: document.ownerId,
+    ownerEmail: document.ownerEmail,
+    subject: document.subject,
+    difficulty: document.difficulty,
     status: document.status,
     questions: document.questions,
     createdAt: document.createdAt
@@ -28,4 +36,3 @@ export function normalizeQuiz(document: {
       : undefined
   };
 }
-

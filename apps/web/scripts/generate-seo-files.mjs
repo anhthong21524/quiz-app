@@ -9,7 +9,18 @@ const workspaceRoot = resolve(webRoot, "..", "..");
 const publicDirectory = resolve(webRoot, "public");
 const fallbackSiteUrl = "http://localhost:3000";
 const publicRoutes = ["/login"];
-const privateRoutes = ["/$", "/home", "/quizzes", "/create-quiz", "/editor", "/api"];
+const privateRoutes = [
+  "/$",
+  "/home",
+  "/management",
+  "/quizzes",
+  "/profile",
+  "/account",
+  "/password",
+  "/create-quiz",
+  "/editor",
+  "/api"
+];
 
 const siteUrl = trimTrailingSlash(
   process.env.VITE_SITE_URL ??

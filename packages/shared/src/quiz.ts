@@ -4,6 +4,8 @@ export enum QuizStatus {
   UNPUBLISHED = "unpublished"
 }
 
+export type QuizDifficulty = "Easy" | "Medium" | "Hard";
+
 export interface Question {
   id?: string;
   prompt: string;
@@ -15,9 +17,12 @@ export interface Quiz {
   id?: string;
   title: string;
   description: string;
+  ownerId?: string;
+  ownerEmail?: string;
+  subject?: string;
+  difficulty?: QuizDifficulty;
   status: QuizStatus;
   questions: Question[];
   createdAt?: string;
   updatedAt?: string;
 }
-

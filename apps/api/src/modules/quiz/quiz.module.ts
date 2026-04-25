@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { QuizService } from "./application/quiz.service";
-import { QUIZ_REPOSITORY } from "./domain/quiz.repository";
+import { QUIZ_REPOSITORY, type QuizRepository } from "./domain/quiz.repository";
 import { InMemoryQuizRepository } from "./infrastructure/persistence/in-memory-quiz.repository";
 import { MongoQuizRepository } from "./infrastructure/persistence/mongo-quiz.repository";
 import { QuizController } from "./presentation/quiz.controller";
@@ -11,21 +11,21 @@ import { QuizController } from "./presentation/quiz.controller";
   providers: [
     QuizService,
     InMemoryQuizRepository,
-    MongoQuizRepository,
     {
       provide: QUIZ_REPOSITORY,
-      inject: [ConfigService, InMemoryQuizRepository, MongoQuizRepository],
-      useFactory: (
+      inject: [ConfigService, InMemoryQuizRepository],
+      useFactory: async (
         configService: ConfigService,
-        inMemoryRepository: InMemoryQuizRepository,
-        mongoRepository: MongoQuizRepository
-      ) => {
-        return configService.get<string>("MONGODB_URI")
-          ? mongoRepository
-          : inMemoryRepository;
+        inMemoryRepository: InMemoryQuizRepository
+      ): Promise<QuizRepository> => {
+        if (!configService.get<string>("MONGODB_URI")) {
+          return inMemoryRepository;
+        }
+
+        const mongoRepository = new MongoQuizRepository(configService);
+        return (await mongoRepository.connect()) ? mongoRepository : inMemoryRepository;
       }
     }
   ]
 })
 export class QuizModule {}
-

@@ -14,6 +14,8 @@ import PublicQuizTakeView from "../views/PublicQuizTakeView.vue";
 import AuthCallbackView from "../views/AuthCallbackView.vue";
 import { applySeo } from "../services/seo";
 
+const managementPath = (path: string) => `/management${path}`;
+
 export const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -96,7 +98,39 @@ export const router = createRouter({
       }
     },
     {
+      path: "/management",
+      redirect: { name: "quizzes" }
+    },
+    {
       path: "/quizzes",
+      redirect: { name: "quizzes" }
+    },
+    {
+      path: "/profile",
+      redirect: { name: "profile" }
+    },
+    {
+      path: "/account",
+      redirect: { name: "account" }
+    },
+    {
+      path: "/password",
+      redirect: { name: "password" }
+    },
+    {
+      path: "/create-quiz",
+      redirect: { name: "create-quiz" }
+    },
+    {
+      path: "/editor",
+      redirect: { name: "editor" }
+    },
+    {
+      path: "/editor/:id",
+      redirect: (to) => ({ name: "edit-quiz", params: to.params })
+    },
+    {
+      path: managementPath("/quizzes"),
       name: "quizzes",
       component: MyQuizzesView,
       meta: {
@@ -104,16 +138,16 @@ export const router = createRouter({
         seo: {
           title: "My Quizzes",
           description: "Search, filter, sort, publish, and edit quizzes in Quiz App.",
-          canonicalPath: "/quizzes",
+          canonicalPath: managementPath("/quizzes"),
           breadcrumbs: [
-            { name: "Dashboard", path: "/" },
-            { name: "My Quizzes", path: "/quizzes" }
+            { name: "Management", path: "/management" },
+            { name: "My Quizzes", path: managementPath("/quizzes") }
           ]
         }
       }
     },
     {
-      path: "/profile",
+      path: managementPath("/profile"),
       name: "profile",
       component: ProfileView,
       meta: {
@@ -121,16 +155,16 @@ export const router = createRouter({
         seo: {
           title: "Profile",
           description: "Manage your personal information and profile settings in Quiz App.",
-          canonicalPath: "/profile",
+          canonicalPath: managementPath("/profile"),
           breadcrumbs: [
-            { name: "Dashboard", path: "/" },
-            { name: "Profile", path: "/profile" }
+            { name: "Management", path: "/management" },
+            { name: "Profile", path: managementPath("/profile") }
           ]
         }
       }
     },
     {
-      path: "/account",
+      path: managementPath("/account"),
       name: "account",
       component: AccountSettingsView,
       meta: {
@@ -138,16 +172,16 @@ export const router = createRouter({
         seo: {
           title: "Account",
           description: "Manage account settings for your Quiz App account.",
-          canonicalPath: "/account",
+          canonicalPath: managementPath("/account"),
           breadcrumbs: [
-            { name: "Dashboard", path: "/" },
-            { name: "Account", path: "/account" }
+            { name: "Management", path: "/management" },
+            { name: "Account", path: managementPath("/account") }
           ]
         }
       }
     },
     {
-      path: "/password",
+      path: managementPath("/password"),
       name: "password",
       component: PasswordSettingsView,
       meta: {
@@ -155,16 +189,16 @@ export const router = createRouter({
         seo: {
           title: "Password",
           description: "Manage password settings for your Quiz App account.",
-          canonicalPath: "/password",
+          canonicalPath: managementPath("/password"),
           breadcrumbs: [
-            { name: "Dashboard", path: "/" },
-            { name: "Password", path: "/password" }
+            { name: "Management", path: "/management" },
+            { name: "Password", path: managementPath("/password") }
           ]
         }
       }
     },
     {
-      path: "/create-quiz",
+      path: managementPath("/create-quiz"),
       name: "create-quiz",
       component: CreateQuizView,
       meta: {
@@ -172,16 +206,16 @@ export const router = createRouter({
         seo: {
           title: "Create Quiz",
           description: "Build a new quiz with setup details, guided question entry, and answer options.",
-          canonicalPath: "/create-quiz",
+          canonicalPath: managementPath("/create-quiz"),
           breadcrumbs: [
-            { name: "Dashboard", path: "/" },
-            { name: "Create Quiz", path: "/create-quiz" }
+            { name: "Management", path: "/management" },
+            { name: "Create Quiz", path: managementPath("/create-quiz") }
           ]
         }
       }
     },
     {
-      path: "/editor",
+      path: managementPath("/editor"),
       name: "editor",
       component: QuizEditorView,
       meta: {
@@ -189,16 +223,16 @@ export const router = createRouter({
         seo: {
           title: "Quiz Editor",
           description: "Create API-backed quizzes with titles, descriptions, questions, and correct answers.",
-          canonicalPath: "/editor",
+          canonicalPath: managementPath("/editor"),
           breadcrumbs: [
-            { name: "Dashboard", path: "/" },
-            { name: "Quiz Editor", path: "/editor" }
+            { name: "Management", path: "/management" },
+            { name: "Quiz Editor", path: managementPath("/editor") }
           ]
         }
       }
     },
     {
-      path: "/editor/:id",
+      path: managementPath("/editor/:id"),
       name: "edit-quiz",
       component: QuizEditorView,
       props: true,
@@ -208,9 +242,9 @@ export const router = createRouter({
           title: "Edit Quiz",
           description: "Edit an existing API-backed quiz in Quiz App.",
           breadcrumbs: [
-            { name: "Dashboard", path: "/" },
-            { name: "My Quizzes", path: "/quizzes" },
-            { name: "Edit Quiz", path: "/editor" }
+            { name: "Management", path: "/management" },
+            { name: "My Quizzes", path: managementPath("/quizzes") },
+            { name: "Edit Quiz", path: managementPath("/editor") }
           ]
         }
       }
@@ -227,7 +261,7 @@ router.beforeEach((to) => {
   }
 
   if (to.name === "login" && authenticated) {
-    return { name: "home" };
+    return { name: "quizzes" };
   }
 
   return true;

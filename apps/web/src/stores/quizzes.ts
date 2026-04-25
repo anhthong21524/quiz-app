@@ -1,4 +1,5 @@
 import { defineStore } from "pinia";
+import { isAxiosError } from "axios";
 import type { Quiz } from "@quiz-app/shared";
 import {
   createQuiz,
@@ -19,6 +20,25 @@ interface QuizState {
   error: string | null;
 }
 
+function getErrorMessage(error: unknown, fallback: string) {
+  if (isAxiosError(error)) {
+    const responseMessage = error.response?.data?.message;
+    if (Array.isArray(responseMessage)) {
+      return responseMessage.join(" ");
+    }
+
+    if (typeof responseMessage === "string") {
+      return responseMessage;
+    }
+
+    if (error.message === "Network Error") {
+      return "API server is not reachable. Make sure the backend is running on http://localhost:3001.";
+    }
+  }
+
+  return error instanceof Error ? error.message : fallback;
+}
+
 export const useQuizStore = defineStore("quizzes", {
   state: (): QuizState => ({
     items: [],
@@ -33,7 +53,7 @@ export const useQuizStore = defineStore("quizzes", {
       try {
         this.items = await fetchQuizzes();
       } catch (error) {
-        this.error = error instanceof Error ? error.message : "Failed to load quizzes.";
+        this.error = getErrorMessage(error, "Failed to load quizzes.");
       } finally {
         this.isLoading = false;
       }
@@ -45,7 +65,7 @@ export const useQuizStore = defineStore("quizzes", {
         this.activeQuiz = await fetchQuiz(id);
         return this.activeQuiz;
       } catch (error) {
-        this.error = error instanceof Error ? error.message : "Failed to load quiz.";
+        this.error = getErrorMessage(error, "Failed to load quiz.");
         throw error;
       } finally {
         this.isLoading = false;
@@ -68,7 +88,7 @@ export const useQuizStore = defineStore("quizzes", {
         this.activeQuiz = savedQuiz;
         return savedQuiz;
       } catch (error) {
-        this.error = error instanceof Error ? error.message : "Failed to save quiz.";
+        this.error = getErrorMessage(error, "Failed to save quiz.");
         throw error;
       } finally {
         this.isLoading = false;
@@ -90,7 +110,7 @@ export const useQuizStore = defineStore("quizzes", {
         }
         return updatedQuiz;
       } catch (error) {
-        this.error = error instanceof Error ? error.message : "Failed to update quiz status.";
+        this.error = getErrorMessage(error, "Failed to update quiz status.");
         throw error;
       } finally {
         this.isLoading = false;
@@ -102,7 +122,7 @@ export const useQuizStore = defineStore("quizzes", {
         await deleteQuiz(id);
         this.items = this.items.filter((quiz) => quiz.id !== id);
       } catch (error) {
-        this.error = error instanceof Error ? error.message : "Failed to delete quiz.";
+        this.error = getErrorMessage(error, "Failed to delete quiz.");
         throw error;
       }
     },
@@ -113,10 +133,9 @@ export const useQuizStore = defineStore("quizzes", {
         this.items.unshift(copy);
         return copy;
       } catch (error) {
-        this.error = error instanceof Error ? error.message : "Failed to duplicate quiz.";
+        this.error = getErrorMessage(error, "Failed to duplicate quiz.");
         throw error;
       }
     }
   }
 });
-

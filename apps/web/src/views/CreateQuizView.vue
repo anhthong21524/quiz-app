@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import type { Question } from "@quiz-app/shared";
 import AnswerOptionRow from "../components/create-quiz/AnswerOptionRow.vue";
 import CreateQuizStepper from "../components/create-quiz/CreateQuizStepper.vue";
 import QuestionNavigator from "../components/create-quiz/QuestionNavigator.vue";
+import { useToast } from "../composables/useToast";
+import { useQuizStore } from "../stores/quizzes";
 import type {
   CreateQuizQuestion,
   DifficultyLevel,
@@ -26,6 +29,8 @@ interface ValidationErrors {
 }
 
 const router = useRouter();
+const quizStore = useQuizStore();
+const { show: showToast } = useToast();
 
 const subjectOptions = [
   "Mathematics",
@@ -48,6 +53,7 @@ const currentStep = ref<1 | 2>(1);
 const currentQuestionIndex = ref(0);
 const draggedOptionIndex = ref<number | null>(null);
 const dragTargetOptionIndex = ref<number | null>(null);
+const isSaving = ref(false);
 const validationErrors = reactive<ValidationErrors>({});
 
 const configuration = reactive<ConfigurationForm>({
@@ -113,7 +119,9 @@ function getDraftStatus(question: CreateQuizQuestion): QuestionStatus {
 
 function isQuestionComplete(question: CreateQuizQuestion) {
   const populatedOptions = question.options.filter((option) => option.text.trim().length > 0);
-  const correctAnswers = question.options.filter((option) => option.isCorrect);
+  const correctAnswers = question.options.filter(
+    (option) => option.isCorrect && option.text.trim().length > 0
+  );
 
   return (
     question.questionText.trim().length > 0 &&
@@ -339,25 +347,100 @@ function selectQuestion(index: number) {
   resetOptionDragState();
 }
 
-function saveAndNext() {
+function getQuestionValidationMessage() {
+  return "Add question text, at least two answer options, and at least one correct answer before continuing.";
+}
+
+function validateCurrentQuestion() {
   const question = currentQuestion.value;
   if (!question) {
-    return;
+    return false;
   }
 
   if (!isQuestionComplete(question)) {
-    validationErrors.question =
-      "Add question text, at least two answer options, and at least one correct answer before continuing.";
+    validationErrors.question = getQuestionValidationMessage();
     question.status = getDraftStatus(question);
-    return;
+    return false;
   }
 
   question.status = "completed";
   validationErrors.question = undefined;
+  return true;
+}
+
+function validateAllQuestions() {
+  const firstIncompleteIndex = questions.value.findIndex((question) => !isQuestionComplete(question));
+
+  if (firstIncompleteIndex >= 0) {
+    questions.value[firstIncompleteIndex].status = getDraftStatus(questions.value[firstIncompleteIndex]);
+    currentQuestionIndex.value = firstIncompleteIndex;
+    validationErrors.question = getQuestionValidationMessage();
+    return false;
+  }
+
+  questions.value = questions.value.map((question) => ({
+    ...question,
+    status: "completed"
+  }));
+
+  return true;
+}
+
+function createQuizDescription() {
+  return `${configuration.subject} quiz (${configuration.difficulty} difficulty).`;
+}
+
+function toQuestionPayload(question: CreateQuizQuestion): Question {
+  const populatedOptions = question.options.filter((option) => option.text.trim().length > 0);
+  const firstCorrectOption = populatedOptions.find((option) => option.isCorrect);
+
+  return {
+    prompt: question.questionText.trim(),
+    options: populatedOptions.map((option) => option.text.trim()),
+    correctOptionIndex: Math.max(
+      0,
+      populatedOptions.findIndex((option) => option.id === firstCorrectOption?.id)
+    )
+  };
+}
+
+async function submitQuiz() {
+  if (!validateAllQuestions() || isSaving.value) {
+    return;
+  }
+
+  isSaving.value = true;
+  try {
+    await quizStore.saveQuiz({
+      title: configuration.title.trim(),
+      description: createQuizDescription(),
+      subject: configuration.subject,
+      difficulty: configuration.difficulty,
+      questions: questions.value.map(toQuestionPayload)
+    });
+
+    showToast("Quiz saved successfully");
+    await router.push({ name: "quizzes" });
+  } catch {
+    const message = quizStore.error ?? "Failed to save quiz. Please try again.";
+    validationErrors.question = message;
+    showToast(message, "error");
+  } finally {
+    isSaving.value = false;
+  }
+}
+
+async function saveAndNext() {
+  if (!validateCurrentQuestion()) {
+    return;
+  }
 
   if (currentQuestionIndex.value < questions.value.length - 1) {
     currentQuestionIndex.value += 1;
+    return;
   }
+
+  await submitQuiz();
 }
 
 function goBackToConfiguration() {
@@ -372,7 +455,7 @@ function handleStepSelection(step: 1 | 2) {
 }
 
 function exitFlow() {
-  router.push({ name: "home" });
+  router.push({ name: "quizzes" });
 }
 </script>
 
@@ -643,9 +726,11 @@ function exitFlow() {
             <button
               type="button"
               class="inline-flex h-11 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
+              :disabled="isSaving"
+              :class="{ 'cursor-not-allowed opacity-75': isSaving }"
               @click="saveAndNext"
             >
-              <span>Save</span>
+              <span>{{ isSaving ? "Saving..." : "Save" }}</span>
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                 <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>

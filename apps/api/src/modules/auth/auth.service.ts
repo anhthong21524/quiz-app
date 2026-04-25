@@ -1,23 +1,12 @@
-import { ConflictException, Injectable, UnauthorizedException } from "@nestjs/common";
+import { ConflictException, Inject, Injectable, OnModuleInit, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { JwtService } from "@nestjs/jwt";
-import { randomBytes, randomUUID, scrypt as scryptCallback, timingSafeEqual } from "node:crypto";
+import { randomBytes, scrypt as scryptCallback, timingSafeEqual } from "node:crypto";
 import { promisify } from "node:util";
+import { USER_REPOSITORY, User, UserRepository } from "./infrastructure/persistence/user.repository";
 
 interface TokenPayload {
   sub: string;
-  email: string;
-}
-
-interface RegisteredUser {
-  id: string;
-  email: string;
-  passwordHash: string;
-  passwordSalt: string;
-}
-
-interface GoogleUser {
-  id: string;
   email: string;
 }
 
@@ -28,18 +17,16 @@ const scrypt = promisify(scryptCallback) as (
 ) => Promise<Buffer>;
 
 @Injectable()
-export class AuthService {
+export class AuthService implements OnModuleInit {
   private readonly adminEmail: string;
   private readonly adminPassword: string;
   private readonly refreshSecret: string;
-  private readonly registeredUsers = new Map<string, RegisteredUser>();
-  private readonly googleUsers = new Map<string, GoogleUser>(); // keyed by Google sub
   private readonly validRefreshTokens = new Set<string>();
-  private readonly userAvatars = new Map<string, string>();
 
   constructor(
     private readonly jwtService: JwtService,
-    private readonly configService: ConfigService
+    private readonly configService: ConfigService,
+    @Inject(USER_REPOSITORY) private readonly userRepository: UserRepository
   ) {
     this.adminEmail = this.normalizeEmail(
       configService.get("AUTH_ADMIN_EMAIL") ?? "admin@quiz.app"
@@ -52,51 +39,57 @@ export class AuthService {
       "_refresh";
   }
 
-  async loginWithGoogle(googleUser: { sub: string; email: string; name: string }) {
-    if (!this.googleUsers.has(googleUser.sub)) {
-      this.googleUsers.set(googleUser.sub, { id: googleUser.sub, email: googleUser.email });
+  async onModuleInit() {
+    const existing = await this.userRepository.findByEmail(this.adminEmail);
+    if (!existing) {
+      const { passwordHash, passwordSalt } = await this.hashPassword(this.adminPassword);
+      await this.userRepository.create({ email: this.adminEmail, passwordHash, passwordSalt });
     }
-    return this.issueTokens({ sub: googleUser.sub, email: googleUser.email });
   }
 
-  getProfile(sub: string): { email: string; avatarUrl?: string } | null {
-    const avatarUrl = this.userAvatars.get(sub);
-
-    const googleUser = this.googleUsers.get(sub);
-    if (googleUser) {
-      return { email: googleUser.email, ...(avatarUrl ? { avatarUrl } : {}) };
-    }
-
-    for (const user of this.registeredUsers.values()) {
-      if (user.id === sub) {
-        return { email: user.email, ...(avatarUrl ? { avatarUrl } : {}) };
+  async loginWithGoogle(googleUser: { sub: string; email: string; name: string }) {
+    let user = await this.userRepository.findByGoogleSub(googleUser.sub);
+    if (!user) {
+      const existing = await this.userRepository.findByEmail(googleUser.email);
+      if (existing) {
+        // Link the Google account to the existing user
+        user = existing;
+      } else {
+        user = await this.userRepository.create({
+          email: this.normalizeEmail(googleUser.email),
+          googleSub: googleUser.sub
+        });
       }
     }
+    return this.issueTokens({ sub: user.id, email: user.email });
+  }
 
-    if (sub === "admin") {
-      return { email: this.adminEmail, ...(avatarUrl ? { avatarUrl } : {}) };
-    }
-
-    return null;
+  async getProfile(sub: string): Promise<{ email: string; avatarUrl?: string } | null> {
+    const user = await this.userRepository.findById(sub);
+    if (!user) return null;
+    return { email: user.email, ...(user.avatarUrl ? { avatarUrl: user.avatarUrl } : {}) };
   }
 
   async register(email: string, password: string) {
     const normalizedEmail = this.normalizeEmail(email);
 
-    if (normalizedEmail === this.adminEmail || this.registeredUsers.has(normalizedEmail)) {
+    if (normalizedEmail === this.adminEmail) {
+      throw new ConflictException("An account with this email already exists.");
+    }
+
+    const existing = await this.userRepository.findByEmail(normalizedEmail);
+    if (existing) {
       throw new ConflictException("An account with this email already exists.");
     }
 
     const { passwordHash, passwordSalt } = await this.hashPassword(
       this.normalizePassword(password)
     );
-    const user: RegisteredUser = {
-      id: randomUUID(),
+    const user = await this.userRepository.create({
       email: normalizedEmail,
       passwordHash,
       passwordSalt
-    };
-    this.registeredUsers.set(normalizedEmail, user);
+    });
 
     return this.issueTokens({ sub: user.id, email: user.email });
   }
@@ -105,19 +98,17 @@ export class AuthService {
     const normalizedEmail = this.normalizeEmail(email);
     const normalizedPassword = this.normalizePassword(password);
 
-    if (normalizedEmail === this.adminEmail && normalizedPassword === this.adminPassword) {
-      return this.issueTokens({ sub: "admin", email: this.adminEmail });
-    }
-
-    const registeredUser = this.registeredUsers.get(normalizedEmail);
-    if (
-      !registeredUser ||
-      !(await this.verifyPassword(normalizedPassword, registeredUser))
-    ) {
+    const user = await this.userRepository.findByEmail(normalizedEmail);
+    if (!user || !user.passwordHash || !user.passwordSalt) {
       throw new UnauthorizedException("Invalid email or password.");
     }
 
-    return this.issueTokens({ sub: registeredUser.id, email: registeredUser.email });
+    const valid = await this.verifyPassword(normalizedPassword, user);
+    if (!valid) {
+      throw new UnauthorizedException("Invalid email or password.");
+    }
+
+    return this.issueTokens({ sub: user.id, email: user.email });
   }
 
   async refresh(refreshToken: string) {
@@ -137,8 +128,8 @@ export class AuthService {
     }
   }
 
-  updateAvatar(sub: string, avatarUrl: string): { avatarUrl: string } {
-    this.userAvatars.set(sub, avatarUrl);
+  async updateAvatar(sub: string, avatarUrl: string): Promise<{ avatarUrl: string }> {
+    await this.userRepository.updateAvatar(sub, avatarUrl);
     return { avatarUrl };
   }
 
@@ -155,11 +146,10 @@ export class AuthService {
     });
     this.validRefreshTokens.add(refreshToken);
 
-    const avatarUrl = this.userAvatars.get(payload.sub);
     return {
       accessToken,
       refreshToken,
-      user: { email: payload.email, ...(avatarUrl ? { avatarUrl } : {}) }
+      user: { email: payload.email }
     };
   }
 
@@ -177,9 +167,9 @@ export class AuthService {
     return { passwordHash, passwordSalt };
   }
 
-  private async verifyPassword(password: string, user: RegisteredUser) {
-    const expectedHash = Buffer.from(user.passwordHash, "hex");
-    const actualHash = await scrypt(password, user.passwordSalt, expectedHash.length);
+  private async verifyPassword(password: string, user: User) {
+    const expectedHash = Buffer.from(user.passwordHash!, "hex");
+    const actualHash = await scrypt(password, user.passwordSalt!, expectedHash.length);
     return expectedHash.length === actualHash.length && timingSafeEqual(expectedHash, actualHash);
   }
 }

@@ -140,7 +140,7 @@ const handleSubmit = async () => {
       await authStore.register(email.value, password.value);
     }
 
-    await router.push({ name: "home" });
+    await router.push({ name: "quizzes" });
   } catch (error) {
     console.error(error);
     if (axios.isAxiosError<{ message?: string | string[] }>(error)) {

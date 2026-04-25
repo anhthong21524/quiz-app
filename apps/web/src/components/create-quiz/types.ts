@@ -1,6 +1,8 @@
+import type { QuizDifficulty } from "@quiz-app/shared";
+
 export type CreateQuizStep = 1 | 2;
 
-export type DifficultyLevel = "Easy" | "Medium" | "Hard";
+export type DifficultyLevel = QuizDifficulty;
 
 export type QuestionStatus = "empty" | "in_progress" | "completed";
 

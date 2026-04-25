@@ -126,7 +126,7 @@ async function submitQuiz() {
       quizId.value
     );
 
-    await router.push(`/editor/${savedQuiz.id}`);
+    await router.push({ name: "edit-quiz", params: { id: savedQuiz.id } });
   } finally {
     isSaving.value = false;
   }
@@ -184,7 +184,7 @@ async function submitQuiz() {
         <button class="primary" type="submit" :disabled="isSaving">
           {{ isSaving ? "Saving..." : isEditing ? "Update quiz" : "Create quiz" }}
         </button>
-        <RouterLink class="secondary" to="/quizzes">Back to list</RouterLink>
+        <RouterLink class="secondary" :to="{ name: 'quizzes' }">Back to list</RouterLink>
       </div>
     </form>
   </section>

@@ -4,6 +4,11 @@ import { CreateQuizDto } from "./dto/create-quiz.dto";
 import { UpdateQuizDto } from "./dto/update-quiz.dto";
 import { QUIZ_REPOSITORY, QuizRepository } from "../domain/quiz.repository";
 
+export interface AuthenticatedUser {
+  id: string;
+  email: string;
+}
+
 @Injectable()
 export class QuizService {
   constructor(
@@ -11,12 +16,16 @@ export class QuizService {
     private readonly quizRepository: QuizRepository
   ) {}
 
-  create(payload: CreateQuizDto) {
-    return this.quizRepository.create(payload);
+  create(payload: CreateQuizDto, user: AuthenticatedUser) {
+    return this.quizRepository.create({
+      ...payload,
+      ownerId: user.id,
+      ownerEmail: user.email
+    });
   }
 
-  findAll() {
-    return this.quizRepository.findAll();
+  findAll(user: AuthenticatedUser) {
+    return this.quizRepository.findAll(user.id);
   }
 
   async findById(id: string) {
@@ -24,30 +33,30 @@ export class QuizService {
     return this.requireQuiz(quiz, id);
   }
 
-  async update(id: string, payload: UpdateQuizDto) {
-    const quiz = await this.quizRepository.update(id, payload);
+  async update(id: string, payload: UpdateQuizDto, user: AuthenticatedUser) {
+    const quiz = await this.quizRepository.update(id, user.id, payload);
     return this.requireQuiz(quiz, id);
   }
 
-  async publish(id: string) {
-    const quiz = await this.quizRepository.updateStatus(id, QuizStatus.PUBLISHED);
+  async publish(id: string, user: AuthenticatedUser) {
+    const quiz = await this.quizRepository.updateStatus(id, user.id, QuizStatus.PUBLISHED);
     return this.requireQuiz(quiz, id);
   }
 
-  async unpublish(id: string) {
-    const quiz = await this.quizRepository.updateStatus(id, QuizStatus.UNPUBLISHED);
+  async unpublish(id: string, user: AuthenticatedUser) {
+    const quiz = await this.quizRepository.updateStatus(id, user.id, QuizStatus.UNPUBLISHED);
     return this.requireQuiz(quiz, id);
   }
 
-  async delete(id: string): Promise<void> {
-    const deleted = await this.quizRepository.delete(id);
+  async delete(id: string, user: AuthenticatedUser): Promise<void> {
+    const deleted = await this.quizRepository.delete(id, user.id);
     if (!deleted) {
       throw new NotFoundException(`Quiz ${id} was not found.`);
     }
   }
 
-  async duplicate(id: string): Promise<Quiz> {
-    const copy = await this.quizRepository.duplicate(id);
+  async duplicate(id: string, user: AuthenticatedUser): Promise<Quiz> {
+    const copy = await this.quizRepository.duplicate(id, user.id);
     return this.requireQuiz(copy, id);
   }
 

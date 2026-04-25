@@ -23,6 +23,18 @@ export class QuizEntity {
   @Prop({ required: true, trim: true, maxlength: 500 })
   description!: string;
 
+  @Prop({ required: true, trim: true, index: true })
+  ownerId!: string;
+
+  @Prop({ required: true, trim: true, lowercase: true })
+  ownerEmail!: string;
+
+  @Prop({ trim: true, maxlength: 80 })
+  subject?: string;
+
+  @Prop({ enum: ["Easy", "Medium", "Hard"] })
+  difficulty?: "Easy" | "Medium" | "Hard";
+
   @Prop({
     type: String,
     enum: Object.values(QuizStatus),
@@ -36,3 +48,4 @@ export class QuizEntity {
 
 export const QuizSchema = SchemaFactory.createForClass(QuizEntity);
 
+QuizSchema.index({ ownerId: 1, updatedAt: -1 });

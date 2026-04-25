@@ -1,4 +1,4 @@
-import { Injectable, Logger, OnModuleDestroy, OnModuleInit } from "@nestjs/common";
+import { Injectable, Logger, OnModuleDestroy } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Connection, Model, connect } from "mongoose";
 import { CreateUserData, User, UserRepository } from "./user.repository";
@@ -9,24 +9,34 @@ type MongoUserRecord = UserEntity & {
 };
 
 @Injectable()
-export class MongoUserRepository implements UserRepository, OnModuleInit, OnModuleDestroy {
+export class MongoUserRepository implements UserRepository, OnModuleDestroy {
   private readonly logger = new Logger(MongoUserRepository.name);
   private connection: Connection | null = null;
   private userModel: Model<UserEntity> | null = null;
 
   constructor(private readonly configService: ConfigService) {}
 
-  async onModuleInit() {
+  async connect(): Promise<boolean> {
     const uri = this.configService.get<string>("MONGODB_URI");
-    if (!uri) return;
+    if (!uri) return false;
 
     const databaseName = this.configService.get<string>("DATABASE_NAME") ?? "quiz_app";
-    const mongoose = await connect(uri, { dbName: databaseName });
-    this.connection = mongoose.connection;
-    this.userModel =
-      this.connection.models.User ??
-      this.connection.model<UserEntity>("User", UserSchema, "users");
-    this.logger.log(`Connected to MongoDB database "${databaseName}" for users.`);
+    try {
+      const mongoose = await connect(uri, {
+        dbName: databaseName,
+        serverSelectionTimeoutMS: 2000
+      });
+      this.connection = mongoose.connection;
+      this.userModel =
+        this.connection.models.User ??
+        this.connection.model<UserEntity>("User", UserSchema, "users");
+      this.logger.log(`Connected to MongoDB database "${databaseName}" for users.`);
+      return true;
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown MongoDB connection error.";
+      this.logger.warn(`MongoDB unavailable for users; using in-memory repository. ${message}`);
+      return false;
+    }
   }
 
   async onModuleDestroy() {

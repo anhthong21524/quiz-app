@@ -57,8 +57,8 @@ export class AuthController {
   }
 
   @Get("me")
-  getMe(@Req() req: Request & { user: { id: string; email: string } }) {
-    return this.authService.getProfile(req.user.id) ?? { email: req.user.email };
+  async getMe(@Req() req: Request & { user: { id: string; email: string } }) {
+    return (await this.authService.getProfile(req.user.id)) ?? { email: req.user.email };
   }
 
   @Patch("me/avatar")

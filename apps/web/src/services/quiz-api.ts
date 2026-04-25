@@ -4,6 +4,8 @@ import { httpClient } from "./http";
 export interface QuizPayload {
   title: string;
   description: string;
+  subject?: string;
+  difficulty?: Quiz["difficulty"];
   questions: Quiz["questions"];
 }
 
@@ -45,4 +47,3 @@ export async function duplicateQuiz(id: string): Promise<Quiz> {
   const response = await httpClient.post<Quiz>(`/quizzes/${id}/duplicate`);
   return response.data;
 }
-

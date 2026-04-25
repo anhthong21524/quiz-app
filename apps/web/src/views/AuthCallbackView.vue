@@ -19,7 +19,7 @@ onMounted(async () => {
       user: email ? { email } : null
     });
     await authStore.syncProfile();
-    await router.replace({ name: "home" });
+    await router.replace({ name: "quizzes" });
   } else {
     await router.replace({ name: "login" });
   }

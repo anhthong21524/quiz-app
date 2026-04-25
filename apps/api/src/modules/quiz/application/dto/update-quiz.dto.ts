@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
 import {
+  IsIn,
   IsArray,
   IsOptional,
   IsString,
@@ -20,9 +21,17 @@ export class UpdateQuizDto {
   description?: string;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  subject?: string;
+
+  @IsOptional()
+  @IsIn(["Easy", "Medium", "Hard"])
+  difficulty?: "Easy" | "Medium" | "Hard";
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => QuestionDto)
   questions?: QuestionDto[];
 }
-

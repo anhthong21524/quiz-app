@@ -193,7 +193,7 @@ watch(() => route.fullPath, closeMenus);
       </svg>
     </button>
 
-    <RouterLink class="brand-lockup" :to="{ name: 'home' }" @click="closeMenus">
+    <RouterLink class="brand-lockup" :to="{ name: 'quizzes' }" @click="closeMenus">
       <div class="brand-badge" aria-hidden="true">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="M8 5h8" stroke-linecap="round" />
@@ -266,7 +266,7 @@ watch(() => route.fullPath, closeMenus);
       <RouterLink
         class="mobile-nav-link"
         :class="{ 'is-active': activeNav === 'home' }"
-        :to="{ name: 'home' }"
+        :to="{ name: 'quizzes' }"
         @click="closeMenus"
       >
         Dashboard

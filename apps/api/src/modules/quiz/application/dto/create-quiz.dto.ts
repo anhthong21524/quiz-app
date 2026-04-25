@@ -2,6 +2,8 @@ import { Type } from "class-transformer";
 import {
   ArrayMinSize,
   IsArray,
+  IsIn,
+  IsOptional,
   IsString,
   MaxLength,
   ValidateNested
@@ -17,10 +19,18 @@ export class CreateQuizDto {
   @MaxLength(500)
   description!: string;
 
+  @IsOptional()
+  @IsString()
+  @MaxLength(80)
+  subject?: string;
+
+  @IsOptional()
+  @IsIn(["Easy", "Medium", "Hard"])
+  difficulty?: "Easy" | "Medium" | "Hard";
+
   @IsArray()
   @ArrayMinSize(1)
   @ValidateNested({ each: true })
   @Type(() => QuestionDto)
   questions!: QuestionDto[];
 }
-
