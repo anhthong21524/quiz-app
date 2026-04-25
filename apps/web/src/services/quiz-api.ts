@@ -37,3 +37,12 @@ export async function unpublishQuiz(id: string) {
   return response.data;
 }
 
+export async function deleteQuiz(id: string): Promise<void> {
+  await httpClient.delete(`/quizzes/${id}`);
+}
+
+export async function duplicateQuiz(id: string): Promise<Quiz> {
+  const response = await httpClient.post<Quiz>(`/quizzes/${id}/duplicate`);
+  return response.data;
+}
+

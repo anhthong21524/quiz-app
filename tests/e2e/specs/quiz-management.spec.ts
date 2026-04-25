@@ -1,5 +1,18 @@
 import { expect, test } from "@playwright/test";
 
+test("create account signs the user in", async ({ page }) => {
+  const email = `creator-${Date.now()}@quiz.app`;
+
+  await page.goto("/login");
+
+  await page.getByRole("tab", { name: "Create account" }).click();
+  await page.getByRole("textbox", { name: "Email" }).fill(email);
+  await page.getByRole("textbox", { name: "Password" }).fill("admin1234");
+  await page.getByRole("button", { name: "Create account ->" }).click();
+
+  await expect(page.getByRole("button", { name: "Open account menu" })).toBeVisible();
+});
+
 test("create and publish a quiz", async ({ page }) => {
   await page.goto("/login");
 
@@ -7,7 +20,7 @@ test("create and publish a quiz", async ({ page }) => {
   await page.getByRole("textbox", { name: "Password" }).fill("admin1234");
   await page.getByRole("button", { name: "Sign in ->" }).click();
 
-  await expect(page.getByRole("heading", { name: "Chemistry Basics" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Open account menu" })).toBeVisible();
 
   await page.goto("/editor");
 
@@ -31,6 +44,8 @@ test("create and publish a quiz", async ({ page }) => {
   const quizTable = page.getByRole("table");
   const quizRow = quizTable.getByRole("row").filter({ hasText: "Platform onboarding" });
   await expect(quizRow).toBeVisible();
-  await quizRow.getByRole("button", { name: "Publish" }).click();
+  await quizRow.getByRole("button", { name: "More options for Platform onboarding" }).click();
+  await quizRow.getByRole("menuitem", { name: "Publish" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Publish" }).click();
   await expect(quizRow.getByText("Published")).toBeVisible();
 });

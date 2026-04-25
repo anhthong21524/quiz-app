@@ -6,6 +6,7 @@ const props = defineProps<{
   canDelete: boolean;
   isDragging?: boolean;
   isDragTarget?: boolean;
+  allowMultiple?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -33,12 +34,13 @@ const emit = defineEmits<{
   >
     <button
       type="button"
-      class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-semibold transition"
-      :class="
+      class="flex h-10 w-10 shrink-0 items-center justify-center border text-sm font-semibold transition"
+      :class="[
+        allowMultiple ? 'rounded-lg' : 'rounded-full',
         option.isCorrect
           ? 'border-emerald-600 bg-emerald-600 text-white shadow-sm'
           : 'border-emerald-500 bg-white text-gray-700 hover:border-emerald-600'
-      "
+      ]"
       :aria-pressed="option.isCorrect"
       @click="emit('toggleCorrect')"
     >

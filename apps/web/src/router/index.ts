@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
-import { isAuthenticated } from "../services/auth-session";
+import { useAuthStore } from "../stores/auth";
 import HomeView from "../views/HomeView.vue";
+import AboutView from "../views/AboutView.vue";
 import LoginView from "../views/LoginView.vue";
 import MyQuizzesView from "../views/MyQuizzesView.vue";
 import CreateQuizView from "../views/CreateQuizView.vue";
@@ -8,6 +9,9 @@ import QuizEditorView from "../views/QuizEditorView.vue";
 import ProfileView from "../views/ProfileView.vue";
 import AccountSettingsView from "../views/AccountSettingsView.vue";
 import PasswordSettingsView from "../views/PasswordSettingsView.vue";
+import PublicQuizLandingPage from "../views/PublicQuizLandingPage.vue";
+import PublicQuizTakeView from "../views/PublicQuizTakeView.vue";
+import AuthCallbackView from "../views/AuthCallbackView.vue";
 import { applySeo } from "../services/seo";
 
 export const router = createRouter({
@@ -18,12 +22,11 @@ export const router = createRouter({
       name: "home",
       component: HomeView,
       meta: {
-        requiresAuth: true,
         seo: {
-          title: "Dashboard",
-          description: "Review quiz activity, status summaries, and in-progress quiz work in Quiz App.",
+          title: "Home",
+          description: "Take quizzes, explore topics, and improve every day with Quiz App.",
           canonicalPath: "/",
-          breadcrumbs: [{ name: "Dashboard", path: "/" }]
+          breadcrumbs: [{ name: "Home", path: "/" }]
         }
       }
     },
@@ -32,16 +35,63 @@ export const router = createRouter({
       redirect: { name: "home" }
     },
     {
+      path: "/about",
+      name: "about",
+      component: AboutView,
+      meta: {
+        seo: {
+          title: "About",
+          description: "Learn how Quiz App helps learners practice, improve, and build knowledge with simple quizzes.",
+          canonicalPath: "/about",
+          breadcrumbs: [
+            { name: "Home", path: "/" },
+            { name: "About", path: "/about" }
+          ]
+        }
+      }
+    },
+    {
       path: "/login",
       name: "login",
       component: LoginView,
       meta: {
-        bareLayout: true,
         seo: {
           title: "Sign in",
           description: "Sign in to Quiz App to create, manage, and publish quizzes.",
           canonicalPath: "/login",
           breadcrumbs: [{ name: "Sign in", path: "/login" }]
+        }
+      }
+    },
+    {
+      path: "/auth/callback",
+      name: "auth-callback",
+      component: AuthCallbackView,
+      meta: { bareLayout: true }
+    },
+    {
+      path: "/q/:slug",
+      name: "public-quiz",
+      component: PublicQuizLandingPage,
+      meta: {
+        bareLayout: true,
+        seo: {
+          title: "Public Quiz",
+          description: "Enter your name and start a public Quiz App quiz.",
+          breadcrumbs: [{ name: "Public Quiz", path: "/q" }]
+        }
+      }
+    },
+    {
+      path: "/q/:slug/take",
+      name: "public-quiz-take",
+      component: PublicQuizTakeView,
+      meta: {
+        bareLayout: true,
+        seo: {
+          title: "Take Quiz",
+          description: "Answer questions in a public Quiz App quiz.",
+          breadcrumbs: [{ name: "Take Quiz", path: "/q" }]
         }
       }
     },
@@ -169,7 +219,8 @@ export const router = createRouter({
 });
 
 router.beforeEach((to) => {
-  const authenticated = isAuthenticated();
+  const authStore = useAuthStore();
+  const authenticated = authStore.isAuthenticated;
 
   if (to.meta.requiresAuth && !authenticated) {
     return { name: "login" };

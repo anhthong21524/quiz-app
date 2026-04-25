@@ -2,8 +2,9 @@
 import axios from "axios";
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import { login } from "../services/auth-api";
-import { setAuthenticated } from "../services/auth-session";
+import { env } from "../config/env";
+import { getGoogleAuthStatus } from "../services/auth-api";
+import { useAuthStore } from "../stores/auth";
 
 type FormErrors = {
   email: string;
@@ -21,6 +22,8 @@ type BrandMessage = {
 const BRAND_ROTATION_MS = 4000;
 const ADMIN_EMAIL = "admin@quiz.app";
 const ADMIN_PASSWORD = "admin1234";
+const GOOGLE_AUTH_UNAVAILABLE_MESSAGE =
+  "Google sign-in isn't configured for this environment yet. Use email and password for now.";
 
 const brandMessages: BrandMessage[] = [
   {
@@ -37,6 +40,8 @@ const email = ref(ADMIN_EMAIL);
 const password = ref(ADMIN_PASSWORD);
 const showPassword = ref(false);
 const isSubmitting = ref(false);
+const isCheckingGoogleAuth = ref(false);
+const googleAuthEnabled = ref<boolean | null>(null);
 const authMode = ref<AuthMode>("signIn");
 const activeBrandIndex = ref(0);
 const errors = reactive<FormErrors>({
@@ -55,6 +60,7 @@ const submitLabel = computed(() => (isSignIn.value ? "Sign in ->" : "Create acco
 const loadingLabel = computed(() =>
   isSignIn.value ? "Signing in..." : "Creating account..."
 );
+const authStore = useAuthStore();
 const router = useRouter();
 
 let brandRotationTimer: number | undefined;
@@ -75,6 +81,10 @@ const validateEmail = (value: string) => {
 const validatePassword = (value: string) => {
   if (!value.trim()) {
     return "Password is required.";
+  }
+
+  if (!isSignIn.value && value.trim().length < 8) {
+    return "Password must be at least 8 characters.";
   }
 
   return "";
@@ -116,11 +126,6 @@ const switchMode = (mode: AuthMode) => {
 };
 
 const handleSubmit = async () => {
-  if (!isSignIn.value) {
-    errors.form = "Account creation is disabled. Sign in with the admin account instead.";
-    return;
-  }
-
   if (!validateForm()) {
     return;
   }
@@ -129,12 +134,12 @@ const handleSubmit = async () => {
   errors.form = "";
 
   try {
-    await login({
-      email: email.value,
-      password: password.value
-    });
+    if (isSignIn.value) {
+      await authStore.login(email.value, password.value);
+    } else {
+      await authStore.register(email.value, password.value);
+    }
 
-    setAuthenticated(true);
     await router.push({ name: "home" });
   } catch (error) {
     console.error(error);
@@ -149,9 +154,33 @@ const handleSubmit = async () => {
   }
 };
 
-const handleGoogleSignIn = () => {
-  // TODO: Connect this action to Google OAuth when auth wiring is available.
-  console.info("Google sign-in clicked");
+const loadGoogleAuthStatus = async () => {
+  try {
+    googleAuthEnabled.value = (await getGoogleAuthStatus()).enabled;
+  } catch (error) {
+    console.warn("Unable to check Google sign-in status.", error);
+    googleAuthEnabled.value = null;
+  }
+};
+
+const handleGoogleSignIn = async () => {
+  errors.form = "";
+  isCheckingGoogleAuth.value = true;
+
+  try {
+    if (googleAuthEnabled.value === null) {
+      await loadGoogleAuthStatus();
+    }
+
+    if (googleAuthEnabled.value === false) {
+      errors.form = GOOGLE_AUTH_UNAVAILABLE_MESSAGE;
+      return;
+    }
+
+    window.location.href = `${env.apiBaseUrl}/auth/google`;
+  } finally {
+    isCheckingGoogleAuth.value = false;
+  }
 };
 
 const handleForgotPassword = () => {
@@ -160,6 +189,8 @@ const handleForgotPassword = () => {
 };
 
 onMounted(() => {
+  void loadGoogleAuthStatus();
+
   brandRotationTimer = window.setInterval(() => {
     activeBrandIndex.value = (activeBrandIndex.value + 1) % brandMessages.length;
   }, BRAND_ROTATION_MS);
@@ -227,6 +258,8 @@ onBeforeUnmount(() => {
                   type="button"
                   class="social-button"
                   :tabindex="isSignIn ? 0 : -1"
+                  :disabled="isCheckingGoogleAuth"
+                  :aria-disabled="googleAuthEnabled === false"
                   @click="handleGoogleSignIn"
                 >
                   <svg viewBox="0 0 18 18" aria-hidden="true">
@@ -247,7 +280,7 @@ onBeforeUnmount(() => {
                       fill="#EA4335"
                     />
                   </svg>
-                  <span>Continue with Google</span>
+                  <span>{{ isCheckingGoogleAuth ? "Checking Google..." : "Continue with Google" }}</span>
                 </button>
 
                 <div class="divider" aria-hidden="true">
@@ -466,7 +499,7 @@ onBeforeUnmount(() => {
   --field-border-strong: #12c48b;
   --field-error: #c2410c;
   --button-shadow: 0 12px 22px rgba(16, 185, 129, 0.18);
-  min-height: 100vh;
+  min-height: calc(100vh - 128px);
   display: grid;
   place-items: center;
   padding: 32px 20px;
@@ -695,6 +728,15 @@ onBeforeUnmount(() => {
 .social-button:hover {
   transform: translateY(-1px);
   border-color: #cec6bd;
+}
+
+.social-button:disabled {
+  cursor: wait;
+  transform: none;
+}
+
+.social-button[aria-disabled="true"] {
+  opacity: 0.72;
 }
 
 .divider {

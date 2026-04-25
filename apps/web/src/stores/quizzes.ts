@@ -2,6 +2,8 @@ import { defineStore } from "pinia";
 import type { Quiz } from "@quiz-app/shared";
 import {
   createQuiz,
+  deleteQuiz,
+  duplicateQuiz,
   fetchQuiz,
   fetchQuizzes,
   publishQuiz,
@@ -92,6 +94,27 @@ export const useQuizStore = defineStore("quizzes", {
         throw error;
       } finally {
         this.isLoading = false;
+      }
+    },
+    async deleteQuiz(id: string) {
+      this.error = null;
+      try {
+        await deleteQuiz(id);
+        this.items = this.items.filter((quiz) => quiz.id !== id);
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : "Failed to delete quiz.";
+        throw error;
+      }
+    },
+    async duplicateQuiz(id: string) {
+      this.error = null;
+      try {
+        const copy = await duplicateQuiz(id);
+        this.items.unshift(copy);
+        return copy;
+      } catch (error) {
+        this.error = error instanceof Error ? error.message : "Failed to duplicate quiz.";
+        throw error;
       }
     }
   }

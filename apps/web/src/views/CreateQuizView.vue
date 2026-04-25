@@ -588,6 +588,7 @@ function exitFlow() {
                     :can-delete="currentQuestion.options.length > minimumOptionCount"
                     :is-dragging="draggedOptionIndex === optionIndex"
                     :is-drag-target="dragTargetOptionIndex === optionIndex && draggedOptionIndex !== optionIndex"
+                    :allow-multiple="currentQuestion.multipleCorrect"
                     @update-text="updateOptionText(optionIndex, $event)"
                     @toggle-correct="toggleCorrectOption(optionIndex)"
                     @delete="deleteOption(optionIndex)"

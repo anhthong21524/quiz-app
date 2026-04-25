@@ -1,992 +1,190 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
-import { useRouter } from "vue-router";
-import { QuizStatus } from "@quiz-app/shared";
-import { useQuizStore } from "../stores/quizzes";
+import { computed } from "vue";
+import { RouterLink } from "vue-router";
+import { useAuthStore } from "../stores/auth";
 
-type StatCard = {
+type FeatureCard = {
   title: string;
-  value: number;
   description: string;
-  tone: "green" | "amber" | "gray";
-  icon: "document" | "edit" | "publish" | "hidden";
+  icon: "book" | "clock" | "chart" | "trophy";
 };
 
-type RecentQuiz = {
-  title: string;
-  subject: string;
-  questions: number;
-  status: "Published" | "In progress" | "Unpublished";
-  updatedAt: string;
-  actionLabel: string;
-  icon: "math" | "science" | "geography" | "english" | "biology";
-  action: () => void;
-};
+const authStore = useAuthStore();
 
-const router = useRouter();
-const quizStore = useQuizStore();
-
-onMounted(async () => {
-  if (!quizStore.items.length) {
-    await quizStore.loadQuizzes();
-  }
-});
-
-const latestInProgressQuiz = computed(() =>
-  [...quizStore.items]
-    .filter((quiz) => quiz.status === QuizStatus.IN_PROGRESS && quiz.id)
-    .sort((left, right) => {
-      const leftTime = new Date(left.updatedAt ?? left.createdAt ?? 0).getTime();
-      const rightTime = new Date(right.updatedAt ?? right.createdAt ?? 0).getTime();
-      return rightTime - leftTime;
-    })[0] ?? null
+const startQuizRoute = computed(() =>
+  authStore.isAuthenticated ? { name: "create-quiz" } : { name: "login" }
 );
 
-function goToMyQuizzes() {
-  router.push({ name: "quizzes" });
-}
-
-function goToLatestQuiz() {
-  const latestQuizId = latestInProgressQuiz.value?.id;
-  if (latestQuizId) {
-    router.push({ name: "edit-quiz", params: { id: latestQuizId } });
-    return;
+const featureCards: FeatureCard[] = [
+  {
+    title: "Many Topics",
+    description: "Explore quizzes across a wide range of categories.",
+    icon: "book"
+  },
+  {
+    title: "Timed Challenges",
+    description: "Test your speed and knowledge with timed quizzes.",
+    icon: "clock"
+  },
+  {
+    title: "Track Progress",
+    description: "Monitor your performance and see how you improve.",
+    icon: "chart"
+  },
+  {
+    title: "Compete & Rank",
+    description: "Climb the leaderboard and become a quiz champion.",
+    icon: "trophy"
   }
+];
 
-  router.push({ name: "create-quiz" });
-}
-
-const statCards = computed<StatCard[]>(() => [
-  {
-    title: "Total quizzes",
-    value: 24,
-    description: "All quizzes you've created",
-    tone: "green",
-    icon: "document"
-  },
-  {
-    title: "In progress",
-    value: 8,
-    description: "Drafts being edited",
-    tone: "amber",
-    icon: "edit"
-  },
-  {
-    title: "Published",
-    value: 11,
-    description: "Publicly available",
-    tone: "green",
-    icon: "publish"
-  },
-  {
-    title: "Unpublished",
-    value: 5,
-    description: "Hidden from public",
-    tone: "gray",
-    icon: "hidden"
-  }
-]);
-
-const recentQuizzes = computed<RecentQuiz[]>(() => [
-  {
-    title: "Mathematics Quiz #1",
-    subject: "Mathematics",
-    questions: 20,
-    status: "Published",
-    updatedAt: "May 15, 2024 \u00b7 2:30 PM",
-    actionLabel: "View",
-    icon: "math",
-    action: goToMyQuizzes
-  },
-  {
-    title: "Chemistry Basics",
-    subject: "Science",
-    questions: 15,
-    status: "In progress",
-    updatedAt: "May 14, 2024 \u00b7 11:45 AM",
-    actionLabel: "Continue",
-    icon: "science",
-    action: goToLatestQuiz
-  },
-  {
-    title: "World Capitals Quiz",
-    subject: "Geography",
-    questions: 10,
-    status: "Published",
-    updatedAt: "May 13, 2024 \u00b7 9:20 AM",
-    actionLabel: "View",
-    icon: "geography",
-    action: goToMyQuizzes
-  },
-  {
-    title: "English Grammar Practice",
-    subject: "English",
-    questions: 25,
-    status: "Unpublished",
-    updatedAt: "May 12, 2024 \u00b7 4:10 PM",
-    actionLabel: "Edit",
-    icon: "english",
-    action: goToMyQuizzes
-  },
-  {
-    title: "Biology MCQs",
-    subject: "Science",
-    questions: 18,
-    status: "In progress",
-    updatedAt: "May 11, 2024 \u00b7 3:05 PM",
-    actionLabel: "Continue",
-    icon: "biology",
-    action: goToLatestQuiz
-  }
-]);
-
-const recentQuizzesPreview = computed(() => recentQuizzes.value.slice(0, 3));
-
-const featuredQuiz = computed(() =>
-  latestInProgressQuiz.value
-    ? {
-        title: latestInProgressQuiz.value.title,
-        questions: latestInProgressQuiz.value.questions.length
-      }
-    : {
-        title: "Chemistry Basics",
-        questions: 15
-      }
-);
 </script>
 
 <template>
-  <section class="home-dashboard">
-    <article class="hero-card">
-      <div class="hero-copy">
-        <div class="hero-kicker">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M19 12a7 7 0 1 1-2.05-4.95" stroke-linecap="round" />
-            <path d="M19 5v5h-5" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          <span>Continue editing</span>
-        </div>
-
-        <h1>{{ featuredQuiz.title }}</h1>
-
-        <div class="hero-meta">
-          <span>{{ featuredQuiz.questions }} questions</span>
-          <span class="hero-meta-dot"></span>
-          <span class="hero-status-badge">In progress</span>
-        </div>
-
-        <div class="hero-actions">
-          <button class="hero-button hero-button-primary" type="button" @click="goToLatestQuiz">
-            <span>Continue</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M5 12h13" stroke-linecap="round" />
-              <path d="m13 6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </button>
-        </div>
-      </div>
-
-      <div class="hero-visual" aria-hidden="true">
-        <div class="hero-blob"></div>
-        <div class="hero-orbit"></div>
-        <div class="hero-spark hero-spark-left"></div>
-        <div class="hero-spark hero-spark-right"></div>
-        <div class="hero-leaf"></div>
-        <div class="hero-icon hero-icon-edit">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
-            <path d="m5 19 3.6-.8 8.9-8.9a2.1 2.1 0 1 0-3-3l-8.9 8.9L5 19Z" stroke-linejoin="round" />
-            <path d="m13.5 7.5 3 3" stroke-linecap="round" />
-          </svg>
-        </div>
-
-        <div class="quiz-preview">
-          <div class="preview-heading"></div>
-          <div class="preview-option">
-            <span></span>
-            <div></div>
-          </div>
-          <div class="preview-option is-correct">
-            <span></span>
-            <div></div>
-          </div>
-          <div class="preview-option">
-            <span></span>
-            <div></div>
-          </div>
-          <div class="preview-option">
-            <span></span>
-            <div></div>
-          </div>
-          <div class="preview-option">
-            <span></span>
-            <div></div>
-          </div>
-        </div>
-      </div>
-    </article>
-
-    <section class="recent-card">
-      <div class="recent-header">
-        <h2>Recent quizzes</h2>
-        <button class="recent-link" type="button" @click="goToMyQuizzes">
-          <span>View all</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <path d="m9 6 6 6-6 6" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-      </div>
-
-      <div class="recent-table-shell">
-        <table class="recent-table">
-          <thead>
-            <tr>
-              <th>Quiz title</th>
-              <th>Subject</th>
-              <th>Questions</th>
-              <th>Status</th>
-              <th>Last updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="quiz in recentQuizzesPreview"
-              :key="quiz.title"
-              :class="{ 'is-highlighted': quiz.title === featuredQuiz.title }"
-            >
-              <td data-label="Quiz title">
-                <div class="quiz-title-cell">
-                  <span class="table-icon" :class="`is-${quiz.icon}`">
-                    <svg
-                      v-if="quiz.icon === 'math'"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.7"
-                    >
-                      <path d="M7.5 6.5h9v11h-9z" opacity="0.3" />
-                      <path d="m9 10 2 4 2-8 2 12" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <svg
-                      v-else-if="quiz.icon === 'science'"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.7"
-                    >
-                      <path d="M9 4h6M10 4v5l-4.5 7.2A2 2 0 0 0 7.2 19h9.6a2 2 0 0 0 1.7-2.8L14 9V4" stroke-linecap="round" stroke-linejoin="round" />
-                    </svg>
-                    <svg
-                      v-else-if="quiz.icon === 'geography'"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.7"
-                    >
-                      <circle cx="12" cy="12" r="8" />
-                      <path d="M4 12h16M12 4a13 13 0 0 1 0 16M12 4a13 13 0 0 0 0 16" stroke-linecap="round" />
-                    </svg>
-                    <svg
-                      v-else-if="quiz.icon === 'english'"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.7"
-                    >
-                      <path d="M6 5.5A2.5 2.5 0 0 1 8.5 3H18v15.5A2.5 2.5 0 0 0 15.5 16H6z" stroke-linejoin="round" />
-                      <path d="M6 5.5V21a2.5 2.5 0 0 1 2.5-2.5H18" stroke-linejoin="round" />
-                    </svg>
-                    <svg
-                      v-else
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="1.7"
-                    >
-                      <path d="M8 4c0 2-2 2.5-2 5s2 3 2 5-2 2.5-2 5" stroke-linecap="round" />
-                      <path d="M16 4c0 2-2 2.5-2 5s2 3 2 5-2 2.5-2 5" stroke-linecap="round" />
-                      <path d="M9 8h6M9 16h6" stroke-linecap="round" />
-                    </svg>
-                  </span>
-                  <span>{{ quiz.title }}</span>
-                </div>
-              </td>
-              <td data-label="Subject">{{ quiz.subject }}</td>
-              <td data-label="Questions">{{ quiz.questions }}</td>
-              <td data-label="Status">
-                <span class="status-badge" :class="`is-${quiz.status.toLowerCase().replace(' ', '-')}`">
-                  {{ quiz.status }}
-                </span>
-              </td>
-              <td data-label="Last updated">{{ quiz.updatedAt }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-
-    <section class="stats-grid" aria-label="Dashboard statistics">
-      <article
-        v-for="stat in statCards"
-        :key="stat.title"
-        class="stat-card"
-        :class="`is-${stat.tone}`"
+  <section class="min-h-full bg-white text-slate-950">
+    <div class="mx-auto grid w-full max-w-[1180px] gap-14 px-4 pb-16 pt-10 sm:px-6 lg:px-8 lg:pt-14">
+      <section
+        class="grid items-center gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,1fr)] lg:gap-12"
+        aria-labelledby="home-hero-title"
       >
-        <div class="stat-icon">
-          <svg
-            v-if="stat.icon === 'document'"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
+        <div class="mx-auto grid max-w-2xl justify-items-center gap-6 text-center lg:mx-0 lg:justify-items-start lg:text-left">
+          <p
+            class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700"
           >
-            <path d="M8 3.5h6l4 4V20a1 1 0 0 1-1 1H8a2 2 0 0 1-2-2V5.5a2 2 0 0 1 2-2Z" />
-            <path d="M14 3.5V8h4" />
-            <path d="M9 11h6M9 15h6" stroke-linecap="round" />
-          </svg>
-          <svg
-            v-else-if="stat.icon === 'edit'"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-          >
-            <path d="m4 20 4.5-1 9-9a2.12 2.12 0 0 0-3-3l-9 9L4 20Z" stroke-linejoin="round" />
-            <path d="m13.5 7.5 3 3" stroke-linecap="round" />
-          </svg>
-          <svg
-            v-else-if="stat.icon === 'publish'"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-          >
-            <path d="m4 12 15-7-4.5 14-3.5-4.5L4 12Z" stroke-linejoin="round" />
-          </svg>
-          <svg
-            v-else
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-          >
-            <path d="M3 3 21 21" stroke-linecap="round" />
-            <path
-              d="M10.6 10.7A3 3 0 0 0 15 13.9M9.1 4.3A10.2 10.2 0 0 1 12 4c6.6 0 10 8 10 8a17.3 17.3 0 0 1-3.5 4.5M6.2 6.3C3.8 8 2 12 2 12a18.5 18.5 0 0 0 10 6c1.4 0 2.7-.2 3.8-.6"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            />
-          </svg>
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+              <path d="m12 3 2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7L12 3Z" stroke-linejoin="round" />
+            </svg>
+            Test your knowledge. Improve every day.
+          </p>
+
+          <div class="grid gap-5">
+            <h1
+              id="home-hero-title"
+              class="max-w-[720px] text-5xl font-extrabold leading-[1.04] tracking-normal text-slate-950 sm:text-6xl lg:text-7xl"
+            >
+              Learn. Challenge.
+              <span class="block text-emerald-600">Grow.</span>
+            </h1>
+            <p class="max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">
+              Take quizzes on a variety of topics, track your progress and improve every day.
+            </p>
+          </div>
+
+          <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+            <RouterLink
+              class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-emerald-600 px-7 font-bold text-white shadow-[0_12px_24px_rgba(5,150,105,0.18)] transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200"
+              :to="startQuizRoute"
+            >
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M8 5.6v12.8a1 1 0 0 0 1.55.84l9.85-6.4a1 1 0 0 0 0-1.68L9.55 4.76A1 1 0 0 0 8 5.6Z" />
+              </svg>
+              Start a quiz
+            </RouterLink>
+            <RouterLink
+              class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-7 font-bold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100"
+              :to="{ name: 'quizzes' }"
+            >
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+                <path d="M5 5h5v5H5zM14 5h5v5h-5zM5 14h5v5H5zM14 14h5v5h-5z" stroke-linejoin="round" />
+              </svg>
+              Browse quizzes
+            </RouterLink>
+          </div>
+
+          <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-semibold text-slate-600 lg:justify-start">
+            <div class="flex -space-x-2" aria-hidden="true">
+              <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-emerald-100 text-sm font-extrabold text-emerald-700">A</span>
+              <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-amber-100 text-sm font-extrabold text-amber-700">B</span>
+              <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-sky-100 text-sm font-extrabold text-sky-700">C</span>
+              <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-rose-100 text-sm font-extrabold text-rose-700">D</span>
+            </div>
+            <p><span class="font-extrabold text-emerald-600">10,000+</span> learners and growing</p>
+          </div>
         </div>
-        <div class="stat-copy">
-          <strong>{{ stat.value }}</strong>
-          <h2>{{ stat.title }}</h2>
-          <p>{{ stat.description }}</p>
+
+        <div class="relative mx-auto h-[330px] w-full max-w-[560px] sm:h-[420px]" aria-hidden="true">
+          <div class="absolute inset-6 rounded-full bg-emerald-50"></div>
+          <div class="absolute left-4 top-20 h-3 w-3 rounded-full bg-emerald-200"></div>
+          <div class="absolute right-10 top-28 h-5 w-5 text-amber-300">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+              <path d="M12 5v14M5 12h14" stroke-linecap="round" />
+            </svg>
+          </div>
+
+          <div class="absolute left-[8%] top-[14%] h-[74%] w-[52%] rounded-[28px] border-[12px] border-emerald-900/45 bg-white shadow-[0_20px_45px_rgba(15,23,42,0.16)]">
+            <div class="absolute -top-10 left-1/2 h-12 w-28 -translate-x-1/2 rounded-lg bg-slate-700 shadow-lg">
+              <span class="absolute left-1/2 top-3 h-3 w-3 -translate-x-1/2 rounded-full bg-white"></span>
+            </div>
+            <div class="grid gap-7 p-8 pt-14">
+              <div class="flex items-center gap-5">
+                <span class="grid h-9 w-9 place-items-center rounded-full bg-emerald-600 text-white">
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="m6 12 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+                <span class="h-2.5 w-24 rounded-full bg-emerald-600"></span>
+              </div>
+              <div class="flex items-center gap-5">
+                <span class="h-9 w-9 rounded-full border-[3px] border-slate-300"></span>
+                <span class="grid gap-2">
+                  <span class="h-2.5 w-32 rounded-full bg-slate-200"></span>
+                  <span class="h-2.5 w-24 rounded-full bg-slate-100"></span>
+                </span>
+              </div>
+              <div class="flex items-center gap-5">
+                <span class="h-9 w-9 rounded-full border-[3px] border-slate-300"></span>
+                <span class="grid gap-2">
+                  <span class="h-2.5 w-36 rounded-full bg-slate-200"></span>
+                  <span class="h-2.5 w-24 rounded-full bg-slate-100"></span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="absolute bottom-10 right-10 grid w-[42%] gap-2 sm:right-4">
+            <div class="h-16 rounded-[18px] bg-emerald-500 shadow-[0_14px_28px_rgba(16,185,129,0.25)]"></div>
+            <div class="h-14 rounded-[18px] bg-amber-400 shadow-[0_14px_28px_rgba(245,158,11,0.18)]"></div>
+            <div class="h-14 rounded-[18px] bg-blue-500 shadow-[0_14px_28px_rgba(59,130,246,0.18)]"></div>
+          </div>
+
+          <div class="absolute bottom-8 right-4 h-36 w-5 rotate-12 rounded-full bg-emerald-500 shadow-lg sm:right-0">
+            <span class="absolute -top-4 left-0 h-5 w-5 rounded-full bg-rose-300"></span>
+            <span class="absolute -bottom-7 left-0 h-8 w-5 bg-slate-800 [clip-path:polygon(50%_100%,0_0,100%_0)]"></span>
+          </div>
         </div>
-      </article>
-    </section>
+      </section>
+
+      <section id="about" class="grid gap-5" aria-labelledby="features-title">
+        <h2 id="features-title" class="sr-only">Quiz App features</h2>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <article
+            v-for="feature in featureCards"
+            :key="feature.title"
+            class="flex items-center gap-5 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)]"
+          >
+            <div class="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+              <svg v-if="feature.icon === 'book'" class="h-9 w-9" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M5.5 4A3.5 3.5 0 0 1 9 7.5V20a3.5 3.5 0 0 0-3.5-3.5H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h1.5ZM18.5 4H20a1 1 0 0 1 1 1v10.5a1 1 0 0 1-1 1h-1.5A3.5 3.5 0 0 0 15 20V7.5A3.5 3.5 0 0 1 18.5 4Z" />
+              </svg>
+              <svg v-else-if="feature.icon === 'clock'" class="h-9 w-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="8" />
+                <path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <svg v-else-if="feature.icon === 'chart'" class="h-9 w-9" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M5 12.5A1.5 1.5 0 0 1 6.5 11h1A1.5 1.5 0 0 1 9 12.5v5A1.5 1.5 0 0 1 7.5 19h-1A1.5 1.5 0 0 1 5 17.5v-5ZM10.5 6.5A1.5 1.5 0 0 1 12 5h1a1.5 1.5 0 0 1 1.5 1.5v11A1.5 1.5 0 0 1 13 19h-1a1.5 1.5 0 0 1-1.5-1.5v-11ZM16 9.5A1.5 1.5 0 0 1 17.5 8h1A1.5 1.5 0 0 1 20 9.5v8a1.5 1.5 0 0 1-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5v-8Z" />
+              </svg>
+              <svg v-else class="h-9 w-9" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M7 4h10v2h3a1 1 0 0 1 1 1v1a5 5 0 0 1-5 5h-.4A5.02 5.02 0 0 1 13 15.58V18h3a1 1 0 1 1 0 2H8a1 1 0 1 1 0-2h3v-2.42A5.02 5.02 0 0 1 8.4 13H8a5 5 0 0 1-5-5V7a1 1 0 0 1 1-1h3V4Zm0 4H5a3 3 0 0 0 2 2.83V8Zm12 0h-2v2.83A3 3 0 0 0 19 8Z" />
+              </svg>
+            </div>
+            <div class="grid gap-2">
+              <h3 class="text-lg font-extrabold text-slate-950">{{ feature.title }}</h3>
+              <p class="text-sm leading-6 text-slate-600">{{ feature.description }}</p>
+            </div>
+          </article>
+        </div>
+      </section>
+
+    </div>
   </section>
 </template>
-
-<style scoped>
-.home-dashboard {
-  display: grid;
-  gap: 20px;
-}
-
-.hero-card,
-.stat-card,
-.recent-card {
-  background: #ffffff;
-  border: var(--surface-border);
-  border-radius: var(--surface-radius);
-  box-shadow: var(--surface-shadow);
-}
-
-.hero-card {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.85fr);
-  gap: 16px;
-  padding: 34px 30px;
-  overflow: hidden;
-  background:
-    radial-gradient(circle at left top, rgba(233, 248, 238, 0.9), transparent 40%),
-    linear-gradient(180deg, #f8fffb 0%, #f7fffa 100%);
-}
-
-.hero-copy {
-  display: grid;
-  align-content: center;
-  gap: 16px;
-  min-height: 230px;
-}
-
-.hero-kicker {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  color: #10b981;
-  font-size: 1.15rem;
-  font-weight: 700;
-}
-
-.hero-kicker svg {
-  width: 20px;
-  height: 20px;
-}
-
-.hero-copy h1 {
-  margin: 0;
-  max-width: 460px;
-  color: #182033;
-  font-size: 3rem;
-  line-height: 1.08;
-  letter-spacing: 0;
-}
-
-.hero-meta {
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 14px;
-  color: #556276;
-  font-size: 1rem;
-}
-
-.hero-meta-dot {
-  width: 5px;
-  height: 5px;
-  border-radius: 999px;
-  background: #8e98a7;
-}
-
-.hero-status-badge {
-  min-height: 38px;
-  padding: 7px 16px;
-  border-radius: 12px;
-  background: #fff2e3;
-  color: #d97706;
-  font-weight: 700;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.hero-button {
-  min-height: 48px;
-  padding: 0 24px;
-  border-radius: 14px;
-  border: 1.5px solid transparent;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  font-weight: 700;
-  transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    border-color 0.2s ease,
-    background-color 0.2s ease;
-}
-
-.hero-button svg {
-  width: 18px;
-  height: 18px;
-}
-
-.hero-button:hover {
-  transform: translateY(-1px);
-}
-
-.hero-button-primary {
-  background: #10b981;
-  color: #ffffff;
-  box-shadow: 0 14px 24px rgba(16, 185, 129, 0.18);
-}
-
-.hero-button-primary:hover {
-  background: #0ea873;
-}
-
-.hero-visual {
-  position: relative;
-  min-height: 230px;
-}
-
-.hero-blob {
-  position: absolute;
-  top: -2px;
-  right: 58px;
-  width: 255px;
-  height: 230px;
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at 70% 25%, rgba(255, 255, 255, 0.78), transparent 26%),
-    linear-gradient(135deg, rgba(229, 250, 236, 0.98), rgba(237, 250, 241, 0.88));
-}
-
-.hero-orbit {
-  position: absolute;
-  top: 26px;
-  left: 10px;
-  width: 325px;
-  height: 155px;
-  border-top: 1.5px dashed rgba(171, 215, 191, 0.45);
-  border-right: 1.5px dashed rgba(171, 215, 191, 0.45);
-  border-radius: 999px;
-  transform: rotate(12deg);
-}
-
-.hero-spark {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  background: rgba(148, 221, 182, 0.65);
-  clip-path: polygon(50% 0%, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0% 50%, 38% 38%);
-}
-
-.hero-spark-left {
-  left: 2px;
-  top: 150px;
-}
-
-.hero-spark-right {
-  right: 20px;
-  top: 42px;
-  background: rgba(255, 205, 109, 0.78);
-}
-
-.hero-leaf {
-  position: absolute;
-  right: -4px;
-  bottom: -8px;
-  width: 96px;
-  height: 90px;
-  opacity: 0.52;
-}
-
-.hero-leaf::before,
-.hero-leaf::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(190, 238, 206, 0.55), rgba(207, 243, 217, 0.4));
-  clip-path: ellipse(32% 48% at 35% 52%);
-}
-
-.hero-leaf::after {
-  left: 28px;
-  top: 10px;
-  clip-path: ellipse(28% 44% at 45% 52%);
-}
-
-.hero-icon,
-.quiz-preview {
-  position: absolute;
-  border-radius: 14px;
-  box-shadow: 0 16px 26px rgba(82, 68, 37, 0.08);
-}
-
-.hero-icon {
-  display: grid;
-  place-items: center;
-  width: 64px;
-  height: 64px;
-}
-
-.hero-icon svg {
-  width: 30px;
-  height: 30px;
-}
-
-.hero-icon-edit {
-  left: 42px;
-  bottom: 44px;
-  background: #52d68f;
-  color: #ffffff;
-}
-
-.quiz-preview {
-  top: 4px;
-  right: 74px;
-  width: min(100%, 300px);
-  padding: 24px 24px 20px;
-  background: rgba(255, 255, 255, 0.98);
-  border: 1px solid rgba(219, 228, 231, 0.96);
-}
-
-.preview-heading {
-  width: 94px;
-  height: 12px;
-  margin-bottom: 22px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #e7e7ee 0%, #ececf2 100%);
-}
-
-.preview-option {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.preview-option:last-child {
-  margin-bottom: 0;
-}
-
-.preview-option span {
-  width: 20px;
-  height: 20px;
-  border-radius: 999px;
-  border: 1.5px solid #d9dde5;
-}
-
-.preview-option div {
-  flex: 1;
-  height: 10px;
-  border-radius: 999px;
-  background: linear-gradient(90deg, #e8e8ef 0%, #ededf3 80%);
-}
-
-.preview-option.is-correct span {
-  border-color: #10b981;
-  background: radial-gradient(circle at center, #10b981 0, #10b981 39%, transparent 41%);
-}
-
-.preview-option.is-correct div {
-  max-width: 200px;
-}
-
-.recent-card {
-  padding: 14px 0 10px;
-  overflow: hidden;
-}
-
-.recent-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 0 30px 10px;
-}
-
-.recent-header h2,
-.stat-copy h2 {
-  margin: 0;
-  color: #1c2433;
-}
-
-.recent-link {
-  border: 0;
-  background: transparent;
-  color: #10b981;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-weight: 700;
-}
-
-.recent-link svg {
-  width: 18px;
-  height: 18px;
-}
-
-.recent-table-shell {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.recent-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 980px;
-}
-
-.recent-table th,
-.recent-table td {
-  padding: 12px 30px;
-  text-align: left;
-  border-top: 1px solid #edf0f2;
-}
-
-.recent-table th {
-  color: #8a93a3;
-  font-size: 0.9rem;
-  font-weight: 500;
-}
-
-.recent-table td {
-  color: #293246;
-  font-size: 0.97rem;
-}
-
-.recent-table tbody tr.is-highlighted {
-  background: #f6fbf7;
-}
-
-.quiz-title-cell {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  font-weight: 700;
-}
-
-.table-icon {
-  width: 44px;
-  height: 44px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-}
-
-.table-icon svg {
-  width: 22px;
-  height: 22px;
-}
-
-.table-icon.is-math {
-  background: #f4edff;
-  color: #8b5cf6;
-}
-
-.table-icon.is-science {
-  background: #e9fbf2;
-  color: #10b981;
-}
-
-.table-icon.is-geography {
-  background: #ecf3ff;
-  color: #1d7cf2;
-}
-
-.table-icon.is-english {
-  background: #fff0f2;
-  color: #ef4444;
-}
-
-.table-icon.is-biology {
-  background: #fff4e5;
-  color: #f59e0b;
-}
-
-.status-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  min-height: 32px;
-  padding: 0 12px;
-  border-radius: 999px;
-  font-weight: 700;
-}
-
-.status-badge::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  border-radius: 999px;
-  background: currentColor;
-}
-
-.status-badge.is-published {
-  background: #ebfbf2;
-  color: #10b981;
-}
-
-.status-badge.is-in-progress {
-  background: #fff5e7;
-  color: #d97706;
-}
-
-.status-badge.is-unpublished {
-  background: #f2f4f7;
-  color: #6b7280;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px;
-}
-
-.stat-card {
-  display: flex;
-  align-items: center;
-  gap: 18px;
-  min-height: 138px;
-  padding: 24px;
-}
-
-.stat-icon {
-  flex-shrink: 0;
-  width: 76px;
-  height: 76px;
-  border-radius: 999px;
-  display: grid;
-  place-items: center;
-}
-
-.stat-icon svg {
-  width: 34px;
-  height: 34px;
-}
-
-.stat-copy {
-  display: grid;
-  gap: 4px;
-}
-
-.stat-copy strong {
-  font-size: 2.35rem;
-  line-height: 1;
-}
-
-.stat-copy h2 {
-  font-size: 0.98rem;
-}
-
-.stat-copy p {
-  margin: 0;
-  color: #657286;
-  line-height: 1.55;
-}
-
-.stat-card.is-green .stat-icon {
-  background: #e8fbf2;
-  color: #10b981;
-}
-
-.stat-card.is-green .stat-copy strong {
-  color: #10b981;
-}
-
-.stat-card.is-amber .stat-icon {
-  background: #fff6e8;
-  color: #f59e0b;
-}
-
-.stat-card.is-amber .stat-copy strong {
-  color: #f59e0b;
-}
-
-.stat-card.is-gray .stat-icon {
-  background: #f3f4f6;
-  color: #6b7280;
-}
-
-.stat-card.is-gray .stat-copy strong {
-  color: #6b7280;
-}
-
-@media (max-width: 1120px) {
-  .hero-card {
-    grid-template-columns: 1fr;
-  }
-
-  .hero-visual {
-    min-height: 280px;
-  }
-
-  .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 20px;
-  }
-}
-
-@media (max-width: 720px) {
-  .hero-card {
-    padding: 26px 22px;
-  }
-
-  .hero-copy h1 {
-    font-size: 2.15rem;
-  }
-
-  .hero-actions {
-    flex-direction: column;
-  }
-
-  .hero-button {
-    width: 100%;
-  }
-
-  .hero-visual {
-    min-height: 260px;
-  }
-
-  .hero-blob {
-    right: 22px;
-    width: 220px;
-    height: 190px;
-  }
-
-  .hero-icon-edit {
-    left: 12px;
-    bottom: 18px;
-  }
-
-  .quiz-preview {
-    right: 12px;
-    width: auto;
-  }
-
-  .recent-header {
-    padding: 0 18px 14px;
-  }
-
-  .recent-table-shell {
-    overflow: visible;
-  }
-
-  .recent-table,
-  .recent-table thead,
-  .recent-table tbody,
-  .recent-table tr,
-  .recent-table td {
-    display: block;
-  }
-
-  .recent-table {
-    min-width: 0;
-  }
-
-  .recent-table thead {
-    display: none;
-  }
-
-  .recent-table tbody {
-    padding: 0 14px 10px;
-  }
-
-  .recent-table tr {
-    margin-bottom: 14px;
-    border: 1px solid #edf0f2;
-    border-radius: 16px;
-    background: #ffffff;
-    box-shadow: 0 8px 22px rgba(34, 24, 12, 0.04);
-    overflow: hidden;
-  }
-
-  .recent-table td {
-    border-top: 1px solid #f1f3f5;
-    padding: 14px 18px;
-  }
-
-  .recent-table td:first-child {
-    border-top: 0;
-  }
-
-  .recent-table td::before {
-    content: attr(data-label);
-    display: block;
-    margin-bottom: 6px;
-    color: #8a93a3;
-    font-size: 0.82rem;
-    font-weight: 600;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-}
-</style>

@@ -2,22 +2,28 @@
 import { computed } from "vue";
 import { useRoute } from "vue-router";
 import AppHeader from "./components/AppHeader.vue";
+import AppToastList from "./components/AppToastList.vue";
 
 const route = useRoute();
 const useBareLayout = computed(() => route.meta.bareLayout === true);
+const usePublicLayout = computed(() =>
+  route.name === "home" || route.name === "about" || route.name === "login"
+);
 </script>
 
 <template>
+  <AppToastList />
+
   <RouterView v-if="useBareLayout" />
 
-  <div v-else class="app-shell">
+  <div v-else class="app-shell" :class="{ 'public-shell': usePublicLayout }">
     <AppHeader />
 
-    <main class="app-content">
+    <main class="app-content" :class="{ 'public-content': usePublicLayout }">
       <RouterView />
     </main>
 
-    <footer class="app-footer">
+    <footer class="app-footer" :class="{ 'public-footer': usePublicLayout }">
       <span>&copy; 2026 Quiz App</span>
     </footer>
   </div>

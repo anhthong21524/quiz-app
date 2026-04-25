@@ -1,26 +1,56 @@
 <script setup lang="ts">
-defineProps<{
+import { ref, onMounted, onBeforeUnmount } from "vue";
+import type { MyQuizStatus } from "../../data/my-quizzes";
+
+const props = defineProps<{
   title: string;
-  canPublish?: boolean;
-  isPublished?: boolean;
-  isBusy?: boolean;
+  status?: MyQuizStatus;
+  isApiQuiz?: boolean;
 }>();
 
 const emit = defineEmits<{
   view: [];
   edit: [];
-  "toggle-published": [];
+  publish: [];
+  unpublish: [];
+  duplicate: [];
+  delete: [];
+  share: [];
 }>();
+
+const menuOpen = ref(false);
+const menuRef = ref<HTMLElement | null>(null);
+
+const isPublished = () => props.status === "Published";
+
+function toggleMenu() {
+  menuOpen.value = !menuOpen.value;
+}
+
+function closeMenu() {
+  menuOpen.value = false;
+}
+
+function action(fn: () => void) {
+  closeMenu();
+  fn();
+}
+
+function handleClickOutside(event: MouseEvent) {
+  if (menuRef.value && !menuRef.value.contains(event.target as Node)) {
+    closeMenu();
+  }
+}
+
+onMounted(() => document.addEventListener("mousedown", handleClickOutside));
+onBeforeUnmount(() => document.removeEventListener("mousedown", handleClickOutside));
 </script>
 
 <template>
   <div class="row-actions">
     <button class="icon-button" type="button" :aria-label="`View ${title}`" @click="emit('view')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-        <path
-          d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"
-          stroke-linejoin="round"
-        />
+        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke-linejoin="round" />
         <circle cx="12" cy="12" r="2.5" />
       </svg>
     </button>
@@ -32,23 +62,71 @@ const emit = defineEmits<{
       </svg>
     </button>
 
-    <button
-      v-if="canPublish"
-      class="publish-button"
-      type="button"
-      :disabled="isBusy"
-      @click="emit('toggle-published')"
-    >
-      {{ isPublished ? "Unpublish" : "Publish" }}
-    </button>
+    <div v-if="isApiQuiz" ref="menuRef" class="more-menu">
+      <button
+        class="icon-button"
+        type="button"
+        :aria-label="`More options for ${title}`"
+        :aria-expanded="menuOpen"
+        @click="toggleMenu"
+      >
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <circle cx="5" cy="12" r="1.7" />
+          <circle cx="12" cy="12" r="1.7" />
+          <circle cx="19" cy="12" r="1.7" />
+        </svg>
+      </button>
 
-    <button v-else class="icon-button" type="button" :aria-label="`More options for ${title}`">
-      <svg viewBox="0 0 24 24" fill="currentColor">
-        <circle cx="5" cy="12" r="1.7" />
-        <circle cx="12" cy="12" r="1.7" />
-        <circle cx="19" cy="12" r="1.7" />
-      </svg>
-    </button>
+      <div v-if="menuOpen" class="more-menu-dropdown" role="menu">
+        <!-- Published → Unpublish + Share -->
+        <template v-if="isPublished()">
+          <button class="menu-item menu-item--orange" type="button" role="menuitem" @click="action(() => emit('unpublish'))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M9 12h6" stroke-linecap="round" />
+            </svg>
+            Unpublish
+          </button>
+          <button class="menu-item" type="button" role="menuitem" @click="action(() => emit('share'))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <path d="m8.7 13.5 6.6 4M15.3 6.5l-6.6 4" stroke-linecap="round" />
+            </svg>
+            Share
+          </button>
+        </template>
+
+        <!-- Unpublished / Draft → Publish -->
+        <template v-else>
+          <button class="menu-item menu-item--green" type="button" role="menuitem" @click="action(() => emit('publish'))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 8v8M8 12l4-4 4 4" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            Publish
+          </button>
+        </template>
+
+        <div class="menu-divider" />
+
+        <button class="menu-item" type="button" role="menuitem" @click="action(() => emit('duplicate'))">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <rect x="9" y="9" width="13" height="13" rx="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          Duplicate
+        </button>
+
+        <button class="menu-item menu-item--red" type="button" role="menuitem" @click="action(() => emit('delete'))">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          Delete
+        </button>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -83,27 +161,79 @@ const emit = defineEmits<{
   height: 18px;
 }
 
-.publish-button {
-  min-height: 30px;
+.more-menu {
+  position: relative;
+}
+
+.more-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 6px);
+  z-index: 100;
+  min-width: 150px;
+  border: 1px solid #e4e8ee;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 8px 28px rgba(24, 32, 51, 0.12);
+  overflow: hidden;
+  padding: 4px;
+}
+
+.menu-divider {
+  margin: 4px 0;
+  height: 1px;
+  background: #f0f3f7;
+}
+
+.menu-item {
+  width: 100%;
+  min-height: 34px;
   border: 0;
-  border-radius: 9px;
-  padding: 0 10px;
-  background: #e8fbf2;
-  color: #0f9f6e;
-  font-size: 0.82rem;
-  font-weight: 800;
-  transition:
-    background-color 0.2s ease,
-    color 0.2s ease;
+  padding: 0 12px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  color: #3a4459;
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s;
 }
 
-.publish-button:hover:not(:disabled) {
-  background: #10b981;
-  color: #ffffff;
+.menu-item:hover {
+  background: #f4f7fa;
 }
 
-.publish-button:disabled {
-  cursor: wait;
-  opacity: 0.65;
+.menu-item--green {
+  color: #0b7a52;
+}
+
+.menu-item--green:hover {
+  background: #e9fbf2;
+}
+
+.menu-item--orange {
+  color: #b25d0a;
+}
+
+.menu-item--orange:hover {
+  background: #fff5e8;
+}
+
+.menu-item--red {
+  color: #b91c1c;
+}
+
+.menu-item--red:hover {
+  background: #fff0f0;
+}
+
+.menu-item svg {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
 }
 </style>

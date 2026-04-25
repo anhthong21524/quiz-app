@@ -1,4 +1,4 @@
-export type MyQuizStatus = "Published" | "In progress" | "Draft";
+export type MyQuizStatus = "Published" | "In progress" | "Unpublished";
 
 export type MyQuizIcon =
   | "mathematics"
@@ -56,7 +56,7 @@ export const myQuizzes: MyQuiz[] = [
     title: "General Knowledge",
     subject: "General Knowledge",
     questions: 25,
-    status: "Draft",
+    status: "Unpublished",
     lastUpdated: "2024-05-10T16:15:00",
     lastUpdatedLabel: "May 10, 2024 \u00b7 4:15 PM",
     icon: "knowledge"
@@ -86,7 +86,7 @@ export const myQuizzes: MyQuiz[] = [
     title: "History of Ancient Rome",
     subject: "History",
     questions: 12,
-    status: "Draft",
+    status: "Unpublished",
     lastUpdated: "2024-05-01T13:20:00",
     lastUpdatedLabel: "May 1, 2024 \u00b7 1:20 PM",
     icon: "history"

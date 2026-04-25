@@ -39,6 +39,18 @@ export class QuizService {
     return this.requireQuiz(quiz, id);
   }
 
+  async delete(id: string): Promise<void> {
+    const deleted = await this.quizRepository.delete(id);
+    if (!deleted) {
+      throw new NotFoundException(`Quiz ${id} was not found.`);
+    }
+  }
+
+  async duplicate(id: string): Promise<Quiz> {
+    const copy = await this.quizRepository.duplicate(id);
+    return this.requireQuiz(copy, id);
+  }
+
   private requireQuiz(quiz: Quiz | null, id: string) {
     if (!quiz) {
       throw new NotFoundException(`Quiz ${id} was not found.`);

@@ -81,4 +81,22 @@ export class MongoQuizRepository
   async updateStatus(id: string, status: QuizStatus): Promise<Quiz | null> {
     return this.update(id, { status });
   }
+
+  async delete(id: string): Promise<boolean> {
+    const result = await this.getModel().findByIdAndDelete(id).lean();
+    return !!result;
+  }
+
+  async duplicate(id: string): Promise<Quiz | null> {
+    const quiz = await this.getModel().findById(id).lean();
+    if (!quiz) return null;
+
+    const { _id, __v, createdAt: _c, updatedAt: _u, ...rest } = quiz as any;
+    const copy = await this.getModel().create({
+      ...rest,
+      title: `Copy of ${quiz.title ?? rest.title}`,
+      status: QuizStatus.IN_PROGRESS
+    });
+    return normalizeQuiz(copy.toObject());
+  }
 }

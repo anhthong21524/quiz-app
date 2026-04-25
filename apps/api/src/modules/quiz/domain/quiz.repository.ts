@@ -19,6 +19,8 @@ export interface QuizRepository {
   findById(id: string): Promise<Quiz | null>;
   update(id: string, data: UpdateQuizData): Promise<Quiz | null>;
   updateStatus(id: string, status: QuizStatus): Promise<Quiz | null>;
+  delete(id: string): Promise<boolean>;
+  duplicate(id: string): Promise<Quiz | null>;
 }
 
 export const QUIZ_REPOSITORY = Symbol("QUIZ_REPOSITORY");

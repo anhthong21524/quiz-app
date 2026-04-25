@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import SettingsPageLayout from "../components/settings/SettingsPageLayout.vue";
+import { useAuthStore } from "../stores/auth";
 
 type ProfileDetail = {
   label: string;
@@ -8,16 +9,32 @@ type ProfileDetail = {
   icon: "language" | "timezone" | "theme";
 };
 
-const fallbackProfile = {
-  fullName: "Alex Johnson",
-  email: "alex.johnson@example.com",
-  memberSince: "May 10, 2024",
+const authStore = useAuthStore();
+const avatarInput = ref<HTMLInputElement | null>(null);
+const avatarError = ref("");
+const avatarUploading = ref(false);
+const maxAvatarSizeBytes = 2 * 1024 * 1024;
+
+const username = computed(() => {
+  const email = authStore.user?.email?.trim();
+
+  if (!email) {
+    return "User";
+  }
+
+  const [emailName] = email.split("@");
+  return emailName || email;
+});
+
+const avatarUrl = computed(() => authStore.user?.avatarUrl ?? "");
+
+const profile = computed(() => ({
+  username: username.value,
+  email: authStore.user?.email?.trim() || "Not available",
   language: "English",
   timezone: "(UTC+07:00) Bangkok, Hanoi, Jakarta",
   preferredTheme: "Light"
-};
-
-const profile = computed(() => fallbackProfile);
+}));
 
 const profileDetails = computed<ProfileDetail[]>(() => [
   {
@@ -40,6 +57,60 @@ const profileDetails = computed<ProfileDetail[]>(() => [
 function editProfile() {
   console.info("Edit profile clicked");
 }
+
+function openAvatarPicker() {
+  avatarInput.value?.click();
+}
+
+function handleAvatarUpload(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+
+  if (!file) {
+    return;
+  }
+
+  if (!file.type.startsWith("image/")) {
+    avatarError.value = "Choose an image file.";
+    input.value = "";
+    return;
+  }
+
+  if (file.size > maxAvatarSizeBytes) {
+    avatarError.value = "Choose an image smaller than 2 MB.";
+    input.value = "";
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = async () => {
+    if (typeof reader.result !== "string") {
+      avatarError.value = "Could not read this image.";
+      input.value = "";
+      return;
+    }
+
+    avatarUploading.value = true;
+    avatarError.value = "";
+    input.value = "";
+
+    try {
+      await authStore.updateAvatar(reader.result);
+    } catch {
+      avatarError.value = "Failed to upload avatar. Please try again.";
+    } finally {
+      avatarUploading.value = false;
+    }
+  };
+
+  reader.onerror = () => {
+    avatarError.value = "Could not read this image.";
+    input.value = "";
+  };
+
+  reader.readAsDataURL(file);
+}
 </script>
 
 <template>
@@ -53,14 +124,30 @@ function editProfile() {
         <div class="profile-summary">
           <div class="profile-avatar-wrap">
             <div class="profile-avatar" aria-hidden="true">
-              <svg viewBox="0 0 120 120" fill="currentColor">
+              <img
+                v-if="avatarUrl"
+                class="profile-avatar-image"
+                :src="avatarUrl"
+                :alt="`${profile.username} avatar`"
+              />
+              <svg v-else viewBox="0 0 120 120" fill="currentColor">
                 <circle cx="60" cy="44" r="19" />
                 <path d="M28 93c5.5-21 58.5-21 64 0Z" />
               </svg>
             </div>
 
-            <button class="avatar-edit-button" type="button" aria-label="Edit avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+            <button
+              class="avatar-edit-button"
+              type="button"
+              :aria-label="avatarUploading ? 'Uploading avatar…' : 'Upload avatar'"
+              :disabled="avatarUploading"
+              @click="openAvatarPicker"
+            >
+              <svg v-if="avatarUploading" class="avatar-spinner" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="9" stroke-opacity="0.25" />
+                <path d="M12 3a9 9 0 0 1 9 9" stroke-linecap="round" />
+              </svg>
+              <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
                 <path
                   d="M7 8.5h2.3l1.2-2h3l1.2 2H17a2 2 0 0 1 2 2v6.25a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V10.5a2 2 0 0 1 2-2Z"
                   stroke-linejoin="round"
@@ -68,13 +155,21 @@ function editProfile() {
                 <circle cx="12" cy="13.5" r="2.8" />
               </svg>
             </button>
+
+            <input
+              ref="avatarInput"
+              class="avatar-file-input"
+              type="file"
+              accept="image/*"
+              @change="handleAvatarUpload"
+            />
           </div>
 
           <div class="profile-identity">
             <dl>
               <div>
-                <dt>Full name</dt>
-                <dd>{{ profile.fullName }}</dd>
+                <dt>Username</dt>
+                <dd>{{ profile.username }}</dd>
               </div>
               <div>
                 <dt>Email</dt>
@@ -88,14 +183,7 @@ function editProfile() {
           Edit profile
         </button>
 
-        <div class="member-row">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-            <rect x="4" y="5" width="16" height="15" rx="2" />
-            <path d="M8 3v4M16 3v4M4 10h16" stroke-linecap="round" />
-          </svg>
-          <span>Member since</span>
-          <strong>{{ profile.memberSince }}</strong>
-        </div>
+        <p v-if="avatarError" class="avatar-error" role="alert">{{ avatarError }}</p>
       </article>
 
       <article class="profile-details-card" aria-label="Profile details">
@@ -153,7 +241,7 @@ function editProfile() {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 26px;
-  padding: 28px 28px 0;
+  padding: 28px;
 }
 
 .profile-summary {
@@ -185,6 +273,12 @@ function editProfile() {
   transform: translateY(10px);
 }
 
+.profile-avatar-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
 .avatar-edit-button {
   position: absolute;
   right: -8px;
@@ -203,6 +297,30 @@ function editProfile() {
 .avatar-edit-button svg {
   width: 21px;
   height: 21px;
+}
+
+.avatar-edit-button:disabled {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.avatar-spinner {
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.avatar-file-input {
+  display: none;
+}
+
+.avatar-error {
+  grid-column: 1 / -1;
+  margin: -12px 0 0;
+  color: #b91c1c;
+  font-weight: 700;
 }
 
 .profile-identity dl {
@@ -246,30 +364,6 @@ function editProfile() {
   color: #ffffff;
 }
 
-.member-row {
-  grid-column: 1 / -1;
-  min-height: 84px;
-  border-top: 1px solid #dfe5ea;
-  display: grid;
-  grid-template-columns: auto minmax(120px, auto) 1fr;
-  align-items: center;
-  gap: 18px;
-  color: #182033;
-}
-
-.member-row svg {
-  width: 24px;
-  height: 24px;
-}
-
-.member-row span {
-  font-weight: 700;
-}
-
-.member-row strong {
-  font-size: 1.02rem;
-}
-
 .profile-details-card {
   padding: 8px 28px;
 }
@@ -309,7 +403,7 @@ function editProfile() {
 @media (max-width: 720px) {
   .profile-card {
     grid-template-columns: 1fr;
-    padding: 24px 20px 0;
+    padding: 24px 20px;
   }
 
   .profile-summary {
@@ -333,16 +427,11 @@ function editProfile() {
     text-align: center;
   }
 
-  .member-row,
   .detail-row {
     grid-template-columns: 1fr;
     gap: 8px;
     align-items: start;
     padding: 18px 0;
-  }
-
-  .member-row {
-    min-height: auto;
   }
 
   .detail-row {

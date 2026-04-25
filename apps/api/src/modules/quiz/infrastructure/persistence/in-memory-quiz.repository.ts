@@ -65,4 +65,27 @@ export class InMemoryQuizRepository implements QuizRepository {
   async updateStatus(id: string, status: QuizStatus): Promise<Quiz | null> {
     return this.update(id, { status });
   }
+
+  async delete(id: string): Promise<boolean> {
+    return this.quizzes.delete(id);
+  }
+
+  async duplicate(id: string): Promise<Quiz | null> {
+    const quiz = this.quizzes.get(id);
+    if (!quiz) return null;
+
+    const timestamp = new Date().toISOString();
+    const newId = randomUUID();
+    const copy: Quiz = {
+      ...quiz,
+      id: newId,
+      title: `Copy of ${quiz.title}`,
+      status: QuizStatus.IN_PROGRESS,
+      questions: quiz.questions.map((q) => ({ ...q, id: randomUUID() })),
+      createdAt: timestamp,
+      updatedAt: timestamp
+    };
+    this.quizzes.set(newId, copy);
+    return copy;
+  }
 }

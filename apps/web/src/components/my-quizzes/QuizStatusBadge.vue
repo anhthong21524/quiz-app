@@ -47,7 +47,7 @@ function statusClass() {
   color: #d97706;
 }
 
-.status-badge.is-draft {
+.status-badge.is-unpublished {
   background: #f2f4f7;
   color: #667287;
 }

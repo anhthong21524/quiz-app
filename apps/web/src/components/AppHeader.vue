@@ -1,12 +1,28 @@
 <script setup lang="ts">
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 import { RouterLink, useRoute, useRouter } from "vue-router";
-import { setAuthenticated } from "../services/auth-session";
+import { useAuthStore } from "../stores/auth";
 
+const authStore = useAuthStore();
 const route = useRoute();
 const router = useRouter();
-const isUserMenuOpen = ref(false);
 const isMobileNavOpen = ref(false);
+const isPublicPage = computed(() =>
+  route.name === "home" || route.name === "about" || route.name === "login"
+);
+
+const username = computed(() => {
+  const email = authStore.user?.email?.trim();
+
+  if (!email) {
+    return "User";
+  }
+
+  const [emailName] = email.split("@");
+  return emailName || email;
+});
+
+const avatarUrl = computed(() => authStore.user?.avatarUrl ?? "");
 
 const activeNav = computed(() => {
   if (route.name === "home") {
@@ -17,11 +33,14 @@ const activeNav = computed(() => {
     return "quizzes";
   }
 
+  if (route.name === "about") {
+    return "about";
+  }
+
   return "";
 });
 
 function closeMenus() {
-  isUserMenuOpen.value = false;
   isMobileNavOpen.value = false;
 }
 
@@ -35,50 +54,123 @@ function navigateToProfile() {
   router.push({ name: "profile" });
 }
 
-function toggleUserMenu() {
-  isUserMenuOpen.value = !isUserMenuOpen.value;
-  isMobileNavOpen.value = false;
-}
-
 function toggleMobileNav() {
   isMobileNavOpen.value = !isMobileNavOpen.value;
-  isUserMenuOpen.value = false;
 }
 
-function signOut() {
+async function signOut() {
   closeMenus();
-  setAuthenticated(false);
+  await authStore.logout();
   router.push({ name: "login" });
 }
 
-function handleWindowClick(event: MouseEvent) {
-  const target = event.target;
-  if (!(target instanceof HTMLElement)) {
-    return;
-  }
-
-  if (!target.closest(".user-menu")) {
-    isUserMenuOpen.value = false;
-  }
-
-  if (!target.closest(".mobile-menu-button") && !target.closest(".mobile-nav-panel")) {
-    isMobileNavOpen.value = false;
-  }
-}
-
 watch(() => route.fullPath, closeMenus);
-
-onMounted(() => {
-  window.addEventListener("click", handleWindowClick);
-});
-
-onBeforeUnmount(() => {
-  window.removeEventListener("click", handleWindowClick);
-});
 </script>
 
 <template>
-  <header class="dashboard-header">
+  <header v-if="isPublicPage" class="public-header">
+    <div class="public-header-inner">
+      <button
+        class="public-mobile-menu-button"
+        type="button"
+        :aria-expanded="isMobileNavOpen"
+        aria-controls="public-mobile-navigation"
+        aria-label="Open navigation menu"
+        @click.stop="toggleMobileNav"
+      >
+        <svg
+          v-if="!isMobileNavOpen"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.9"
+        >
+          <path d="M5 7h14M5 12h14M5 17h14" stroke-linecap="round" />
+        </svg>
+        <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
+          <path d="m7 7 10 10M17 7 7 17" stroke-linecap="round" />
+        </svg>
+      </button>
+
+      <RouterLink class="public-brand-lockup" :to="{ name: 'home' }" @click="closeMenus">
+        <div class="public-brand-badge" aria-hidden="true">Q</div>
+        <span class="public-brand-name">Quiz App</span>
+      </RouterLink>
+
+      <nav class="public-nav" aria-label="Primary">
+        <RouterLink
+          class="public-nav-link"
+          :class="{ 'is-active': activeNav === 'home' }"
+          :to="{ name: 'home' }"
+        >
+          Home
+        </RouterLink>
+        <RouterLink
+          class="public-nav-link"
+          :class="{ 'is-active': activeNav === 'quizzes' }"
+          :to="{ name: 'quizzes' }"
+        >
+          Quizzes
+        </RouterLink>
+        <RouterLink
+          class="public-nav-link"
+          :class="{ 'is-active': activeNav === 'about' }"
+          :to="{ name: 'about' }"
+        >
+          About
+        </RouterLink>
+      </nav>
+
+      <div class="public-header-actions">
+        <button class="public-icon-button" type="button" aria-label="Dark mode">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M20.4 14.8A7.4 7.4 0 0 1 9.2 3.6 8.5 8.5 0 1 0 20.4 14.8Z" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </button>
+        <RouterLink class="public-login-button" :to="{ name: 'login' }" @click="closeMenus">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z" />
+            <path d="M4.5 21a7.5 7.5 0 0 1 15 0" stroke-linecap="round" />
+          </svg>
+          <span>Login</span>
+        </RouterLink>
+      </div>
+
+      <nav
+        v-if="isMobileNavOpen"
+        id="public-mobile-navigation"
+        class="public-mobile-nav-panel"
+        aria-label="Mobile primary"
+      >
+        <RouterLink
+          class="public-mobile-nav-link"
+          :class="{ 'is-active': activeNav === 'home' }"
+          :to="{ name: 'home' }"
+          @click="closeMenus"
+        >
+          Home
+        </RouterLink>
+        <RouterLink
+          class="public-mobile-nav-link"
+          :class="{ 'is-active': activeNav === 'quizzes' }"
+          :to="{ name: 'quizzes' }"
+          @click="closeMenus"
+        >
+          Quizzes
+        </RouterLink>
+        <RouterLink
+          class="public-mobile-nav-link"
+          :class="{ 'is-active': activeNav === 'about' }"
+          :to="{ name: 'about' }"
+          @click="closeMenus"
+        >
+          About
+        </RouterLink>
+      </nav>
+    </div>
+  </header>
+
+  <header v-else class="dashboard-header">
     <button
       class="mobile-menu-button"
       type="button"
@@ -142,37 +234,27 @@ onBeforeUnmount(() => {
         <span class="header-create-label">Create quiz</span>
       </button>
 
-      <div class="user-menu">
-        <button
-          class="user-menu-trigger"
-          type="button"
-          :aria-expanded="isUserMenuOpen"
-          aria-label="Open account menu"
-          @click.stop="toggleUserMenu"
-        >
+      <button
+        class="user-profile-button"
+        type="button"
+        aria-label="Open account menu"
+        @click="navigateToProfile"
+      >
+        <span class="user-menu-trigger">
           <span class="user-avatar" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="currentColor">
+            <img v-if="avatarUrl" :src="avatarUrl" alt="" />
+            <svg v-else viewBox="0 0 24 24" fill="currentColor">
               <circle cx="12" cy="8" r="4.5" />
               <path d="M4.5 21a7.5 7.5 0 0 1 15 0" />
             </svg>
           </span>
-          <svg
-            class="user-menu-chevron"
-            :class="{ 'is-open': isUserMenuOpen }"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.8"
-          >
-            <path d="m7 10 5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
+          <span class="user-greeting">
+            Hi <span class="user-greeting-name">{{ username }}</span>
+          </span>
+        </span>
+      </button>
 
-        <div v-if="isUserMenuOpen" class="user-menu-popover">
-          <button class="user-menu-item" type="button" @click="navigateToProfile">Profile</button>
-          <button class="user-menu-item" type="button" @click="signOut">Sign out</button>
-        </div>
-      </div>
+      <button class="header-signout-button" type="button" @click="signOut">Sign out</button>
     </div>
 
     <nav

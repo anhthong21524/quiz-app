@@ -8,25 +8,52 @@ import QuizGrid from "../components/my-quizzes/QuizGrid.vue";
 import QuizPagination from "../components/my-quizzes/QuizPagination.vue";
 import QuizTable from "../components/my-quizzes/QuizTable.vue";
 import QuizToolbar from "../components/my-quizzes/QuizToolbar.vue";
+import ConfirmModal from "../components/ConfirmModal.vue";
+import ShareModal from "../components/ShareModal.vue";
 import type { QuizListItem, ViewMode } from "../components/my-quizzes/types";
 import { myQuizzes, type MyQuizStatus } from "../data/my-quizzes";
 import { useQuizStore } from "../stores/quizzes";
+import { useToast } from "../composables/useToast";
 
 const router = useRouter();
 const quizStore = useQuizStore();
+const { show: showToast } = useToast();
 
 const searchQuery = ref("");
 const selectedStatus = ref<MyQuizStatus | "All status">("All status");
 const selectedSubject = ref("All subjects");
 const selectedSort = ref("last-updated");
 const viewMode = ref<ViewMode>("list");
-const busyQuizId = ref<string | null>(null);
+
+interface ConfirmState {
+  open: boolean;
+  title: string;
+  message: string;
+  confirmLabel: string;
+  danger: boolean;
+  onConfirm: () => Promise<void>;
+}
+
+const confirmState = ref<ConfirmState>({
+  open: false,
+  title: "",
+  message: "",
+  confirmLabel: "Confirm",
+  danger: false,
+  onConfirm: async () => {}
+});
+
+const shareState = ref<{ open: boolean; title: string; url: string }>({
+  open: false,
+  title: "",
+  url: ""
+});
 
 const statusOptions: Array<MyQuizStatus | "All status"> = [
   "All status",
   "Published",
   "In progress",
-  "Draft"
+  "Unpublished"
 ];
 
 onMounted(async () => {
@@ -112,15 +139,9 @@ function formatLastUpdated(value?: string) {
 }
 
 function mapQuizStatus(status: QuizStatus): MyQuizStatus {
-  if (status === QuizStatus.PUBLISHED) {
-    return "Published";
-  }
-
-  if (status === QuizStatus.IN_PROGRESS) {
-    return "In progress";
-  }
-
-  return "Draft";
+  if (status === QuizStatus.PUBLISHED) return "Published";
+  if (status === QuizStatus.IN_PROGRESS) return "In progress";
+  return "Unpublished";
 }
 
 function mapApiQuiz(quiz: Quiz): QuizListItem {
@@ -129,7 +150,6 @@ function mapApiQuiz(quiz: Quiz): QuizListItem {
   return {
     id,
     apiId: quiz.id,
-    apiStatus: quiz.status,
     source: "api",
     title: quiz.title,
     subject: "Custom",
@@ -141,27 +161,121 @@ function mapApiQuiz(quiz: Quiz): QuizListItem {
   };
 }
 
-function openQuiz(quiz: QuizListItem) {
+function openConfirm(opts: Omit<ConfirmState, "open">) {
+  confirmState.value = { open: true, ...opts };
+}
+
+async function runConfirm() {
+  try {
+    await confirmState.value.onConfirm();
+  } finally {
+    confirmState.value.open = false;
+  }
+}
+
+function viewQuiz(quiz: QuizListItem) {
   if (quiz.apiId) {
     router.push({ name: "edit-quiz", params: { id: quiz.apiId } });
   }
 }
 
-async function togglePublished(quiz: QuizListItem) {
-  if (!quiz.apiId || busyQuizId.value) {
-    return;
-  }
+function editQuiz(quiz: QuizListItem) {
+  if (!quiz.apiId) return;
 
-  busyQuizId.value = quiz.apiId;
-  try {
-    await quizStore.setQuizPublished(
-      quiz.apiId,
-      quiz.apiStatus !== QuizStatus.PUBLISHED
-    );
-  } finally {
-    busyQuizId.value = null;
+  if (quiz.status === "Published") {
+    openConfirm({
+      title: "Edit published quiz",
+      message: "Editing will affect the currently published quiz. Users may see changes immediately. Continue?",
+      confirmLabel: "Edit anyway",
+      danger: false,
+      onConfirm: async () => {
+        router.push({ name: "edit-quiz", params: { id: quiz.apiId! } });
+      }
+    });
+  } else {
+    router.push({ name: "edit-quiz", params: { id: quiz.apiId } });
   }
 }
+
+function publishQuiz(quiz: QuizListItem) {
+  if (!quiz.apiId) return;
+
+  openConfirm({
+    title: "Publish quiz",
+    message: `"${quiz.title}" will become publicly visible. Are you sure you want to publish?`,
+    confirmLabel: "Publish",
+    danger: false,
+    onConfirm: async () => {
+      try {
+        await quizStore.setQuizPublished(quiz.apiId!, true);
+        showToast("Quiz published successfully");
+      } catch {
+        showToast("Failed to publish quiz", "error");
+      }
+    }
+  });
+}
+
+function unpublishQuiz(quiz: QuizListItem) {
+  if (!quiz.apiId) return;
+
+  openConfirm({
+    title: "Unpublish quiz",
+    message: `"${quiz.title}" will no longer be visible to users. You can re-publish at any time.`,
+    confirmLabel: "Unpublish",
+    danger: false,
+    onConfirm: async () => {
+      try {
+        await quizStore.setQuizPublished(quiz.apiId!, false);
+        showToast("Quiz unpublished successfully");
+      } catch {
+        showToast("Failed to unpublish quiz", "error");
+      }
+    }
+  });
+}
+
+async function duplicateQuiz(quiz: QuizListItem) {
+  if (!quiz.apiId) return;
+
+  try {
+    await quizStore.duplicateQuiz(quiz.apiId);
+    showToast(`"${quiz.title}" duplicated successfully`);
+  } catch {
+    showToast("Failed to duplicate quiz", "error");
+  }
+}
+
+function deleteQuiz(quiz: QuizListItem) {
+  if (!quiz.apiId) return;
+
+  openConfirm({
+    title: "Delete quiz",
+    message: `"${quiz.title}" will be permanently deleted. This action cannot be undone.`,
+    confirmLabel: "Delete",
+    danger: true,
+    onConfirm: async () => {
+      try {
+        await quizStore.deleteQuiz(quiz.apiId!);
+        showToast("Quiz deleted successfully");
+      } catch {
+        showToast("Failed to delete quiz", "error");
+      }
+    }
+  });
+}
+
+function shareQuiz(quiz: QuizListItem) {
+  if (!quiz.apiId) return;
+
+  const baseUrl = import.meta.env.VITE_SITE_URL ?? window.location.origin;
+  shareState.value = {
+    open: true,
+    title: quiz.title,
+    url: `${baseUrl}/quiz/${quiz.apiId}`
+  };
+}
+
 </script>
 
 <template>
@@ -190,27 +304,36 @@ async function togglePublished(quiz: QuizListItem) {
         <template v-if="viewMode === 'list'">
           <QuizTable
             :quizzes="filteredQuizzes"
-            :busy-quiz-id="busyQuizId"
-            @view="openQuiz"
-            @edit="openQuiz"
-            @toggle-published="togglePublished"
+            @view="viewQuiz"
+            @edit="editQuiz"
+            @publish="publishQuiz"
+            @unpublish="unpublishQuiz"
+            @duplicate="duplicateQuiz"
+            @delete="deleteQuiz"
+            @share="shareQuiz"
           />
           <QuizCardList
             :quizzes="filteredQuizzes"
-            :busy-quiz-id="busyQuizId"
-            @view="openQuiz"
-            @edit="openQuiz"
-            @toggle-published="togglePublished"
+            @view="viewQuiz"
+            @edit="editQuiz"
+            @publish="publishQuiz"
+            @unpublish="unpublishQuiz"
+            @duplicate="duplicateQuiz"
+            @delete="deleteQuiz"
+            @share="shareQuiz"
           />
         </template>
 
         <QuizGrid
           v-else
           :quizzes="filteredQuizzes"
-          :busy-quiz-id="busyQuizId"
-          @view="openQuiz"
-          @edit="openQuiz"
-          @toggle-published="togglePublished"
+          @view="viewQuiz"
+          @edit="editQuiz"
+          @publish="publishQuiz"
+          @unpublish="unpublishQuiz"
+          @duplicate="duplicateQuiz"
+          @delete="deleteQuiz"
+          @share="shareQuiz"
         />
 
         <QuizPagination :showing-copy="showingCopy" />
@@ -219,6 +342,23 @@ async function togglePublished(quiz: QuizListItem) {
       <QuizEmptyState v-else @create="createQuiz" />
     </section>
   </section>
+
+  <ConfirmModal
+    v-if="confirmState.open"
+    :title="confirmState.title"
+    :message="confirmState.message"
+    :confirm-label="confirmState.confirmLabel"
+    :danger="confirmState.danger"
+    @confirm="runConfirm"
+    @cancel="confirmState.open = false"
+  />
+
+  <ShareModal
+    v-if="shareState.open"
+    :title="shareState.title"
+    :url="shareState.url"
+    @close="shareState.open = false"
+  />
 </template>
 
 <style>

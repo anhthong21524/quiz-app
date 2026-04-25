@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post } from "@nestjs/common";
+import { Public } from "../../auth/decorators/public.decorator";
 import { CreateQuizDto } from "../application/dto/create-quiz.dto";
 import { UpdateQuizDto } from "../application/dto/update-quiz.dto";
 import { QuizService } from "../application/quiz.service";
@@ -13,6 +14,7 @@ export class QuizController {
   }
 
   @Get(":id")
+  @Public()
   findById(@Param("id") id: string) {
     return this.quizService.findById(id);
   }
@@ -35,6 +37,17 @@ export class QuizController {
   @Patch(":id/unpublish")
   unpublish(@Param("id") id: string) {
     return this.quizService.unpublish(id);
+  }
+
+  @Delete(":id")
+  @HttpCode(HttpStatus.NO_CONTENT)
+  delete(@Param("id") id: string) {
+    return this.quizService.delete(id);
+  }
+
+  @Post(":id/duplicate")
+  duplicate(@Param("id") id: string) {
+    return this.quizService.duplicate(id);
   }
 }
 

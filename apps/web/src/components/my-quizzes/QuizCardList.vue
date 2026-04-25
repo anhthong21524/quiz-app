@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import { QuizStatus } from "@quiz-app/shared";
 import QuizIconAvatar from "./QuizIconAvatar.vue";
 import QuizRowActions from "./QuizRowActions.vue";
 import QuizStatusBadge from "./QuizStatusBadge.vue";
@@ -7,13 +6,16 @@ import type { QuizListItem } from "./types";
 
 defineProps<{
   quizzes: QuizListItem[];
-  busyQuizId?: string | null;
 }>();
 
 const emit = defineEmits<{
-  edit: [quiz: QuizListItem];
   view: [quiz: QuizListItem];
-  "toggle-published": [quiz: QuizListItem];
+  edit: [quiz: QuizListItem];
+  publish: [quiz: QuizListItem];
+  unpublish: [quiz: QuizListItem];
+  duplicate: [quiz: QuizListItem];
+  delete: [quiz: QuizListItem];
+  share: [quiz: QuizListItem];
 }>();
 </script>
 
@@ -51,12 +53,15 @@ const emit = defineEmits<{
       <QuizRowActions
         class="card-actions"
         :title="quiz.title"
-        :can-publish="quiz.source === 'api'"
-        :is-published="quiz.apiStatus === QuizStatus.PUBLISHED"
-        :is-busy="busyQuizId === quiz.apiId"
+        :status="quiz.status"
+        :is-api-quiz="quiz.source === 'api'"
         @view="emit('view', quiz)"
         @edit="emit('edit', quiz)"
-        @toggle-published="emit('toggle-published', quiz)"
+        @publish="emit('publish', quiz)"
+        @unpublish="emit('unpublish', quiz)"
+        @duplicate="emit('duplicate', quiz)"
+        @delete="emit('delete', quiz)"
+        @share="emit('share', quiz)"
       />
     </article>
   </div>
