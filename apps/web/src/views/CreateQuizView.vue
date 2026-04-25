@@ -422,7 +422,7 @@ async function submitQuiz() {
     showToast("Quiz saved successfully");
     await router.push({ name: "quizzes" });
   } catch {
-    const message = quizStore.error ?? "Failed to save quiz. Please try again.";
+    const message = quizStore.error?.userMessage ?? "Failed to save quiz. Please try again.";
     validationErrors.question = message;
     showToast(message, "error");
   } finally {

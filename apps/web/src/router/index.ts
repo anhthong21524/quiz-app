@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "../stores/auth";
+import { useGlobalLoading } from "../composables/useGlobalLoading";
 import HomeView from "../views/HomeView.vue";
 import AboutView from "../views/AboutView.vue";
 import LoginView from "../views/LoginView.vue";
@@ -252,6 +253,8 @@ export const router = createRouter({
   ]
 });
 
+const globalLoading = useGlobalLoading();
+
 router.beforeEach((to) => {
   const authStore = useAuthStore();
   const authenticated = authStore.isAuthenticated;
@@ -264,9 +267,11 @@ router.beforeEach((to) => {
     return { name: "quizzes" };
   }
 
+  globalLoading.start();
   return true;
 });
 
 router.afterEach((to) => {
+  globalLoading.done();
   applySeo(to);
 });

@@ -1,6 +1,8 @@
 import { defineStore } from "pinia";
-import { isAxiosError } from "axios";
 import type { Quiz } from "@quiz-app/shared";
+import type { AppError } from "../lib/api/errors";
+import { isAppError, normalizeApiError } from "../lib/api/errors";
+import { getUserMessage, type MessageContext } from "../lib/api/error-messages";
 import {
   createQuiz,
   deleteQuiz,
@@ -16,27 +18,22 @@ import {
 interface QuizState {
   items: Quiz[];
   activeQuiz: Quiz | null;
+  /** True only during loadQuizzes / loadQuiz — drives skeleton UI. */
   isLoading: boolean;
-  error: string | null;
+  /**
+   * True during save, publish, unpublish, delete, duplicate.
+   * Kept separate so skeleton never appears when an action button is pending.
+   */
+  isActionLoading: boolean;
+  error: AppError | null;
 }
 
-function getErrorMessage(error: unknown, fallback: string) {
-  if (isAxiosError(error)) {
-    const responseMessage = error.response?.data?.message;
-    if (Array.isArray(responseMessage)) {
-      return responseMessage.join(" ");
-    }
-
-    if (typeof responseMessage === "string") {
-      return responseMessage;
-    }
-
-    if (error.message === "Network Error") {
-      return "API server is not reachable. Make sure the backend is running on http://localhost:3001.";
-    }
-  }
-
-  return error instanceof Error ? error.message : fallback;
+// Attach a context-specific userMessage before storing the error.
+// The interceptor guarantees the caught value is already an AppError,
+// but normalizeApiError is a safe fallback for any unexpected throws.
+function toAppError(error: unknown, context: MessageContext): AppError {
+  const appError = isAppError(error) ? error : normalizeApiError(error);
+  return { ...appError, userMessage: getUserMessage(appError, context) };
 }
 
 export const useQuizStore = defineStore("quizzes", {
@@ -44,8 +41,10 @@ export const useQuizStore = defineStore("quizzes", {
     items: [],
     activeQuiz: null,
     isLoading: false,
+    isActionLoading: false,
     error: null
   }),
+
   actions: {
     async loadQuizzes() {
       this.isLoading = true;
@@ -53,11 +52,12 @@ export const useQuizStore = defineStore("quizzes", {
       try {
         this.items = await fetchQuizzes();
       } catch (error) {
-        this.error = getErrorMessage(error, "Failed to load quizzes.");
+        this.error = toAppError(error, "quiz_list_load");
       } finally {
         this.isLoading = false;
       }
     },
+
     async loadQuiz(id: string) {
       this.isLoading = true;
       this.error = null;
@@ -65,14 +65,15 @@ export const useQuizStore = defineStore("quizzes", {
         this.activeQuiz = await fetchQuiz(id);
         return this.activeQuiz;
       } catch (error) {
-        this.error = getErrorMessage(error, "Failed to load quiz.");
-        throw error;
+        this.error = toAppError(error, "quiz_load");
+        throw this.error;
       } finally {
         this.isLoading = false;
       }
     },
+
     async saveQuiz(payload: QuizPayload, id?: string) {
-      this.isLoading = true;
+      this.isActionLoading = true;
       this.error = null;
       try {
         const savedQuiz = id
@@ -88,20 +89,20 @@ export const useQuizStore = defineStore("quizzes", {
         this.activeQuiz = savedQuiz;
         return savedQuiz;
       } catch (error) {
-        this.error = getErrorMessage(error, "Failed to save quiz.");
-        throw error;
+        this.error = toAppError(error, "quiz_save");
+        throw this.error;
       } finally {
-        this.isLoading = false;
+        this.isActionLoading = false;
       }
     },
+
     async setQuizPublished(id: string, published: boolean) {
-      this.isLoading = true;
+      this.isActionLoading = true;
       this.error = null;
       try {
-        const updatedQuiz = published
-          ? await publishQuiz(id)
-          : await unpublishQuiz(id);
-        const existingIndex = this.items.findIndex((quiz) => quiz.id === id);
+        const updatedQuiz = published ? await publishQuiz(id) : await unpublishQuiz(id);
+
+        const existingIndex = this.items.findIndex((q) => q.id === id);
         if (existingIndex >= 0) {
           this.items.splice(existingIndex, 1, updatedQuiz);
         }
@@ -110,31 +111,40 @@ export const useQuizStore = defineStore("quizzes", {
         }
         return updatedQuiz;
       } catch (error) {
-        this.error = getErrorMessage(error, "Failed to update quiz status.");
-        throw error;
+        const context: MessageContext = published ? "quiz_publish" : "quiz_unpublish";
+        this.error = toAppError(error, context);
+        throw this.error;
       } finally {
-        this.isLoading = false;
+        this.isActionLoading = false;
       }
     },
+
     async deleteQuiz(id: string) {
+      this.isActionLoading = true;
       this.error = null;
       try {
         await deleteQuiz(id);
         this.items = this.items.filter((quiz) => quiz.id !== id);
       } catch (error) {
-        this.error = getErrorMessage(error, "Failed to delete quiz.");
-        throw error;
+        this.error = toAppError(error, "quiz_delete");
+        throw this.error;
+      } finally {
+        this.isActionLoading = false;
       }
     },
+
     async duplicateQuiz(id: string) {
+      this.isActionLoading = true;
       this.error = null;
       try {
         const copy = await duplicateQuiz(id);
         this.items.unshift(copy);
         return copy;
       } catch (error) {
-        this.error = getErrorMessage(error, "Failed to duplicate quiz.");
-        throw error;
+        this.error = toAppError(error, "quiz_duplicate");
+        throw this.error;
+      } finally {
+        this.isActionLoading = false;
       }
     }
   }

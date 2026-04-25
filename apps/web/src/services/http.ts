@@ -1,5 +1,6 @@
 import axios from "axios";
 import { env } from "../config/env";
+import { normalizeApiError } from "../lib/api/errors";
 
 const STORAGE_KEY = "quiz_app_auth";
 
@@ -96,4 +97,12 @@ httpClient.interceptors.response.use(
       isRefreshing = false;
     }
   }
+);
+
+// Normalization interceptor — runs after the 401 refresh interceptor.
+// Every error that escapes the refresh logic is converted into an AppError here,
+// so all catch blocks in stores/components receive a consistent shape.
+httpClient.interceptors.response.use(
+  (response) => response,
+  (error) => Promise.reject(normalizeApiError(error))
 );

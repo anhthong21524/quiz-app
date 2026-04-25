@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import axios from "axios";
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
 import { env } from "../config/env";
 import { getGoogleAuthStatus } from "../services/auth-api";
 import { useAuthStore } from "../stores/auth";
+import { isAppError } from "../lib/api/errors";
+import { getUserMessage } from "../lib/api/error-messages";
 
 type FormErrors = {
   email: string;
@@ -142,10 +143,9 @@ const handleSubmit = async () => {
 
     await router.push({ name: "quizzes" });
   } catch (error) {
-    console.error(error);
-    if (axios.isAxiosError<{ message?: string | string[] }>(error)) {
-      const message = error.response?.data?.message;
-      errors.form = Array.isArray(message) ? message.join(", ") : message ?? "Invalid email or password.";
+    if (isAppError(error)) {
+      const context = isSignIn.value ? "login" : "register";
+      errors.form = getUserMessage(error, context);
     } else {
       errors.form = "We couldn't sign you in right now. Please try again.";
     }
@@ -374,7 +374,13 @@ onBeforeUnmount(() => {
 
                 <p v-if="errors.form" class="form-error">{{ errors.form }}</p>
 
-                <button type="submit" class="submit-button" :disabled="isSubmitting">
+                <button
+                  type="submit"
+                  class="submit-button"
+                  :disabled="isSubmitting"
+                  :aria-busy="isSubmitting"
+                  :aria-label="isSubmitting ? loadingLabel : undefined"
+                >
                   <span v-if="isSubmitting" class="spinner" aria-hidden="true"></span>
                   <span>{{ isSubmitting ? loadingLabel : submitLabel }}</span>
                 </button>
@@ -468,7 +474,13 @@ onBeforeUnmount(() => {
 
                 <p v-if="errors.form" class="form-error">{{ errors.form }}</p>
 
-                <button type="submit" class="submit-button" :disabled="isSubmitting">
+                <button
+                  type="submit"
+                  class="submit-button"
+                  :disabled="isSubmitting"
+                  :aria-busy="isSubmitting"
+                  :aria-label="isSubmitting ? loadingLabel : undefined"
+                >
                   <span v-if="isSubmitting" class="spinner" aria-hidden="true"></span>
                   <span>{{ isSubmitting ? loadingLabel : submitLabel }}</span>
                 </button>

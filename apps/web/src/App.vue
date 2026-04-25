@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useRoute } from "vue-router";
 import AppHeader from "./components/AppHeader.vue";
 import AppToastList from "./components/AppToastList.vue";
+import GlobalLoadingBar from "./components/GlobalLoadingBar.vue";
 
 const route = useRoute();
 const useBareLayout = computed(() => route.meta.bareLayout === true);
@@ -12,6 +13,7 @@ const usePublicLayout = computed(() =>
 </script>
 
 <template>
+  <GlobalLoadingBar />
   <AppToastList />
 
   <RouterView v-if="useBareLayout" />

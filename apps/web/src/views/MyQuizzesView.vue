@@ -10,6 +10,8 @@ import QuizTable from "../components/my-quizzes/QuizTable.vue";
 import QuizToolbar from "../components/my-quizzes/QuizToolbar.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 import ShareModal from "../components/ShareModal.vue";
+import SectionErrorState from "../components/feedback/SectionErrorState.vue";
+import QuizListSkeleton from "../components/loading/QuizListSkeleton.vue";
 import type { QuizListItem, ViewMode } from "../components/my-quizzes/types";
 import { myQuizzes, type MyQuizStatus } from "../data/my-quizzes";
 import { useQuizStore } from "../stores/quizzes";
@@ -56,11 +58,21 @@ const statusOptions: Array<MyQuizStatus | "All status"> = [
   "Unpublished"
 ];
 
+// True only on first load when there are no items yet — shows skeleton instead of blank.
+// During background refresh (items already present) we keep stale content visible.
+const isInitialLoad = computed(
+  () => quizStore.isLoading && quizStore.items.length === 0
+);
+
 onMounted(async () => {
   if (!quizStore.items.length) {
     await quizStore.loadQuizzes();
   }
 });
+
+async function retryLoadQuizzes() {
+  await quizStore.loadQuizzes();
+}
 
 const seededQuizzes = computed<QuizListItem[]>(() =>
   myQuizzes.map((quiz) => ({
@@ -285,61 +297,86 @@ function shareQuiz(quiz: QuizListItem) {
       <p>Manage your quiz drafts, published quizzes, and API-backed editor work.</p>
     </header>
 
-    <section class="quiz-manager-card" aria-labelledby="my-quizzes-list-title">
+    <section
+      class="quiz-manager-card"
+      aria-labelledby="my-quizzes-list-title"
+      :aria-busy="isInitialLoad"
+    >
       <h2 id="my-quizzes-list-title" class="sr-only">My quizzes list</h2>
 
-      <QuizToolbar
-        v-model:search-query="searchQuery"
-        v-model:selected-status="selectedStatus"
-        v-model:selected-subject="selectedSubject"
-        v-model:selected-sort="selectedSort"
-        v-model:view-mode="viewMode"
-        :status-options="statusOptions"
-        :subject-options="subjectOptions"
-      />
-
-      <p v-if="quizStore.error" class="quiz-error">{{ quizStore.error }}</p>
-
-      <template v-if="filteredQuizzes.length">
-        <template v-if="viewMode === 'list'">
-          <QuizTable
-            :quizzes="filteredQuizzes"
-            @view="viewQuiz"
-            @edit="editQuiz"
-            @publish="publishQuiz"
-            @unpublish="unpublishQuiz"
-            @duplicate="duplicateQuiz"
-            @delete="deleteQuiz"
-            @share="shareQuiz"
-          />
-          <QuizCardList
-            :quizzes="filteredQuizzes"
-            @view="viewQuiz"
-            @edit="editQuiz"
-            @publish="publishQuiz"
-            @unpublish="unpublishQuiz"
-            @duplicate="duplicateQuiz"
-            @delete="deleteQuiz"
-            @share="shareQuiz"
-          />
-        </template>
-
-        <QuizGrid
-          v-else
-          :quizzes="filteredQuizzes"
-          @view="viewQuiz"
-          @edit="editQuiz"
-          @publish="publishQuiz"
-          @unpublish="unpublishQuiz"
-          @duplicate="duplicateQuiz"
-          @delete="deleteQuiz"
-          @share="shareQuiz"
+      <!-- Initial load: show skeleton instead of blank card area.
+           Transition requires exactly one root child per branch, so each branch
+           is a single element keyed to let Vue swap them cleanly. -->
+      <Transition name="quiz-list-fade" mode="out-in">
+        <QuizListSkeleton
+          v-if="isInitialLoad"
+          key="skeleton"
+          :count="5"
+          aria-label="Loading quizzes"
         />
 
-        <QuizPagination :showing-copy="showingCopy" />
-      </template>
+        <div v-else key="content" class="quiz-manager-content">
+          <QuizToolbar
+            v-model:search-query="searchQuery"
+            v-model:selected-status="selectedStatus"
+            v-model:selected-subject="selectedSubject"
+            v-model:selected-sort="selectedSort"
+            v-model:view-mode="viewMode"
+            :status-options="statusOptions"
+            :subject-options="subjectOptions"
+          />
 
-      <QuizEmptyState v-else @create="createQuiz" />
+          <SectionErrorState
+            v-if="quizStore.error && !quizStore.isLoading"
+            :message="quizStore.error.userMessage"
+            :retryable="quizStore.error.isRetryable"
+            :loading="quizStore.isLoading"
+            retry-label="Reload quizzes"
+            @retry="retryLoadQuizzes"
+          />
+
+          <template v-else-if="filteredQuizzes.length">
+            <template v-if="viewMode === 'list'">
+              <QuizTable
+                :quizzes="filteredQuizzes"
+                @view="viewQuiz"
+                @edit="editQuiz"
+                @publish="publishQuiz"
+                @unpublish="unpublishQuiz"
+                @duplicate="duplicateQuiz"
+                @delete="deleteQuiz"
+                @share="shareQuiz"
+              />
+              <QuizCardList
+                :quizzes="filteredQuizzes"
+                @view="viewQuiz"
+                @edit="editQuiz"
+                @publish="publishQuiz"
+                @unpublish="unpublishQuiz"
+                @duplicate="duplicateQuiz"
+                @delete="deleteQuiz"
+                @share="shareQuiz"
+              />
+            </template>
+
+            <QuizGrid
+              v-else
+              :quizzes="filteredQuizzes"
+              @view="viewQuiz"
+              @edit="editQuiz"
+              @publish="publishQuiz"
+              @unpublish="unpublishQuiz"
+              @duplicate="duplicateQuiz"
+              @delete="deleteQuiz"
+              @share="shareQuiz"
+            />
+
+            <QuizPagination :showing-copy="showingCopy" />
+          </template>
+
+          <QuizEmptyState v-else @create="createQuiz" />
+        </div>
+      </Transition>
     </section>
   </section>
 
@@ -362,6 +399,29 @@ function shareQuiz(quiz: QuizListItem) {
 </template>
 
 <style>
+.quiz-list-fade-enter-active,
+.quiz-list-fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.quiz-list-fade-enter-from,
+.quiz-list-fade-leave-to {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .quiz-list-fade-enter-active,
+  .quiz-list-fade-leave-active {
+    transition: none;
+  }
+}
+
+/* Transparent wrapper required by <Transition> single-root constraint.
+   Inherits the flex column layout from .quiz-manager-card. */
+.quiz-manager-content {
+  display: contents;
+}
+
 .my-quizzes-page {
   display: grid;
   gap: 18px;
@@ -435,12 +495,6 @@ function shareQuiz(quiz: QuizListItem) {
   padding: 24px;
 }
 
-.quiz-error {
-  margin: 0;
-  padding: 0 24px 18px;
-  color: #b91c1c;
-  font-weight: 700;
-}
 
 .search-control,
 .select-control {
