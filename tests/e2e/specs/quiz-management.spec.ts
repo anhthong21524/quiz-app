@@ -7,7 +7,8 @@ test("create account signs the user in", async ({ page }) => {
 
   await page.getByRole("tab", { name: "Create account" }).click();
   await page.getByRole("textbox", { name: "Email" }).fill(email);
-  await page.getByRole("textbox", { name: "Password" }).fill("admin1234");
+  await page.getByRole("textbox", { name: "Password", exact: true }).fill("Stronger123!");
+  await page.getByRole("textbox", { name: "Confirm password" }).fill("Stronger123!");
   await page.getByRole("button", { name: "Create account ->" }).click();
 
   await expect(page.getByRole("button", { name: "Open account menu" })).toBeVisible();
@@ -122,7 +123,7 @@ test("quizzes are scoped to the authenticated creator", async ({ request }) => {
   const otherRegister = await request.post(`${apiBaseUrl}/auth/register`, {
     data: {
       email: otherEmail,
-      password: "admin1234"
+      password: "Stronger123!"
     }
   });
   expect(otherRegister.ok()).toBeTruthy();

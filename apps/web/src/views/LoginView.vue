@@ -1,17 +1,28 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import FieldErrorText from "../components/forms/FieldErrorText.vue";
+import FormErrorBanner from "../components/forms/FormErrorBanner.vue";
+import PasswordHint from "../components/forms/PasswordHint.vue";
 import { env } from "../config/env";
 import { getGoogleAuthStatus } from "../services/auth-api";
 import { useAuthStore } from "../stores/auth";
 import { isAppError } from "../lib/api/errors";
-import { getUserMessage } from "../lib/api/error-messages";
+import {
+  validateLoginForm,
+  validateRegisterForm,
+  type AuthFieldErrors,
+  type LoginFormValues,
+  type RegisterFormValues
+} from "../lib/validation/authSchema";
+import {
+  loginPayloadFrom,
+  normalizeAuthError,
+  registerPayloadFrom
+} from "../lib/validation/normalizeAuthError";
+import type { AuthFieldName } from "../lib/validation/validators";
 
-type FormErrors = {
-  email: string;
-  password: string;
-  form: string;
-};
+type FieldFlags = Partial<Record<AuthFieldName, boolean>>;
 
 type AuthMode = "signIn" | "createAccount";
 
@@ -25,6 +36,7 @@ const ADMIN_EMAIL = "admin@quiz.app";
 const ADMIN_PASSWORD = "admin1234";
 const GOOGLE_AUTH_UNAVAILABLE_MESSAGE =
   "Google sign-in isn't configured for this environment yet. Use email and password for now.";
+const GENERIC_AUTH_ERROR = "We couldn't complete that request right now. Please try again.";
 
 const brandMessages: BrandMessage[] = [
   {
@@ -37,117 +49,162 @@ const brandMessages: BrandMessage[] = [
   }
 ];
 
-const email = ref(ADMIN_EMAIL);
-const password = ref(ADMIN_PASSWORD);
+const loginForm = reactive<LoginFormValues>({
+  email: ADMIN_EMAIL,
+  password: ADMIN_PASSWORD
+});
+const registerForm = reactive<RegisterFormValues>({
+  name: "",
+  email: "",
+  password: "",
+  confirmPassword: ""
+});
 const showPassword = ref(false);
+const showConfirmPassword = ref(false);
 const isSubmitting = ref(false);
 const isCheckingGoogleAuth = ref(false);
 const googleAuthEnabled = ref<boolean | null>(null);
 const authMode = ref<AuthMode>("signIn");
 const activeBrandIndex = ref(0);
-const errors = reactive<FormErrors>({
-  email: "",
-  password: "",
-  form: ""
-});
+const submitAttempted = ref(false);
+const loginTouched = reactive<FieldFlags>({});
+const registerTouched = reactive<FieldFlags>({});
+const loginDirty = reactive<FieldFlags>({});
+const registerDirty = reactive<FieldFlags>({});
+const loginServerErrors = reactive<AuthFieldErrors>({});
+const registerServerErrors = reactive<AuthFieldErrors>({});
+const formError = ref("");
 
 const isSignIn = computed(() => authMode.value === "signIn");
 const authTitle = computed(() =>
   isSignIn.value ? "Sign in to Quiz App" : "Create your Quiz App account"
 );
 const passwordInputType = computed(() => (showPassword.value ? "text" : "password"));
+const confirmPasswordInputType = computed(() =>
+  showConfirmPassword.value ? "text" : "password"
+);
 const panelContent = computed(() => brandMessages[activeBrandIndex.value]);
 const submitLabel = computed(() => (isSignIn.value ? "Sign in ->" : "Create account ->"));
 const loadingLabel = computed(() =>
   isSignIn.value ? "Signing in..." : "Creating account..."
+);
+const loginValidation = computed(() => validateLoginForm(loginForm));
+const registerValidation = computed(() => validateRegisterForm(registerForm));
+const activeValidation = computed(() =>
+  isSignIn.value ? loginValidation.value : registerValidation.value
+);
+const activeTouched = computed(() => (isSignIn.value ? loginTouched : registerTouched));
+const activeDirty = computed(() => (isSignIn.value ? loginDirty : registerDirty));
+const activeServerErrors = computed(() =>
+  isSignIn.value ? loginServerErrors : registerServerErrors
+);
+const isSubmitDisabled = computed(
+  () => isSubmitting.value || !activeValidation.value.isValid
 );
 const authStore = useAuthStore();
 const router = useRouter();
 
 let brandRotationTimer: number | undefined;
 
-const validateEmail = (value: string) => {
-  if (!value.trim()) {
-    return "Email is required.";
-  }
-
-  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailPattern.test(value)) {
-    return "Enter a valid email address.";
-  }
-
-  return "";
-};
-
-const validatePassword = (value: string) => {
-  if (!value.trim()) {
-    return "Password is required.";
-  }
-
-  if (!isSignIn.value && value.trim().length < 8) {
-    return "Password must be at least 8 characters.";
-  }
-
-  return "";
-};
-
-const validateForm = () => {
-  errors.email = validateEmail(email.value);
-  errors.password = validatePassword(password.value);
-  errors.form = "";
-
-  return !errors.email && !errors.password;
-};
-
-const clearEmailError = () => {
-  if (errors.email) {
-    errors.email = validateEmail(email.value);
+const clearObject = (target: Record<string, unknown>) => {
+  for (const key of Object.keys(target)) {
+    delete target[key];
   }
 };
 
-const clearPasswordError = () => {
-  if (errors.password) {
-    errors.password = validatePassword(password.value);
-  }
+const resetInteractionState = () => {
+  submitAttempted.value = false;
+  formError.value = "";
+  clearObject(loginTouched);
+  clearObject(registerTouched);
+  clearObject(loginDirty);
+  clearObject(registerDirty);
+  clearObject(loginServerErrors);
+  clearObject(registerServerErrors);
 };
 
 const resetFormState = () => {
-  email.value = isSignIn.value ? ADMIN_EMAIL : "";
-  password.value = isSignIn.value ? ADMIN_PASSWORD : "";
+  loginForm.email = ADMIN_EMAIL;
+  loginForm.password = ADMIN_PASSWORD;
+  registerForm.name = "";
+  registerForm.email = "";
+  registerForm.password = "";
+  registerForm.confirmPassword = "";
   showPassword.value = false;
+  showConfirmPassword.value = false;
   isSubmitting.value = false;
-  errors.email = "";
-  errors.password = "";
-  errors.form = "";
+  resetInteractionState();
 };
 
 const switchMode = (mode: AuthMode) => {
   authMode.value = mode;
-  resetFormState();
+  showPassword.value = false;
+  showConfirmPassword.value = false;
+  isSubmitting.value = false;
+  resetInteractionState();
+};
+
+const markFieldTouched = (field: AuthFieldName) => {
+  activeTouched.value[field] = true;
+};
+
+const handleFieldInput = (field: AuthFieldName) => {
+  activeDirty.value[field] = true;
+  delete activeServerErrors.value[field];
+  formError.value = "";
+};
+
+const shouldShowFieldError = (field: AuthFieldName) =>
+  Boolean(submitAttempted.value || activeTouched.value[field]);
+
+const fieldError = (field: AuthFieldName) => {
+  const clientError = activeValidation.value.fieldErrors[field];
+
+  if (clientError && shouldShowFieldError(field)) {
+    return clientError;
+  }
+
+  return activeServerErrors.value[field] ?? "";
+};
+
+const applyServerErrors = (fieldErrors: AuthFieldErrors) => {
+  const target = activeServerErrors.value;
+  clearObject(target);
+
+  for (const [field, message] of Object.entries(fieldErrors)) {
+    target[field as AuthFieldName] = message;
+  }
 };
 
 const handleSubmit = async () => {
-  if (!validateForm()) {
+  submitAttempted.value = true;
+  formError.value = "";
+  clearObject(activeServerErrors.value);
+
+  if (!activeValidation.value.isValid) {
     return;
   }
 
   isSubmitting.value = true;
-  errors.form = "";
 
   try {
     if (isSignIn.value) {
-      await authStore.login(email.value, password.value);
+      const payload = loginPayloadFrom(loginValidation.value.values);
+      await authStore.login(payload.email, payload.password);
     } else {
-      await authStore.register(email.value, password.value);
+      const payload = registerPayloadFrom(registerValidation.value.values);
+      await authStore.register(payload.email, payload.password);
     }
 
     await router.push({ name: "quizzes" });
   } catch (error) {
     if (isAppError(error)) {
       const context = isSignIn.value ? "login" : "register";
-      errors.form = getUserMessage(error, context);
+      const normalizedError = normalizeAuthError(error, context);
+      applyServerErrors(normalizedError.fieldErrors);
+      formError.value = normalizedError.formError;
     } else {
-      errors.form = "We couldn't sign you in right now. Please try again.";
+      formError.value = GENERIC_AUTH_ERROR;
     }
   } finally {
     isSubmitting.value = false;
@@ -164,7 +221,7 @@ const loadGoogleAuthStatus = async () => {
 };
 
 const handleGoogleSignIn = async () => {
-  errors.form = "";
+  formError.value = "";
   isCheckingGoogleAuth.value = true;
 
   try {
@@ -173,7 +230,7 @@ const handleGoogleSignIn = async () => {
     }
 
     if (googleAuthEnabled.value === false) {
-      errors.form = GOOGLE_AUTH_UNAVAILABLE_MESSAGE;
+      formError.value = GOOGLE_AUTH_UNAVAILABLE_MESSAGE;
       return;
     }
 
@@ -295,18 +352,17 @@ onBeforeUnmount(() => {
                   <label for="signin-email">Email</label>
                   <input
                     id="signin-email"
-                    v-model="email"
+                    v-model="loginForm.email"
                     type="email"
                     name="email"
                     autocomplete="email"
                     placeholder="you@example.com"
-                    :aria-invalid="Boolean(errors.email)"
-                    :aria-describedby="errors.email ? 'signin-email-error' : undefined"
-                    @input="clearEmailError"
+                    :aria-invalid="Boolean(fieldError('email'))"
+                    :aria-describedby="fieldError('email') ? 'signin-email-error' : undefined"
+                    @blur="markFieldTouched('email')"
+                    @input="handleFieldInput('email')"
                   />
-                  <p v-if="errors.email" id="signin-email-error" class="field-error">
-                    {{ errors.email }}
-                  </p>
+                  <FieldErrorText id="signin-email-error" :message="fieldError('email')" />
                 </div>
 
                 <div class="field-group">
@@ -314,14 +370,15 @@ onBeforeUnmount(() => {
                   <div class="password-field">
                     <input
                       id="signin-password"
-                      v-model="password"
+                      v-model="loginForm.password"
                       :type="passwordInputType"
                       name="password"
                       autocomplete="current-password"
                       placeholder="Password"
-                      :aria-invalid="Boolean(errors.password)"
-                      :aria-describedby="errors.password ? 'signin-password-error' : undefined"
-                      @input="clearPasswordError"
+                      :aria-invalid="Boolean(fieldError('password'))"
+                      :aria-describedby="fieldError('password') ? 'signin-password-error' : undefined"
+                      @blur="markFieldTouched('password')"
+                      @input="handleFieldInput('password')"
                     />
                     <button
                       type="button"
@@ -361,9 +418,7 @@ onBeforeUnmount(() => {
                       </svg>
                     </button>
                   </div>
-                  <p v-if="errors.password" id="signin-password-error" class="field-error">
-                    {{ errors.password }}
-                  </p>
+                  <FieldErrorText id="signin-password-error" :message="fieldError('password')" />
                 </div>
 
                 <div class="form-links">
@@ -372,12 +427,12 @@ onBeforeUnmount(() => {
                   </button>
                 </div>
 
-                <p v-if="errors.form" class="form-error">{{ errors.form }}</p>
+                <FormErrorBanner :message="formError" />
 
                 <button
                   type="submit"
                   class="submit-button"
-                  :disabled="isSubmitting"
+                  :disabled="isSubmitDisabled"
                   :aria-busy="isSubmitting"
                   :aria-label="isSubmitting ? loadingLabel : undefined"
                 >
@@ -392,25 +447,22 @@ onBeforeUnmount(() => {
               :class="{ 'is-active': !isSignIn }"
               :aria-hidden="isSignIn"
             >
-              <div class="panel-spacer" aria-hidden="true"></div>
-
               <form class="login-form create-account" @submit.prevent="handleSubmit" novalidate>
                 <div class="field-group">
                   <label for="signup-email">Email</label>
                   <input
                     id="signup-email"
-                    v-model="email"
+                    v-model="registerForm.email"
                     type="email"
                     name="email"
                     autocomplete="email"
                     placeholder="you@example.com"
-                    :aria-invalid="Boolean(errors.email)"
-                    :aria-describedby="errors.email ? 'signup-email-error' : undefined"
-                    @input="clearEmailError"
+                    :aria-invalid="Boolean(fieldError('email'))"
+                    :aria-describedby="fieldError('email') ? 'signup-email-error' : undefined"
+                    @blur="markFieldTouched('email')"
+                    @input="handleFieldInput('email')"
                   />
-                  <p v-if="errors.email" id="signup-email-error" class="field-error">
-                    {{ errors.email }}
-                  </p>
+                  <FieldErrorText id="signup-email-error" :message="fieldError('email')" />
                 </div>
 
                 <div class="field-group">
@@ -418,14 +470,19 @@ onBeforeUnmount(() => {
                   <div class="password-field">
                     <input
                       id="signup-password"
-                      v-model="password"
+                      v-model="registerForm.password"
                       :type="passwordInputType"
                       name="password"
                       autocomplete="new-password"
                       placeholder="Password"
-                      :aria-invalid="Boolean(errors.password)"
-                      :aria-describedby="errors.password ? 'signup-password-error' : undefined"
-                      @input="clearPasswordError"
+                      :aria-invalid="Boolean(fieldError('password'))"
+                      :aria-describedby="
+                        ['signup-password-hint', fieldError('password') ? 'signup-password-error' : undefined]
+                          .filter(Boolean)
+                          .join(' ')
+                      "
+                      @blur="markFieldTouched('password')"
+                      @input="handleFieldInput('password')"
                     />
                     <button
                       type="button"
@@ -465,19 +522,83 @@ onBeforeUnmount(() => {
                       </svg>
                     </button>
                   </div>
-                  <p v-if="errors.password" id="signup-password-error" class="field-error">
-                    {{ errors.password }}
-                  </p>
+                  <FieldErrorText id="signup-password-error" :message="fieldError('password')" />
                 </div>
 
-                <div class="form-links form-links-placeholder" aria-hidden="true"></div>
+                <PasswordHint
+                  id="signup-password-hint"
+                  :password="registerForm.password"
+                  :confirm-password="registerForm.confirmPassword"
+                  show-confirmation
+                />
 
-                <p v-if="errors.form" class="form-error">{{ errors.form }}</p>
+                <div class="field-group">
+                  <label for="signup-confirm-password">Confirm password</label>
+                  <div class="password-field">
+                    <input
+                      id="signup-confirm-password"
+                      v-model="registerForm.confirmPassword"
+                      :type="confirmPasswordInputType"
+                      name="confirmPassword"
+                      autocomplete="new-password"
+                      placeholder="Confirm password"
+                      :aria-invalid="Boolean(fieldError('confirmPassword'))"
+                      :aria-describedby="
+                        fieldError('confirmPassword') ? 'signup-confirm-password-error' : undefined
+                      "
+                      @blur="markFieldTouched('confirmPassword')"
+                      @input="handleFieldInput('confirmPassword')"
+                    />
+                    <button
+                      type="button"
+                      class="password-toggle"
+                      :aria-label="showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'"
+                      @click="showConfirmPassword = !showConfirmPassword"
+                    >
+                      <svg
+                        v-if="showConfirmPassword"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M2 12s3.6-6 10-6 10 6 10 6-3.6 6-10 6-10-6-10-6Z" />
+                        <circle cx="12" cy="12" r="3" />
+                      </svg>
+                      <svg
+                        v-else
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.8"
+                        stroke-linecap="round"
+                        stroke-linejoin="round"
+                        aria-hidden="true"
+                      >
+                        <path d="M3 3l18 18" />
+                        <path d="M10.6 10.7A2.99 2.99 0 0 0 9 13a3 3 0 0 0 5.2 2.1" />
+                        <path
+                          d="M9.9 4.24A9.77 9.77 0 0 1 12 4c6.4 0 10 8 10 8a18.4 18.4 0 0 1-3.2 4.2"
+                        />
+                        <path d="M6.6 6.64C4.2 8.18 2 12 2 12a18.7 18.7 0 0 0 5.17 5.47" />
+                      </svg>
+                    </button>
+                  </div>
+                  <FieldErrorText
+                    id="signup-confirm-password-error"
+                    :message="fieldError('confirmPassword')"
+                  />
+                </div>
+
+                <FormErrorBanner :message="formError" />
 
                 <button
                   type="submit"
                   class="submit-button"
-                  :disabled="isSubmitting"
+                  :disabled="isSubmitDisabled"
                   :aria-busy="isSubmitting"
                   :aria-label="isSubmitting ? loadingLabel : undefined"
                 >
@@ -536,8 +657,8 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 28px;
-  padding: 48px 36px;
+  gap: 24px;
+  padding: 42px 36px;
   background: var(--brand-bg);
 }
 
@@ -566,7 +687,7 @@ onBeforeUnmount(() => {
 .brand-copy {
   display: grid;
   gap: 12px;
-  margin-top: 44px;
+  margin-top: 36px;
 }
 
 .brand-copy-enter-active,
@@ -607,7 +728,7 @@ onBeforeUnmount(() => {
   flex-direction: column;
   justify-content: center;
   background: #ffffff;
-  padding: 52px 44px;
+  padding: 42px 44px;
 }
 
 .form-shell {
@@ -615,7 +736,7 @@ onBeforeUnmount(() => {
   max-width: 460px;
   margin: 0 auto;
   display: grid;
-  gap: 16px;
+  gap: 14px;
 }
 
 .auth-title {
@@ -627,41 +748,30 @@ onBeforeUnmount(() => {
 }
 
 .form-stage {
-  position: relative;
   width: 100%;
-  min-height: 372px;
-  --form-top-offset: 104px;
 }
 
 .auth-form-panel {
-  position: absolute;
-  inset: 0;
   box-sizing: border-box;
-  display: flex;
+  display: none;
   flex-direction: column;
-  justify-content: center;
-  gap: 18px;
+  gap: 16px;
   opacity: 0;
   visibility: hidden;
-  z-index: 0;
   pointer-events: none;
 }
 
 .auth-form-panel.is-active {
+  display: flex;
   opacity: 1;
   visibility: visible;
-  z-index: 1;
   pointer-events: auto;
 }
 
 .sign-in-extras {
   display: grid;
-  gap: 18px;
-  min-height: var(--form-top-offset);
-}
-
-.panel-spacer {
-  min-height: var(--form-top-offset);
+  gap: 14px;
+  padding-top: 6px;
 }
 
 .tabs {
@@ -772,7 +882,7 @@ onBeforeUnmount(() => {
 .login-form {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 11px;
   width: 100%;
 }
 
@@ -857,7 +967,7 @@ onBeforeUnmount(() => {
 }
 
 .form-links-placeholder {
-  visibility: hidden;
+  display: none;
 }
 
 .text-link {
@@ -900,9 +1010,13 @@ onBeforeUnmount(() => {
 }
 
 .submit-button:disabled {
-  cursor: wait;
+  cursor: not-allowed;
   background: #7fdcbc;
   box-shadow: none;
+}
+
+.submit-button[aria-busy="true"] {
+  cursor: wait;
 }
 
 .spinner {
@@ -956,10 +1070,6 @@ onBeforeUnmount(() => {
 
   .form-shell {
     width: 100%;
-  }
-
-  .form-stage {
-    min-height: 340px;
   }
 }
 </style>
