@@ -35,7 +35,9 @@ pnpm --filter @quiz-app/shared build # Rebuild shared types
 
 Copy `.env.example` to `.env` in `apps/api/`. The API runs without MongoDB — if `MONGODB_URI` is not set it falls back to an in-memory repository automatically.
 
-Key env vars: `MONGODB_URI`, `DATABASE_NAME`, `PORT` (default 3000), `FRONTEND_URL`, `VITE_API_BASE_URL`.
+Key env vars: `MONGODB_URI`, `DATABASE_NAME`, `PORT` (default 3000), `FRONTEND_URL`, `VITE_API_BASE_URL`, `VITE_SITE_URL`.
+
+The `prebuild` script (`apps/web/scripts/generate-seo-files.mjs`) runs before every `vite build` and generates: `robots.txt`, `sitemap.xml` (using `VITE_SITE_URL`), and PNG assets (`og-image.png`, `apple-touch-icon.png`, `icon-192.png`, `icon-512.png`) from the source SVGs. Run it manually with `node apps/web/scripts/generate-seo-files.mjs` after changing `og-image.svg` or `favicon.svg`.
 
 ## Architecture
 
@@ -63,14 +65,34 @@ tests/e2e/    — Playwright tests
 
 Global `ValidationPipe` is configured with `whitelist: true`, `forbidNonWhitelisted: true`, and `transform: true`.
 
+`apps/api/src/modules/auth/` contains a simple auth module:
+- `AuthController` — handles `POST /auth/login`
+- `AuthService` — validates hardcoded admin credentials (`admin@quiz.app` / `admin1234`) and returns a user object; no JWT tokens
+
 ### Frontend
 
-Vue 3 SFCs with Pinia for state (`useQuizStore` in `stores/`), Vue Router for navigation, and Axios via `services/httpClient.ts`. The API base URL comes from `src/config/env.ts` which reads `VITE_API_BASE_URL`. Quiz API calls live in `services/quiz-api.ts`; store actions wrap them with loading/error state.
+Vue 3 SFCs with Pinia for state (`useQuizStore` in `stores/`), Vue Router for navigation, and Axios via `services/http.ts`. The API base URL comes from `src/config/env.ts` which reads `VITE_API_BASE_URL`. Quiz API calls live in `services/quiz-api.ts`; auth API calls live in `services/auth-api.ts`; store actions wrap them with loading/error state.
+
+Auth state is stored in `sessionStorage` via `services/auth-session.ts` (`isAuthenticated`, `setAuthenticated`). The router guard in `router/index.ts` redirects unauthenticated users to `/login` for protected routes, and redirects authenticated users away from `/login`.
+
+SEO metadata (title, description, canonical, breadcrumbs) is applied per-route via `services/seo.ts` in a `router.afterEach` hook.
+
+#### Views and Routes
+
+| Route | View | Auth Required |
+|-------|------|---------------|
+| `/` | `HomeView` (Dashboard) | Yes |
+| `/login` | `LoginView` | No (bare layout) |
+| `/quizzes` | `MyQuizzesView` | Yes |
+| `/create-quiz` | `CreateQuizView` | Yes |
+| `/editor` | `QuizEditorView` (new quiz) | Yes |
+| `/editor/:id` | `QuizEditorView` (edit quiz) | Yes |
 
 ### API Endpoints
 
 | Method | Path | Action |
 |--------|------|--------|
+| POST | `/auth/login` | Sign in (hardcoded admin) |
 | POST | `/api/quizzes` | Create quiz |
 | GET | `/api/quizzes` | List all quizzes |
 | GET | `/api/quizzes/:id` | Get quiz by ID |

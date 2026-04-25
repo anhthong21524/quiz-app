@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import sharp from "sharp";
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const webRoot = resolve(scriptDirectory, "..");
@@ -19,8 +20,42 @@ const siteUrl = trimTrailingSlash(
 const lastModified = new Date().toISOString();
 
 await mkdir(publicDirectory, { recursive: true });
-await writeFile(resolve(publicDirectory, "robots.txt"), createRobots(), "utf8");
-await writeFile(resolve(publicDirectory, "sitemap.xml"), createSitemap(), "utf8");
+
+await Promise.all([
+  generateOgImage(),
+  generateIcons(),
+  writeFile(resolve(publicDirectory, "robots.txt"), createRobots(), "utf8"),
+  writeFile(resolve(publicDirectory, "sitemap.xml"), createSitemap(), "utf8")
+]);
+
+async function generateOgImage() {
+  const svgBuffer = await readFile(resolve(publicDirectory, "og-image.svg"));
+  await sharp(svgBuffer)
+    .resize(1200, 630)
+    .png({ compressionLevel: 9, effort: 10 })
+    .toFile(resolve(publicDirectory, "og-image.png"));
+  console.log("Generated og-image.png");
+}
+
+async function generateIcons() {
+  const svgBuffer = await readFile(resolve(publicDirectory, "favicon.svg"));
+
+  await Promise.all([
+    sharp(svgBuffer)
+      .resize(180, 180)
+      .png({ compressionLevel: 9 })
+      .toFile(resolve(publicDirectory, "apple-touch-icon.png")),
+    sharp(svgBuffer)
+      .resize(192, 192)
+      .png({ compressionLevel: 9 })
+      .toFile(resolve(publicDirectory, "icon-192.png")),
+    sharp(svgBuffer)
+      .resize(512, 512)
+      .png({ compressionLevel: 9 })
+      .toFile(resolve(publicDirectory, "icon-512.png"))
+  ]);
+  console.log("Generated apple-touch-icon.png, icon-192.png, icon-512.png");
+}
 
 function createRobots() {
   const disallowRules = privateRoutes.map((route) => `Disallow: ${route}`).join("\n");
@@ -28,6 +63,7 @@ function createRobots() {
   return `User-agent: *
 Allow: /login
 Allow: /favicon.svg
+Allow: /og-image.png
 Allow: /og-image.svg
 Allow: /site.webmanifest
 ${disallowRules}

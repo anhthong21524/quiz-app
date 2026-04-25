@@ -1,6 +1,7 @@
 User-agent: *
 Allow: /login
 Allow: /favicon.svg
+Allow: /og-image.png
 Allow: /og-image.svg
 Allow: /site.webmanifest
 Disallow: /$

@@ -30,7 +30,9 @@ declare module "vue-router" {
 const appName = "Quiz App";
 const defaultDescription =
   "Quiz App helps educators create, manage, and publish quizzes from one focused web workspace.";
-const defaultImagePath = "/og-image.svg";
+const defaultImagePath = "/og-image.png";
+const defaultImageWidth = "1200";
+const defaultImageHeight = "630";
 const defaultRobots: RobotsDirective = {
   index: true,
   follow: true
@@ -60,6 +62,9 @@ export function applySeo(to: RouteLocationNormalizedLoaded) {
   setMetaProperty("og:description", description);
   setMetaProperty("og:url", canonicalUrl);
   setMetaProperty("og:image", imageUrl);
+  setMetaProperty("og:image:width", defaultImageWidth);
+  setMetaProperty("og:image:height", defaultImageHeight);
+  setMetaProperty("og:locale", "en_US");
 
   setMeta("twitter:card", "summary_large_image");
   setMeta("twitter:title", title);
@@ -156,7 +161,7 @@ function buildStructuredData(seo: SeoRouteMeta | undefined, canonicalUrl: string
       "@id": resolveUrl("/#organization"),
       name: appName,
       url: env.siteUrl,
-      logo: resolveUrl("/favicon.svg")
+      logo: resolveUrl("/icon-512.png")
     },
     {
       "@type": "SoftwareApplication",
