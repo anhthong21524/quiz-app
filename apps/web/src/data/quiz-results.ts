@@ -1,5 +1,3 @@
-export type QuizResultStatus = "Published" | "Draft";
-
 export type QuizResultIcon =
   | "science"
   | "geography"
@@ -34,7 +32,6 @@ export interface QuizPerformanceResult {
   lastUpdateIso: string;
   lastUpdateDate: string;
   lastUpdateTime: string;
-  status: QuizResultStatus;
   icon: QuizResultIcon;
 }
 
@@ -43,6 +40,7 @@ export interface RecentSubmissionResult {
   studentName: string;
   quizTitle: string;
   submittedAt: string;
+  submittedAtIso: string;
   initials: string;
   accent: "green" | "red" | "blue" | "purple" | "orange";
 }
@@ -102,7 +100,6 @@ export const quizPerformanceResults: QuizPerformanceResult[] = [
     lastUpdateIso: "2026-04-26T09:15:00",
     lastUpdateDate: "Apr 26, 2026",
     lastUpdateTime: "9:15 AM",
-    status: "Published",
     icon: "science"
   },
   {
@@ -121,7 +118,6 @@ export const quizPerformanceResults: QuizPerformanceResult[] = [
     lastUpdateIso: "2026-04-25T20:20:00",
     lastUpdateDate: "Apr 25, 2026",
     lastUpdateTime: "8:20 PM",
-    status: "Published",
     icon: "geography"
   },
   {
@@ -140,7 +136,6 @@ export const quizPerformanceResults: QuizPerformanceResult[] = [
     lastUpdateIso: "2026-04-24T18:10:00",
     lastUpdateDate: "Apr 24, 2026",
     lastUpdateTime: "6:10 PM",
-    status: "Published",
     icon: "knowledge"
   },
   {
@@ -159,7 +154,6 @@ export const quizPerformanceResults: QuizPerformanceResult[] = [
     lastUpdateIso: "2026-04-24T15:30:00",
     lastUpdateDate: "Apr 24, 2026",
     lastUpdateTime: "3:30 PM",
-    status: "Published",
     icon: "mathematics"
   },
   {
@@ -178,7 +172,6 @@ export const quizPerformanceResults: QuizPerformanceResult[] = [
     lastUpdateIso: "2026-04-20T11:40:00",
     lastUpdateDate: "Apr 20, 2026",
     lastUpdateTime: "11:40 AM",
-    status: "Draft",
     icon: "technology"
   },
   {
@@ -197,7 +190,6 @@ export const quizPerformanceResults: QuizPerformanceResult[] = [
     lastUpdateIso: "2026-04-19T09:05:00",
     lastUpdateDate: "Apr 19, 2026",
     lastUpdateTime: "9:05 AM",
-    status: "Published",
     icon: "biology"
   },
   {
@@ -216,7 +208,6 @@ export const quizPerformanceResults: QuizPerformanceResult[] = [
     lastUpdateIso: "2026-04-18T16:55:00",
     lastUpdateDate: "Apr 18, 2026",
     lastUpdateTime: "4:55 PM",
-    status: "Published",
     icon: "history"
   },
   {
@@ -235,7 +226,6 @@ export const quizPerformanceResults: QuizPerformanceResult[] = [
     lastUpdateIso: "2026-04-17T14:25:00",
     lastUpdateDate: "Apr 17, 2026",
     lastUpdateTime: "2:25 PM",
-    status: "Published",
     icon: "chemistry"
   }
 ];
@@ -246,6 +236,7 @@ export const recentSubmissionResults: RecentSubmissionResult[] = [
     studentName: "Thong Anh",
     quizTitle: "Quiz 1",
     submittedAt: "Apr 26, 2026, 9:15 AM",
+    submittedAtIso: "2026-04-26T09:15:00",
     initials: "TA",
     accent: "green"
   },
@@ -254,6 +245,7 @@ export const recentSubmissionResults: RecentSubmissionResult[] = [
     studentName: "Linh M.",
     quizTitle: "World Geography",
     submittedAt: "Apr 26, 2026, 8:54 AM",
+    submittedAtIso: "2026-04-26T08:54:00",
     initials: "LM",
     accent: "red"
   },
@@ -262,6 +254,7 @@ export const recentSubmissionResults: RecentSubmissionResult[] = [
     studentName: "Hoang Nam",
     quizTitle: "General Knowledge",
     submittedAt: "Apr 26, 2026, 8:31 AM",
+    submittedAtIso: "2026-04-26T08:31:00",
     initials: "HN",
     accent: "blue"
   },
@@ -270,6 +263,7 @@ export const recentSubmissionResults: RecentSubmissionResult[] = [
     studentName: "Phuong T.",
     quizTitle: "Basic Mathematics",
     submittedAt: "Apr 26, 2026, 8:10 AM",
+    submittedAtIso: "2026-04-26T08:10:00",
     initials: "PT",
     accent: "purple"
   },
@@ -278,6 +272,7 @@ export const recentSubmissionResults: RecentSubmissionResult[] = [
     studentName: "Quang D.",
     quizTitle: "Biology Fundamentals",
     submittedAt: "Apr 26, 2026, 7:58 AM",
+    submittedAtIso: "2026-04-26T07:58:00",
     initials: "QD",
     accent: "orange"
   }

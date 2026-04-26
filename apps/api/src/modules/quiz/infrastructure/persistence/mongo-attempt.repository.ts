@@ -38,7 +38,7 @@ export class MongoAttemptRepository implements AttemptRepository {
       this.connection = mongoose.connection;
       this.attemptModel =
         this.connection.models.QuizAttempt ??
-        this.connection.model<QuizAttemptEntity>("QuizAttempt", QuizAttemptSchema, "quiz_attempts");
+        this.connection.model<QuizAttemptEntity>("QuizAttempt", QuizAttemptSchema, "qa_quiz_attempts");
       this.logger.log("MongoAttemptRepository connected.");
       return true;
     } catch (error) {

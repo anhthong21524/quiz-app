@@ -76,6 +76,8 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
     <AppTable
       :columns="COLUMNS"
       min-width="1100px"
+      first-column-variant="index"
+      sorting-enabled
       :sort-key="sortKey"
       :sort-dir="sortDir"
       @sort="onSort"

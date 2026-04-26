@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppPagination from "../AppPagination.vue";
 import AppTable from "../AppTable.vue";
 import type { QuizSubmission } from "../../data/quiz-submissions";
 
@@ -48,6 +49,10 @@ function scoreClass(submission: QuizSubmission) {
   }
 
   return "is-medium";
+}
+
+function handlePageChange(page: number) {
+  emit("page", page);
 }
 </script>
 
@@ -116,7 +121,7 @@ function scoreClass(submission: QuizSubmission) {
       </div>
     </div>
 
-    <AppTable v-if="submissions.length" :columns="columns" min-width="900px">
+    <AppTable v-if="submissions.length" :columns="columns" min-width="900px" first-column-variant="index">
       <tr
         v-for="(submission, index) in submissions"
         :key="submission.id"
@@ -167,44 +172,13 @@ function scoreClass(submission: QuizSubmission) {
       <p>Adjust the search, status, score, or date filter to find participants.</p>
     </div>
 
-    <footer class="submission-pagination">
-      <p>Showing {{ showingStart }} to {{ showingEnd }} of {{ totalSubmissions }} submissions</p>
-      <div class="pagination-controls" aria-label="Pagination">
-        <button
-          type="button"
-          class="pagination-button"
-          aria-label="Previous page"
-          :disabled="currentPage === 1"
-          @click="emit('page', currentPage - 1)"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <path d="m15 18-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-        <button
-          v-for="page in pageCount"
-          :key="page"
-          type="button"
-          class="pagination-button"
-          :class="{ 'is-active': page === currentPage }"
-          :aria-current="page === currentPage ? 'page' : undefined"
-          @click="emit('page', page)"
-        >
-          {{ page }}
-        </button>
-        <button
-          type="button"
-          class="pagination-button"
-          aria-label="Next page"
-          :disabled="currentPage === pageCount"
-          @click="emit('page', currentPage + 1)"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-      </div>
-    </footer>
+    <AppPagination
+      :current-page="currentPage"
+      :total-pages="pageCount"
+      :showing-copy="`Showing ${showingStart} to ${showingEnd} of ${totalSubmissions} submissions`"
+      aria-label="Submission pagination"
+      @update:current-page="handlePageChange"
+    />
   </div>
 </template>
 
@@ -473,56 +447,6 @@ function scoreClass(submission: QuizSubmission) {
   color: #657286;
 }
 
-.submission-pagination {
-  min-height: 70px;
-  padding: 16px 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.submission-pagination p {
-  margin: 0;
-  color: #657286;
-  font-size: 0.92rem;
-}
-
-.pagination-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.pagination-button {
-  min-width: 36px;
-  height: 36px;
-  border: 1px solid #dfe4ea;
-  border-radius: 10px;
-  display: inline-grid;
-  place-items: center;
-  background: #ffffff;
-  color: #344159;
-  font-weight: 900;
-}
-
-.pagination-button svg {
-  width: 17px;
-  height: 17px;
-}
-
-.pagination-button.is-active {
-  border-color: #10b981;
-  background: #10b981;
-  color: #ffffff;
-  box-shadow: 0 12px 20px rgba(16, 185, 129, 0.18);
-}
-
-.pagination-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
 .sr-only {
   position: absolute;
   width: 1px;
@@ -549,16 +473,6 @@ function scoreClass(submission: QuizSubmission) {
 @media (max-width: 640px) {
   .toolbar-filters {
     grid-template-columns: 1fr;
-  }
-
-  .submission-pagination {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .pagination-controls {
-    align-self: stretch;
-    justify-content: flex-end;
   }
 }
 </style>

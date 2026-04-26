@@ -2,11 +2,11 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { QuizStatus, type Quiz } from "@quiz-app/shared";
+import AppStatsBar from "../components/AppStatsBar.vue";
 import QuizCardList from "../components/my-quizzes/QuizCardList.vue";
 import QuizEmptyState from "../components/my-quizzes/QuizEmptyState.vue";
 import QuizGrid from "../components/my-quizzes/QuizGrid.vue";
 import QuizPagination from "../components/my-quizzes/QuizPagination.vue";
-import QuizStatsBar from "../components/my-quizzes/QuizStatsBar.vue";
 import QuizTable from "../components/my-quizzes/QuizTable.vue";
 import QuizToolbar from "../components/my-quizzes/QuizToolbar.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
@@ -150,6 +150,25 @@ const publishedCount = computed(
   () => apiQuizzes.value.filter((q) => q.status === "Published").length
 );
 const inProgressCount = computed(() => apiQuizzes.value.length - publishedCount.value);
+const quizStatsItems = computed(() => [
+  {
+    id: "total",
+    label: "Total",
+    value: apiQuizzes.value.length
+  },
+  {
+    id: "published",
+    label: "Published",
+    value: publishedCount.value,
+    tone: "green" as const
+  },
+  {
+    id: "in-progress",
+    label: "In progress",
+    value: inProgressCount.value,
+    tone: "amber" as const
+  }
+]);
 
 function clearFilters() {
   searchQuery.value = "";
@@ -225,7 +244,7 @@ async function runConfirm() {
 
 function viewQuiz(quiz: QuizListItem) {
   if (quiz.apiId) {
-    router.push({ name: "edit-quiz", params: { id: quiz.apiId } });
+    router.push({ name: "edit-quiz-questions", params: { id: quiz.apiId } });
   }
 }
 
@@ -339,11 +358,14 @@ function shareQuiz(quiz: QuizListItem) {
     <!-- UX-5: Dashboard stats / empty-dashboard state.
          Shows a skeleton while the initial load runs, a welcome banner when
          there are no quizzes yet, or live stat pills once quizzes exist. -->
-    <QuizStatsBar
-      :total="apiQuizzes.length"
-      :published="publishedCount"
-      :in-progress="inProgressCount"
+    <AppStatsBar
+      :items="quizStatsItems"
       :loading="isInitialLoad"
+      :empty="apiQuizzes.length === 0"
+      aria-label="Quiz dashboard stats"
+      loading-label="Loading dashboard stats"
+      empty-title="Welcome to your quiz dashboard"
+      empty-description="Your stats, including total quizzes, published count, and recent activity, will appear here once you create your first quiz."
     />
 
     <section

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
-@Schema({ timestamps: true, collection: "users" })
+@Schema({ timestamps: true, collection: "qa_users" })
 export class UserEntity {
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
   email!: string;

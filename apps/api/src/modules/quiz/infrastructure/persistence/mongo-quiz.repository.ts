@@ -36,7 +36,7 @@ export class MongoQuizRepository
       this.connection = mongoose.connection;
       this.quizModel =
         this.connection.models.Quiz ??
-        this.connection.model<QuizEntity>("Quiz", QuizSchema, "quizzes");
+        this.connection.model<QuizEntity>("Quiz", QuizSchema, "qa_quizzes");
       this.logger.log(`Connected to MongoDB database "${databaseName}".`);
       return true;
     } catch (error) {

@@ -15,7 +15,7 @@ export class QuestionEntity {
 
 export const QuestionSchema = SchemaFactory.createForClass(QuestionEntity);
 
-@Schema({ timestamps: true, collection: "quizzes" })
+@Schema({ timestamps: true, collection: "qa_quizzes" })
 export class QuizEntity {
   @Prop({ required: true, trim: true, maxlength: 120 })
   title!: string;

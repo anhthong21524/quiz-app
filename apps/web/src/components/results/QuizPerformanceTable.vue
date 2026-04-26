@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppPagination from "../AppPagination.vue";
 import AppTable from "../AppTable.vue";
 import type { QuizPerformanceResult } from "../../data/quiz-results";
 import ResultQuizIcon from "./ResultQuizIcon.vue";
@@ -10,26 +11,26 @@ defineProps<{
   showingStart: number;
   showingEnd: number;
   totalQuizzes: number;
+  sortKey: string;
+  sortDir: "asc" | "desc";
 }>();
 
 const emit = defineEmits<{
   page: [page: number];
   view: [quiz: QuizPerformanceResult];
+  sort: [key: string, dir: "asc" | "desc"];
 }>();
 
 const columns = [
-  { label: "Quiz" },
-  { label: "Subject" },
-  { label: "Questions" },
-  { label: "Submissions" },
-  { label: "Average score" },
-  { label: "Completion rate" },
-  { label: "Average time" },
-  { label: "Last update" },
+  { label: "No.", class: "col-num" },
+  { label: "Quiz", class: "col-quiz", key: "title" },
+  { label: "Subject", class: "col-subject", key: "subject" },
+  { label: "Submissions", class: "col-submissions", key: "submissions" },
+  { label: "Average score", class: "col-score", key: "averageScore" },
 ];
 
 function scoreClass(score: string) {
-  const numericScore = Number.parseInt(score, 10);
+  const numericScore = Number.parseInt(score.match(/(\d+)%$/)?.[1] ?? "", 10);
 
   if (Number.isNaN(numericScore)) {
     return "";
@@ -45,6 +46,14 @@ function scoreClass(score: string) {
 
   return "";
 }
+
+function handleSort(key: string, dir: "asc" | "desc") {
+  emit("sort", key, dir);
+}
+
+function handlePageChange(page: number) {
+  emit("page", page);
+}
 </script>
 
 <template>
@@ -59,9 +68,19 @@ function scoreClass(score: string) {
       </button>
     </header>
 
-    <AppTable v-if="quizzes.length" :columns="columns" min-width="980px">
+    <AppTable
+      v-if="quizzes.length"
+      :columns="columns"
+      min-width="820px"
+      column-spacing="12px"
+      first-column-variant="index"
+      sorting-enabled
+      :sort-key="sortKey"
+      :sort-dir="sortDir"
+      @sort="handleSort"
+    >
       <tr
-        v-for="quiz in quizzes"
+        v-for="(quiz, index) in quizzes"
         :key="quiz.id"
         class="clickable-row"
         tabindex="0"
@@ -70,35 +89,17 @@ function scoreClass(score: string) {
         @keydown.enter.prevent="emit('view', quiz)"
         @keydown.space.prevent="emit('view', quiz)"
       >
-        <td>
+        <td class="col-num cell-num">{{ showingStart + index }}</td>
+        <td class="col-quiz">
           <div class="quiz-title-cell">
             <ResultQuizIcon :icon="quiz.icon" />
             <span class="quiz-title-text">{{ quiz.title }}</span>
-            <span class="result-status-badge" :class="`is-${quiz.status.toLowerCase()}`">
-              {{ quiz.status }}
-            </span>
           </div>
         </td>
-        <td>{{ quiz.subject }}</td>
-        <td>{{ quiz.questions }}</td>
-        <td>{{ quiz.submissions }}</td>
-        <td>
+        <td class="col-subject">{{ quiz.subject }}</td>
+        <td class="col-submissions">{{ quiz.submissions }}</td>
+        <td class="col-score">
           <span class="metric-value" :class="scoreClass(quiz.averageScore)">{{ quiz.averageScore }}</span>
-          <span class="metric-helper">{{ quiz.scoreDetail }}</span>
-        </td>
-        <td>
-          <span class="metric-value">{{ quiz.completionRate }}</span>
-          <span class="metric-helper">{{ quiz.completionDetail }}</span>
-        </td>
-        <td>
-          <span class="metric-value">{{ quiz.averageTime }}</span>
-          <span class="metric-helper">{{ quiz.averageTimeHelper }}</span>
-        </td>
-        <td>
-          <time class="last-update" :datetime="quiz.lastUpdate">
-            <span>{{ quiz.lastUpdateDate }}</span>
-            <span>{{ quiz.lastUpdateTime }}</span>
-          </time>
         </td>
       </tr>
     </AppTable>
@@ -113,44 +114,13 @@ function scoreClass(score: string) {
       <p>Adjust the search, status, subject, or date filter to see quiz performance.</p>
     </div>
 
-    <footer class="performance-pagination">
-      <p>Showing {{ showingStart }} to {{ showingEnd }} of {{ totalQuizzes }} quizzes</p>
-      <div class="pagination-controls" aria-label="Pagination">
-        <button
-          type="button"
-          class="pagination-button"
-          aria-label="Previous page"
-          :disabled="currentPage === 1"
-          @click="emit('page', currentPage - 1)"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <path d="m15 18-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-        <button
-          v-for="page in pageCount"
-          :key="page"
-          type="button"
-          class="pagination-button"
-          :class="{ 'is-active': page === currentPage }"
-          :aria-current="page === currentPage ? 'page' : undefined"
-          @click="emit('page', page)"
-        >
-          {{ page }}
-        </button>
-        <button
-          type="button"
-          class="pagination-button"
-          aria-label="Next page"
-          :disabled="currentPage === pageCount"
-          @click="emit('page', currentPage + 1)"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </button>
-      </div>
-    </footer>
+    <AppPagination
+      :current-page="currentPage"
+      :total-pages="pageCount"
+      :showing-copy="`Showing ${showingStart} to ${showingEnd} of ${totalQuizzes} quizzes`"
+      aria-label="Quiz performance pagination"
+      @update:current-page="handlePageChange"
+    />
   </section>
 </template>
 
@@ -226,36 +196,43 @@ function scoreClass(score: string) {
 .quiz-title-cell {
   display: flex;
   align-items: center;
-  gap: 10px;
-  min-width: 220px;
+  gap: 14px;
+  min-width: 0;
 }
 
 .quiz-title-text {
   min-width: 0;
   overflow: hidden;
   color: #182033;
-  font-weight: 900;
+  font-weight: 800;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.result-status-badge {
-  min-height: 22px;
-  border-radius: 999px;
-  padding: 0 8px;
-  display: inline-flex;
-  align-items: center;
-  color: #667287;
-  background: #f2f4f7;
-  font-size: 0.72rem;
-  font-weight: 900;
-  white-space: nowrap;
+.col-num {
+  width: 48px;
+  text-align: center;
 }
 
-.result-status-badge.is-published {
-  border: 1px solid rgba(16, 185, 129, 0.2);
-  background: #e8fbf2;
-  color: #0f9f65;
+.cell-num {
+  text-align: center;
+  color: #8a93a3;
+}
+
+.col-quiz {
+  width: 180px;
+}
+
+.col-subject {
+  width: 150px;
+}
+
+.col-submissions {
+  width: 120px;
+}
+
+.col-score {
+  width: 150px;
 }
 
 .metric-value,
@@ -279,18 +256,6 @@ function scoreClass(score: string) {
 
 .metric-helper {
   margin-top: 2px;
-  color: #667287;
-  font-size: 0.82rem;
-}
-
-.last-update {
-  display: grid;
-  gap: 2px;
-  color: #344159;
-  white-space: nowrap;
-}
-
-.last-update span + span {
   color: #667287;
   font-size: 0.82rem;
 }
@@ -336,66 +301,10 @@ function scoreClass(score: string) {
   color: #657286;
 }
 
-.performance-pagination {
-  min-height: 70px;
-  padding: 16px 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-
-.performance-pagination p {
-  margin: 0;
-  color: #657286;
-  font-size: 0.92rem;
-}
-
-.pagination-controls {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.pagination-button {
-  min-width: 36px;
-  height: 36px;
-  border: 1px solid #dfe4ea;
-  border-radius: 10px;
-  display: inline-grid;
-  place-items: center;
-  background: #ffffff;
-  color: #344159;
-  font-weight: 900;
-}
-
-.pagination-button svg {
-  width: 17px;
-  height: 17px;
-}
-
-.pagination-button.is-active {
-  border-color: #10b981;
-  background: #10b981;
-  color: #ffffff;
-  box-shadow: 0 12px 20px rgba(16, 185, 129, 0.18);
-}
-
-.pagination-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.55;
-}
-
 @media (max-width: 720px) {
-  .performance-card-header,
-  .performance-pagination {
+  .performance-card-header {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .pagination-controls {
-    align-self: stretch;
-    justify-content: flex-end;
   }
 }
 </style>

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 
-@Schema({ timestamps: true, collection: "quiz_attempts" })
+@Schema({ timestamps: true, collection: "qa_quiz_attempts" })
 export class QuizAttemptEntity {
   @Prop({ required: true, index: true })
   quizId!: string;

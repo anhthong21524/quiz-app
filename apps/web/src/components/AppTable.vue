@@ -3,15 +3,24 @@ export interface AppTableColumn {
   label: string;
   key?: string;
   class?: string;
+  sortable?: boolean;
 }
 
 const props = withDefaults(defineProps<{
   columns: AppTableColumn[];
   minWidth?: string;
+  columnSpacing?: string;
+  rowSpacing?: string;
+  firstColumnVariant?: "default" | "index";
+  sortingEnabled?: boolean;
   sortKey?: string;
   sortDir?: "asc" | "desc";
 }>(), {
   minWidth: "640px",
+  columnSpacing: "20px",
+  rowSpacing: "8px",
+  firstColumnVariant: "default",
+  sortingEnabled: false,
   sortKey: "",
   sortDir: "asc",
 });
@@ -21,36 +30,61 @@ const emit = defineEmits<{
 }>();
 
 function handleSort(col: AppTableColumn) {
-  if (!col.key) return;
+  if (!isSortable(col) || !col.key) return;
   const dir = props.sortKey === col.key && props.sortDir === "asc" ? "desc" : "asc";
   emit("sort", col.key, dir);
+}
+
+function isSortable(col: AppTableColumn) {
+  return props.sortingEnabled && Boolean(col.key) && col.sortable !== false;
 }
 </script>
 
 <template>
   <div class="app-table-wrap">
-    <table class="app-table" :style="{ minWidth }">
+    <table
+      :class="[
+        'app-table',
+        {
+          'app-table--index-first-column': firstColumnVariant === 'index',
+        },
+      ]"
+      :style="{
+        minWidth,
+        '--app-table-cell-padding-inline': columnSpacing,
+        '--app-table-cell-padding-block': rowSpacing,
+      }"
+    >
       <thead>
         <tr>
           <th
             v-for="col in columns"
             :key="col.label"
-            :class="[col.class, { 'th-sortable': !!col.key, 'th-sorted': col.key && col.key === sortKey }]"
-            @click="handleSort(col)"
+            :class="[col.class, { 'th-sortable': isSortable(col), 'th-sorted': isSortable(col) && col.key === sortKey }]"
           >
-            <span class="th-inner">
-              {{ col.label }}
-              <span v-if="col.key" class="sort-icon" aria-hidden="true">
-                <svg v-if="col.key === sortKey && sortDir === 'asc'" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M8 3.5 3.5 9h9L8 3.5Z" />
-                </svg>
-                <svg v-else-if="col.key === sortKey && sortDir === 'desc'" viewBox="0 0 16 16" fill="currentColor">
-                  <path d="M8 12.5 3.5 7h9L8 12.5Z" />
-                </svg>
-                <svg v-else viewBox="0 0 16 16" fill="currentColor" class="sort-icon--idle">
-                  <path d="M8 3.5 3.5 7.5h9L8 3.5ZM8 12.5l4.5-4h-9l4.5 4Z" />
-                </svg>
+            <button
+              v-if="isSortable(col)"
+              type="button"
+              class="th-button"
+              @click="handleSort(col)"
+            >
+              <span class="th-inner">
+                {{ col.label }}
+                <span class="sort-icon" aria-hidden="true">
+                  <svg v-if="col.key === sortKey && sortDir === 'asc'" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 3.5 3.5 9h9L8 3.5Z" />
+                  </svg>
+                  <svg v-else-if="col.key === sortKey && sortDir === 'desc'" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 12.5 3.5 7h9L8 12.5Z" />
+                  </svg>
+                  <svg v-else viewBox="0 0 16 16" fill="currentColor" class="sort-icon--idle">
+                    <path d="M8 3.5 3.5 7.5h9L8 3.5ZM8 12.5l4.5-4h-9l4.5 4Z" />
+                  </svg>
+                </span>
               </span>
+            </button>
+            <span v-else class="th-inner">
+              {{ col.label }}
             </span>
           </th>
         </tr>
@@ -74,7 +108,7 @@ function handleSort(col: AppTableColumn) {
 }
 
 .app-table th {
-  padding: 8px 20px;
+  padding: var(--app-table-cell-padding-block) var(--app-table-cell-padding-inline);
   background: #fbfcfd;
   color: #8a93a3;
   font-size: 0.82rem;
@@ -91,11 +125,22 @@ function handleSort(col: AppTableColumn) {
   gap: 5px;
 }
 
+.th-button {
+  border: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+}
+
 .th-sortable {
   cursor: pointer;
 }
 
-.th-sortable:hover {
+.th-sortable:hover,
+.th-sortable:focus-within {
   color: #4b5563;
   background: #f3f5f7;
 }
@@ -121,12 +166,13 @@ function handleSort(col: AppTableColumn) {
   opacity: 0.35;
 }
 
-.th-sortable:hover .sort-icon--idle {
+.th-sortable:hover .sort-icon--idle,
+.th-sortable:focus-within .sort-icon--idle {
   opacity: 0.6;
 }
 
 .app-table :deep(td) {
-  padding: 8px 20px;
+  padding: var(--app-table-cell-padding-block) var(--app-table-cell-padding-inline);
   border-bottom: 1px solid #f3f5f7;
   font-size: 0.93rem;
   vertical-align: middle;
@@ -150,5 +196,26 @@ function handleSort(col: AppTableColumn) {
 
 .app-table tbody :deep(tr:hover) {
   background: #e6f7f1;
+}
+
+.app-table--index-first-column th:first-child {
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+  padding-left: 12px;
+  padding-right: 12px;
+  text-align: center;
+  border-right: 1px solid #edf0f2;
+}
+
+.app-table--index-first-column tbody :deep(tr > td:first-child:not([colspan])) {
+  width: 56px;
+  min-width: 56px;
+  max-width: 56px;
+  padding-left: 12px;
+  padding-right: 12px;
+  text-align: center;
+  color: #8a93a3;
+  border-right: 1px solid #edf0f2;
 }
 </style>

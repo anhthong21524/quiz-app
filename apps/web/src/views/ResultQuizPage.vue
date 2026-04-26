@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
+import AppStatsBar from "../components/AppStatsBar.vue";
 import QuizPerformanceTable from "../components/results/QuizPerformanceTable.vue";
 import RecentSubmissionsCard from "../components/results/RecentSubmissionsCard.vue";
 import ResultFilterPanel from "../components/results/ResultFilterPanel.vue";
-import ResultSummaryCard from "../components/results/ResultSummaryCard.vue";
 import {
   fetchQuizPerformance,
   fetchRecentSubmissions,
@@ -13,7 +13,7 @@ import {
   type RecentSubmissionItem,
   type ResultsSummary
 } from "../services/quiz-api";
-import type { QuizPerformanceResult, RecentSubmissionResult, ResultSummaryMetric } from "../data/quiz-results";
+import type { QuizPerformanceResult, RecentSubmissionResult } from "../data/quiz-results";
 
 const router = useRouter();
 
@@ -22,6 +22,8 @@ const selectedSubject = ref("All subjects");
 const selectedDateRange = ref("All time");
 const isLoading = ref(false);
 const currentPage = ref(1);
+const sortKey = ref("submissions");
+const sortDir = ref<"asc" | "desc">("desc");
 
 const summary = ref<ResultsSummary | null>(null);
 const performanceData = ref<QuizPerformanceItem[]>([]);
@@ -73,54 +75,31 @@ function subjectIcon(subject: string): string {
   return SUBJECT_ICON_MAP[subject.toLowerCase()] ?? "knowledge";
 }
 
-function statusLabel(status: string): "Published" | "Draft" {
-  return status === "published" ? "Published" : "Draft";
+function formatPoints(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(1);
 }
 
-const resultSummaryMetrics = computed<ResultSummaryMetric[]>(() => {
+const resultOverviewItems = computed(() => {
   const s = summary.value;
   if (!s) return [];
-
-  const avgScoreDetail =
-    s.totalPossible > 0
-      ? `${(s.totalCorrect / (s.completedSubmissions || 1)).toFixed(1)} / ${(s.totalPossible / (s.completedSubmissions || 1)).toFixed(0)} points`
-      : "-";
 
   return [
     {
       id: "total-quizzes",
       label: "Total quizzes",
-      value: String(s.totalQuizzes),
-      helper: `${s.publishedQuizzes} published quizzes`,
-      icon: "users" as const
+      value: s.totalQuizzes
     },
     {
       id: "total-submissions",
-      label: "Total submissions",
-      value: String(s.totalSubmissions),
-      helper: "Across all quizzes",
-      icon: "clipboard" as const
+      label: "Submissions",
+      value: s.totalSubmissions,
+      tone: "teal" as const
     },
     {
       id: "average-score",
-      label: "Average score",
+      label: "Avg score",
       value: s.averageScorePercent != null ? `${s.averageScorePercent}%` : "-",
-      helper: avgScoreDetail,
-      icon: "star" as const
-    },
-    {
-      id: "average-time",
-      label: "Average time",
-      value: formatTime(s.averageTimeSecs),
-      helper: "mm:ss",
-      icon: "clock" as const
-    },
-    {
-      id: "completion-rate",
-      label: "Completion rate",
-      value: s.totalSubmissions > 0 ? `${Math.round((s.completedSubmissions / s.totalSubmissions) * 100)}%` : "-",
-      helper: `${s.completedSubmissions} / ${s.totalSubmissions} completed`,
-      icon: "check" as const
+      tone: "amber" as const
     }
   ];
 });
@@ -132,6 +111,10 @@ const quizPerformanceResults = computed<QuizPerformanceResult[]>(() =>
     const completionPct =
       item.totalSubmissions > 0 ? Math.round((item.completedSubmissions / item.totalSubmissions) * 100) : 0;
     const lastIso = item.lastSubmittedAt ?? new Date(0).toISOString();
+    const averageScoreValue =
+      item.completedSubmissions > 0 ? `${formatPoints(avgPointsPerQ)}/${item.questionCount} - ${avgScorePct}%` : "";
+    const completionValue =
+      item.totalSubmissions > 0 ? `${item.completedSubmissions}/${item.totalSubmissions} - ${completionPct}%` : "";
 
     return {
       id: item.id,
@@ -139,16 +122,10 @@ const quizPerformanceResults = computed<QuizPerformanceResult[]>(() =>
       subject: item.subject,
       questions: item.questionCount,
       submissions: item.totalSubmissions,
-      averageScore: item.averageScorePercent != null ? `${avgScorePct}%` : "-",
-      scoreDetail:
-        item.completedSubmissions > 0
-          ? `${avgPointsPerQ.toFixed(1)} / ${item.questionCount}`
-          : `- / ${item.questionCount}`,
-      completionRate: item.totalSubmissions > 0 ? `${completionPct}%` : "0%",
-      completionDetail:
-        item.totalSubmissions > 0
-          ? `${item.completedSubmissions} / ${item.totalSubmissions}`
-          : "0 / 0",
+      averageScore: averageScoreValue,
+      scoreDetail: "",
+      completionRate: completionValue,
+      completionDetail: "",
       averageTime: formatTime(item.averageTimeSecs),
       averageTimeHelper: "mm:ss",
       lastUpdate: item.lastSubmittedAt ? formatDate(item.lastSubmittedAt) : "-",
@@ -163,7 +140,6 @@ const quizPerformanceResults = computed<QuizPerformanceResult[]>(() =>
             new Date(item.lastSubmittedAt)
           )
         : "-",
-      status: statusLabel(item.status),
       icon: subjectIcon(item.subject) as QuizPerformanceResult["icon"]
     };
   })
@@ -175,6 +151,7 @@ const recentSubmissionResults = computed<RecentSubmissionResult[]>(() =>
     studentName: item.takerName,
     quizTitle: item.quizTitle,
     submittedAt: formatDate(item.submittedAt),
+    submittedAtIso: item.submittedAt,
     initials: initials(item.takerName),
     accent: ACCENT_CYCLE[index % ACCENT_CYCLE.length]
   }))
@@ -201,20 +178,43 @@ const filteredQuizzes = computed(() => {
   });
 });
 
-const pageCount = computed(() => Math.max(1, Math.ceil(filteredQuizzes.value.length / pageSize)));
+function averageScorePercent(score: string) {
+  const match = score.match(/(\d+)%$/);
+  return match ? Number.parseInt(match[1], 10) : -1;
+}
+
+const sortedQuizzes = computed(() => {
+  return [...filteredQuizzes.value].sort((a, b) => {
+    let comparison = 0;
+
+    if (sortKey.value === "title") {
+      comparison = a.title.localeCompare(b.title);
+    } else if (sortKey.value === "subject") {
+      comparison = a.subject.localeCompare(b.subject);
+    } else if (sortKey.value === "submissions") {
+      comparison = a.submissions - b.submissions;
+    } else if (sortKey.value === "averageScore") {
+      comparison = averageScorePercent(a.averageScore) - averageScorePercent(b.averageScore);
+    }
+
+    return sortDir.value === "asc" ? comparison : -comparison;
+  });
+});
+
+const pageCount = computed(() => Math.max(1, Math.ceil(sortedQuizzes.value.length / pageSize)));
 
 const paginatedQuizzes = computed(() => {
   const start = (currentPage.value - 1) * pageSize;
-  return filteredQuizzes.value.slice(start, start + pageSize);
+  return sortedQuizzes.value.slice(start, start + pageSize);
 });
 
 const showingStart = computed(() => {
-  if (!filteredQuizzes.value.length) return 0;
+  if (!sortedQuizzes.value.length) return 0;
   return (currentPage.value - 1) * pageSize + 1;
 });
 
 const showingEnd = computed(() =>
-  Math.min(currentPage.value * pageSize, filteredQuizzes.value.length)
+  Math.min(currentPage.value * pageSize, sortedQuizzes.value.length)
 );
 
 watch([searchQuery, selectedSubject, selectedDateRange], () => {
@@ -250,6 +250,12 @@ function setPage(page: number) {
   currentPage.value = Math.min(Math.max(page, 1), pageCount.value);
 }
 
+function setSort(key: string, dir: "asc" | "desc") {
+  sortKey.value = key;
+  sortDir.value = dir;
+  currentPage.value = 1;
+}
+
 onMounted(async () => {
   isLoading.value = true;
   try {
@@ -276,13 +282,13 @@ onMounted(async () => {
 
     <div class="result-quiz-layout">
       <main class="result-main">
-        <section class="summary-grid" aria-label="Result summary">
-          <ResultSummaryCard
-            v-for="metric in resultSummaryMetrics"
-            :key="metric.id"
-            :metric="metric"
-          />
-        </section>
+        <AppStatsBar
+          :items="resultOverviewItems"
+          :loading="isLoading"
+          :loading-item-count="3"
+          aria-label="Result summary"
+          loading-label="Loading result summary"
+        />
 
         <QuizPerformanceTable
           :quizzes="paginatedQuizzes"
@@ -290,8 +296,11 @@ onMounted(async () => {
           :page-count="pageCount"
           :showing-start="showingStart"
           :showing-end="showingEnd"
-          :total-quizzes="filteredQuizzes.length"
+          :total-quizzes="sortedQuizzes.length"
+          :sort-key="sortKey"
+          :sort-dir="sortDir"
           @page="setPage"
+          @sort="setSort"
           @view="openQuizSubmissions"
         />
       </main>
@@ -341,7 +350,7 @@ onMounted(async () => {
 .result-quiz-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 300px;
-  align-items: start;
+  align-items: stretch;
   gap: 22px;
 }
 
@@ -352,25 +361,19 @@ onMounted(async () => {
   gap: 18px;
 }
 
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(140px, 1fr));
-  gap: 16px;
-}
-
-@media (max-width: 1180px) {
-  .summary-grid {
-    grid-template-columns: repeat(3, minmax(160px, 1fr));
-  }
+.result-sidebar {
+  grid-template-rows: auto 1fr;
 }
 
 @media (max-width: 980px) {
   .result-quiz-layout {
     grid-template-columns: 1fr;
+    align-items: start;
   }
 
   .result-sidebar {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: none;
   }
 
   .result-sidebar > :first-child {
@@ -383,9 +386,9 @@ onMounted(async () => {
     font-size: 1.7rem;
   }
 
-  .summary-grid,
   .result-sidebar {
     grid-template-columns: 1fr;
+    grid-template-rows: none;
   }
 }
 </style>

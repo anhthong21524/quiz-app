@@ -179,7 +179,7 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
 
           <RouterLink
             class="hero-cta"
-            :to="{ name: 'edit-quiz', params: { id: heroQuiz.id } }"
+            :to="{ name: 'edit-quiz-questions', params: { id: heroQuiz.id } }"
           >
             Continue
             <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
@@ -191,7 +191,7 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
         <!-- Floating edit button -->
         <RouterLink
           class="hero-edit-btn"
-          :to="{ name: 'edit-quiz', params: { id: heroQuiz.id } }"
+          :to="{ name: 'edit-quiz-questions', params: { id: heroQuiz.id } }"
           :aria-label="`Edit ${heroQuiz.title}`"
         >
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">
@@ -260,6 +260,7 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
       <!-- Data table (always 5 rows) -->
       <AppTable
         v-else
+        first-column-variant="index"
         :columns="[
           { label: '#', class: 'col-num' },
           { label: 'Quiz title' },

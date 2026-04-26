@@ -29,7 +29,7 @@ export class MongoUserRepository implements UserRepository, OnModuleDestroy {
       this.connection = mongoose.connection;
       this.userModel =
         this.connection.models.User ??
-        this.connection.model<UserEntity>("User", UserSchema, "users");
+        this.connection.model<UserEntity>("User", UserSchema, "qa_users");
       this.logger.log(`Connected to MongoDB database "${databaseName}" for users.`);
       return true;
     } catch (error) {

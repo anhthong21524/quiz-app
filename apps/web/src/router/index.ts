@@ -10,7 +10,6 @@ import MyQuizzesView from "../views/MyQuizzesView.vue";
 import ResultQuizPage from "../views/ResultQuizPage.vue";
 import ResultQuizDetailView from "../views/ResultQuizDetailView.vue";
 import CreateQuizView from "../views/CreateQuizView.vue";
-import QuizEditorView from "../views/QuizEditorView.vue";
 import ProfileView from "../views/ProfileView.vue";
 import AccountSettingsView from "../views/AccountSettingsView.vue";
 import PasswordSettingsView from "../views/PasswordSettingsView.vue";
@@ -148,11 +147,11 @@ export const router = createRouter({
     },
     {
       path: "/editor",
-      redirect: { name: "editor" }
+      redirect: { name: "create-quiz" }
     },
     {
       path: "/editor/:id",
-      redirect: (to) => ({ name: "edit-quiz", params: to.params })
+      redirect: (to) => ({ name: "edit-quiz-questions", params: to.params })
     },
     {
       path: "/results",
@@ -293,38 +292,11 @@ export const router = createRouter({
     },
     {
       path: managementPath("/editor"),
-      name: "editor",
-      component: QuizEditorView,
-      meta: {
-        requiresAuth: true,
-        seo: {
-          title: "Quiz Editor",
-          description: "Create API-backed quizzes with titles, descriptions, questions, and correct answers.",
-          canonicalPath: managementPath("/editor"),
-          breadcrumbs: [
-            { name: "Management", path: "/management" },
-            { name: "Quiz Editor", path: managementPath("/editor") }
-          ]
-        }
-      }
+      redirect: { name: "create-quiz" }
     },
     {
       path: managementPath("/editor/:id"),
-      name: "edit-quiz",
-      component: QuizEditorView,
-      props: true,
-      meta: {
-        requiresAuth: true,
-        seo: {
-          title: "Edit Quiz",
-          description: "Edit an existing API-backed quiz in Quiz App.",
-          breadcrumbs: [
-            { name: "Management", path: "/management" },
-            { name: "My Quizzes", path: managementPath("/quizzes") },
-            { name: "Edit Quiz", path: managementPath("/editor") }
-          ]
-        }
-      }
+      redirect: (to) => ({ name: "edit-quiz-questions", params: to.params })
     }
   ]
 });

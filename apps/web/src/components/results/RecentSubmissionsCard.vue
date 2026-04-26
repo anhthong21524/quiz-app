@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppDateTime from "../AppDateTime.vue";
 import type { RecentSubmissionResult } from "../../data/quiz-results";
 
 defineProps<{
@@ -22,7 +23,7 @@ defineProps<{
           <strong>{{ submission.studentName }}</strong>
           <span>{{ submission.quizTitle }}</span>
         </span>
-        <time>{{ submission.submittedAt }}</time>
+        <AppDateTime :value="submission.submittedAtIso" />
       </li>
     </ul>
   </section>
@@ -34,7 +35,9 @@ defineProps<{
   border-radius: 16px;
   padding: 18px;
   display: grid;
+  align-content: start;
   gap: 18px;
+  height: 100%;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: var(--surface-shadow);
 }
