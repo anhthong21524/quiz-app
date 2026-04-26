@@ -17,6 +17,7 @@ interface AppStatsBarItem {
 const props = withDefaults(defineProps<{
   items: AppStatsBarItem[];
   variant?: AppStatsBarVariant;
+  height?: string;
   label?: string;
   loading?: boolean;
   empty?: boolean;
@@ -27,6 +28,7 @@ const props = withDefaults(defineProps<{
   loadingItemCount?: number;
 }>(), {
   variant: "pills",
+  height: "56px",
   label: "Overview",
   loading: false,
   empty: false,
@@ -47,6 +49,7 @@ const skeletonItems = computed(() =>
     v-if="loading"
     class="app-stats-bar app-stats-bar--skeleton"
     :class="`app-stats-bar--${variant}`"
+    :style="{ '--app-stats-bar-height': height }"
     aria-busy="true"
     :aria-label="loadingLabel"
   >
@@ -67,6 +70,7 @@ const skeletonItems = computed(() =>
   <div
     v-else-if="empty"
     class="app-stats-bar app-stats-bar--empty"
+    :style="{ '--app-stats-bar-height': height }"
     role="status"
     aria-live="polite"
   >
@@ -90,6 +94,7 @@ const skeletonItems = computed(() =>
     v-else
     class="app-stats-bar app-stats-bar--active"
     :class="`app-stats-bar--${variant}`"
+    :style="{ '--app-stats-bar-height': height }"
     role="region"
     :aria-label="ariaLabel"
   >
@@ -196,6 +201,12 @@ const skeletonItems = computed(() =>
   background: rgba(255, 255, 255, 0.98);
   box-shadow: var(--surface-shadow, 0 10px 26px rgba(46, 35, 20, 0.06));
   padding: 10px 20px;
+  min-height: var(--app-stats-bar-height);
+  box-sizing: border-box;
+}
+
+.app-stats-bar--pills {
+  height: var(--app-stats-bar-height);
 }
 
 .app-stats-bar--pills.app-stats-bar--skeleton,
@@ -203,7 +214,7 @@ const skeletonItems = computed(() =>
   display: flex;
   align-items: center;
   gap: 20px;
-  min-height: 44px;
+  min-height: 0;
   flex-wrap: wrap;
 }
 
@@ -255,7 +266,8 @@ const skeletonItems = computed(() =>
   display: flex;
   align-items: center;
   gap: 16px;
-  min-height: 44px;
+  min-height: 0;
+  height: var(--app-stats-bar-height);
 }
 
 .app-stats-bar__empty-icon {
@@ -481,6 +493,11 @@ const skeletonItems = computed(() =>
 @media (max-width: 560px) {
   .app-stats-bar {
     padding: 10px 16px;
+  }
+
+  .app-stats-bar--pills,
+  .app-stats-bar--empty {
+    height: auto;
   }
 
   .app-stats-bar--cards {

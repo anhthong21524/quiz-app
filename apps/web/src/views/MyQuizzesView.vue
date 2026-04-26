@@ -360,6 +360,7 @@ function shareQuiz(quiz: QuizListItem) {
          there are no quizzes yet, or live stat pills once quizzes exist. -->
     <AppStatsBar
       :items="quizStatsItems"
+      height="56px"
       :loading="isInitialLoad"
       :empty="apiQuizzes.length === 0"
       aria-label="Quiz dashboard stats"

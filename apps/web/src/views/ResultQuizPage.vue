@@ -107,12 +107,10 @@ const resultOverviewItems = computed(() => {
 const quizPerformanceResults = computed<QuizPerformanceResult[]>(() =>
   performanceData.value.map((item) => {
     const avgScorePct = item.averageScorePercent ?? 0;
-    const avgPointsPerQ = item.completedSubmissions > 0 ? item.totalCorrect / item.completedSubmissions : 0;
     const completionPct =
       item.totalSubmissions > 0 ? Math.round((item.completedSubmissions / item.totalSubmissions) * 100) : 0;
     const lastIso = item.lastSubmittedAt ?? new Date(0).toISOString();
-    const averageScoreValue =
-      item.completedSubmissions > 0 ? `${formatPoints(avgPointsPerQ)}/${item.questionCount} - ${avgScorePct}%` : "";
+    const averageScoreValue = item.completedSubmissions > 0 ? `${avgScorePct}%` : "-";
     const completionValue =
       item.totalSubmissions > 0 ? `${item.completedSubmissions}/${item.totalSubmissions} - ${completionPct}%` : "";
 
@@ -280,16 +278,17 @@ onMounted(async () => {
       <p>View and analyze results for all quizzes.</p>
     </header>
 
+    <AppStatsBar
+      :items="resultOverviewItems"
+      height="56px"
+      :loading="isLoading"
+      :loading-item-count="3"
+      aria-label="Result summary"
+      loading-label="Loading result summary"
+    />
+
     <div class="result-quiz-layout">
       <main class="result-main">
-        <AppStatsBar
-          :items="resultOverviewItems"
-          :loading="isLoading"
-          :loading-item-count="3"
-          aria-label="Result summary"
-          loading-label="Loading result summary"
-        />
-
         <QuizPerformanceTable
           :quizzes="paginatedQuizzes"
           :current-page="currentPage"
@@ -324,7 +323,7 @@ onMounted(async () => {
 <style scoped>
 .result-quiz-page {
   display: grid;
-  gap: 22px;
+  gap: 18px;
 }
 
 .result-quiz-heading {
@@ -358,6 +357,13 @@ onMounted(async () => {
 .result-sidebar {
   min-width: 0;
   display: grid;
+}
+
+.result-main {
+  gap: 0;
+}
+
+.result-sidebar {
   gap: 18px;
 }
 
