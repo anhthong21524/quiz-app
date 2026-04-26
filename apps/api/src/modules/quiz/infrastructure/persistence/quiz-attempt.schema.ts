@@ -11,20 +11,17 @@ export class QuizAttemptEntity {
   @Prop({ required: true })
   startedAt!: string;
 
-  @Prop({ type: Number, default: null })
-  timeLimit!: number | null;
-
   @Prop({ type: String, default: null })
   submittedAt?: string;
+
+  @Prop({ type: Number, default: null })
+  timeTaken?: number;
 
   @Prop({ type: Object, default: null })
   answers?: Record<string, number>;
 
   @Prop({ type: Number, default: null })
   score?: number;
-
-  @Prop({ type: Number, default: null })
-  totalQuestions?: number;
 }
 
 export const QuizAttemptSchema = SchemaFactory.createForClass(QuizAttemptEntity);

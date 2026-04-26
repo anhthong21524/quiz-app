@@ -86,6 +86,6 @@ export class QuizController {
     @Param("attemptId") attemptId: string,
     @Body() body: SubmitAttemptDto
   ) {
-    return this.attemptService.submitAttempt(id, attemptId, body.answers);
+    return this.attemptService.submitAttempt(id, attemptId, body.answers, body.timeTaken);
   }
 }

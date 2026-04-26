@@ -70,9 +70,9 @@ const storageKey = computed(() =>
   attempt.value ? `quiz-app-public-answers-${attempt.value.attemptId}` : ""
 );
 const remainingSeconds = computed(() => {
-  if (!attempt.value?.timeLimit) return null;
-  const startedAt = new Date(attempt.value.startedAt).getTime();
-  const durationSeconds = attempt.value.timeLimit * 60;
+  if (!quiz.value?.timeLimit) return null;
+  const startedAt = new Date(attempt.value?.startedAt ?? Date.now()).getTime();
+  const durationSeconds = quiz.value.timeLimit * 60;
   const elapsedSeconds = Math.floor((now.value - startedAt) / 1000);
   return Math.max(durationSeconds - elapsedSeconds, 0);
 });
@@ -140,15 +140,17 @@ async function submitQuiz() {
   const currentAttempt = attempt.value;
   if (!currentAttempt || !quiz.value) return;
 
+  const timeTaken = Math.floor((Date.now() - new Date(currentAttempt.startedAt).getTime()) / 1000);
   const result = await submitQuizAttempt({
     quizId: currentAttempt.quizId,
     attemptId: currentAttempt.attemptId,
-    answers: answers.value
+    answers: answers.value,
+    timeTaken
   });
 
   if (result) {
     score.value = result.score;
-    totalQuestionsAtSubmit.value = result.totalQuestions;
+    totalQuestionsAtSubmit.value = questions.value.length;
   }
 }
 

@@ -100,6 +100,8 @@ SEO metadata (title, description, canonical, breadcrumbs) is applied per-route v
 | `/management/quizzes/:id/questions` | `CreateQuizView` (edit questions) | Yes |
 | `/management/editor` | `QuizEditorView` (new quiz) | Yes |
 | `/management/editor/:id` | `QuizEditorView` (edit quiz) | Yes |
+| `/results` | `ResultQuizPage` (all quiz results) | Yes |
+| `/results/:quizId` | `ResultQuizDetailView` (single quiz submissions) | Yes |
 
 Legacy paths (`/quizzes`, `/editor`, `/editor/:id`, etc.) redirect to their `/management/*` equivalents.
 
@@ -125,6 +127,7 @@ Legacy paths (`/quizzes`, `/editor`, `/editor/:id`, etc.) redirect to their `/ma
 |--------|------|------|--------|
 | GET | `/api/quizzes` | Required | List quizzes for current user |
 | GET | `/api/quizzes/public` | Public | List all published quizzes |
+| GET | `/api/quizzes/slug/:slug` | Public | Get quiz by slug |
 | GET | `/api/quizzes/:id` | Public | Get quiz by ID |
 | POST | `/api/quizzes` | Required | Create quiz |
 | PATCH | `/api/quizzes/:id` | Required | Update quiz |
@@ -132,3 +135,5 @@ Legacy paths (`/quizzes`, `/editor`, `/editor/:id`, etc.) redirect to their `/ma
 | PATCH | `/api/quizzes/:id/unpublish` | Required | Unpublish quiz |
 | DELETE | `/api/quizzes/:id` | Required | Delete quiz (204) |
 | POST | `/api/quizzes/:id/duplicate` | Required | Duplicate quiz |
+| POST | `/api/quizzes/:id/attempts` | Public | Start a quiz attempt |
+| POST | `/api/quizzes/:id/attempts/:attemptId/submit` | Public | Submit attempt with answers |

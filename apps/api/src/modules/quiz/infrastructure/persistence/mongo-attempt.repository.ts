@@ -12,11 +12,10 @@ function normalizeAttempt(doc: Record<string, unknown>): QuizAttempt {
     quizId: doc.quizId as string,
     takerName: doc.takerName as string,
     startedAt: doc.startedAt as string,
-    timeLimit: (doc.timeLimit as number | null) ?? null,
     submittedAt: doc.submittedAt as string | undefined,
+    timeTaken: doc.timeTaken as number | undefined,
     answers: doc.answers as Record<string, number> | undefined,
-    score: doc.score as number | undefined,
-    totalQuestions: doc.totalQuestions as number | undefined
+    score: doc.score as number | undefined
   };
 }
 
@@ -56,12 +55,11 @@ export class MongoAttemptRepository implements AttemptRepository {
     return this.attemptModel;
   }
 
-  async create(quizId: string, takerName: string, timeLimit: number | null): Promise<QuizAttempt> {
+  async create(quizId: string, takerName: string): Promise<QuizAttempt> {
     const doc = await this.getModel().create({
       quizId,
       takerName,
-      startedAt: new Date().toISOString(),
-      timeLimit
+      startedAt: new Date().toISOString()
     });
     return normalizeAttempt(doc.toObject() as unknown as Record<string, unknown>);
   }
@@ -77,13 +75,13 @@ export class MongoAttemptRepository implements AttemptRepository {
     id: string,
     answers: Record<string, number>,
     score: number,
-    totalQuestions: number
+    timeTaken: number
   ): Promise<QuizAttempt | null> {
     if (!Types.ObjectId.isValid(id)) return null;
     const doc = await this.getModel()
       .findByIdAndUpdate(
         id,
-        { submittedAt: new Date().toISOString(), answers, score, totalQuestions },
+        { submittedAt: new Date().toISOString(), timeTaken, answers, score },
         { new: true }
       )
       .lean();

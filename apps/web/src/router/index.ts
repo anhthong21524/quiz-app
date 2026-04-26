@@ -7,6 +7,8 @@ import LoginView from "../views/LoginView.vue";
 import ManagementView from "../views/ManagementView.vue";
 import PublicQuizzesView from "../views/PublicQuizzesView.vue";
 import MyQuizzesView from "../views/MyQuizzesView.vue";
+import ResultQuizPage from "../views/ResultQuizPage.vue";
+import ResultQuizDetailView from "../views/ResultQuizDetailView.vue";
 import CreateQuizView from "../views/CreateQuizView.vue";
 import QuizEditorView from "../views/QuizEditorView.vue";
 import ProfileView from "../views/ProfileView.vue";
@@ -151,6 +153,40 @@ export const router = createRouter({
     {
       path: "/editor/:id",
       redirect: (to) => ({ name: "edit-quiz", params: to.params })
+    },
+    {
+      path: "/results",
+      redirect: { name: "results" }
+    },
+    {
+      path: "/results/:quizId",
+      redirect: (to) => ({ name: "result-quiz-detail", params: to.params })
+    },
+    {
+      path: managementPath("/results"),
+      name: "results",
+      component: ResultQuizPage,
+      meta: {
+        requiresAuth: true,
+        seo: {
+          title: "Result Quiz",
+          description: "View and analyze results for all quizzes in Quiz App.",
+          canonicalPath: managementPath("/results")
+        }
+      }
+    },
+    {
+      path: managementPath("/results/:quizId"),
+      name: "result-quiz-detail",
+      component: ResultQuizDetailView,
+      meta: {
+        requiresAuth: true,
+        seo: {
+          title: "Quiz Results",
+          description: "View submissions and analytics for a single quiz.",
+          canonicalPath: managementPath("/results")
+        }
+      }
     },
     {
       path: managementPath("/quizzes"),

@@ -44,6 +44,10 @@ const activeNav = computed(() => {
     return "quizzes";
   }
 
+  if (route.name === "results" || route.name === "result-quiz-detail") {
+    return "results";
+  }
+
   if (route.name === "about") {
     return "about";
   }
@@ -236,6 +240,17 @@ watch(() => route.fullPath, closeMenus);
         </svg>
         <span>My Quizzes</span>
       </RouterLink>
+      <RouterLink
+        class="nav-link"
+        :class="{ 'is-active': activeNav === 'results' }"
+        :to="{ name: 'results' }"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M7 19V11M12 19V5M17 19v-8" stroke-linecap="round" />
+          <path d="M4 19h16" stroke-linecap="round" opacity="0.4" />
+        </svg>
+        <span>Result Quiz</span>
+      </RouterLink>
     </nav>
 
     <div class="header-actions">
@@ -295,6 +310,14 @@ watch(() => route.fullPath, closeMenus);
         @click="closeMenus"
       >
         My Quizzes
+      </RouterLink>
+      <RouterLink
+        class="mobile-nav-link"
+        :class="{ 'is-active': activeNav === 'results' }"
+        :to="{ name: 'results' }"
+        @click="closeMenus"
+      >
+        Result Quiz
       </RouterLink>
     </nav>
   </header>

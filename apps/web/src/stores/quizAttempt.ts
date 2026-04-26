@@ -8,7 +8,6 @@ export interface QuizAttemptSession {
   quizSlug: string;
   takerName: string;
   startedAt: string;
-  timeLimit: number | null;
 }
 
 interface QuizAttemptState {

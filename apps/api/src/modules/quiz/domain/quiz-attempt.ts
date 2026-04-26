@@ -3,9 +3,8 @@ export interface QuizAttempt {
   quizId: string;
   takerName: string;
   startedAt: string;
-  timeLimit: number | null;
   submittedAt?: string;
+  timeTaken?: number;
   answers?: Record<string, number>;
   score?: number;
-  totalQuestions?: number;
 }

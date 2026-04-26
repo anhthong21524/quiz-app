@@ -79,8 +79,7 @@ async function startQuiz() {
       quizId: quiz.value.id,
       quizSlug: quiz.value.slug,
       takerName: trimmedName,
-      startedAt: attempt.startedAt,
-      timeLimit: quiz.value.timeLimit ?? attempt.timeLimit
+      startedAt: attempt.startedAt
     });
 
     router.push({ name: "public-quiz-take", params: { slug: quiz.value.slug } });

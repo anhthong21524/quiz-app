@@ -25,7 +25,6 @@ export interface QuizAttemptResponse {
   quizId: string;
   takerName: string;
   startedAt: string;
-  timeLimit: number | null;
 }
 
 interface PublicQuizApiResponse {
@@ -49,7 +48,6 @@ interface QuizAttemptApiResponse {
   quizId?: string;
   takerName?: string;
   startedAt?: string;
-  timeLimit?: number | null;
 }
 
 function isPublicQuizApiResponse(data: unknown): data is PublicQuizApiResponse {
@@ -126,11 +124,11 @@ export interface SubmitAttemptPayload {
   quizId: string;
   attemptId: string;
   answers: Record<string, number>;
+  timeTaken: number;
 }
 
 export interface SubmitAttemptResult {
   score: number;
-  totalQuestions: number;
   submittedAt: string;
 }
 
@@ -140,16 +138,15 @@ export async function submitQuizAttempt(
   try {
     const response = await httpClient.post<{
       score?: number;
-      totalQuestions?: number;
       submittedAt?: string;
     }>(`/quizzes/${payload.quizId}/attempts/${payload.attemptId}/submit`, {
-      answers: payload.answers
+      answers: payload.answers,
+      timeTaken: payload.timeTaken
     });
     const data = response.data;
-    if (data.score === undefined || data.totalQuestions === undefined) return null;
+    if (data.score === undefined) return null;
     return {
       score: data.score,
-      totalQuestions: data.totalQuestions,
       submittedAt: data.submittedAt ?? new Date().toISOString()
     };
   } catch {
@@ -171,8 +168,7 @@ export async function createQuizAttempt(
       id: data.id ?? data._id ?? data.attemptId ?? crypto.randomUUID(),
       quizId: data.quizId ?? payload.quizId,
       takerName: data.takerName ?? payload.takerName,
-      startedAt: data.startedAt ?? new Date().toISOString(),
-      timeLimit: data.timeLimit ?? null
+      startedAt: data.startedAt ?? new Date().toISOString()
     };
   } catch {
     // TODO: Replace the local attempt with the API response when public attempts are available.
@@ -180,8 +176,7 @@ export async function createQuizAttempt(
       id: crypto.randomUUID(),
       quizId: payload.quizId,
       takerName: payload.takerName,
-      startedAt: new Date().toISOString(),
-      timeLimit: null
+      startedAt: new Date().toISOString()
     };
   }
 }

@@ -16,13 +16,14 @@ export class AttemptService {
   async createAttempt(quizId: string, takerName: string): Promise<QuizAttempt> {
     const quiz = await this.quizRepository.findById(quizId);
     if (!quiz) throw new NotFoundException(`Quiz ${quizId} was not found.`);
-    return this.attemptRepository.create(quizId, takerName, quiz.timeLimit ?? null);
+    return this.attemptRepository.create(quizId, takerName);
   }
 
   async submitAttempt(
     quizId: string,
     attemptId: string,
-    answers: Record<string, number>
+    answers: Record<string, number>,
+    timeTaken: number
   ): Promise<QuizAttempt> {
     const attempt = await this.attemptRepository.findById(attemptId);
     if (!attempt || attempt.quizId !== quizId) {
@@ -33,7 +34,7 @@ export class AttemptService {
     if (!quiz) throw new NotFoundException(`Quiz ${quizId} was not found.`);
 
     const score = this.calculateScore(quiz, answers);
-    const submitted = await this.attemptRepository.submit(attemptId, answers, score, quiz.questions.length);
+    const submitted = await this.attemptRepository.submit(attemptId, answers, score, timeTaken);
     if (!submitted) throw new NotFoundException(`Attempt ${attemptId} was not found.`);
     return submitted;
   }
