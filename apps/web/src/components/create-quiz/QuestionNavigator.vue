@@ -36,18 +36,18 @@ function getButtonClasses(status: CreateQuizQuestion["status"], isActive: boolea
 
 <template>
   <aside class="flex h-full flex-col rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-4 shadow-[0_10px_26px_rgba(46,35,20,0.06)] xl:sticky xl:top-6">
-    <div class="space-y-1">
-      <h2 class="text-xl font-bold text-gray-900">Questions</h2>
-      <p class="text-sm text-gray-500">{{ completedCount }} / {{ questions.length }} completed</p>
+    <div class="flex items-baseline justify-between gap-2">
+      <h2 class="text-base font-bold text-gray-900">Questions</h2>
+      <p class="text-xs text-gray-500">{{ completedCount }} / {{ questions.length }} completed</p>
     </div>
 
-    <div class="mt-4 flex flex-1 flex-col space-y-4">
+    <div class="mt-3 flex flex-1 flex-col space-y-3">
       <div
         class="grid"
         :class="
           usesCompactLayout
-            ? 'grid-cols-5 gap-2'
-            : 'grid-cols-4 gap-2.5 sm:grid-cols-5 lg:grid-cols-4'
+            ? 'grid-cols-5 gap-1.5'
+            : 'grid-cols-4 gap-2 sm:grid-cols-5 lg:grid-cols-4'
         "
       >
         <button
@@ -56,7 +56,7 @@ function getButtonClasses(status: CreateQuizQuestion["status"], isActive: boolea
           type="button"
           class="relative flex items-center justify-center rounded-xl border font-semibold transition"
           :class="[
-            usesCompactLayout ? 'h-9 text-[13px]' : 'h-11 text-sm',
+            usesCompactLayout ? 'h-9 text-[13px]' : 'h-10 text-sm',
             getButtonClasses(question.status, currentQuestionIndex === index)
           ]"
           @click="emit('select', index)"
@@ -80,7 +80,14 @@ function getButtonClasses(status: CreateQuizQuestion["status"], isActive: boolea
         </button>
       </div>
 
-      <div class="mt-auto">
+      <div class="mt-auto space-y-3">
+        <div v-if="completedCount < questions.length" class="rounded-xl bg-slate-50 px-3 py-2.5 text-xs text-slate-500">
+          <span class="font-semibold text-slate-600">{{ questions.length - completedCount }}</span>
+          {{ questions.length - completedCount === 1 ? "question" : "questions" }} left to complete.
+        </div>
+        <div v-else class="rounded-xl bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-700">
+          All questions complete — ready to save!
+        </div>
         <slot />
       </div>
     </div>

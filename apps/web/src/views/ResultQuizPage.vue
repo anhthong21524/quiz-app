@@ -14,6 +14,7 @@ import {
   type ResultsSummary
 } from "../services/quiz-api";
 import type { QuizPerformanceResult, RecentSubmissionResult } from "../data/quiz-results";
+import PageHeader from "../components/PageHeader.vue";
 
 const router = useRouter();
 
@@ -273,10 +274,7 @@ onMounted(async () => {
 
 <template>
   <section class="result-quiz-page" :aria-busy="isLoading">
-    <header class="result-quiz-heading">
-      <h1>Result Quiz</h1>
-      <p>View and analyze results for all quizzes.</p>
-    </header>
+    <PageHeader title="Result Quiz" description="View and analyze results for all quizzes." />
 
     <AppStatsBar
       :items="resultOverviewItems"
@@ -326,25 +324,6 @@ onMounted(async () => {
   gap: 18px;
 }
 
-.result-quiz-heading {
-  display: grid;
-  gap: 6px;
-}
-
-.result-quiz-heading h1,
-.result-quiz-heading p {
-  margin: 0;
-}
-
-.result-quiz-heading h1 {
-  color: #182033;
-  font-size: 2rem;
-  line-height: 1.15;
-}
-
-.result-quiz-heading p {
-  color: #657286;
-}
 
 .result-quiz-layout {
   display: grid;

@@ -34,7 +34,7 @@ const emit = defineEmits<{
   >
     <button
       type="button"
-      class="flex h-10 w-10 shrink-0 items-center justify-center border text-sm font-semibold transition"
+      class="flex h-9 w-9 shrink-0 items-center justify-center border text-sm font-semibold transition"
       :class="[
         allowMultiple ? 'rounded-lg' : 'rounded-full',
         option.isCorrect
@@ -60,7 +60,7 @@ const emit = defineEmits<{
     <input
       :value="option.text"
       type="text"
-      class="min-w-0 flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+      class="min-w-0 flex-1 rounded-xl border border-gray-200 bg-white px-4 py-2 text-sm text-gray-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
       :placeholder="`Option ${option.label}`"
       @input="emit('updateText', ($event.target as HTMLInputElement).value)"
     />
@@ -68,7 +68,7 @@ const emit = defineEmits<{
     <button
       type="button"
       draggable="true"
-      class="hidden h-9 w-7 shrink-0 cursor-grab items-center justify-center rounded-lg text-gray-300 transition hover:bg-gray-50 hover:text-gray-500 active:cursor-grabbing md:inline-flex"
+      class="hidden h-8 w-7 shrink-0 cursor-grab items-center justify-center rounded-lg text-gray-300 transition hover:bg-gray-50 hover:text-gray-500 active:cursor-grabbing md:inline-flex"
       :aria-label="`Drag option ${option.label}`"
       @dragstart="emit('dragStart', $event)"
       @dragend="emit('dragEnd')"
@@ -85,7 +85,7 @@ const emit = defineEmits<{
 
     <button
       type="button"
-      class="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-transparent text-gray-400 transition hover:border-red-100 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-40"
+      class="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-transparent text-gray-400 transition hover:border-red-100 hover:bg-red-50 hover:text-red-500 disabled:cursor-not-allowed disabled:opacity-40"
       :disabled="!canDelete"
       aria-label="Delete option"
       @click="emit('delete')"

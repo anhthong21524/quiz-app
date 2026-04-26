@@ -42,13 +42,23 @@ function handleClickOutside(event: MouseEvent) {
   }
 }
 
-onMounted(() => document.addEventListener("mousedown", handleClickOutside));
-onBeforeUnmount(() => document.removeEventListener("mousedown", handleClickOutside));
+function handleKeydown(event: KeyboardEvent) {
+  if (event.key === "Escape") closeMenu();
+}
+
+onMounted(() => {
+  document.addEventListener("mousedown", handleClickOutside);
+  document.addEventListener("keydown", handleKeydown);
+});
+onBeforeUnmount(() => {
+  document.removeEventListener("mousedown", handleClickOutside);
+  document.removeEventListener("keydown", handleKeydown);
+});
 </script>
 
 <template>
   <div class="row-actions">
-    <button class="icon-button" type="button" :aria-label="`View ${title}`" @click="emit('view')">
+    <button class="icon-button" type="button" :aria-label="isPublished() ? `Preview ${title}` : `View ${title}`" @click="emit('view')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke-linejoin="round" />
         <circle cx="12" cy="12" r="2.5" />
@@ -59,6 +69,22 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", handleClickOutsi
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <path d="m5 19 3.8-.8 9-9a2.1 2.1 0 0 0-3-3l-9 9L5 19Z" stroke-linejoin="round" />
         <path d="m13.5 7.5 3 3" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <!-- Share as top-level button for published quizzes -->
+    <button
+      v-if="isApiQuiz && isPublished()"
+      class="icon-button"
+      type="button"
+      :aria-label="`Share ${title}`"
+      @click="emit('share')"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <circle cx="18" cy="5" r="3" />
+        <circle cx="6" cy="12" r="3" />
+        <circle cx="18" cy="19" r="3" />
+        <path d="m8.7 13.5 6.6 4M15.3 6.5l-6.6 4" stroke-linecap="round" />
       </svg>
     </button>
 
@@ -78,7 +104,7 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", handleClickOutsi
       </button>
 
       <div v-if="menuOpen" class="more-menu-dropdown" role="menu">
-        <!-- Published → Unpublish + Share -->
+        <!-- Published → Unpublish -->
         <template v-if="isPublished()">
           <button class="menu-item menu-item--orange" type="button" role="menuitem" @click="action(() => emit('unpublish'))">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -86,15 +112,6 @@ onBeforeUnmount(() => document.removeEventListener("mousedown", handleClickOutsi
               <path d="M9 12h6" stroke-linecap="round" />
             </svg>
             Unpublish
-          </button>
-          <button class="menu-item" type="button" role="menuitem" @click="action(() => emit('share'))">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-              <circle cx="18" cy="5" r="3" />
-              <circle cx="6" cy="12" r="3" />
-              <circle cx="18" cy="19" r="3" />
-              <path d="m8.7 13.5 6.6 4M15.3 6.5l-6.6 4" stroke-linecap="round" />
-            </svg>
-            Share
           </button>
         </template>
 

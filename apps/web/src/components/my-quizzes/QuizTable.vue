@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref } from "vue";
+import { computed } from "vue";
 import AppTable from "../AppTable.vue";
 import QuizIconAvatar from "./QuizIconAvatar.vue";
 import QuizRowActions from "./QuizRowActions.vue";
@@ -10,9 +10,13 @@ const props = withDefaults(defineProps<{
   quizzes: QuizListItem[];
   offset?: number;
   pageSize?: number;
+  sortKey?: string;
+  sortDir?: "asc" | "desc";
 }>(), {
   offset: 0,
   pageSize: 6,
+  sortKey: "",
+  sortDir: "asc",
 });
 
 const emit = defineEmits<{
@@ -23,6 +27,7 @@ const emit = defineEmits<{
   duplicate: [quiz: QuizListItem];
   delete: [quiz: QuizListItem];
   share: [quiz: QuizListItem];
+  sort: [key: string, dir: "asc" | "desc"];
 }>();
 
 const COLUMNS = [
@@ -35,37 +40,8 @@ const COLUMNS = [
   { label: "Actions",      class: "col-actions" },
 ];
 
-const sortKey = ref("");
-const sortDir = ref<"asc" | "desc">("asc");
-
-function onSort(key: string, dir: "asc" | "desc") {
-  sortKey.value = key;
-  sortDir.value = dir;
-}
-
-const sortedQuizzes = computed(() => {
-  const key = sortKey.value as keyof QuizListItem;
-  if (!key) return props.quizzes;
-
-  return [...props.quizzes].sort((a, b) => {
-    const av = a[key];
-    const bv = b[key];
-
-    let cmp = 0;
-    if (key === "lastUpdated") {
-      cmp = new Date(av as string).getTime() - new Date(bv as string).getTime();
-    } else if (typeof av === "number" && typeof bv === "number") {
-      cmp = av - bv;
-    } else {
-      cmp = String(av ?? "").localeCompare(String(bv ?? ""));
-    }
-
-    return sortDir.value === "asc" ? cmp : -cmp;
-  });
-});
-
 const paddedRows = computed<(QuizListItem | null)[]>(() => {
-  const rows: (QuizListItem | null)[] = [...sortedQuizzes.value.slice(0, props.pageSize)];
+  const rows: (QuizListItem | null)[] = [...props.quizzes.slice(0, props.pageSize)];
   while (rows.length < props.pageSize) rows.push(null);
   return rows;
 });
@@ -80,7 +56,7 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
       sorting-enabled
       :sort-key="sortKey"
       :sort-dir="sortDir"
-      @sort="onSort"
+      @sort="(key, dir) => emit('sort', key, dir)"
     >
       <tr
         v-for="(quiz, i) in paddedRows"
@@ -140,7 +116,7 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
 .col-num { width: 48px; text-align: center; }
 .cell-num { text-align: center; color: #8a93a3; }
 
-.col-actions { width: 110px; text-align: right; }
+.col-actions { width: 140px; text-align: right; }
 .col-actions-cell { text-align: right; }
 
 .row-empty { pointer-events: none; }

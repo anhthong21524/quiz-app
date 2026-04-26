@@ -13,6 +13,7 @@ import ConfirmModal from "../components/ConfirmModal.vue";
 import ShareModal from "../components/ShareModal.vue";
 import SectionErrorState from "../components/feedback/SectionErrorState.vue";
 import QuizListSkeleton from "../components/loading/QuizListSkeleton.vue";
+import PageHeader from "../components/PageHeader.vue";
 import type {
   MyQuizIcon,
   MyQuizStatus,
@@ -33,6 +34,13 @@ const selectedStatus = ref<MyQuizStatus | "All status">("All status");
 const selectedSubject = ref("All subjects");
 const viewMode = ref<ViewMode>("list");
 const currentPage = ref(1);
+const sortKey = ref("");
+const sortDir = ref<"asc" | "desc">("asc");
+
+function onSort(key: string, dir: "asc" | "desc") {
+  sortKey.value = key;
+  sortDir.value = dir;
+}
 
 interface ConfirmState {
   open: boolean;
@@ -111,18 +119,37 @@ const filteredQuizzes = computed(() => {
 
 watch(filteredQuizzes, () => { currentPage.value = 1; });
 
+const sortedFilteredQuizzes = computed(() => {
+  const key = sortKey.value as keyof QuizListItem;
+  if (!key) return filteredQuizzes.value;
+
+  return [...filteredQuizzes.value].sort((a, b) => {
+    const av = a[key];
+    const bv = b[key];
+    let cmp = 0;
+    if (key === "lastUpdated") {
+      cmp = new Date(av as string).getTime() - new Date(bv as string).getTime();
+    } else if (typeof av === "number" && typeof bv === "number") {
+      cmp = av - bv;
+    } else {
+      cmp = String(av ?? "").localeCompare(String(bv ?? ""));
+    }
+    return sortDir.value === "asc" ? cmp : -cmp;
+  });
+});
+
 const totalPages = computed(() =>
-  Math.max(1, Math.ceil(filteredQuizzes.value.length / PAGE_SIZE))
+  Math.max(1, Math.ceil(sortedFilteredQuizzes.value.length / PAGE_SIZE))
 );
 
 const pageOffset = computed(() => (currentPage.value - 1) * PAGE_SIZE);
 
 const pagedQuizzes = computed(() =>
-  filteredQuizzes.value.slice(pageOffset.value, pageOffset.value + PAGE_SIZE)
+  sortedFilteredQuizzes.value.slice(pageOffset.value, pageOffset.value + PAGE_SIZE)
 );
 
 const showingCopy = computed(() => {
-  const total = filteredQuizzes.value.length;
+  const total = sortedFilteredQuizzes.value.length;
   if (!total) return "Showing 0 to 0 of 0 quizzes";
   const from = pageOffset.value + 1;
   const to = Math.min(pageOffset.value + PAGE_SIZE, total);
@@ -145,11 +172,16 @@ const isFilteredEmpty = computed(
     filteredQuizzes.value.length === 0
 );
 
-// ── Dashboard stats (UX-5) ───────────────────────────────────
+// ── Dashboard stats ───────────────────────────────────────────
 const publishedCount = computed(
   () => apiQuizzes.value.filter((q) => q.status === "Published").length
 );
-const inProgressCount = computed(() => apiQuizzes.value.length - publishedCount.value);
+const inProgressCount = computed(
+  () => apiQuizzes.value.filter((q) => q.status === "In progress").length
+);
+const unpublishedCount = computed(
+  () => apiQuizzes.value.filter((q) => q.status === "Unpublished").length
+);
 const quizStatsItems = computed(() => [
   {
     id: "total",
@@ -167,6 +199,12 @@ const quizStatsItems = computed(() => [
     label: "In progress",
     value: inProgressCount.value,
     tone: "amber" as const
+  },
+  {
+    id: "unpublished",
+    label: "Unpublished",
+    value: unpublishedCount.value,
+    tone: "gray" as const
   }
 ]);
 
@@ -174,6 +212,20 @@ function clearFilters() {
   searchQuery.value = "";
   selectedStatus.value = "All status";
   selectedSubject.value = "All subjects";
+}
+
+function handleStatClick(id: string) {
+  const map: Record<string, MyQuizStatus | "All status"> = {
+    total: "All status",
+    published: "Published",
+    "in-progress": "In progress",
+    unpublished: "Unpublished",
+  };
+  const status = map[id];
+  if (status !== undefined) {
+    selectedStatus.value = status;
+    currentPage.value = 1;
+  }
 }
 
 function createQuiz() {
@@ -243,7 +295,10 @@ async function runConfirm() {
 }
 
 function viewQuiz(quiz: QuizListItem) {
-  if (quiz.apiId) {
+  if (quiz.status === "Published" && quiz.slug) {
+    const baseUrl = import.meta.env.VITE_SITE_URL ?? window.location.origin;
+    window.open(`${baseUrl}/q/${quiz.slug}`, "_blank", "noopener");
+  } else if (quiz.apiId) {
     router.push({ name: "edit-quiz-questions", params: { id: quiz.apiId } });
   }
 }
@@ -350,10 +405,10 @@ function shareQuiz(quiz: QuizListItem) {
 
 <template>
   <section class="my-quizzes-page">
-    <header class="my-quizzes-heading">
-      <h1>My Quizzes</h1>
-      <p>Manage your in-progress quizzes, published quizzes, and API-backed editor work.</p>
-    </header>
+    <PageHeader
+      title="My Quizzes"
+      description="Manage, publish, and share all your quizzes."
+    />
 
     <!-- UX-5: Dashboard stats / empty-dashboard state.
          Shows a skeleton while the initial load runs, a welcome banner when
@@ -363,10 +418,12 @@ function shareQuiz(quiz: QuizListItem) {
       height="56px"
       :loading="isInitialLoad"
       :empty="apiQuizzes.length === 0"
+      :clickable="apiQuizzes.length > 0"
       aria-label="Quiz dashboard stats"
       loading-label="Loading dashboard stats"
       empty-title="Welcome to your quiz dashboard"
       empty-description="Your stats, including total quizzes, published count, and recent activity, will appear here once you create your first quiz."
+      @item-click="handleStatClick"
     />
 
     <section
@@ -412,6 +469,8 @@ function shareQuiz(quiz: QuizListItem) {
                 :quizzes="pagedQuizzes"
                 :offset="pageOffset"
                 :page-size="PAGE_SIZE"
+                :sort-key="sortKey"
+                :sort-dir="sortDir"
                 @view="viewQuiz"
                 @edit="editQuiz"
                 @publish="publishQuiz"
@@ -419,6 +478,7 @@ function shareQuiz(quiz: QuizListItem) {
                 @duplicate="duplicateQuiz"
                 @delete="deleteQuiz"
                 @share="shareQuiz"
+                @sort="onSort"
               />
               <QuizCardList
                 :quizzes="pagedQuizzes"
@@ -512,25 +572,6 @@ function shareQuiz(quiz: QuizListItem) {
   min-height: 100%;
 }
 
-.my-quizzes-heading {
-  display: grid;
-  gap: 6px;
-}
-
-.my-quizzes-heading h1,
-.my-quizzes-heading p {
-  margin: 0;
-}
-
-.my-quizzes-heading h1 {
-  color: #182033;
-  font-size: 2rem;
-  line-height: 1.15;
-}
-
-.my-quizzes-heading p {
-  color: #657286;
-}
 
 .quiz-manager-card {
   border: var(--surface-border);
@@ -623,6 +664,29 @@ function shareQuiz(quiz: QuizListItem) {
 
 .search-control input::placeholder {
   color: #7f8a9c;
+}
+
+.search-clear {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #e2e6ea;
+  color: #5a6373;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.search-clear:hover {
+  background: #c8cdd5;
+}
+
+.search-clear svg {
+  width: 12px;
+  height: 12px;
 }
 
 .filter-group {

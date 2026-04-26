@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted } from "vue";
+import { computed, onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { QuizStatus, type Quiz } from "@quiz-app/shared";
 import AppTable from "../components/AppTable.vue";
@@ -8,14 +8,18 @@ import QuizIconAvatar from "../components/my-quizzes/QuizIconAvatar.vue";
 import QuizStatusBadge from "../components/my-quizzes/QuizStatusBadge.vue";
 import type { MyQuizIcon, MyQuizStatus } from "../components/my-quizzes/types";
 import { useQuizStore } from "../stores/quizzes";
+import { fetchResultsSummary } from "../services/quiz-api";
 
 const quizStore = useQuizStore();
 const RECENT_QUIZZES_LIMIT = 5;
+const totalSubmissions = ref<number | null>(null);
 
 onMounted(async () => {
-  if (!quizStore.items.length && !quizStore.isLoading) {
-    await quizStore.loadQuizzes();
-  }
+  const quizzesPromise = !quizStore.items.length && !quizStore.isLoading
+    ? quizStore.loadQuizzes()
+    : Promise.resolve();
+  const [, summary] = await Promise.all([quizzesPromise, fetchResultsSummary()]);
+  totalSubmissions.value = summary.totalSubmissions;
 });
 
 // ── Icon helper (mirrors MyQuizzesView) ───────────────────────
@@ -86,9 +90,6 @@ const inProgressCount = computed(
 const publishedCount = computed(
   () => quizStore.items.filter((q) => q.status === QuizStatus.PUBLISHED).length
 );
-const unpublishedCount = computed(
-  () => quizStore.items.filter((q) => q.status === QuizStatus.UNPUBLISHED).length
-);
 
 const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length);
 </script>
@@ -158,15 +159,33 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
         </div>
       </template>
 
-      <!-- Has quiz: Continue editing -->
+      <!-- Has quiz: status-aware hero -->
       <template v-else>
         <div class="hero-body">
           <p class="hero-eyebrow">
-            <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-              <path d="M14.5 9A5.5 5.5 0 1 1 9 3.5" stroke-linecap="round" />
-              <path d="M14.5 3.5v3h-3" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            Continue editing
+            <!-- In-progress: refresh/continue icon -->
+            <template v-if="heroQuiz.status === QuizStatus.IN_PROGRESS">
+              <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="M14.5 9A5.5 5.5 0 1 1 9 3.5" stroke-linecap="round" />
+                <path d="M14.5 3.5v3h-3" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Continue editing
+            </template>
+            <!-- Published: checkmark/send icon -->
+            <template v-else-if="heroQuiz.status === QuizStatus.PUBLISHED">
+              <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="M3 9l4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              Published
+            </template>
+            <!-- Unpublished: eye-off icon -->
+            <template v-else>
+              <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="M2 2l14 14M7.5 7.6A3 3 0 0 0 10.4 10.5" stroke-linecap="round" />
+                <path d="M5 4.6C3.3 5.7 2 7.5 2 9s3.1 5 7 5a9 9 0 0 0 3-.5M8 4c.3 0 .7 0 1 .1C13 4.6 16 7 16 9c0 .8-.4 1.6-1 2.3" stroke-linecap="round" />
+              </svg>
+              Unpublished
+            </template>
           </p>
 
           <h1 class="hero-title">{{ heroQuiz.title }}</h1>
@@ -181,23 +200,12 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
             class="hero-cta"
             :to="{ name: 'edit-quiz-questions', params: { id: heroQuiz.id } }"
           >
-            Continue
+            {{ heroQuiz.status === QuizStatus.IN_PROGRESS ? 'Continue' : 'Edit' }}
             <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.64L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.16-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd" />
             </svg>
           </RouterLink>
         </div>
-
-        <!-- Floating edit button -->
-        <RouterLink
-          class="hero-edit-btn"
-          :to="{ name: 'edit-quiz-questions', params: { id: heroQuiz.id } }"
-          :aria-label="`Edit ${heroQuiz.title}`"
-        >
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7">
-            <path d="M13.586 3.586a2 2 0 1 1 2.828 2.828l-.793.793-2.828-2.828.793-.793ZM11.379 5.793 3 14.172V17h2.828l8.38-8.379-2.83-2.828Z" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </RouterLink>
 
         <!-- Decorative quiz mockup -->
         <div class="hero-mockup" aria-hidden="true">
@@ -221,6 +229,55 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
             </div>
           </div>
         </div>
+      </template>
+    </section>
+
+    <!-- ══ STATS GRID ════════════════════════════════════════════ -->
+    <section class="stats-grid" aria-label="Quiz stats overview">
+
+      <!-- Skeleton -->
+      <template v-if="isLoading">
+        <div v-for="n in 4" :key="n" class="stat-card stat-card--skeleton" aria-hidden="true">
+          <div class="skel skel--stat-icon" />
+          <div class="stat-card__body">
+            <div class="skel skel--stat-num" />
+            <div class="skel skel--stat-label" />
+            <div class="skel skel--stat-hint" />
+          </div>
+        </div>
+      </template>
+
+      <template v-else>
+        <StatCard :value="totalCount" label="Total quizzes" hint="All quizzes you've created" color="green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M6 3h8l4 4v14H6z" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M14 3v4h4" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M9 13h6M9 17h4" stroke-linecap="round" />
+          </svg>
+        </StatCard>
+
+        <StatCard :value="inProgressCount" label="In progress" hint="Being actively edited" color="amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M11 4H4v16h16v-7" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </StatCard>
+
+        <StatCard :value="publishedCount" label="Published" hint="Publicly available" color="green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M22 2 11 13" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M22 2 15 22l-4-9-9-4 20-7Z" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </StatCard>
+
+        <StatCard :value="totalSubmissions ?? '—'" label="Total submissions" hint="Across all published quizzes" color="teal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linecap="round" stroke-linejoin="round" />
+            <circle cx="9" cy="7" r="4" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </StatCard>
+
       </template>
     </section>
 
@@ -293,54 +350,6 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
           </template>
         </tr>
       </AppTable>
-    </section>
-
-    <!-- ══ STATS GRID ════════════════════════════════════════════ -->
-    <section class="stats-grid" aria-label="Quiz stats overview">
-
-      <!-- Skeleton -->
-      <template v-if="isLoading">
-        <div v-for="n in 4" :key="n" class="stat-card stat-card--skeleton" aria-hidden="true">
-          <div class="skel skel--stat-icon" />
-          <div class="stat-card__body">
-            <div class="skel skel--stat-num" />
-            <div class="skel skel--stat-label" />
-            <div class="skel skel--stat-hint" />
-          </div>
-        </div>
-      </template>
-
-      <template v-else>
-        <StatCard :value="totalCount" label="Total quizzes" hint="All quizzes you've created" color="green">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-            <path d="M6 3h8l4 4v14H6z" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M14 3v4h4" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M9 13h6M9 17h4" stroke-linecap="round" />
-          </svg>
-        </StatCard>
-
-        <StatCard :value="inProgressCount" label="In progress" hint="Being actively edited" color="amber">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-            <path d="M11 4H4v16h16v-7" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </StatCard>
-
-        <StatCard :value="publishedCount" label="Published" hint="Publicly available" color="teal">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-            <path d="M22 2 11 13" stroke-linecap="round" stroke-linejoin="round" />
-            <path d="M22 2 15 22l-4-9-9-4 20-7Z" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </StatCard>
-
-        <StatCard :value="unpublishedCount" label="Unpublished" hint="Hidden from public" color="gray">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" stroke-linecap="round" />
-            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" stroke-linecap="round" />
-            <path d="M1 1l22 22" stroke-linecap="round" />
-          </svg>
-        </StatCard>
-      </template>
     </section>
 
   </div>
@@ -446,30 +455,6 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
 .hero-cta svg { width: 18px; height: 18px; }
 .hero-cta:hover { background: #0ea873; transform: translateY(-1px); }
 .hero-cta:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; }
-
-/* Floating edit button */
-.hero-edit-btn {
-  position: absolute;
-  bottom: 36px;
-  left: 400px;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  background: #10b981;
-  color: #ffffff;
-  display: grid;
-  place-items: center;
-  text-decoration: none;
-  box-shadow: 0 8px 18px rgba(16, 185, 129, 0.28);
-  z-index: 1;
-  transition:
-    background-color 0.15s ease,
-    transform 0.15s ease;
-}
-
-.hero-edit-btn svg { width: 20px; height: 20px; }
-.hero-edit-btn:hover { background: #0ea873; transform: translateY(-1px); }
-.hero-edit-btn:focus-visible { outline: 2px solid #065f46; outline-offset: 2px; border-radius: 50%; }
 
 /* Decorative mockup */
 .hero-mockup {
@@ -629,14 +614,12 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
 /* ══ RESPONSIVE ══════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
-  .hero-edit-btn { left: 340px; }
 }
 
 @media (max-width: 860px) {
   .dash-hero { padding: 20px 24px; }
   .hero-title { font-size: 1.6rem; }
   .hero-mockup { display: none; }
-  .hero-edit-btn { display: none; }
   .card-header { padding: 18px 20px 14px; }
 }
 

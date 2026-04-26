@@ -29,10 +29,21 @@ const emit = defineEmits<{
       </svg>
       <input
         :value="searchQuery"
-        type="search"
+        type="text"
         placeholder="Search quizzes..."
         @input="emit('update:searchQuery', ($event.target as HTMLInputElement).value)"
       />
+      <button
+        v-if="searchQuery"
+        class="search-clear"
+        type="button"
+        aria-label="Clear search"
+        @click="emit('update:searchQuery', '')"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round" />
+        </svg>
+      </button>
     </label>
 
     <div class="filter-group">

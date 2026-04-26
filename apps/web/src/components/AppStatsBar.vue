@@ -26,6 +26,7 @@ const props = withDefaults(defineProps<{
   ariaLabel?: string;
   loadingLabel?: string;
   loadingItemCount?: number;
+  clickable?: boolean;
 }>(), {
   variant: "pills",
   height: "56px",
@@ -36,8 +37,13 @@ const props = withDefaults(defineProps<{
   emptyDescription: "Stats will appear here once there is activity to summarize.",
   ariaLabel: "Stats overview",
   loadingLabel: "Loading stats",
-  loadingItemCount: 3
+  loadingItemCount: 3,
+  clickable: false,
 });
+
+const emit = defineEmits<{
+  "item-click": [id: string];
+}>();
 
 const skeletonItems = computed(() =>
   Array.from({ length: props.loadingItemCount }, (_, index) => index)
@@ -101,15 +107,18 @@ const skeletonItems = computed(() =>
     <p v-if="variant === 'pills' && label" class="app-stats-bar__label">{{ label }}</p>
 
     <dl v-if="variant === 'pills'" class="app-stats-bar__items">
-      <div
+      <component
+        :is="clickable ? 'button' : 'div'"
         v-for="item in items"
         :key="item.id ?? item.label"
         class="app-stats-pill"
-        :class="`app-stats-pill--${item.tone ?? 'neutral'}`"
+        :class="[`app-stats-pill--${item.tone ?? 'neutral'}`, { 'app-stats-pill--clickable': clickable }]"
+        :type="clickable ? 'button' : undefined"
+        @click="clickable ? emit('item-click', item.id ?? item.label) : undefined"
       >
         <dt class="app-stats-pill__label">{{ item.label }}</dt>
         <dd class="app-stats-pill__value">{{ item.value }}</dd>
-      </div>
+      </component>
     </dl>
 
     <div v-else class="app-stats-cards">
@@ -336,6 +345,21 @@ const skeletonItems = computed(() =>
   border: 1px solid #edf0f2;
   border-radius: 20px;
   background: #f4f6f8;
+}
+
+.app-stats-pill--clickable {
+  cursor: pointer;
+  transition: filter 0.15s ease, box-shadow 0.15s ease;
+}
+
+.app-stats-pill--clickable:hover {
+  filter: brightness(0.96);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.app-stats-pill--clickable:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
 }
 
 .app-stats-pill--green {

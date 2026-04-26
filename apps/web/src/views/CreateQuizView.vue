@@ -7,6 +7,7 @@ import CreateQuizStepper from "../components/create-quiz/CreateQuizStepper.vue";
 import QuestionNavigator from "../components/create-quiz/QuestionNavigator.vue";
 import FullPageErrorState from "../components/feedback/FullPageErrorState.vue";
 import EditorFormSkeleton from "../components/loading/EditorFormSkeleton.vue";
+import PageHeader from "../components/PageHeader.vue";
 import { useToast } from "../composables/useToast";
 import { useQuizStore } from "../stores/quizzes";
 import type {
@@ -656,294 +657,290 @@ function exitFlow() {
   <EditorFormSkeleton v-else-if="quizStore.isLoading && isEditing" />
 
   <section v-else class="w-full">
-    <div class="mx-auto w-full max-w-[1180px] space-y-5">
-      <div class="space-y-3">
-        <div class="space-y-2">
-          <h1 class="text-3xl font-extrabold text-slate-900 sm:text-4xl">{{ pageTitle }}</h1>
-          <p class="max-w-2xl text-sm text-slate-500 sm:text-base">
-            {{ stepIntro }}
-          </p>
-        </div>
+    <div class="mx-auto w-full max-w-[1180px] space-y-4">
+      <div class="space-y-2">
+        <PageHeader :title="pageTitle" :description="stepIntro" />
 
         <div
-          class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between"
-          :class="currentStep === 1 ? 'pt-2' : ''"
+          class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
+          :class="currentStep === 1 ? 'pt-1' : ''"
         >
           <CreateQuizStepper :current-step="currentStep" @select="handleStepSelection" />
 
-          <div
+          <button
             v-if="currentStep === 2"
-            class="flex w-full flex-col gap-3 sm:flex-row sm:items-center sm:justify-end lg:w-auto"
+            type="button"
+            class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-700"
+            @click="goBackToConfiguration"
           >
-            <div class="w-full max-w-xs space-y-1.5">
-              <p class="text-right text-sm font-medium text-slate-500">
-                {{ completedQuestions }} / {{ questions.length }} questions completed
-              </p>
-              <div class="h-2 overflow-hidden rounded-full bg-gray-200">
-                <div
-                  class="h-full rounded-full bg-emerald-500 transition-all"
-                  :style="{ width: `${progressPercent}%` }"
-                ></div>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              class="inline-flex items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-gray-300 hover:bg-gray-50"
-              @click="exitFlow"
-            >
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4">
-                <path d="M8 5 3 10l5 5M3 10h9M12 4h4a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1h-4" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-              <span>Exit</span>
-            </button>
-          </div>
+            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+              <path d="M12 5 7 10l5 5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            Back to configuration
+          </button>
         </div>
       </div>
 
       <div v-if="currentStep === 1">
         <div class="rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-5 shadow-[0_10px_26px_rgba(46,35,20,0.06)]">
-          <div class="space-y-5">
-            <section class="space-y-3">
-              <div class="space-y-1">
-                <h2 class="text-xl font-bold text-slate-900">Basic information</h2>
-              </div>
+          <div class="space-y-4">
+            <!-- Two-column layout on large screens -->
+            <div class="grid gap-5 lg:grid-cols-[1fr_320px]">
+              <!-- Left: Basic information -->
+              <section class="space-y-3">
+                <h2 class="text-base font-bold text-slate-900">Basic information</h2>
 
-              <div class="space-y-3">
-                <label class="block space-y-2">
-                  <span class="text-sm font-semibold text-slate-700">Quiz title</span>
-                  <input
-                    v-model="configuration.title"
-                    type="text"
-                    placeholder="e.g. Mathematics Quiz #1"
-                    class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                  />
-                  <p v-if="validationErrors.title" class="text-sm font-medium text-red-500">
-                    {{ validationErrors.title }}
-                  </p>
-                </label>
+                <div class="space-y-3">
+                  <label class="block space-y-1.5">
+                    <span class="text-sm font-semibold text-slate-700">Quiz title</span>
+                    <input
+                      v-model="configuration.title"
+                      type="text"
+                      placeholder="e.g. Mathematics Quiz #1"
+                      class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    />
+                    <p v-if="validationErrors.title" class="text-sm font-medium text-red-500">
+                      {{ validationErrors.title }}
+                    </p>
+                  </label>
 
-                <label class="block space-y-2">
-                  <div class="flex items-center justify-between gap-3">
-                    <span class="text-sm font-semibold text-slate-700">Quiz description</span>
-                    <span class="text-sm text-slate-400">{{ configuration.description.length }} / 500</span>
-                  </div>
-                  <textarea
-                    v-model="configuration.description"
-                    rows="3"
-                    maxlength="500"
-                    placeholder="Describe what learners will practice in this quiz."
-                    class="w-full resize-y rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                  ></textarea>
-                  <p v-if="validationErrors.description" class="text-sm font-medium text-red-500">
-                    {{ validationErrors.description }}
-                  </p>
-                </label>
-
-                <label class="block space-y-2">
-                  <span class="text-sm font-semibold text-slate-700">Subject / Domain</span>
-                  <select
-                    v-model="configuration.subject"
-                    class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                  >
-                    <option disabled value="">Select a subject</option>
-                    <option v-for="subject in subjectOptions" :key="subject" :value="subject">
-                      {{ subject }}
-                    </option>
-                  </select>
-                  <p v-if="validationErrors.subject" class="text-sm font-medium text-red-500">
-                    {{ validationErrors.subject }}
-                  </p>
-                </label>
-              </div>
-            </section>
-
-            <section class="space-y-3 border-t border-gray-100 pt-5">
-              <div class="space-y-1">
-                <h2 class="text-xl font-bold text-slate-900">Quiz setup</h2>
-              </div>
-
-              <div class="space-y-3">
-                <label class="block space-y-2">
-                  <div class="flex items-center justify-between gap-3">
-                    <span class="text-sm font-semibold text-slate-700">Number of questions</span>
-                    <span class="text-sm text-slate-400">1 - 50</span>
-                  </div>
-                  <input
-                    v-model.number="configuration.numberOfQuestions"
-                    type="number"
-                    :min="minQuestions"
-                    :max="maxQuestions"
-                    class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 sm:max-w-[14rem]"
-                  />
-                  <p v-if="validationErrors.numberOfQuestions" class="text-sm font-medium text-red-500">
-                    {{ validationErrors.numberOfQuestions }}
-                  </p>
-                </label>
-
-                <div class="space-y-2">
-                  <span class="text-sm font-semibold text-slate-700">Time limit</span>
-                  <div class="flex flex-wrap items-center gap-x-5 gap-y-3">
-                    <div class="flex flex-wrap items-center gap-x-5 gap-y-2">
-                      <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-slate-700">
-                        <input
-                          type="radio"
-                          name="time-limit-mode"
-                          class="sr-only"
-                          :checked="!configuration.timeLimitEnabled"
-                          @change="setUnlimitedTimeLimit"
-                        />
-                        <span
-                          class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
-                          :class="
-                            !configuration.timeLimitEnabled
-                              ? 'border-emerald-600 bg-emerald-600 text-white'
-                              : 'border-gray-300 bg-white text-transparent'
-                          "
-                        >
-                          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3">
-                            <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
-                          </svg>
-                        </span>
-                        <span>Unlimited (no time limit)</span>
-                      </label>
-
-                      <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-semibold text-slate-700">
-                        <input
-                          type="radio"
-                          name="time-limit-mode"
-                          class="sr-only"
-                          :checked="configuration.timeLimitEnabled"
-                          @change="setTimedTimeLimit"
-                        />
-                        <span
-                          class="inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full border"
-                          :class="
-                            configuration.timeLimitEnabled
-                              ? 'border-emerald-600 bg-emerald-600 text-white'
-                              : 'border-gray-300 bg-white text-transparent'
-                          "
-                        >
-                          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3">
-                            <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
-                          </svg>
-                        </span>
-                        <span>Set time limit</span>
-                      </label>
+                  <label class="block space-y-1.5">
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="text-sm font-semibold text-slate-700">Quiz description</span>
+                      <span class="text-xs text-slate-400">{{ configuration.description.length }} / 500</span>
                     </div>
+                    <textarea
+                      v-model="configuration.description"
+                      rows="2"
+                      maxlength="500"
+                      placeholder="Describe what learners will practice in this quiz."
+                      class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                    ></textarea>
+                    <p v-if="validationErrors.description" class="text-sm font-medium text-red-500">
+                      {{ validationErrors.description }}
+                    </p>
+                  </label>
 
-                    <label
-                      class="flex h-11 w-full overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100 sm:w-[28rem]"
-                      :class="!configuration.timeLimitEnabled ? 'opacity-60' : ''"
+                  <label class="block space-y-1.5">
+                    <span class="text-sm font-semibold text-slate-700">Subject / Domain</span>
+                    <select
+                      v-model="configuration.subject"
+                      class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                     >
-                      <span class="sr-only">Time limit minutes</span>
-                      <input
-                        v-model.number="configuration.timeLimitMinutes"
-                        type="number"
-                        min="1"
-                        :max="maxTimeLimitMinutes"
-                        :placeholder="String(defaultTimeLimitMinutes)"
-                        class="min-w-0 flex-1 border-0 bg-white px-4 text-slate-900 outline-none placeholder:text-gray-400"
-                        @click="setTimedTimeLimit"
-                        @focus="setTimedTimeLimit"
-                      />
-                      <span class="grid min-w-24 place-items-center border-l border-gray-200 bg-gray-50 px-4 text-sm font-medium text-slate-600">
-                        minutes
-                      </span>
-                    </label>
-                  </div>
-                  <div class="flex flex-wrap items-center gap-x-5 gap-y-1">
-                    <p class="text-sm text-slate-500">Set how many minutes users have to complete this quiz.</p>
-                    <span class="shrink-0 text-sm text-slate-400">1 - 180 minutes</span>
-                  </div>
-                  <p v-if="validationErrors.timeLimitMinutes" class="text-sm font-medium text-red-500">
-                    {{ validationErrors.timeLimitMinutes }}
-                  </p>
+                      <option disabled value="">Select a subject</option>
+                      <option v-for="subject in subjectOptions" :key="subject" :value="subject">
+                        {{ subject }}
+                      </option>
+                    </select>
+                    <p v-if="validationErrors.subject" class="text-sm font-medium text-red-500">
+                      {{ validationErrors.subject }}
+                    </p>
+                  </label>
                 </div>
+              </section>
 
-                <div class="space-y-2">
-                  <span class="text-sm font-semibold text-slate-700">Difficulty level</span>
-                  <div class="grid gap-3 sm:grid-cols-3">
-                    <button
-                      v-for="difficulty in difficultyOptions"
-                      :key="difficulty"
-                      type="button"
-                      class="inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition"
-                      :class="
-                        configuration.difficulty === difficulty
-                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                          : 'border-gray-200 bg-white text-slate-700 hover:border-emerald-200 hover:text-emerald-700'
-                      "
-                      @click="configuration.difficulty = difficulty"
-                    >
-                      <span
-                        class="inline-flex h-5 w-5 items-center justify-center rounded-full border"
+              <!-- Right: Quiz setup -->
+              <section class="space-y-3 border-t border-gray-100 pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+                <h2 class="text-base font-bold text-slate-900">Quiz setup</h2>
+
+                <div class="space-y-3">
+                  <div class="space-y-1.5">
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="text-sm font-semibold text-slate-700">Number of questions</span>
+                      <span class="text-xs text-slate-400">1 – 50</span>
+                    </div>
+                    <div class="flex h-10 overflow-hidden rounded-xl border border-gray-200 bg-white transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100">
+                      <button
+                        type="button"
+                        class="flex w-10 shrink-0 items-center justify-center border-r border-gray-200 bg-gray-50 text-lg font-semibold text-slate-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        :disabled="configuration.numberOfQuestions <= minQuestions"
+                        @click="configuration.numberOfQuestions = Math.max(minQuestions, configuration.numberOfQuestions - 1)"
+                      >−</button>
+                      <input
+                        v-model.number="configuration.numberOfQuestions"
+                        type="number"
+                        :min="minQuestions"
+                        :max="maxQuestions"
+                        class="min-w-0 flex-1 border-0 bg-white px-2 text-center text-sm font-semibold text-slate-900 outline-none"
+                      />
+                      <button
+                        type="button"
+                        class="flex w-10 shrink-0 items-center justify-center border-l border-gray-200 bg-gray-50 text-lg font-semibold text-slate-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        :disabled="configuration.numberOfQuestions >= maxQuestions"
+                        @click="configuration.numberOfQuestions = Math.min(maxQuestions, configuration.numberOfQuestions + 1)"
+                      >+</button>
+                    </div>
+                    <p v-if="validationErrors.numberOfQuestions" class="text-sm font-medium text-red-500">
+                      {{ validationErrors.numberOfQuestions }}
+                    </p>
+                  </div>
+
+                  <div class="space-y-1.5">
+                    <span class="text-sm font-semibold text-slate-700">Time limit</span>
+                    <div class="flex flex-col gap-2">
+                      <div class="flex flex-wrap gap-x-4 gap-y-2">
+                        <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+                          <input
+                            type="radio"
+                            name="time-limit-mode"
+                            class="sr-only"
+                            :checked="!configuration.timeLimitEnabled"
+                            @change="setUnlimitedTimeLimit"
+                          />
+                          <span
+                            class="inline-flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border"
+                            :class="
+                              !configuration.timeLimitEnabled
+                                ? 'border-emerald-600 bg-emerald-600 text-white'
+                                : 'border-gray-300 bg-white text-transparent'
+                            "
+                          >
+                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" class="h-2.5 w-2.5">
+                              <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </span>
+                          <span>Unlimited</span>
+                        </label>
+
+                        <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+                          <input
+                            type="radio"
+                            name="time-limit-mode"
+                            class="sr-only"
+                            :checked="configuration.timeLimitEnabled"
+                            @change="setTimedTimeLimit"
+                          />
+                          <span
+                            class="inline-flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border"
+                            :class="
+                              configuration.timeLimitEnabled
+                                ? 'border-emerald-600 bg-emerald-600 text-white'
+                                : 'border-gray-300 bg-white text-transparent'
+                            "
+                          >
+                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" class="h-2.5 w-2.5">
+                              <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                          </span>
+                          <span>Set time limit</span>
+                        </label>
+                      </div>
+
+                      <div class="space-y-1">
+                        <label
+                          class="flex h-10 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100"
+                          :class="!configuration.timeLimitEnabled ? 'pointer-events-none opacity-50' : ''"
+                        >
+                          <span class="sr-only">Time limit minutes</span>
+                          <input
+                            v-model.number="configuration.timeLimitMinutes"
+                            type="number"
+                            min="1"
+                            :max="maxTimeLimitMinutes"
+                            :placeholder="String(defaultTimeLimitMinutes)"
+                            class="min-w-0 flex-1 border-0 bg-white px-3 text-sm text-slate-900 outline-none placeholder:text-gray-400"
+                            @click="setTimedTimeLimit"
+                            @focus="setTimedTimeLimit"
+                          />
+                          <span class="grid min-w-20 place-items-center border-l border-gray-200 bg-gray-50 px-3 text-xs font-medium text-slate-600">
+                            minutes
+                          </span>
+                        </label>
+                        <p class="text-xs text-slate-400">1 – 180 minutes</p>
+                      </div>
+                    </div>
+                    <p v-if="validationErrors.timeLimitMinutes" class="text-sm font-medium text-red-500">
+                      {{ validationErrors.timeLimitMinutes }}
+                    </p>
+                  </div>
+
+                  <div class="space-y-1.5">
+                    <span class="text-sm font-semibold text-slate-700">Difficulty level</span>
+                    <div class="grid grid-cols-3 gap-2">
+                      <button
+                        v-for="difficulty in difficultyOptions"
+                        :key="difficulty"
+                        type="button"
+                        class="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border px-3 text-sm font-semibold transition"
                         :class="
                           configuration.difficulty === difficulty
-                            ? 'border-emerald-600 bg-emerald-600 text-white'
-                            : 'border-gray-300 bg-white text-transparent'
+                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                            : 'border-gray-200 bg-white text-slate-700 hover:border-emerald-200 hover:text-emerald-700'
                         "
+                        @click="configuration.difficulty = difficulty"
                       >
-                        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3">
-                          <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                      </span>
-                      <span>{{ difficulty }}</span>
-                    </button>
+                        <span
+                          class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border"
+                          :class="
+                            configuration.difficulty === difficulty
+                              ? 'border-emerald-600 bg-emerald-600 text-white'
+                              : 'border-gray-300 bg-white text-transparent'
+                          "
+                        >
+                          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" class="h-2.5 w-2.5">
+                            <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </span>
+                        <span>{{ difficulty }}</span>
+                      </button>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </section>
-
-            <div class="rounded-xl bg-emerald-50 px-4 py-2.5 text-sm text-emerald-800">
-              You can change these settings later.
+              </section>
             </div>
 
-            <button
-              type="button"
-              class="inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-base font-bold text-white shadow-sm transition hover:bg-emerald-700"
-              @click="goToQuestionsStep"
-            >
-              <span>{{ isEditing ? "Update questions" : "Create questions" }}</span>
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
-                <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
+            <!-- Footer row: hint + CTA -->
+            <div class="flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+              <p class="text-sm text-emerald-700">
+                <span class="mr-1 inline-block rounded-lg bg-emerald-50 px-2 py-0.5 font-medium">Tip</span>
+                You can change these settings later.
+              </p>
+              <button
+                type="button"
+                class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 sm:min-w-[180px]"
+                @click="goToQuestionsStep"
+              >
+                <span>{{ isEditing ? "Update questions" : "Create questions" }}</span>
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                  <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div v-else class="space-y-4">
-        <div class="items-stretch gap-5 xl:grid xl:grid-cols-[minmax(0,1.95fr)_260px]">
-          <div class="rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-5 shadow-[0_10px_26px_rgba(46,35,20,0.06)]">
-            <div v-if="currentQuestion" class="space-y-4">
-              <label class="block space-y-2">
+      <div v-else>
+        <div class="items-stretch gap-4 xl:grid xl:grid-cols-[minmax(0,1.95fr)_252px]">
+          <div class="rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-4 shadow-[0_10px_26px_rgba(46,35,20,0.06)]">
+            <div v-if="currentQuestion" class="space-y-3">
+              <label class="block space-y-1.5">
                 <span class="text-sm font-semibold text-slate-700">Question</span>
                 <textarea
                   :value="currentQuestion.questionText"
-                  rows="3"
-                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                  rows="2"
+                  class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   placeholder="Write your question here..."
                   @input="updateQuestionText(($event.target as HTMLTextAreaElement).value)"
                 ></textarea>
               </label>
 
-              <section class="space-y-3">
-                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <section class="space-y-2">
+                <div class="flex items-center justify-between gap-2">
                   <span class="text-sm font-semibold text-slate-700">Answer options</span>
 
                   <button
                     type="button"
-                    class="inline-flex items-center gap-3 text-sm text-slate-500"
+                    class="inline-flex items-center gap-2 text-sm text-slate-500"
                     :aria-pressed="currentQuestion.multipleCorrect"
                     @click="toggleMultipleCorrect"
                   >
                     <span
-                      class="relative inline-flex h-7 w-12 items-center rounded-full transition"
+                      class="relative inline-flex h-6 w-11 items-center rounded-full transition"
                       :class="currentQuestion.multipleCorrect ? 'bg-emerald-500' : 'bg-gray-200'"
                     >
                       <span
-                        class="inline-block h-5 w-5 rounded-full bg-white shadow-sm transition"
+                        class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition"
                         :class="currentQuestion.multipleCorrect ? 'translate-x-6' : 'translate-x-1'"
                       ></span>
                     </span>
@@ -951,7 +948,7 @@ function exitFlow() {
                   </button>
                 </div>
 
-                <div class="space-y-2.5">
+                <div class="space-y-2">
                   <AnswerOptionRow
                     v-for="(option, optionIndex) in currentQuestion.options"
                     :key="option.id"
@@ -973,7 +970,7 @@ function exitFlow() {
 
                 <button
                   type="button"
-                  class="flex w-full items-center justify-center rounded-xl border border-dashed border-gray-300 px-4 py-2.5 text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  class="flex w-full items-center justify-center rounded-xl border border-dashed border-gray-300 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
                   :disabled="currentQuestion.options.length >= maxOptions"
                   @click="addOption"
                 >
@@ -981,29 +978,27 @@ function exitFlow() {
                 </button>
               </section>
 
-              <label class="block space-y-2">
+              <label class="block space-y-1.5">
                 <span class="text-sm font-semibold text-slate-700">Explanation <span class="font-normal text-slate-400">(optional)</span></span>
                 <textarea
                   :value="currentQuestion.explanation"
                   rows="2"
-                  class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                  class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   placeholder="Explain why the correct answer is right..."
                   @input="updateExplanation(($event.target as HTMLTextAreaElement).value)"
                 ></textarea>
               </label>
 
-              <div class="min-h-[4.5rem]">
-                <p
-                  v-if="validationErrors.question"
-                  class="rounded-xl border border-red-100 bg-red-50 px-4 py-3 text-sm font-medium text-red-600"
-                >
-                  {{ validationErrors.question }}
-                </p>
-              </div>
+              <p
+                v-if="validationErrors.question"
+                class="rounded-xl border border-red-100 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600"
+              >
+                {{ validationErrors.question }}
+              </p>
             </div>
           </div>
 
-          <div class="mt-5 flex h-full flex-col gap-5 xl:mt-0">
+          <div class="mt-4 flex h-full flex-col gap-3 xl:mt-0">
             <QuestionNavigator
               :questions="questions"
               :current-question-index="currentQuestionIndex"
@@ -1013,12 +1008,17 @@ function exitFlow() {
 
             <button
               type="button"
-              class="inline-flex h-11 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
+              class="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
               :disabled="isSaving"
               :class="{ 'cursor-not-allowed opacity-75': isSaving }"
               @click="saveAndNext"
             >
-              <span>{{ isSaving ? "Saving..." : isEditing ? "Update" : "Save" }}</span>
+              <span>{{
+                isSaving ? "Saving..." :
+                isEditing ? "Update quiz" :
+                currentQuestionIndex < questions.length - 1 ? "Next question" :
+                "Save quiz"
+              }}</span>
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                 <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
