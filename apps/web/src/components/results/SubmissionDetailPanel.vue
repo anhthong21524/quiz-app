@@ -7,10 +7,6 @@ const props = defineProps<{
   submission: QuizSubmission;
 }>();
 
-const emit = defineEmits<{
-  close: [];
-}>();
-
 const correctRate = computed(() => `${props.submission.scorePercent}%`);
 const submittedAtDate = computed(() => {
   const [monthDay, year] = props.submission.submittedAt.split(", ");
@@ -22,14 +18,6 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
 
 <template>
   <aside class="submission-detail-panel" aria-label="Submission detail">
-    <header class="detail-panel-header">
-      <button type="button" class="detail-close-button" aria-label="Close detail" @click="emit('close')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-          <path d="m7 7 10 10M17 7 7 17" stroke-linecap="round" />
-        </svg>
-      </button>
-    </header>
-
     <div class="detail-panel-body">
       <section class="participant-block">
         <span class="submission-avatar" :class="`is-${submission.accent}`" aria-hidden="true">
@@ -57,12 +45,6 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
           <strong>{{ submittedAtDate }}</strong>
           <small>{{ submittedAtTime }}</small>
         </article>
-        <article>
-          <span>Status</span>
-          <strong>
-            <span class="status-badge">{{ submission.status }}</span>
-          </strong>
-        </article>
       </section>
     </div>
 
@@ -70,10 +52,6 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
       <h2 id="answer-review-title">Answers review</h2>
       <SubmissionAnswerReview :answers="submission.answers" />
     </section>
-
-    <footer class="detail-panel-footer">
-      <button type="button" class="close-detail-button" @click="emit('close')">Close detail</button>
-    </footer>
   </aside>
 </template>
 
@@ -84,45 +62,19 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
   position: relative;
   display: flex;
   min-width: 0;
-  min-height: 620px;
+  min-height: 0;
   flex-direction: column;
   overflow: hidden;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: var(--surface-shadow);
 }
 
-.detail-panel-header {
-  position: absolute;
-  top: 14px;
-  right: 18px;
-  z-index: 1;
-}
-
-.detail-close-button {
-  width: 34px;
-  height: 34px;
-  border: 1px solid #dfe4ea;
-  border-radius: 9px;
-  display: grid;
-  place-items: center;
-  background: #ffffff;
-  color: #182033;
-}
-
-.detail-close-button:hover {
-  background: #eef9f4;
-  color: #10b981;
-}
-
-.detail-close-button svg {
-  width: 20px;
-  height: 20px;
-}
-
 .detail-panel-body {
-  padding: 24px 18px 18px;
+  padding: 18px;
   display: grid;
-  gap: 20px;
+  grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 16px;
 }
 
 .participant-block {
@@ -130,7 +82,6 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
   grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 14px;
-  padding-right: 48px;
 }
 
 .submission-avatar {
@@ -191,22 +142,9 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
   font-size: 0.86rem;
 }
 
-.status-badge {
-  min-height: 22px;
-  border-radius: 999px;
-  padding: 0 9px;
-  display: inline-flex;
-  align-items: center;
-  background: #dff8ed;
-  color: #0f9f65;
-  font-size: 0.75rem;
-  font-weight: 900;
-  white-space: nowrap;
-}
-
 .submission-stat-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   border: 1px solid #dfe4ea;
   border-radius: 10px;
   overflow: hidden;
@@ -214,13 +152,13 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
 
 .submission-stat-grid article {
   min-width: 0;
-  min-height: 86px;
-  padding: 13px 10px;
-  display: grid;
-  justify-items: center;
-  align-content: center;
-  gap: 4px;
-  text-align: center;
+  min-height: 58px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: left;
 }
 
 .submission-stat-grid article + article {
@@ -237,6 +175,7 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
 .submission-stat-grid strong {
   color: #182033;
   font-size: 1rem;
+  white-space: nowrap;
 }
 
 .submission-stat-grid small:first-of-type {
@@ -244,43 +183,21 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
 }
 
 .detail-answer-section {
-  border-bottom: 1px solid #edf0f2;
+  border-top: 1px solid #edf0f2;
 }
 
 .detail-answer-section h2 {
   margin: 0;
-  padding: 16px 18px 12px;
-  border-top: 1px solid #edf0f2;
+  padding: 14px 18px 8px;
   color: #182033;
   font-size: 0.95rem;
   font-weight: 900;
 }
 
-.detail-answer-section :deep(.answer-review-list) {
-  padding: 0 18px;
-}
-
-.detail-panel-footer {
-  margin-top: auto;
-  padding: 18px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.close-detail-button {
-  min-height: 38px;
-  border: 1px solid #dfe4ea;
-  border-radius: 9px;
-  padding: 0 18px;
-  background: #ffffff;
-  color: #182033;
-  font-weight: 800;
-}
-
-.close-detail-button:hover {
-  border-color: #a7f3d0;
-  background: #eef9f4;
-  color: #10b981;
+@media (max-width: 900px) {
+  .detail-panel-body {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px) {
@@ -290,13 +207,10 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
     justify-items: start;
   }
 
-  .status-badge {
-    justify-self: start;
-  }
-
   .submission-stat-grid article {
     width: 100%;
-    justify-items: start;
+    justify-content: flex-start;
+    flex-wrap: wrap;
     text-align: left;
   }
 

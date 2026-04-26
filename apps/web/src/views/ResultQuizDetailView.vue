@@ -21,7 +21,6 @@ import {
 const route = useRoute();
 
 const searchQuery = ref("");
-const statusFilter = ref("All status");
 const scoreFilter = ref("All scores");
 const dateFilter = ref("All time");
 const currentPage = ref(1);
@@ -31,7 +30,6 @@ const isLoading = ref(false);
 const quizDetail = ref<MockQuizResultDetail | null>(null);
 
 const pageSize = 10;
-const statusOptions = ["All status", "Completed", "Incomplete"];
 const scoreOptions = ["All scores", "80% and above", "70% - 79%", "Below 70%"];
 const dateOptions = ["All time", "Today", "Last 7 days"];
 const tabs = [
@@ -153,29 +151,19 @@ const summaryCards = computed(() => {
       id: "total-submissions",
       label: "Total submissions",
       value: String(s.totalSubmissions),
-      helper: `${s.uniqueParticipants} unique participants`,
       icon: "users" as const
     },
     {
       id: "average-score",
       label: "Average score",
       value: `${s.averageScorePercent}%`,
-      helper: s.averageScoreText,
       icon: "star" as const
     },
     {
       id: "average-time",
       label: "Average time",
       value: s.averageTime,
-      helper: "mm:ss",
       icon: "clock" as const
-    },
-    {
-      id: "completion-rate",
-      label: "Completion rate",
-      value: `${s.completionRate}%`,
-      helper: `${s.completedCount} / ${s.totalSubmissions} completed`,
-      icon: "check" as const
     }
   ];
 });
@@ -188,12 +176,10 @@ const filteredSubmissions = computed(() => {
       !normalizedSearch ||
       submission.participantName.toLowerCase().includes(normalizedSearch) ||
       submission.participantEmail.toLowerCase().includes(normalizedSearch);
-    const matchesStatus =
-      statusFilter.value === "All status" || submission.status === statusFilter.value;
     const matchesScore = isInSelectedScoreRange(submission);
     const matchesDate = isInSelectedDateRange(submission.submittedAtIso);
 
-    return matchesSearch && matchesStatus && matchesScore && matchesDate;
+    return matchesSearch && matchesScore && matchesDate;
   });
 });
 
@@ -227,7 +213,7 @@ watch(
   { immediate: true }
 );
 
-watch([searchQuery, statusFilter, scoreFilter, dateFilter], () => {
+watch([searchQuery, scoreFilter, dateFilter], () => {
   currentPage.value = 1;
 });
 
@@ -266,22 +252,17 @@ function setPage(page: number) {
   currentPage.value = Math.min(Math.max(page, 1), pageCount.value);
 }
 
-function clearSelectedSubmission() {
-  activeTab.value = "submissions";
-}
-
 function downloadCsv() {
   if (!quizDetail.value || !summary.value) return;
 
-  const header = ["#", "Participant", "Email", "Submitted at", "Score", "Time taken", "Correct", "Status"];
+  const header = ["#", "Participant", "Email", "Submitted at", "Score", "Time taken", "Status"];
   const rows = submissions.value.map((submission, index) => [
     String(index + 1),
     submission.participantName,
     submission.participantEmail,
     submission.submittedAt,
-    `${submission.score} / ${submission.totalScore}`,
+    `${submission.score}/${submission.totalScore} - ${submission.scorePercent}%`,
     submission.timeTaken,
-    `${submission.correctAnswers} / ${submission.totalQuestions}`,
     submission.status
   ]);
   const csv = [header, ...rows]
@@ -315,27 +296,14 @@ onMounted(async () => {
   </section>
 
   <section v-else-if="quizDetail && summary" class="result-detail-page">
-    <nav class="result-breadcrumb" aria-label="Breadcrumb">
-      <RouterLink :to="{ name: 'results' }">
-        Result Quiz
-      </RouterLink>
-      <span aria-hidden="true">></span>
-      <span>{{ summary.quizTitle }}</span>
-    </nav>
-
-    <header class="result-detail-heading">
-      <div class="heading-copy">
-        <div class="heading-meta-row">
-          <h1>{{ summary.quizTitle }}</h1>
-          <span class="published-badge">{{ summary.status === "published" ? "Published" : "Draft" }}</span>
-          <span class="meta-separator" aria-hidden="true">></span>
-          <span>{{ summary.category }}</span>
-          <span class="meta-separator" aria-hidden="true">></span>
-          <span>{{ summary.totalQuestions }} questions</span>
-          <span class="meta-separator" aria-hidden="true">></span>
-          <span>{{ summary.totalSubmissions }} submissions</span>
-        </div>
-      </div>
+    <div class="result-detail-topbar">
+      <nav class="result-breadcrumb" aria-label="Breadcrumb">
+        <RouterLink :to="{ name: 'results' }">
+          Result Quiz
+        </RouterLink>
+        <span aria-hidden="true">></span>
+        <span>{{ summary.quizTitle }}</span>
+      </nav>
 
       <button type="button" class="export-button" @click="downloadCsv">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -343,7 +311,7 @@ onMounted(async () => {
         </svg>
         Export CSV
       </button>
-    </header>
+    </div>
 
     <section class="summary-grid" aria-label="Result summary">
       <QuizResultSummaryCard
@@ -351,7 +319,6 @@ onMounted(async () => {
         :key="card.id"
         :label="card.label"
         :value="card.value"
-        :helper="card.helper"
         :icon="card.icon"
       />
     </section>
@@ -364,7 +331,6 @@ onMounted(async () => {
 
         <SubmissionTable
           v-model:search-query="searchQuery"
-          v-model:status-filter="statusFilter"
           v-model:score-filter="scoreFilter"
           v-model:date-filter="dateFilter"
           :submissions="paginatedSubmissions"
@@ -374,7 +340,6 @@ onMounted(async () => {
           :showing-start="showingStart"
           :showing-end="showingEnd"
           :total-submissions="filteredSubmissions.length"
-          :status-options="statusOptions"
           :score-options="scoreOptions"
           :date-options="dateOptions"
           @page="setPage"
@@ -385,7 +350,6 @@ onMounted(async () => {
       <SubmissionDetailPanel
         v-else-if="selectedSubmission"
         :submission="selectedSubmission"
-        @close="clearSelectedSubmission"
       />
 
       <div v-else class="submission-detail-empty">
@@ -411,7 +375,14 @@ onMounted(async () => {
 <style scoped>
 .result-detail-page {
   display: grid;
-  gap: 18px;
+  gap: 14px;
+}
+
+.result-detail-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
 }
 
 .result-breadcrumb {
@@ -436,50 +407,6 @@ onMounted(async () => {
 .result-breadcrumb svg {
   width: 17px;
   height: 17px;
-}
-
-.result-detail-heading {
-  display: flex;
-  align-items: end;
-  justify-content: space-between;
-  gap: 18px;
-}
-
-.heading-copy {
-  min-width: 0;
-  display: grid;
-  gap: 10px;
-}
-
-.heading-meta-row {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 9px 13px;
-  color: #53627c;
-  font-size: 0.9rem;
-  font-weight: 800;
-}
-
-.heading-copy h1 {
-  margin: 0;
-  color: #182033;
-  font-size: 1.75rem;
-  line-height: 1.15;
-}
-
-.published-badge {
-  border-radius: 999px;
-  padding: 3px 10px;
-  background: #dff8ed;
-  color: #0f9f65;
-  font-size: 0.76rem;
-  font-weight: 900;
-}
-
-.meta-separator {
-  color: #93a0b4;
 }
 
 .export-button {
@@ -509,8 +436,8 @@ onMounted(async () => {
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(160px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(160px, 1fr));
+  gap: 14px;
 }
 
 .result-detail-layout {
@@ -534,7 +461,7 @@ onMounted(async () => {
 }
 
 .submissions-card :deep(.submission-detail-panel) {
-  min-height: 560px;
+  min-height: 0;
   border: 0;
   border-radius: 0;
   box-shadow: none;
@@ -620,13 +547,9 @@ onMounted(async () => {
 }
 
 @media (max-width: 640px) {
-  .result-detail-heading {
+  .result-detail-topbar {
     align-items: stretch;
     flex-direction: column;
-  }
-
-  .heading-meta-row {
-    gap: 7px 10px;
   }
 
   .export-button {

@@ -6,7 +6,6 @@ import type { QuizSubmission } from "../../data/quiz-submissions";
 defineProps<{
   submissions: QuizSubmission[];
   searchQuery: string;
-  statusFilter: string;
   scoreFilter: string;
   dateFilter: string;
   selectedSubmissionId: string | null;
@@ -15,14 +14,12 @@ defineProps<{
   showingStart: number;
   showingEnd: number;
   totalSubmissions: number;
-  statusOptions: string[];
   scoreOptions: string[];
   dateOptions: string[];
 }>();
 
 const emit = defineEmits<{
   "update:searchQuery": [value: string];
-  "update:statusFilter": [value: string];
   "update:scoreFilter": [value: string];
   "update:dateFilter": [value: string];
   page: [page: number];
@@ -34,8 +31,6 @@ const columns = [
   { label: "Participant" },
   { label: "Score" },
   { label: "Time taken" },
-  { label: "Correct" },
-  { label: "Status" },
   { label: "Submitted at" },
 ];
 
@@ -75,21 +70,6 @@ function handlePageChange(page: number) {
 
       <div class="toolbar-filters">
         <label class="toolbar-select">
-          <span class="sr-only">Status</span>
-          <select
-            :value="statusFilter"
-            @change="emit('update:statusFilter', ($event.target as HTMLSelectElement).value)"
-          >
-            <option v-for="option in statusOptions" :key="option" :value="option">
-              {{ option }}
-            </option>
-          </select>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-            <path d="m7 10 5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-        </label>
-
-        <label class="toolbar-select">
           <span class="sr-only">Score</span>
           <select
             :value="scoreFilter"
@@ -121,7 +101,7 @@ function handlePageChange(page: number) {
       </div>
     </div>
 
-    <AppTable v-if="submissions.length" :columns="columns" min-width="900px" first-column-variant="index">
+    <AppTable v-if="submissions.length" :columns="columns" min-width="820px" first-column-variant="index">
       <tr
         v-for="(submission, index) in submissions"
         :key="submission.id"
@@ -146,16 +126,14 @@ function handlePageChange(page: number) {
           </div>
         </td>
         <td>
-          <span class="score-value">{{ submission.score }} / {{ submission.totalScore }}</span>
-          <span class="score-percent" :class="scoreClass(submission)">
-            {{ submission.scorePercent }}%
+          <span class="score-value">
+            {{ submission.score }}/{{ submission.totalScore }} -
+            <span class="score-percent" :class="scoreClass(submission)">
+              {{ submission.scorePercent }}%
+            </span>
           </span>
         </td>
         <td>{{ submission.timeTaken }}</td>
-        <td>{{ submission.correctAnswers }} / {{ submission.totalQuestions }}</td>
-        <td>
-          <span class="status-badge">{{ submission.status }}</span>
-        </td>
         <td>
           <time :datetime="submission.submittedAtIso">{{ submission.submittedAt }}</time>
         </td>
@@ -169,7 +147,7 @@ function handlePageChange(page: number) {
         </svg>
       </span>
       <h3>No submissions match these filters</h3>
-      <p>Adjust the search, status, score, or date filter to find participants.</p>
+      <p>Adjust the search, score, or date filter to find participants.</p>
     </div>
 
     <AppPagination
@@ -247,7 +225,7 @@ function handlePageChange(page: number) {
 
 .toolbar-filters {
   display: grid;
-  grid-template-columns: repeat(3, minmax(128px, 1fr));
+  grid-template-columns: repeat(2, minmax(148px, 1fr));
   gap: 10px;
 }
 
@@ -365,19 +343,13 @@ function handlePageChange(page: number) {
   font-size: 0.8rem;
 }
 
-.score-value,
-.score-percent {
-  display: block;
-}
-
 .score-value {
   color: #182033;
   font-weight: 900;
+  white-space: nowrap;
 }
 
 .score-percent {
-  margin-top: 2px;
-  font-size: 0.82rem;
   font-weight: 900;
 }
 
@@ -391,19 +363,6 @@ function handlePageChange(page: number) {
 
 .score-percent.is-low {
   color: #ef4444;
-}
-
-.status-badge {
-  min-height: 22px;
-  border-radius: 999px;
-  padding: 0 9px;
-  display: inline-flex;
-  align-items: center;
-  background: #dff8ed;
-  color: #0f9f65;
-  font-size: 0.75rem;
-  font-weight: 900;
-  white-space: nowrap;
 }
 
 .submissions-empty-state {

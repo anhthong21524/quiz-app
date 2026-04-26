@@ -2,7 +2,6 @@
 defineProps<{
   label: string;
   value: string;
-  helper: string;
   icon: "users" | "star" | "clock" | "check";
 }>();
 </script>
@@ -53,27 +52,26 @@ defineProps<{
     <div class="summary-copy">
       <p>{{ label }}</p>
       <strong>{{ value }}</strong>
-      <span>{{ helper }}</span>
     </div>
   </article>
 </template>
 
 <style scoped>
 .result-detail-summary-card {
-  min-height: 110px;
+  min-height: 94px;
   border: var(--surface-border);
   border-radius: 16px;
-  padding: 18px;
+  padding: 16px 18px;
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 16px;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: var(--surface-shadow);
 }
 
 .summary-icon {
-  width: 52px;
-  height: 52px;
+  width: 48px;
+  height: 48px;
   border-radius: 999px;
   display: grid;
   place-items: center;
@@ -83,8 +81,8 @@ defineProps<{
 }
 
 .summary-icon svg {
-  width: 26px;
-  height: 26px;
+  width: 24px;
+  height: 24px;
 }
 
 .summary-copy {
@@ -94,8 +92,7 @@ defineProps<{
 }
 
 .summary-copy p,
-.summary-copy strong,
-.summary-copy span {
+.summary-copy strong {
   margin: 0;
 }
 
@@ -107,12 +104,7 @@ defineProps<{
 
 .summary-copy strong {
   color: #182033;
-  font-size: 1.75rem;
+  font-size: 1.6rem;
   line-height: 1.1;
-}
-
-.summary-copy span {
-  color: #52617a;
-  font-size: 0.85rem;
 }
 </style>
