@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Req } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Req } from "@nestjs/common";
 import type { Request } from "express";
 import { Public } from "../../auth/decorators/public.decorator";
 import { CreateAttemptDto } from "../application/dto/create-attempt.dto";
@@ -34,6 +34,26 @@ export class QuizController {
   @Public()
   findBySlug(@Param("slug") slug: string) {
     return this.quizService.findBySlug(slug);
+  }
+
+  @Get("results/summary")
+  getResultsSummary(@Req() request: AuthenticatedRequest) {
+    return this.attemptService.getResultsSummary(request.user);
+  }
+
+  @Get("results/performance")
+  getQuizPerformance(@Req() request: AuthenticatedRequest) {
+    return this.attemptService.getQuizPerformance(request.user);
+  }
+
+  @Get("results/recent")
+  getRecentSubmissions(@Req() request: AuthenticatedRequest, @Query("limit") limit?: string) {
+    return this.attemptService.getRecentSubmissions(request.user, limit ? parseInt(limit, 10) : 5);
+  }
+
+  @Get(":id/results")
+  getQuizResults(@Param("id") id: string, @Req() request: AuthenticatedRequest) {
+    return this.attemptService.getQuizResults(id, request.user);
   }
 
   @Get(":id")

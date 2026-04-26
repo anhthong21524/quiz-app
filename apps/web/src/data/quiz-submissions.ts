@@ -1,4 +1,10 @@
-export type QuizSubmissionStatus = "Completed" | "Incomplete";
+import type {
+  QuizResultSummary,
+  QuizSubmission as SharedQuizSubmission,
+  QuizSubmissionStatus
+} from "@quiz-app/shared";
+
+export type { QuizResultSummary, QuizSubmissionStatus };
 
 export type QuizSubmissionAccent = "green" | "red" | "blue" | "purple" | "orange";
 
@@ -10,42 +16,17 @@ export interface QuizSubmissionAnswer {
   isCorrect: boolean;
 }
 
-export interface QuizSubmission {
-  id: string;
-  participantName: string;
-  email: string;
+export interface QuizSubmission extends SharedQuizSubmission {
   initials: string;
   accent: QuizSubmissionAccent;
-  submittedAt: string;
   submittedAtIso: string;
-  score: number;
-  totalScore: number;
-  scorePercent: number;
-  timeTaken: string;
-  correctAnswers: number;
-  totalQuestions: number;
-  status: QuizSubmissionStatus;
   answers: QuizSubmissionAnswer[];
 }
 
 export interface QuizResultDetail {
   id: string;
-  title: string;
-  status: "Published" | "Draft";
-  subject: string;
-  questionCount: number;
-  submissionCount: number;
   publishedAt: string;
-  summary: {
-    totalSubmissions: string;
-    totalSubmissionsHelper: string;
-    averageScore: string;
-    averageScoreHelper: string;
-    averageTime: string;
-    averageTimeHelper: string;
-    completionRate: string;
-    completionRateHelper: string;
-  };
+  summary: QuizResultSummary;
   submissions: QuizSubmission[];
 }
 
@@ -85,7 +66,7 @@ const participantRows: Array<
 > = [
   {
     participantName: "Thong Anh",
-    email: "thonganh@example.com",
+    participantEmail: "thonganh@example.com",
     initials: "TA",
     accent: "green",
     submittedAt: "Apr 26, 2026, 9:15 AM",
@@ -97,7 +78,7 @@ const participantRows: Array<
   },
   {
     participantName: "Linh M.",
-    email: "linh.m@example.com",
+    participantEmail: "linh.m@example.com",
     initials: "LM",
     accent: "red",
     submittedAt: "Apr 26, 2026, 8:54 AM",
@@ -109,7 +90,7 @@ const participantRows: Array<
   },
   {
     participantName: "Hoang Nam",
-    email: "nam.hoang@example.com",
+    participantEmail: "nam.hoang@example.com",
     initials: "HN",
     accent: "blue",
     submittedAt: "Apr 26, 2026, 8:31 AM",
@@ -121,7 +102,7 @@ const participantRows: Array<
   },
   {
     participantName: "Phuong T.",
-    email: "phuongt@example.com",
+    participantEmail: "phuongt@example.com",
     initials: "PT",
     accent: "purple",
     submittedAt: "Apr 26, 2026, 8:10 AM",
@@ -133,7 +114,7 @@ const participantRows: Array<
   },
   {
     participantName: "Quang D.",
-    email: "quangd@example.com",
+    participantEmail: "quangd@example.com",
     initials: "QD",
     accent: "orange",
     submittedAt: "Apr 26, 2026, 7:58 AM",
@@ -145,7 +126,7 @@ const participantRows: Array<
   },
   {
     participantName: "Huyen Tran",
-    email: "huyen.tran@example.com",
+    participantEmail: "huyen.tran@example.com",
     initials: "HT",
     accent: "green",
     submittedAt: "Apr 26, 2026, 7:42 AM",
@@ -157,7 +138,7 @@ const participantRows: Array<
   },
   {
     participantName: "Khanh Linh",
-    email: "khanhlinh@example.com",
+    participantEmail: "khanhlinh@example.com",
     initials: "KL",
     accent: "orange",
     submittedAt: "Apr 26, 2026, 7:30 AM",
@@ -231,7 +212,7 @@ const extraRows: QuizSubmission[] = extraNames.map((entry, index) => {
   return {
     id: `submission-${index + 8}`,
     participantName,
-    email,
+    participantEmail: email,
     initials,
     accent: accents[index % accents.length],
     submittedAt: toDisplayDate(submittedAtIso),
@@ -270,21 +251,20 @@ const quizOneSubmissions: QuizSubmission[] = [
 export const quizResultDetails: QuizResultDetail[] = [
   {
     id: "quiz-1",
-    title: "Quiz 1",
-    status: "Published",
-    subject: "Science",
-    questionCount: 10,
-    submissionCount: 24,
     publishedAt: "Apr 26, 2026, 7:50 AM",
     summary: {
-      totalSubmissions: "24",
-      totalSubmissionsHelper: "24 unique participants",
-      averageScore: "76%",
-      averageScoreHelper: "18.2 / 24 points",
+      quizId: "quiz-1",
+      quizTitle: "Quiz 1",
+      status: "published",
+      category: "Science",
+      totalQuestions: 10,
+      totalSubmissions: 24,
+      uniqueParticipants: 24,
+      averageScorePercent: 76,
+      averageScoreText: "18.2 / 24 points",
       averageTime: "6:13",
-      averageTimeHelper: "mm:ss",
-      completionRate: "100%",
-      completionRateHelper: "24 / 24 completed"
+      completionRate: 100,
+      completedCount: 24
     },
     submissions: quizOneSubmissions
   }

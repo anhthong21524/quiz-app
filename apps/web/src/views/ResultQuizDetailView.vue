@@ -1,14 +1,22 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
 import QuizResultSummaryCard from "../components/results/QuizResultSummaryCard.vue";
+import ResultTabs from "../components/results/ResultTabs.vue";
 import SubmissionDetailPanel from "../components/results/SubmissionDetailPanel.vue";
 import SubmissionTable from "../components/results/SubmissionTable.vue";
 import {
   quizResultDetails,
-  type QuizResultDetail,
-  type QuizSubmission
+  type QuizResultDetail as MockQuizResultDetail,
+  type QuizSubmission,
+  type QuizSubmissionAnswer
 } from "../data/quiz-submissions";
+import type { QuizResultSummary } from "@quiz-app/shared";
+import {
+  fetchQuizResultDetail,
+  type QuizResultDetail as ApiQuizResultDetail,
+  type SubmissionResult
+} from "../services/quiz-api";
 
 const route = useRoute();
 
@@ -18,66 +26,168 @@ const scoreFilter = ref("All scores");
 const dateFilter = ref("All time");
 const currentPage = ref(1);
 const selectedSubmissionId = ref<string | null>(null);
+const activeTab = ref<"submissions" | "submission-detail">("submissions");
+const isLoading = ref(false);
+const quizDetail = ref<MockQuizResultDetail | null>(null);
 
-const pageSize = 5;
-const referenceDate = new Date("2026-04-26T23:59:59");
+const pageSize = 10;
 const statusOptions = ["All status", "Completed", "Incomplete"];
 const scoreOptions = ["All scores", "80% and above", "70% - 79%", "Below 70%"];
 const dateOptions = ["All time", "Today", "Last 7 days"];
+const tabs = [
+  { id: "submissions", label: "Submissions" },
+  { id: "submission-detail", label: "Submission detail", disabled: true }
+];
 
-const quiz = computed<QuizResultDetail | undefined>(() =>
-  quizResultDetails.find((item) => item.id === route.params.quizId)
-);
+const ACCENT_CYCLE = ["green", "red", "blue", "purple", "orange"] as const;
+
+function formatTime(secs: number | null): string {
+  if (secs == null) return "-";
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function formatDate(iso: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(new Date(iso));
+}
+
+function initials(name: string): string {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+function toQuizSubmission(attempt: SubmissionResult, index: number, questionCount: number): QuizSubmission {
+  const scorePercent =
+    attempt.score != null && questionCount > 0
+      ? Math.round((attempt.score / questionCount) * 100)
+      : 0;
+
+  const answers: QuizSubmissionAnswer[] = attempt.answers.map((a) => ({
+    id: a.questionId,
+    question: a.question,
+    userAnswer: a.selectedIndex != null ? (a.options[a.selectedIndex] ?? "-") : "-",
+    correctAnswer: a.options[a.correctIndex] ?? "-",
+    isCorrect: a.isCorrect
+  }));
+
+  return {
+    id: attempt.id,
+    participantName: attempt.takerName,
+    participantEmail: "",
+    initials: initials(attempt.takerName),
+    accent: ACCENT_CYCLE[index % ACCENT_CYCLE.length],
+    submittedAt: attempt.submittedAt ? formatDate(attempt.submittedAt) : "-",
+    submittedAtIso: attempt.submittedAt ?? attempt.startedAt,
+    score: attempt.score ?? 0,
+    totalScore: questionCount,
+    scorePercent,
+    timeTaken: formatTime(attempt.timeTaken),
+    correctAnswers: attempt.score ?? 0,
+    totalQuestions: questionCount,
+    status: attempt.status,
+    answers
+  };
+}
+
+function toPublishedOrDraft(status: string): QuizResultSummary["status"] {
+  return status === "published" ? "published" : "draft";
+}
+
+function toDisplayDetail(detail: ApiQuizResultDetail): MockQuizResultDetail {
+  const totalQuestions = detail.questionCount;
+  const totalSubmissions = detail.totalSubmissions;
+  const completedCount = detail.completedSubmissions;
+  const averageScorePercent = detail.averageScorePercent ?? 0;
+  const averageScoreText =
+    completedCount > 0 ? `${(detail.totalCorrect / completedCount).toFixed(1)} / ${totalQuestions} points` : "-";
+  const completionRate =
+    totalSubmissions > 0 ? Math.round((completedCount / totalSubmissions) * 100) : 0;
+
+  return {
+    id: detail.id,
+    publishedAt: "",
+    summary: {
+      quizId: detail.id,
+      quizTitle: detail.title,
+      status: toPublishedOrDraft(detail.status),
+      category: detail.subject || "General",
+      totalQuestions,
+      totalSubmissions,
+      uniqueParticipants: totalSubmissions,
+      averageScorePercent,
+      averageScoreText,
+      averageTime: formatTime(detail.averageTimeSecs),
+      completionRate,
+      completedCount
+    },
+    submissions: detail.submissions.map((attempt, index) =>
+      toQuizSubmission(attempt, index, totalQuestions)
+    )
+  };
+}
+
+function mockDetailForRoute(): MockQuizResultDetail | null {
+  const quizId = route.params.quizId as string;
+  return quizResultDetails.find((item) => item.id === quizId) ?? null;
+}
+
+const summary = computed(() => quizDetail.value?.summary ?? null);
+const submissions = computed<QuizSubmission[]>(() => quizDetail.value?.submissions ?? []);
 
 const summaryCards = computed(() => {
-  if (!quiz.value) {
-    return [];
-  }
+  const s = summary.value;
+  if (!s) return [];
 
   return [
     {
       id: "total-submissions",
       label: "Total submissions",
-      value: quiz.value.summary.totalSubmissions,
-      helper: quiz.value.summary.totalSubmissionsHelper,
+      value: String(s.totalSubmissions),
+      helper: `${s.uniqueParticipants} unique participants`,
       icon: "users" as const
     },
     {
       id: "average-score",
       label: "Average score",
-      value: quiz.value.summary.averageScore,
-      helper: quiz.value.summary.averageScoreHelper,
+      value: `${s.averageScorePercent}%`,
+      helper: s.averageScoreText,
       icon: "star" as const
     },
     {
       id: "average-time",
       label: "Average time",
-      value: quiz.value.summary.averageTime,
-      helper: quiz.value.summary.averageTimeHelper,
+      value: s.averageTime,
+      helper: "mm:ss",
       icon: "clock" as const
     },
     {
       id: "completion-rate",
       label: "Completion rate",
-      value: quiz.value.summary.completionRate,
-      helper: quiz.value.summary.completionRateHelper,
+      value: `${s.completionRate}%`,
+      helper: `${s.completedCount} / ${s.totalSubmissions} completed`,
       icon: "check" as const
     }
   ];
 });
 
 const filteredSubmissions = computed(() => {
-  if (!quiz.value) {
-    return [];
-  }
-
   const normalizedSearch = searchQuery.value.trim().toLowerCase();
 
-  return quiz.value.submissions.filter((submission) => {
+  return submissions.value.filter((submission) => {
     const matchesSearch =
       !normalizedSearch ||
       submission.participantName.toLowerCase().includes(normalizedSearch) ||
-      submission.email.toLowerCase().includes(normalizedSearch);
+      submission.participantEmail.toLowerCase().includes(normalizedSearch);
     const matchesStatus =
       statusFilter.value === "All status" || submission.status === statusFilter.value;
     const matchesScore = isInSelectedScoreRange(submission);
@@ -91,15 +201,11 @@ const pageCount = computed(() => Math.max(1, Math.ceil(filteredSubmissions.value
 
 const paginatedSubmissions = computed(() => {
   const start = (currentPage.value - 1) * pageSize;
-
   return filteredSubmissions.value.slice(start, start + pageSize);
 });
 
 const showingStart = computed(() => {
-  if (!filteredSubmissions.value.length) {
-    return 0;
-  }
-
+  if (!filteredSubmissions.value.length) return 0;
   return (currentPage.value - 1) * pageSize + 1;
 });
 
@@ -108,17 +214,14 @@ const showingEnd = computed(() =>
 );
 
 const selectedSubmission = computed(() => {
-  if (!quiz.value || !selectedSubmissionId.value) {
-    return null;
-  }
-
-  return quiz.value.submissions.find((submission) => submission.id === selectedSubmissionId.value) ?? null;
+  if (!selectedSubmissionId.value) return null;
+  return submissions.value.find((s) => s.id === selectedSubmissionId.value) ?? null;
 });
 
 watch(
-  quiz,
-  (nextQuiz) => {
-    selectedSubmissionId.value = nextQuiz?.submissions[0]?.id ?? null;
+  submissions,
+  (next) => {
+    selectedSubmissionId.value = next[0]?.id ?? null;
     currentPage.value = 1;
   },
   { immediate: true }
@@ -129,40 +232,34 @@ watch([searchQuery, statusFilter, scoreFilter, dateFilter], () => {
 });
 
 function isInSelectedScoreRange(submission: QuizSubmission) {
-  if (scoreFilter.value === "All scores") {
-    return true;
-  }
-
-  if (scoreFilter.value === "80% and above") {
-    return submission.scorePercent >= 80;
-  }
-
-  if (scoreFilter.value === "70% - 79%") {
-    return submission.scorePercent >= 70 && submission.scorePercent < 80;
-  }
-
+  if (scoreFilter.value === "All scores") return true;
+  if (scoreFilter.value === "80% and above") return submission.scorePercent >= 80;
+  if (scoreFilter.value === "70% - 79%") return submission.scorePercent >= 70 && submission.scorePercent < 80;
   return submission.scorePercent < 70;
 }
 
 function isInSelectedDateRange(value: string) {
-  if (dateFilter.value === "All time") {
-    return true;
-  }
+  if (dateFilter.value === "All time") return true;
 
   const submittedAt = new Date(value);
-  const daysDifference = Math.floor(
-    (referenceDate.getTime() - submittedAt.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  if (isNaN(submittedAt.getTime())) return false;
 
-  if (dateFilter.value === "Today") {
-    return daysDifference === 0;
-  }
+  const now = new Date();
+  const daysDifference = Math.floor((now.getTime() - submittedAt.getTime()) / (1000 * 60 * 60 * 24));
 
+  if (dateFilter.value === "Today") return daysDifference === 0;
   return daysDifference <= 7;
+}
+
+function selectTab(tabId: string) {
+  if (tabId === "submissions" || tabId === "submission-detail") {
+    activeTab.value = tabId;
+  }
 }
 
 function selectSubmission(submission: QuizSubmission) {
   selectedSubmissionId.value = submission.id;
+  activeTab.value = "submission-detail";
 }
 
 function setPage(page: number) {
@@ -170,28 +267,17 @@ function setPage(page: number) {
 }
 
 function clearSelectedSubmission() {
-  selectedSubmissionId.value = null;
+  activeTab.value = "submissions";
 }
 
 function downloadCsv() {
-  if (!quiz.value) {
-    return;
-  }
+  if (!quizDetail.value || !summary.value) return;
 
-  const header = [
-    "#",
-    "Participant",
-    "Email",
-    "Submitted at",
-    "Score",
-    "Time taken",
-    "Correct",
-    "Status"
-  ];
-  const rows = quiz.value.submissions.map((submission, index) => [
+  const header = ["#", "Participant", "Email", "Submitted at", "Score", "Time taken", "Correct", "Status"];
+  const rows = submissions.value.map((submission, index) => [
     String(index + 1),
     submission.participantName,
-    submission.email,
+    submission.participantEmail,
     submission.submittedAt,
     `${submission.score} / ${submission.totalScore}`,
     submission.timeTaken,
@@ -199,34 +285,56 @@ function downloadCsv() {
     submission.status
   ]);
   const csv = [header, ...rows]
-    .map((row) => row.map((value) => `"${value.replace(/"/g, '""')}"`).join(","))
+    .map((row) => row.map((value) => `"${String(value).replace(/"/g, '""')}"`).join(","))
     .join("\n");
   const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");
   link.href = url;
-  link.download = `${quiz.value.id}-submissions.csv`;
+  link.download = `${summary.value.quizId}-submissions.csv`;
   link.click();
   URL.revokeObjectURL(url);
 }
+
+onMounted(async () => {
+  const quizId = route.params.quizId as string;
+  isLoading.value = true;
+  try {
+    quizDetail.value = toDisplayDetail(await fetchQuizResultDetail(quizId));
+  } catch {
+    quizDetail.value = mockDetailForRoute();
+  } finally {
+    isLoading.value = false;
+  }
+});
 </script>
 
 <template>
-  <section v-if="quiz" class="result-detail-page">
+  <section v-if="isLoading" class="result-not-found-card">
+    <p>Loading...</p>
+  </section>
+
+  <section v-else-if="quizDetail && summary" class="result-detail-page">
     <nav class="result-breadcrumb" aria-label="Breadcrumb">
       <RouterLink :to="{ name: 'results' }">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-          <path d="m15 18-6-6 6-6" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
         Result Quiz
       </RouterLink>
       <span aria-hidden="true">></span>
-      <span>{{ quiz.title }}</span>
+      <span>{{ summary.quizTitle }}</span>
     </nav>
 
     <header class="result-detail-heading">
       <div class="heading-copy">
-        <h1>{{ quiz.title }}</h1>
+        <div class="heading-meta-row">
+          <h1>{{ summary.quizTitle }}</h1>
+          <span class="published-badge">{{ summary.status === "published" ? "Published" : "Draft" }}</span>
+          <span class="meta-separator" aria-hidden="true">></span>
+          <span>{{ summary.category }}</span>
+          <span class="meta-separator" aria-hidden="true">></span>
+          <span>{{ summary.totalQuestions }} questions</span>
+          <span class="meta-separator" aria-hidden="true">></span>
+          <span>{{ summary.totalSubmissions }} submissions</span>
+        </div>
       </div>
 
       <button type="button" class="export-button" @click="downloadCsv">
@@ -248,8 +356,10 @@ function downloadCsv() {
       />
     </section>
 
-    <div class="result-detail-layout" :class="{ 'is-detail-hidden': !selectedSubmission }">
-      <section class="submissions-card" aria-labelledby="result-detail-table-title">
+    <section class="submissions-card" aria-labelledby="result-detail-table-title">
+      <ResultTabs :tabs="tabs" :active-tab="activeTab" @select="selectTab" />
+
+      <div v-if="activeTab === 'submissions'">
         <h2 id="result-detail-table-title" class="sr-only">Quiz submissions</h2>
 
         <SubmissionTable
@@ -270,20 +380,31 @@ function downloadCsv() {
           @page="setPage"
           @select="selectSubmission"
         />
-      </section>
+      </div>
 
       <SubmissionDetailPanel
-        v-if="selectedSubmission"
+        v-else-if="selectedSubmission"
         :submission="selectedSubmission"
         @close="clearSelectedSubmission"
       />
-    </div>
+
+      <div v-else class="submission-detail-empty">
+        <span aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke-linejoin="round" />
+            <circle cx="12" cy="12" r="2.5" />
+          </svg>
+        </span>
+        <h2>Select a submission</h2>
+        <p>Open the submissions tab to review participant details.</p>
+      </div>
+    </section>
   </section>
 
   <section v-else class="result-not-found-card">
     <RouterLink class="back-link" :to="{ name: 'results' }">Back to Result Quiz</RouterLink>
     <h1>Quiz result not found</h1>
-    <p>This quiz result is not available in the mock result data.</p>
+    <p>This quiz does not exist or you do not have access to it.</p>
   </section>
 </template>
 
@@ -330,11 +451,35 @@ function downloadCsv() {
   gap: 10px;
 }
 
+.heading-meta-row {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 9px 13px;
+  color: #53627c;
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
 .heading-copy h1 {
   margin: 0;
   color: #182033;
   font-size: 1.75rem;
   line-height: 1.15;
+}
+
+.published-badge {
+  border-radius: 999px;
+  padding: 3px 10px;
+  background: #dff8ed;
+  color: #0f9f65;
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.meta-separator {
+  color: #93a0b4;
 }
 
 .export-button {
@@ -388,6 +533,53 @@ function downloadCsv() {
   box-shadow: var(--surface-shadow);
 }
 
+.submissions-card :deep(.submission-detail-panel) {
+  min-height: 560px;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.submission-detail-empty {
+  min-height: 420px;
+  padding: 42px 20px;
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 10px;
+  text-align: center;
+}
+
+.submission-detail-empty span {
+  width: 58px;
+  height: 58px;
+  border-radius: 16px;
+  display: grid;
+  place-items: center;
+  background: #e8fbf2;
+  color: #10b981;
+}
+
+.submission-detail-empty svg {
+  width: 30px;
+  height: 30px;
+}
+
+.submission-detail-empty h2,
+.submission-detail-empty p {
+  margin: 0;
+}
+
+.submission-detail-empty h2 {
+  color: #182033;
+  font-size: 1.1rem;
+}
+
+.submission-detail-empty p {
+  max-width: 360px;
+  color: #657286;
+}
+
 .result-not-found-card {
   padding: 28px;
   display: grid;
@@ -433,6 +625,10 @@ function downloadCsv() {
     flex-direction: column;
   }
 
+  .heading-meta-row {
+    gap: 7px 10px;
+  }
+
   .export-button {
     justify-content: center;
   }
@@ -440,6 +636,5 @@ function downloadCsv() {
   .summary-grid {
     grid-template-columns: 1fr;
   }
-
 }
 </style>

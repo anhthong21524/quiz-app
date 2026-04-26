@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import QuizPerformanceTable from "../components/results/QuizPerformanceTable.vue";
 import RecentSubmissionsCard from "../components/results/RecentSubmissionsCard.vue";
 import ResultFilterPanel from "../components/results/ResultFilterPanel.vue";
 import ResultSummaryCard from "../components/results/ResultSummaryCard.vue";
 import {
-  quizPerformanceResults,
-  recentSubmissionResults,
-  resultSummaryMetrics,
-  type QuizPerformanceResult
-} from "../data/quiz-results";
+  fetchQuizPerformance,
+  fetchRecentSubmissions,
+  fetchResultsSummary,
+  type QuizPerformanceItem,
+  type RecentSubmissionItem,
+  type ResultsSummary
+} from "../services/quiz-api";
+import type { QuizPerformanceResult, RecentSubmissionResult, ResultSummaryMetric } from "../data/quiz-results";
 
 const router = useRouter();
 
@@ -20,20 +23,172 @@ const selectedDateRange = ref("All time");
 const isLoading = ref(false);
 const currentPage = ref(1);
 
+const summary = ref<ResultsSummary | null>(null);
+const performanceData = ref<QuizPerformanceItem[]>([]);
+const recentData = ref<RecentSubmissionItem[]>([]);
+
 const dateRangeOptions = ["All time", "Today", "Last 7 days", "Last 30 days"];
-const referenceDate = new Date("2026-04-26T23:59:59");
 const pageSize = 5;
-const totalQuizCount = 12;
+
+const SUBJECT_ICON_MAP: Record<string, string> = {
+  science: "science",
+  geography: "geography",
+  general: "knowledge",
+  math: "mathematics",
+  mathematics: "mathematics",
+  technology: "technology",
+  biology: "biology",
+  history: "history",
+  chemistry: "chemistry"
+};
+
+const ACCENT_CYCLE = ["green", "red", "blue", "purple", "orange"] as const;
+
+function formatTime(secs: number | null): string {
+  if (secs == null) return "-";
+  const m = Math.floor(secs / 60);
+  const s = secs % 60;
+  return `${m}:${s.toString().padStart(2, "0")}`;
+}
+
+function formatDate(iso: string): string {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  }).format(new Date(iso));
+}
+
+function initials(name: string): string {
+  return name
+    .split(" ")
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase() ?? "")
+    .join("");
+}
+
+function subjectIcon(subject: string): string {
+  return SUBJECT_ICON_MAP[subject.toLowerCase()] ?? "knowledge";
+}
+
+function statusLabel(status: string): "Published" | "Draft" {
+  return status === "published" ? "Published" : "Draft";
+}
+
+const resultSummaryMetrics = computed<ResultSummaryMetric[]>(() => {
+  const s = summary.value;
+  if (!s) return [];
+
+  const avgScoreDetail =
+    s.totalPossible > 0
+      ? `${(s.totalCorrect / (s.completedSubmissions || 1)).toFixed(1)} / ${(s.totalPossible / (s.completedSubmissions || 1)).toFixed(0)} points`
+      : "-";
+
+  return [
+    {
+      id: "total-quizzes",
+      label: "Total quizzes",
+      value: String(s.totalQuizzes),
+      helper: `${s.publishedQuizzes} published quizzes`,
+      icon: "users" as const
+    },
+    {
+      id: "total-submissions",
+      label: "Total submissions",
+      value: String(s.totalSubmissions),
+      helper: "Across all quizzes",
+      icon: "clipboard" as const
+    },
+    {
+      id: "average-score",
+      label: "Average score",
+      value: s.averageScorePercent != null ? `${s.averageScorePercent}%` : "-",
+      helper: avgScoreDetail,
+      icon: "star" as const
+    },
+    {
+      id: "average-time",
+      label: "Average time",
+      value: formatTime(s.averageTimeSecs),
+      helper: "mm:ss",
+      icon: "clock" as const
+    },
+    {
+      id: "completion-rate",
+      label: "Completion rate",
+      value: s.totalSubmissions > 0 ? `${Math.round((s.completedSubmissions / s.totalSubmissions) * 100)}%` : "-",
+      helper: `${s.completedSubmissions} / ${s.totalSubmissions} completed`,
+      icon: "check" as const
+    }
+  ];
+});
+
+const quizPerformanceResults = computed<QuizPerformanceResult[]>(() =>
+  performanceData.value.map((item) => {
+    const avgScorePct = item.averageScorePercent ?? 0;
+    const avgPointsPerQ = item.completedSubmissions > 0 ? item.totalCorrect / item.completedSubmissions : 0;
+    const completionPct =
+      item.totalSubmissions > 0 ? Math.round((item.completedSubmissions / item.totalSubmissions) * 100) : 0;
+    const lastIso = item.lastSubmittedAt ?? new Date(0).toISOString();
+
+    return {
+      id: item.id,
+      title: item.title,
+      subject: item.subject,
+      questions: item.questionCount,
+      submissions: item.totalSubmissions,
+      averageScore: item.averageScorePercent != null ? `${avgScorePct}%` : "-",
+      scoreDetail:
+        item.completedSubmissions > 0
+          ? `${avgPointsPerQ.toFixed(1)} / ${item.questionCount}`
+          : `- / ${item.questionCount}`,
+      completionRate: item.totalSubmissions > 0 ? `${completionPct}%` : "0%",
+      completionDetail:
+        item.totalSubmissions > 0
+          ? `${item.completedSubmissions} / ${item.totalSubmissions}`
+          : "0 / 0",
+      averageTime: formatTime(item.averageTimeSecs),
+      averageTimeHelper: "mm:ss",
+      lastUpdate: item.lastSubmittedAt ? formatDate(item.lastSubmittedAt) : "-",
+      lastUpdateIso: lastIso,
+      lastUpdateDate: item.lastSubmittedAt
+        ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(
+            new Date(item.lastSubmittedAt)
+          )
+        : "-",
+      lastUpdateTime: item.lastSubmittedAt
+        ? new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(
+            new Date(item.lastSubmittedAt)
+          )
+        : "-",
+      status: statusLabel(item.status),
+      icon: subjectIcon(item.subject) as QuizPerformanceResult["icon"]
+    };
+  })
+);
+
+const recentSubmissionResults = computed<RecentSubmissionResult[]>(() =>
+  recentData.value.map((item, index) => ({
+    id: item.id,
+    studentName: item.takerName,
+    quizTitle: item.quizTitle,
+    submittedAt: formatDate(item.submittedAt),
+    initials: initials(item.takerName),
+    accent: ACCENT_CYCLE[index % ACCENT_CYCLE.length]
+  }))
+);
 
 const subjectOptions = computed(() => [
   "All subjects",
-  ...Array.from(new Set(quizPerformanceResults.map((quiz) => quiz.subject))).sort()
+  ...Array.from(new Set(quizPerformanceResults.value.map((q) => q.subject))).sort()
 ]);
 
 const filteredQuizzes = computed(() => {
   const normalizedSearch = searchQuery.value.trim().toLowerCase();
 
-  return quizPerformanceResults.filter((quiz) => {
+  return quizPerformanceResults.value.filter((quiz) => {
     const matchesSearch =
       !normalizedSearch ||
       quiz.title.toLowerCase().includes(normalizedSearch) ||
@@ -50,15 +205,11 @@ const pageCount = computed(() => Math.max(1, Math.ceil(filteredQuizzes.value.len
 
 const paginatedQuizzes = computed(() => {
   const start = (currentPage.value - 1) * pageSize;
-
   return filteredQuizzes.value.slice(start, start + pageSize);
 });
 
 const showingStart = computed(() => {
-  if (!filteredQuizzes.value.length) {
-    return 0;
-  }
-
+  if (!filteredQuizzes.value.length) return 0;
   return (currentPage.value - 1) * pageSize + 1;
 });
 
@@ -71,23 +222,16 @@ watch([searchQuery, selectedSubject, selectedDateRange], () => {
 });
 
 function isInSelectedDateRange(value: string) {
-  if (selectedDateRange.value === "All time") {
-    return true;
-  }
+  if (selectedDateRange.value === "All time") return true;
 
   const updatedAt = new Date(value);
-  const daysDifference = Math.floor(
-    (referenceDate.getTime() - updatedAt.getTime()) / (1000 * 60 * 60 * 24)
-  );
+  if (isNaN(updatedAt.getTime())) return false;
 
-  if (selectedDateRange.value === "Today") {
-    return daysDifference === 0;
-  }
+  const now = new Date();
+  const daysDifference = Math.floor((now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (selectedDateRange.value === "Last 7 days") {
-    return daysDifference <= 7;
-  }
-
+  if (selectedDateRange.value === "Today") return daysDifference === 0;
+  if (selectedDateRange.value === "Last 7 days") return daysDifference <= 7;
   return daysDifference <= 30;
 }
 
@@ -105,6 +249,22 @@ function openQuizSubmissions(quiz: QuizPerformanceResult) {
 function setPage(page: number) {
   currentPage.value = Math.min(Math.max(page, 1), pageCount.value);
 }
+
+onMounted(async () => {
+  isLoading.value = true;
+  try {
+    const [s, p, r] = await Promise.all([
+      fetchResultsSummary(),
+      fetchQuizPerformance(),
+      fetchRecentSubmissions(5)
+    ]);
+    summary.value = s;
+    performanceData.value = p;
+    recentData.value = r;
+  } finally {
+    isLoading.value = false;
+  }
+});
 </script>
 
 <template>
@@ -130,7 +290,7 @@ function setPage(page: number) {
           :page-count="pageCount"
           :showing-start="showingStart"
           :showing-end="showingEnd"
-          :total-quizzes="totalQuizCount"
+          :total-quizzes="filteredQuizzes.length"
           @page="setPage"
           @view="openQuizSubmissions"
         />

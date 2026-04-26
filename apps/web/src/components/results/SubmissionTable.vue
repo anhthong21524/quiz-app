@@ -111,6 +111,10 @@ function scoreClass(submission: QuizSubmission) {
           <tr>
             <th>#</th>
             <th>Participant</th>
+            <th>Score</th>
+            <th>Time taken</th>
+            <th>Correct</th>
+            <th>Status</th>
             <th>
               <span class="sortable-heading">
                 Submitted at
@@ -119,11 +123,6 @@ function scoreClass(submission: QuizSubmission) {
                 </svg>
               </span>
             </th>
-            <th>Score</th>
-            <th>Time taken</th>
-            <th>Correct</th>
-            <th>Status</th>
-            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
@@ -131,6 +130,12 @@ function scoreClass(submission: QuizSubmission) {
             v-for="(submission, index) in submissions"
             :key="submission.id"
             :class="{ 'is-selected': submission.id === selectedSubmissionId }"
+            tabindex="0"
+            role="button"
+            :aria-label="`View ${submission.participantName} submission detail`"
+            @click="emit('select', submission)"
+            @keydown.enter.prevent="emit('select', submission)"
+            @keydown.space.prevent="emit('select', submission)"
           >
             <td>{{ showingStart + index }}</td>
             <td>
@@ -140,12 +145,9 @@ function scoreClass(submission: QuizSubmission) {
                 </span>
                 <span class="participant-copy">
                   <strong>{{ submission.participantName }}</strong>
-                  <span>{{ submission.email }}</span>
+                  <span>{{ submission.participantEmail }}</span>
                 </span>
               </div>
-            </td>
-            <td>
-              <time :datetime="submission.submittedAtIso">{{ submission.submittedAt }}</time>
             </td>
             <td>
               <span class="score-value">{{ submission.score }} / {{ submission.totalScore }}</span>
@@ -159,18 +161,7 @@ function scoreClass(submission: QuizSubmission) {
               <span class="status-badge">{{ submission.status }}</span>
             </td>
             <td>
-              <button
-                type="button"
-                class="row-action-button"
-                :aria-label="`View ${submission.participantName} submission`"
-                title="View"
-                @click="emit('select', submission)"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                  <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke-linejoin="round" />
-                  <circle cx="12" cy="12" r="2.5" />
-                </svg>
-              </button>
+              <time :datetime="submission.submittedAtIso">{{ submission.submittedAt }}</time>
             </td>
           </tr>
         </tbody>
@@ -321,7 +312,7 @@ function scoreClass(submission: QuizSubmission) {
 
 .submission-table {
   width: 100%;
-  min-width: 980px;
+  min-width: 900px;
   border-collapse: collapse;
 }
 
@@ -347,12 +338,18 @@ function scoreClass(submission: QuizSubmission) {
 }
 
 .submission-table tbody tr {
+  cursor: pointer;
+  outline: none;
   transition: background-color 0.2s ease;
 }
 
 .submission-table tbody tr:hover,
 .submission-table tbody tr.is-selected {
   background: #eefaf4;
+}
+
+.submission-table tbody tr:focus-visible {
+  box-shadow: inset 0 0 0 2px #10b981;
 }
 
 .sortable-heading {
@@ -471,34 +468,6 @@ function scoreClass(submission: QuizSubmission) {
   font-size: 0.75rem;
   font-weight: 900;
   white-space: nowrap;
-}
-
-.row-action-button {
-  width: 34px;
-  height: 34px;
-  border: 1px solid #dfe4ea;
-  border-radius: 9px;
-  display: grid;
-  place-items: center;
-  background: #ffffff;
-  color: #53627c;
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease;
-}
-
-.row-action-button:hover {
-  border-color: #a7f3d0;
-  background: #eef9f4;
-  color: #10b981;
-  transform: translateY(-1px);
-}
-
-.row-action-button svg {
-  width: 18px;
-  height: 18px;
 }
 
 .submissions-empty-state {

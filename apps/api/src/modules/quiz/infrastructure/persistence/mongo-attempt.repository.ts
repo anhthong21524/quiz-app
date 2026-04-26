@@ -71,6 +71,27 @@ export class MongoAttemptRepository implements AttemptRepository {
     return normalizeAttempt(doc as Record<string, unknown>);
   }
 
+  async findByQuizId(quizId: string): Promise<QuizAttempt[]> {
+    const docs = await this.getModel().find({ quizId }).lean();
+    return docs.map((doc) => normalizeAttempt(doc as Record<string, unknown>));
+  }
+
+  async findByQuizIds(quizIds: string[]): Promise<QuizAttempt[]> {
+    if (!quizIds.length) return [];
+    const docs = await this.getModel().find({ quizId: { $in: quizIds } }).lean();
+    return docs.map((doc) => normalizeAttempt(doc as Record<string, unknown>));
+  }
+
+  async findRecent(quizIds: string[], limit: number): Promise<QuizAttempt[]> {
+    if (!quizIds.length) return [];
+    const docs = await this.getModel()
+      .find({ quizId: { $in: quizIds }, submittedAt: { $ne: null } })
+      .sort({ submittedAt: -1 })
+      .limit(limit)
+      .lean();
+    return docs.map((doc) => normalizeAttempt(doc as Record<string, unknown>));
+  }
+
   async submit(
     id: string,
     answers: Record<string, number>,

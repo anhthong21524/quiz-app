@@ -22,6 +22,23 @@ export class InMemoryAttemptRepository implements AttemptRepository {
     return this.attempts.get(id) ?? null;
   }
 
+  async findByQuizId(quizId: string): Promise<QuizAttempt[]> {
+    return Array.from(this.attempts.values()).filter((a) => a.quizId === quizId);
+  }
+
+  async findByQuizIds(quizIds: string[]): Promise<QuizAttempt[]> {
+    const set = new Set(quizIds);
+    return Array.from(this.attempts.values()).filter((a) => set.has(a.quizId));
+  }
+
+  async findRecent(quizIds: string[], limit: number): Promise<QuizAttempt[]> {
+    const set = new Set(quizIds);
+    return Array.from(this.attempts.values())
+      .filter((a) => set.has(a.quizId) && a.submittedAt)
+      .sort((a, b) => new Date(b.submittedAt!).getTime() - new Date(a.submittedAt!).getTime())
+      .slice(0, limit);
+  }
+
   async submit(
     id: string,
     answers: Record<string, number>,

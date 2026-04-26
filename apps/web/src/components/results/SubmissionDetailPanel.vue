@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed } from "vue";
 import type { QuizSubmission } from "../../data/quiz-submissions";
 import SubmissionAnswerReview from "./SubmissionAnswerReview.vue";
 
@@ -11,8 +11,6 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const activeTab = ref<"answers" | "overview">("answers");
-
 const correctRate = computed(() => `${props.submission.scorePercent}%`);
 const submittedAtDate = computed(() => {
   const [monthDay, year] = props.submission.submittedAt.split(", ");
@@ -20,19 +18,11 @@ const submittedAtDate = computed(() => {
   return year ? `${monthDay}, ${year}` : props.submission.submittedAt;
 });
 const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[2] ?? "");
-
-watch(
-  () => props.submission.id,
-  () => {
-    activeTab.value = "answers";
-  }
-);
 </script>
 
 <template>
-  <aside class="submission-detail-panel" aria-labelledby="submission-detail-title">
+  <aside class="submission-detail-panel" aria-label="Submission detail">
     <header class="detail-panel-header">
-      <h2 id="submission-detail-title">Submission detail</h2>
       <button type="button" class="detail-close-button" aria-label="Close detail" @click="emit('close')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
           <path d="m7 7 10 10M17 7 7 17" stroke-linecap="round" />
@@ -47,9 +37,8 @@ watch(
         </span>
         <div class="participant-copy">
           <h3>{{ submission.participantName }}</h3>
-          <p>{{ submission.email }}</p>
+          <p>{{ submission.participantEmail }}</p>
         </div>
-        <span class="status-badge">{{ submission.status }}</span>
       </section>
 
       <section class="submission-stat-grid" aria-label="Submission stats">
@@ -68,50 +57,19 @@ watch(
           <strong>{{ submittedAtDate }}</strong>
           <small>{{ submittedAtTime }}</small>
         </article>
+        <article>
+          <span>Status</span>
+          <strong>
+            <span class="status-badge">{{ submission.status }}</span>
+          </strong>
+        </article>
       </section>
     </div>
 
-    <div class="detail-tabs" role="tablist" aria-label="Submission detail views">
-      <button
-        type="button"
-        class="detail-tab"
-        :class="{ 'is-active': activeTab === 'answers' }"
-        :aria-selected="activeTab === 'answers'"
-        role="tab"
-        @click="activeTab = 'answers'"
-      >
-        Answers review
-      </button>
-      <button
-        type="button"
-        class="detail-tab"
-        :class="{ 'is-active': activeTab === 'overview' }"
-        :aria-selected="activeTab === 'overview'"
-        role="tab"
-        @click="activeTab = 'overview'"
-      >
-        Overview
-      </button>
-    </div>
-
-    <div class="detail-tab-panel">
-      <SubmissionAnswerReview v-if="activeTab === 'answers'" :answers="submission.answers" />
-
-      <div v-else class="detail-overview">
-        <article>
-          <span>Correct answers</span>
-          <strong>{{ submission.correctAnswers }} / {{ submission.totalQuestions }}</strong>
-        </article>
-        <article>
-          <span>Status</span>
-          <strong>{{ submission.status }}</strong>
-        </article>
-        <article>
-          <span>Submitted at</span>
-          <strong>{{ submission.submittedAt }}</strong>
-        </article>
-      </div>
-    </div>
+    <section class="detail-answer-section" aria-labelledby="answer-review-title">
+      <h2 id="answer-review-title">Answers review</h2>
+      <SubmissionAnswerReview :answers="submission.answers" />
+    </section>
 
     <footer class="detail-panel-footer">
       <button type="button" class="close-detail-button" @click="emit('close')">Close detail</button>
@@ -123,6 +81,7 @@ watch(
 .submission-detail-panel {
   border: var(--surface-border);
   border-radius: 16px;
+  position: relative;
   display: flex;
   min-width: 0;
   min-height: 620px;
@@ -133,29 +92,20 @@ watch(
 }
 
 .detail-panel-header {
-  min-height: 62px;
-  padding: 0 18px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  border-bottom: 1px solid #edf0f2;
-}
-
-.detail-panel-header h2 {
-  margin: 0;
-  color: #182033;
-  font-size: 1rem;
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  z-index: 1;
 }
 
 .detail-close-button {
   width: 34px;
   height: 34px;
-  border: 0;
+  border: 1px solid #dfe4ea;
   border-radius: 9px;
   display: grid;
   place-items: center;
-  background: transparent;
+  background: #ffffff;
   color: #182033;
 }
 
@@ -170,16 +120,17 @@ watch(
 }
 
 .detail-panel-body {
-  padding: 20px 18px 14px;
+  padding: 24px 18px 18px;
   display: grid;
-  gap: 22px;
+  gap: 20px;
 }
 
 .participant-block {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: center;
   gap: 14px;
+  padding-right: 48px;
 }
 
 .submission-avatar {
@@ -255,7 +206,7 @@ watch(
 
 .submission-stat-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   border: 1px solid #dfe4ea;
   border-radius: 10px;
   overflow: hidden;
@@ -292,65 +243,21 @@ watch(
   color: #10b981;
 }
 
-.detail-tabs {
-  padding: 0 18px;
-  display: flex;
-  gap: 26px;
+.detail-answer-section {
   border-bottom: 1px solid #edf0f2;
 }
 
-.detail-tab {
-  min-height: 42px;
-  border: 0;
-  border-radius: 0;
-  padding: 0;
-  position: relative;
-  background: transparent;
-  color: #52617a;
-  font-size: 0.82rem;
+.detail-answer-section h2 {
+  margin: 0;
+  padding: 16px 18px 12px;
+  border-top: 1px solid #edf0f2;
+  color: #182033;
+  font-size: 0.95rem;
   font-weight: 900;
 }
 
-.detail-tab.is-active {
-  color: #10b981;
-}
-
-.detail-tab.is-active::after {
-  content: "";
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  background: #10b981;
-}
-
-.detail-tab-panel {
+.detail-answer-section :deep(.answer-review-list) {
   padding: 0 18px;
-}
-
-.detail-overview {
-  padding: 18px 0;
-  display: grid;
-  gap: 12px;
-}
-
-.detail-overview article {
-  border: 1px solid #edf0f2;
-  border-radius: 12px;
-  padding: 14px;
-  display: grid;
-  gap: 3px;
-}
-
-.detail-overview span {
-  color: #667287;
-  font-size: 0.82rem;
-  font-weight: 800;
-}
-
-.detail-overview strong {
-  color: #182033;
 }
 
 .detail-panel-footer {

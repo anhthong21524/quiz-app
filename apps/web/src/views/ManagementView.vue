@@ -8,6 +8,7 @@ import type { MyQuizIcon, MyQuizStatus } from "../components/my-quizzes/types";
 import { useQuizStore } from "../stores/quizzes";
 
 const quizStore = useQuizStore();
+const RECENT_QUIZZES_LIMIT = 5;
 
 onMounted(async () => {
   if (!quizStore.items.length && !quizStore.isLoading) {
@@ -69,7 +70,7 @@ const recentQuizzes = computed(() =>
       new Date(b.updatedAt ?? b.createdAt ?? 0).getTime() -
       new Date(a.updatedAt ?? a.createdAt ?? 0).getTime()
     )
-    .slice(0, 3)
+    .slice(0, RECENT_QUIZZES_LIMIT)
 );
 
 // ── Stats ─────────────────────────────────────────────────────
@@ -243,7 +244,7 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
             </tr>
           </thead>
           <tbody>
-            <tr v-for="n in 3" :key="n" aria-hidden="true">
+            <tr v-for="n in RECENT_QUIZZES_LIMIT" :key="n" aria-hidden="true">
               <td><div class="skel skel--row-title" /></td>
               <td><div class="skel skel--row-sm" /></td>
               <td><div class="skel skel--row-xs" /></td>
