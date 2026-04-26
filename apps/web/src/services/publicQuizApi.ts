@@ -1,5 +1,7 @@
-import { QuizStatus, type Quiz } from "@quiz-app/shared";
+import { QuizStatus, type Question, type Quiz } from "@quiz-app/shared";
 import { httpClient } from "./http";
+
+export type PublicQuizQuestion = Question;
 
 export interface PublicQuizInfo {
   id: string;
@@ -10,6 +12,7 @@ export interface PublicQuizInfo {
   timeLimit: number | null;
   questionType: string;
   isPublished: boolean;
+  questions: PublicQuizQuestion[];
 }
 
 export interface CreateQuizAttemptPayload {
@@ -79,7 +82,8 @@ function normalizeQuiz(data: PublicQuizApiResponse, fallbackSlug: string): Publi
     questionCount,
     timeLimit: data.timeLimit ?? null,
     questionType: data.questionType ?? "Multiple Choice",
-    isPublished
+    isPublished,
+    questions: data.questions ?? []
   };
 }
 

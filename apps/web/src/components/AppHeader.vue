@@ -12,7 +12,8 @@ const isPublicPage = computed(() =>
   route.name === "public-quizzes" ||
   route.name === "about" ||
   route.name === "login" ||
-  route.name === "public-quiz"
+  route.name === "public-quiz" ||
+  route.name === "public-quiz-take"
 );
 
 const username = computed(() => {
@@ -39,7 +40,7 @@ const activeNav = computed(() => {
     return "home";
   }
 
-  if (route.name === "public-quizzes" || route.name === "quizzes") {
+  if (route.name === "public-quizzes" || route.name === "public-quiz-take" || route.name === "quizzes") {
     return "quizzes";
   }
 

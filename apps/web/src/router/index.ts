@@ -107,7 +107,6 @@ export const router = createRouter({
       name: "public-quiz-take",
       component: PublicQuizTakeView,
       meta: {
-        bareLayout: true,
         seo: {
           title: "Take Quiz",
           description: "Answer questions in a public Quiz App quiz.",

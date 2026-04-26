@@ -12,7 +12,8 @@ const usePublicLayout = computed(() =>
   route.name === "public-quizzes" ||
   route.name === "about" ||
   route.name === "login" ||
-  route.name === "public-quiz"
+  route.name === "public-quiz" ||
+  route.name === "public-quiz-take"
 );
 </script>
 
