@@ -1,0 +1,78 @@
+@startuml
+title Quiz-Taking Flow — Complete Sequence
+
+actor       User
+participant "PublicQuizLandingPage\n(/q/:slug)"        as Landing
+participant "PublicQuizTakeView\n(/q/:slug/take)"      as TakeView
+participant "publicQuizApi.ts"                          as ApiClient
+participant "QuizController\n(NestJS)"                 as Controller
+participant "AttemptService"                           as Service
+database    "Repository\n(Mongo / In-Memory)"          as Repo
+participant "Pinia\n(quizAttemptStore)"                as Store
+database    "localStorage"                             as LS
+
+== Load landing page ==
+
+User       -> Landing    : navigate /q/:slug
+Landing    -> ApiClient  : getPublicQuizBySlug(slug)
+ApiClient  -> Controller : GET /api/quizzes/slug/:slug
+Controller --> ApiClient : quiz data
+ApiClient  --> Landing   : quiz data
+Landing    --> User      : render quiz info & name form
+
+== Start attempt ==
+
+User       -> Landing    : enter name → click "Start quiz"
+Landing    -> ApiClient  : createQuizAttempt({ quizId, takerName })
+ApiClient  -> Controller : POST /api/quizzes/:id/attempts
+Controller -> Service    : createAttempt(quizId, takerName)
+Service    -> Repo       : repo.create(quizId, takerName)
+Repo       --> Service   : QuizAttempt { id, startedAt }
+Service    --> Controller: QuizAttempt
+Controller --> ApiClient : { id, startedAt }
+ApiClient  --> Landing   : attempt data
+Landing    -> Store      : setAttempt({ attemptId, quizId, quizSlug, startedAt, takerName })
+Landing    -> TakeView   : router.push(/q/:slug/take)
+
+== Load quiz questions ==
+
+TakeView   -> ApiClient  : getPublicQuizBySlug(slug)
+ApiClient  -> Controller : GET /api/quizzes/slug/:slug
+Controller --> ApiClient : quiz + questions
+ApiClient  --> TakeView  : quiz + questions
+TakeView   -> LS         : read localStorage[quiz-app-public-answers-{attemptId}]
+LS         --> TakeView  : saved answers (or empty)
+TakeView   --> User      : render questions + timer
+
+== Answer questions ==
+
+loop for each question
+  User     -> TakeView   : selectAnswer(optionIndex)
+  TakeView -> LS         : saveAnswers() — write answers map
+end
+
+== Submit quiz ==
+
+alt user clicks "Submit quiz"
+  User     -> TakeView   : click Submit
+else timer reaches zero
+  TakeView -> TakeView   : watch(remainingSeconds === 0) → submitQuiz()
+end
+
+TakeView   -> TakeView   : isSubmitted = true\ncalculate timeTaken
+TakeView   -> ApiClient  : submitQuizAttempt({ quizId, attemptId, answers, timeTaken })
+ApiClient  -> Controller : POST /api/quizzes/:id/attempts/:attemptId/submit
+Controller -> Service    : submitAttempt(quizId, attemptId, answers, timeTaken)
+Service    -> Repo       : findById(attemptId)
+Repo       --> Service   : attempt
+Service    -> Repo       : findById(quizId)
+Repo       --> Service   : quiz
+Service    -> Service    : calculateScore(quiz, answers)
+Service    -> Repo       : repo.submit(attemptId, answers, score, timeTaken)
+Repo       --> Service   : updated QuizAttempt
+Service    --> Controller: { score, submittedAt }
+Controller --> ApiClient : { score, submittedAt }
+ApiClient  --> TakeView  : result
+TakeView   --> User      : show results screen\n(score / time taken / question count)
+
+@enduml

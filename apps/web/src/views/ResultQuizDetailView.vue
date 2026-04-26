@@ -375,7 +375,7 @@ onMounted(async () => {
 <style scoped>
 .result-detail-page {
   display: grid;
-  gap: 14px;
+  gap: 10px;
 }
 
 .result-detail-topbar {
@@ -437,7 +437,7 @@ onMounted(async () => {
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(160px, 1fr));
-  gap: 14px;
+  gap: 10px;
 }
 
 .result-detail-layout {

@@ -58,10 +58,10 @@ defineProps<{
 
 <style scoped>
 .result-detail-summary-card {
-  min-height: 94px;
+  min-height: 80px;
   border: var(--surface-border);
   border-radius: 16px;
-  padding: 16px 18px;
+  padding: 12px 18px;
   display: flex;
   align-items: center;
   gap: 16px;
@@ -70,8 +70,8 @@ defineProps<{
 }
 
 .summary-icon {
-  width: 48px;
-  height: 48px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
   display: grid;
   place-items: center;
@@ -104,7 +104,7 @@ defineProps<{
 
 .summary-copy strong {
   color: #182033;
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   line-height: 1.1;
 }
 </style>

@@ -70,11 +70,11 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
 }
 
 .detail-panel-body {
-  padding: 18px;
+  padding: 14px 18px;
   display: grid;
   grid-template-columns: minmax(180px, 260px) minmax(0, 1fr);
   align-items: stretch;
-  gap: 16px;
+  gap: 14px;
 }
 
 .participant-block {
@@ -152,8 +152,8 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
 
 .submission-stat-grid article {
   min-width: 0;
-  min-height: 58px;
-  padding: 10px 14px;
+  min-height: 50px;
+  padding: 8px 14px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -188,7 +188,7 @@ const submittedAtTime = computed(() => props.submission.submittedAt.split(", ")[
 
 .detail-answer-section h2 {
   margin: 0;
-  padding: 14px 18px 8px;
+  padding: 10px 18px 6px;
   color: #182033;
   font-size: 0.95rem;
   font-weight: 900;

@@ -8,7 +8,7 @@ const props = withDefaults(defineProps<{
   answers: QuizSubmissionAnswer[];
   pageSize?: number;
 }>(), {
-  pageSize: 6
+  pageSize: 5
 });
 
 const columns = [
@@ -63,7 +63,7 @@ function setPage(page: number) {
       :columns="columns"
       min-width="820px"
       column-spacing="16px"
-      row-spacing="12px"
+      row-spacing="9px"
       first-column-variant="index"
     >
       <tr v-for="(answer, index) in paginatedAnswers" :key="answer.id">
