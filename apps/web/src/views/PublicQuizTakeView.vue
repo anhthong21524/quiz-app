@@ -3,6 +3,7 @@ import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import {
   getPublicQuizBySlug,
+  submitQuizAttempt,
   type PublicQuizInfo,
   type PublicQuizQuestion
 } from "../services/publicQuizApi";
@@ -23,6 +24,8 @@ const isLoading = ref(true);
 const pageError = ref("");
 const isSubmitted = ref(false);
 const submittedAt = ref<number | null>(null);
+const score = ref<number | null>(null);
+const totalQuestionsAtSubmit = ref<number | null>(null);
 const now = ref(Date.now());
 const showLeaveQuizModal = ref(false);
 const pendingNavigationPath = ref("");
@@ -129,10 +132,24 @@ function goToQuestion(index: number) {
 function goToPreviousQuestion() { goToQuestion(currentQuestionIndex.value - 1); }
 function goToNextQuestion() { goToQuestion(currentQuestionIndex.value + 1); }
 
-function submitQuiz() {
+async function submitQuiz() {
   isSubmitted.value = true;
   submittedAt.value = Date.now();
   saveAnswers();
+
+  const currentAttempt = attempt.value;
+  if (!currentAttempt || !quiz.value) return;
+
+  const result = await submitQuizAttempt({
+    quizId: currentAttempt.quizId,
+    attemptId: currentAttempt.attemptId,
+    answers: answers.value
+  });
+
+  if (result) {
+    score.value = result.score;
+    totalQuestionsAtSubmit.value = result.totalQuestions;
+  }
 }
 
 function exitQuiz() {
@@ -145,6 +162,8 @@ function restartQuiz() {
   currentQuestionIndex.value = 0;
   isSubmitted.value = false;
   submittedAt.value = null;
+  score.value = null;
+  totalQuestionsAtSubmit.value = null;
 }
 
 function goToPublicQuizzes() {
@@ -385,7 +404,9 @@ onBeforeUnmount(() => {
                       <path d="m15 9 4-4M19 5v4M19 5h-4" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                   </span>
-                  <p class="text-3xl font-extrabold text-emerald-600">-</p>
+                  <p class="text-3xl font-extrabold text-emerald-600">
+                    {{ score !== null && totalQuestionsAtSubmit !== null ? `${score}/${totalQuestionsAtSubmit}` : '-' }}
+                  </p>
                   <p class="-mt-2 text-sm font-semibold text-slate-500">Score</p>
                 </div>
               </div>
@@ -398,9 +419,13 @@ onBeforeUnmount(() => {
                 </svg>
               </span>
               <div>
-                <h2 class="text-base font-extrabold text-slate-900">Your results will be available soon</h2>
+                <h2 class="text-base font-extrabold text-slate-900">
+                  {{ score !== null ? 'Your results are in!' : 'Submission recorded' }}
+                </h2>
                 <p class="mt-1 text-sm font-semibold leading-6 text-slate-500">
-                  Results are calculated after the quiz deadline. You can check your results from your dashboard.
+                  {{ score !== null
+                    ? `You answered ${score} out of ${totalQuestionsAtSubmit} questions correctly.`
+                    : 'Your answers have been saved. Results will be available soon.' }}
                 </p>
               </div>
             </section>

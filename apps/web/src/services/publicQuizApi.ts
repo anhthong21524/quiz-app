@@ -122,6 +122,41 @@ export async function getPublicQuizBySlug(slug: string): Promise<PublicQuizInfo 
   }
 }
 
+export interface SubmitAttemptPayload {
+  quizId: string;
+  attemptId: string;
+  answers: Record<string, number>;
+}
+
+export interface SubmitAttemptResult {
+  score: number;
+  totalQuestions: number;
+  submittedAt: string;
+}
+
+export async function submitQuizAttempt(
+  payload: SubmitAttemptPayload
+): Promise<SubmitAttemptResult | null> {
+  try {
+    const response = await httpClient.post<{
+      score?: number;
+      totalQuestions?: number;
+      submittedAt?: string;
+    }>(`/quizzes/${payload.quizId}/attempts/${payload.attemptId}/submit`, {
+      answers: payload.answers
+    });
+    const data = response.data;
+    if (data.score === undefined || data.totalQuestions === undefined) return null;
+    return {
+      score: data.score,
+      totalQuestions: data.totalQuestions,
+      submittedAt: data.submittedAt ?? new Date().toISOString()
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function createQuizAttempt(
   payload: CreateQuizAttemptPayload
 ): Promise<QuizAttemptResponse> {

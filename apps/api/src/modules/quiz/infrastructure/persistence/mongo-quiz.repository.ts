@@ -15,7 +15,7 @@ export class MongoQuizRepository
   implements QuizRepository, OnModuleDestroy
 {
   private readonly logger = new Logger(MongoQuizRepository.name);
-  private connection: Connection | null = null;
+  connection: Connection | null = null;
   private quizModel: Model<QuizEntity> | null = null;
 
   constructor(private readonly configService: ConfigService) {}
