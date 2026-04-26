@@ -7,7 +7,7 @@
     "dev": "vite",
     "prebuild": "node scripts/generate-seo-files.mjs",
     "build": "vue-tsc --noEmit && vite build",
-    "lint": "vue-tsc --noEmit",
+    "lint": "vue-tsc --noEmit && eslint src && stylelint \"src/**/*.vue\"",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -19,8 +19,14 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.4",
+    "@typescript-eslint/eslint-plugin": "^8.59.0",
+    "@typescript-eslint/parser": "^8.59.0",
     "@vitejs/plugin-vue": "^6.0.1",
+    "eslint": "^10.2.1",
+    "eslint-plugin-vue": "^10.9.0",
+    "postcss-html": "^1.8.1",
     "sharp": "^0.34.5",
+    "stylelint": "^17.9.0",
     "tailwindcss": "^4.2.4",
     "typescript": "^5.9.3",
     "vite": "^7.1.7",

@@ -6,7 +6,7 @@
  *
  *   loading === true          → skeleton shimmer (shown during initial load)
  *   total === 0 && !loading   → UX-5 welcome/empty-dashboard state
- *   total > 0  && !loading    → live stat pills (total, published, drafts)
+ *   total > 0  && !loading    → live stat pills (total, published, in progress)
  *
  * Kept as a pure display component: all data comes in via props so the
  * parent (MyQuizzesView) owns the data and this component stays testable.
@@ -15,7 +15,7 @@ withDefaults(
   defineProps<{
     total: number;
     published: number;
-    drafts: number;
+    inProgress: number;
     loading?: boolean;
   }>(),
   { loading: false }
@@ -81,8 +81,8 @@ withDefaults(
       </div>
 
       <div class="stats-pill stats-pill--amber">
-        <dt class="stats-pill__label">Drafts</dt>
-        <dd class="stats-pill__value">{{ drafts }}</dd>
+        <dt class="stats-pill__label">In progress</dt>
+        <dd class="stats-pill__value">{{ inProgress }}</dd>
       </div>
     </dl>
   </div>
@@ -95,7 +95,7 @@ withDefaults(
   border-radius: var(--surface-radius, 20px);
   background: rgba(255, 255, 255, 0.98);
   box-shadow: var(--surface-shadow, 0 10px 26px rgba(46, 35, 20, 0.06));
-  padding: 16px 24px;
+  padding: 10px 20px;
 }
 
 /* ── Skeleton ──────────────────────────────────────────────── */
@@ -103,7 +103,7 @@ withDefaults(
   display: flex;
   align-items: center;
   gap: 12px;
-  min-height: 60px;
+  min-height: 44px;
 }
 
 .sb-skel {
@@ -136,7 +136,7 @@ withDefaults(
   display: flex;
   align-items: center;
   gap: 16px;
-  min-height: 60px;
+  min-height: 44px;
 }
 
 .welcome-icon {
@@ -180,7 +180,7 @@ withDefaults(
   display: flex;
   align-items: center;
   gap: 20px;
-  min-height: 60px;
+  min-height: 44px;
   flex-wrap: wrap;
 }
 
@@ -256,7 +256,7 @@ withDefaults(
 /* ── Responsive ────────────────────────────────────────────── */
 @media (max-width: 560px) {
   .stats-bar {
-    padding: 14px 18px;
+    padding: 10px 16px;
   }
 
   .stats-bar--welcome {

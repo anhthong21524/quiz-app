@@ -72,6 +72,33 @@ Global `ValidationPipe` is configured with `whitelist: true`, `forbidNonWhitelis
 
 Key auth env vars: `JWT_SECRET`, `AUTH_ADMIN_EMAIL`, `AUTH_ADMIN_PASSWORD`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`.
 
+## UI Conventions (Frontend)
+
+These rules apply to all frontend work. Follow them without being asked.
+
+### Standard Components — always use, never inline
+
+| Need | Component | Location |
+|------|-----------|----------|
+| Any data table | `AppTable` | `apps/web/src/components/AppTable.vue` |
+| Stat / metric card | `StatCard` | `apps/web/src/components/StatCard.vue` |
+
+**`AppTable` rules:**
+- Every table must include a `#` column (row number).
+- Default `pageSize` is 6; rows are always padded to `pageSize` with empty placeholder rows.
+- Pass `minWidth` when the table has many columns (e.g. `"1100px"` for the full quiz table).
+- Sortable columns get a `key` field in the `columns` array; unsortable columns (# , Actions) omit it.
+
+**`StatCard` props:** `value`, `label`, `hint`, `color` (`green` | `amber` | `teal` | `gray`), optional `width` / `height`.
+
+### No scrollbars
+
+Pages and cards must never produce a visible scrollbar. When adding new UI:
+- Avoid fixed `height` / `min-height` on containers that hold variable-length content.
+- Use `padding` and `gap` conservatively — prefer compact values so content fits without overflow.
+- Remove `overflow: auto` / `overflow-y: auto` from inner containers unless the container has an explicit, intentional fixed height.
+- Test at the standard viewport after every layout change.
+
 ### Frontend
 
 Vue 3 SFCs with Pinia for state (`useQuizStore` in `stores/`), Vue Router for navigation, and Axios via `services/http.ts`. The API base URL comes from `src/config/env.ts` which reads `VITE_API_BASE_URL`. Quiz API calls live in `services/quiz-api.ts`; auth API calls live in `services/auth-api.ts`; store actions wrap them with loading/error state.

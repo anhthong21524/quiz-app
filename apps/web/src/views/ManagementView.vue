@@ -2,6 +2,8 @@
 import { computed, onMounted } from "vue";
 import { RouterLink } from "vue-router";
 import { QuizStatus, type Quiz } from "@quiz-app/shared";
+import AppTable from "../components/AppTable.vue";
+import StatCard from "../components/StatCard.vue";
 import QuizIconAvatar from "../components/my-quizzes/QuizIconAvatar.vue";
 import QuizStatusBadge from "../components/my-quizzes/QuizStatusBadge.vue";
 import type { MyQuizIcon, MyQuizStatus } from "../components/my-quizzes/types";
@@ -63,15 +65,18 @@ const heroQuiz = computed<Quiz | null>(() => {
   )[0];
 });
 
-// ── Recent quizzes table (last 5 by updatedAt) ────────────────
-const recentQuizzes = computed(() =>
-  [...quizStore.items]
+// ── Recent quizzes table (always 5 rows, padded with nulls) ──
+const recentQuizzes = computed<(Quiz | null)[]>(() => {
+  const sorted = [...quizStore.items]
     .sort((a, b) =>
       new Date(b.updatedAt ?? b.createdAt ?? 0).getTime() -
       new Date(a.updatedAt ?? a.createdAt ?? 0).getTime()
     )
-    .slice(0, RECENT_QUIZZES_LIMIT)
-);
+    .slice(0, RECENT_QUIZZES_LIMIT);
+  const padded: (Quiz | null)[] = [...sorted];
+  while (padded.length < RECENT_QUIZZES_LIMIT) padded.push(null);
+  return padded;
+});
 
 // ── Stats ─────────────────────────────────────────────────────
 const totalCount = computed(() => quizStore.items.length);
@@ -232,73 +237,61 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
       </div>
 
       <!-- Skeleton rows -->
-      <div v-if="isLoading" class="quiz-table-wrap" aria-busy="true">
-        <table class="quiz-table">
-          <thead>
-            <tr>
-              <th>Quiz title</th>
-              <th>Subject</th>
-              <th>Questions</th>
-              <th>Status</th>
-              <th>Last updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="n in RECENT_QUIZZES_LIMIT" :key="n" aria-hidden="true">
-              <td><div class="skel skel--row-title" /></td>
-              <td><div class="skel skel--row-sm" /></td>
-              <td><div class="skel skel--row-xs" /></td>
-              <td><div class="skel skel--row-badge" /></td>
-              <td><div class="skel skel--row-md" /></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <AppTable
+        v-if="isLoading"
+        :columns="[
+          { label: 'Quiz title' },
+          { label: 'Subject' },
+          { label: 'Questions' },
+          { label: 'Status' },
+          { label: 'Last updated' },
+        ]"
+        aria-busy="true"
+      >
+        <tr v-for="n in RECENT_QUIZZES_LIMIT" :key="n" aria-hidden="true">
+          <td><div class="skel skel--row-xs" /></td>
+          <td><div class="skel skel--row-title" /></td>
+          <td><div class="skel skel--row-sm" /></td>
+          <td><div class="skel skel--row-badge" /></td>
+          <td><div class="skel skel--row-md" /></td>
+        </tr>
+      </AppTable>
 
-      <!-- Empty state -->
-      <div v-else-if="!recentQuizzes.length" class="table-empty">
-        <p>
-          No quizzes yet.
-          <RouterLink :to="{ name: 'create-quiz' }" class="table-empty__link">
-            Create your first one →
-          </RouterLink>
-        </p>
-      </div>
-
-      <!-- Data table -->
-      <div v-else class="quiz-table-wrap">
-        <table class="quiz-table">
-          <thead>
-            <tr>
-              <th>Quiz title</th>
-              <th>Subject</th>
-              <th>Questions</th>
-              <th>Status</th>
-              <th>Last updated</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="quiz in recentQuizzes"
-              :key="quiz.id"
-            >
-              <td>
-                <RouterLink
-                  class="quiz-title-cell"
-                  :to="{ name: 'edit-quiz', params: { id: quiz.id } }"
-                >
-                  <QuizIconAvatar :icon="getQuizIcon(quiz.subject)" />
-                  <span>{{ quiz.title }}</span>
-                </RouterLink>
-              </td>
-              <td class="cell-muted">{{ quiz.subject ?? "Custom" }}</td>
-              <td class="cell-muted">{{ quiz.questions.length }}</td>
-              <td><QuizStatusBadge :status="mapStatus(quiz.status)" /></td>
-              <td class="cell-muted">{{ formatDateTime(quiz.updatedAt ?? quiz.createdAt) }}</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+      <!-- Data table (always 5 rows) -->
+      <AppTable
+        v-else
+        :columns="[
+          { label: '#', class: 'col-num' },
+          { label: 'Quiz title' },
+          { label: 'Subject' },
+          { label: 'Questions' },
+          { label: 'Status' },
+          { label: 'Last updated' },
+        ]"
+      >
+        <tr
+          v-for="(quiz, i) in recentQuizzes"
+          :key="quiz ? quiz.id : `empty-${i}`"
+          :class="{ 'row-empty': !quiz }"
+        >
+          <template v-if="quiz">
+            <td class="col-num cell-muted">{{ i + 1 }}</td>
+            <td>
+              <div class="quiz-title-cell">
+                <QuizIconAvatar :icon="getQuizIcon(quiz.subject)" />
+                <span>{{ quiz.title }}</span>
+              </div>
+            </td>
+            <td class="cell-muted">{{ quiz.subject ?? "Custom" }}</td>
+            <td class="cell-muted">{{ quiz.questions.length }}</td>
+            <td><QuizStatusBadge :status="mapStatus(quiz.status)" /></td>
+            <td class="cell-muted">{{ formatDateTime(quiz.updatedAt ?? quiz.createdAt) }}</td>
+          </template>
+          <template v-else>
+            <td colspan="6" class="cell-empty">&nbsp;</td>
+          </template>
+        </tr>
+      </AppTable>
     </section>
 
     <!-- ══ STATS GRID ════════════════════════════════════════════ -->
@@ -317,67 +310,35 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
       </template>
 
       <template v-else>
-        <!-- Total -->
-        <div class="stat-card">
-          <div class="stat-icon stat-icon--green" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-              <path d="M6 3h8l4 4v14H6z" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M14 3v4h4" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M9 13h6M9 17h4" stroke-linecap="round" />
-            </svg>
-          </div>
-          <div class="stat-card__body">
-            <p class="stat-num">{{ totalCount }}</p>
-            <p class="stat-label">Total quizzes</p>
-            <p class="stat-hint">All quizzes you've created</p>
-          </div>
-        </div>
+        <StatCard :value="totalCount" label="Total quizzes" hint="All quizzes you've created" color="green">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M6 3h8l4 4v14H6z" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M14 3v4h4" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M9 13h6M9 17h4" stroke-linecap="round" />
+          </svg>
+        </StatCard>
 
-        <!-- In progress -->
-        <div class="stat-card">
-          <div class="stat-icon stat-icon--amber" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-              <path d="M11 4H4v16h16v-7" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </div>
-          <div class="stat-card__body">
-            <p class="stat-num stat-num--amber">{{ inProgressCount }}</p>
-            <p class="stat-label">In progress</p>
-            <p class="stat-hint">Drafts being edited</p>
-          </div>
-        </div>
+        <StatCard :value="inProgressCount" label="In progress" hint="Being actively edited" color="amber">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M11 4H4v16h16v-7" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </StatCard>
 
-        <!-- Published -->
-        <div class="stat-card">
-          <div class="stat-icon stat-icon--teal" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-              <path d="M22 2 11 13" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M22 2 15 22l-4-9-9-4 20-7Z" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </div>
-          <div class="stat-card__body">
-            <p class="stat-num stat-num--teal">{{ publishedCount }}</p>
-            <p class="stat-label">Published</p>
-            <p class="stat-hint">Publicly available</p>
-          </div>
-        </div>
+        <StatCard :value="publishedCount" label="Published" hint="Publicly available" color="teal">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M22 2 11 13" stroke-linecap="round" stroke-linejoin="round" />
+            <path d="M22 2 15 22l-4-9-9-4 20-7Z" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+        </StatCard>
 
-        <!-- Unpublished -->
-        <div class="stat-card">
-          <div class="stat-icon stat-icon--gray" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
-              <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" stroke-linecap="round" />
-              <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" stroke-linecap="round" />
-              <path d="M1 1l22 22" stroke-linecap="round" />
-            </svg>
-          </div>
-          <div class="stat-card__body">
-            <p class="stat-num stat-num--gray">{{ unpublishedCount }}</p>
-            <p class="stat-label">Unpublished</p>
-            <p class="stat-hint">Hidden from public</p>
-          </div>
-        </div>
+        <StatCard :value="unpublishedCount" label="Unpublished" hint="Hidden from public" color="gray">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" stroke-linecap="round" />
+            <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" stroke-linecap="round" />
+            <path d="M1 1l22 22" stroke-linecap="round" />
+          </svg>
+        </StatCard>
       </template>
     </section>
 
@@ -388,7 +349,7 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
 /* ── Page shell ──────────────────────────────────────────────── */
 .dash {
   display: grid;
-  gap: 18px;
+  gap: 12px;
 }
 
 /* ══ HERO ════════════════════════════════════════════════════════ */
@@ -398,8 +359,8 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
   border-radius: var(--surface-radius, 20px);
   background: linear-gradient(135deg, #e8fbf2 0%, #d1f5e4 100%);
   border: 1px solid #c3f0d8;
-  padding: 36px 40px;
-  min-height: 180px;
+  padding: 24px 40px;
+  min-height: 150px;
   display: flex;
   align-items: center;
 }
@@ -573,7 +534,7 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 22px 28px 16px;
+  padding: 14px 20px 12px;
 }
 
 .card-title {
@@ -599,43 +560,6 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
 .card-link:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; border-radius: 3px; }
 
 /* ══ RECENT QUIZZES TABLE ════════════════════════════════════════ */
-.quiz-table-wrap {
-  overflow-x: auto;
-  border-top: 1px solid #edf0f2;
-}
-
-.quiz-table {
-  width: 100%;
-  border-collapse: collapse;
-  min-width: 640px;
-}
-
-.quiz-table th {
-  padding: 10px 20px;
-  background: #fbfcfd;
-  color: #8a93a3;
-  font-size: 0.82rem;
-  font-weight: 700;
-  text-align: left;
-  border-bottom: 1px solid #edf0f2;
-  white-space: nowrap;
-}
-
-.quiz-table td {
-  padding: 12px 20px;
-  border-bottom: 1px solid #f3f5f7;
-  font-size: 0.93rem;
-  vertical-align: middle;
-}
-
-.quiz-table tbody tr:last-child td { border-bottom: 0; }
-
-.quiz-table tbody tr {
-  transition: background-color 0.15s ease;
-}
-
-.quiz-table tbody tr:hover { background: #f9fbfa; }
-
 .quiz-title-cell {
   display: flex;
   align-items: center;
@@ -645,89 +569,28 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
   font-weight: 700;
 }
 
-.quiz-title-cell:hover { color: #10b981; }
-.quiz-title-cell:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; border-radius: 4px; }
 
 .cell-muted { color: #657286; }
+.col-num { width: 40px; text-align: center; }
 
-.table-empty {
-  padding: 32px 28px;
-  text-align: center;
-  border-top: 1px solid #edf0f2;
-  color: #8a93a3;
-  font-size: 0.93rem;
-}
-
-.table-empty__link {
-  color: #10b981;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-.table-empty__link:hover { text-decoration: underline; }
+.row-empty { pointer-events: none; }
+.row-empty:hover { background: transparent !important; }
+.cell-empty { height: 38px; }
 
 /* ══ STATS GRID ══════════════════════════════════════════════════ */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 14px;
+  gap: 10px;
 }
 
-.stat-card {
+.stat-card--skeleton {
   border: var(--surface-border, 1px solid rgba(226, 223, 218, 0.92));
   border-radius: var(--surface-radius, 20px);
   background: rgba(255, 255, 255, 0.98);
   box-shadow: var(--surface-shadow, 0 10px 26px rgba(46, 35, 20, 0.06));
-  padding: 22px 20px;
-  display: flex;
-  align-items: flex-start;
-  gap: 16px;
-}
-
-.stat-card--skeleton { min-height: 100px; }
-
-.stat-icon {
-  width: 46px;
-  height: 46px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  flex-shrink: 0;
-}
-
-.stat-icon svg { width: 22px; height: 22px; }
-
-.stat-icon--green  { background: #e8fbf2; color: #10b981; }
-.stat-icon--amber  { background: #fff4e6; color: #d97706; }
-.stat-icon--teal   { background: #e0f7f4; color: #0d9488; }
-.stat-icon--gray   { background: #f3f4f6; color: #6b7280; }
-
-.stat-card__body { display: grid; gap: 2px; }
-
-.stat-num {
-  margin: 0;
-  font-size: 2rem;
-  font-weight: 800;
-  color: #182033;
-  line-height: 1;
-}
-
-.stat-num--amber { color: #d97706; }
-.stat-num--teal  { color: #0d9488; }
-.stat-num--gray  { color: #6b7280; }
-
-.stat-label {
-  margin: 0;
-  font-size: 0.9rem;
-  font-weight: 700;
-  color: #182033;
-}
-
-.stat-hint {
-  margin: 0;
-  font-size: 0.8rem;
-  color: #8a93a3;
-  line-height: 1.4;
+  padding: 14px 16px;
+  min-height: 68px;
 }
 
 /* ══ SKELETON SHIMMER ════════════════════════════════════════════ */
@@ -752,10 +615,10 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
 .skel--row-md     { height: 12px; width: 130px; }
 
 /* Stats skeletons */
-.skel--stat-icon  { width: 46px; height: 46px; border-radius: 12px; flex-shrink: 0; }
-.skel--stat-num   { height: 28px; width: 52px; margin-bottom: 4px; }
-.skel--stat-label { height: 13px; width: 90px; margin-bottom: 4px; }
-.skel--stat-hint  { height: 11px; width: 110px; }
+.skel--stat-icon  { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; }
+.skel--stat-num   { height: 20px; width: 40px; margin-bottom: 2px; }
+.skel--stat-label { height: 11px; width: 80px; margin-bottom: 2px; }
+.skel--stat-hint  { height: 10px; width: 100px; }
 
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
@@ -769,13 +632,11 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
 }
 
 @media (max-width: 860px) {
-  .dash-hero { padding: 28px 24px; }
+  .dash-hero { padding: 20px 24px; }
   .hero-title { font-size: 1.6rem; }
   .hero-mockup { display: none; }
   .hero-edit-btn { display: none; }
   .card-header { padding: 18px 20px 14px; }
-  .quiz-table th,
-  .quiz-table td { padding: 10px 16px; }
 }
 
 @media (max-width: 560px) {

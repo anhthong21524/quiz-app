@@ -6,7 +6,6 @@ defineProps<{
   searchQuery: string;
   selectedStatus: MyQuizStatus | "All status";
   selectedSubject: string;
-  selectedSort: string;
   viewMode: ViewMode;
   statusOptions: Array<MyQuizStatus | "All status">;
   subjectOptions: string[];
@@ -16,7 +15,6 @@ const emit = defineEmits<{
   "update:searchQuery": [value: string];
   "update:selectedStatus": [value: MyQuizStatus | "All status"];
   "update:selectedSubject": [value: string];
-  "update:selectedSort": [value: string];
   "update:viewMode": [value: ViewMode];
 }>();
 </script>
@@ -68,20 +66,7 @@ const emit = defineEmits<{
         </svg>
       </label>
 
-      <label class="select-control sort-control">
-        <span class="sr-only">Sort quizzes</span>
-        <select
-          :value="selectedSort"
-          @change="emit('update:selectedSort', ($event.target as HTMLSelectElement).value)"
-        >
-          <option value="last-updated">Sort by: Last updated</option>
-          <option value="title">Sort by: Title</option>
-          <option value="questions">Sort by: Questions</option>
-        </select>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-          <path d="m7 10 5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </label>
+
     </div>
 
     <div class="view-toggle" role="group" aria-label="Choose quiz view">

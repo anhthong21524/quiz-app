@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppTable from "../AppTable.vue";
 import type { QuizSubmission } from "../../data/quiz-submissions";
 
 defineProps<{
@@ -26,6 +27,16 @@ const emit = defineEmits<{
   page: [page: number];
   select: [submission: QuizSubmission];
 }>();
+
+const columns = [
+  { label: "#" },
+  { label: "Participant" },
+  { label: "Score" },
+  { label: "Time taken" },
+  { label: "Correct" },
+  { label: "Status" },
+  { label: "Submitted at" },
+];
 
 function scoreClass(submission: QuizSubmission) {
   if (submission.scorePercent >= 80) {
@@ -105,68 +116,46 @@ function scoreClass(submission: QuizSubmission) {
       </div>
     </div>
 
-    <div v-if="submissions.length" class="submission-table-shell">
-      <table class="submission-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Participant</th>
-            <th>Score</th>
-            <th>Time taken</th>
-            <th>Correct</th>
-            <th>Status</th>
-            <th>
-              <span class="sortable-heading">
-                Submitted at
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-                  <path d="M12 5v14M17 14l-5 5-5-5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </span>
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="(submission, index) in submissions"
-            :key="submission.id"
-            :class="{ 'is-selected': submission.id === selectedSubmissionId }"
-            tabindex="0"
-            role="button"
-            :aria-label="`View ${submission.participantName} submission detail`"
-            @click="emit('select', submission)"
-            @keydown.enter.prevent="emit('select', submission)"
-            @keydown.space.prevent="emit('select', submission)"
-          >
-            <td>{{ showingStart + index }}</td>
-            <td>
-              <div class="participant-cell">
-                <span class="submission-avatar" :class="`is-${submission.accent}`" aria-hidden="true">
-                  {{ submission.initials }}
-                </span>
-                <span class="participant-copy">
-                  <strong>{{ submission.participantName }}</strong>
-                  <span>{{ submission.participantEmail }}</span>
-                </span>
-              </div>
-            </td>
-            <td>
-              <span class="score-value">{{ submission.score }} / {{ submission.totalScore }}</span>
-              <span class="score-percent" :class="scoreClass(submission)">
-                {{ submission.scorePercent }}%
-              </span>
-            </td>
-            <td>{{ submission.timeTaken }}</td>
-            <td>{{ submission.correctAnswers }} / {{ submission.totalQuestions }}</td>
-            <td>
-              <span class="status-badge">{{ submission.status }}</span>
-            </td>
-            <td>
-              <time :datetime="submission.submittedAtIso">{{ submission.submittedAt }}</time>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <AppTable v-if="submissions.length" :columns="columns" min-width="900px">
+      <tr
+        v-for="(submission, index) in submissions"
+        :key="submission.id"
+        :class="{ 'is-selected': submission.id === selectedSubmissionId }"
+        tabindex="0"
+        role="button"
+        :aria-label="`View ${submission.participantName} submission detail`"
+        @click="emit('select', submission)"
+        @keydown.enter.prevent="emit('select', submission)"
+        @keydown.space.prevent="emit('select', submission)"
+      >
+        <td>{{ showingStart + index }}</td>
+        <td>
+          <div class="participant-cell">
+            <span class="submission-avatar" :class="`is-${submission.accent}`" aria-hidden="true">
+              {{ submission.initials }}
+            </span>
+            <span class="participant-copy">
+              <strong>{{ submission.participantName }}</strong>
+              <span>{{ submission.participantEmail }}</span>
+            </span>
+          </div>
+        </td>
+        <td>
+          <span class="score-value">{{ submission.score }} / {{ submission.totalScore }}</span>
+          <span class="score-percent" :class="scoreClass(submission)">
+            {{ submission.scorePercent }}%
+          </span>
+        </td>
+        <td>{{ submission.timeTaken }}</td>
+        <td>{{ submission.correctAnswers }} / {{ submission.totalQuestions }}</td>
+        <td>
+          <span class="status-badge">{{ submission.status }}</span>
+        </td>
+        <td>
+          <time :datetime="submission.submittedAtIso">{{ submission.submittedAt }}</time>
+        </td>
+      </tr>
+    </AppTable>
 
     <div v-else class="submissions-empty-state">
       <span aria-hidden="true">
@@ -305,50 +294,23 @@ function scoreClass(submission: QuizSubmission) {
   pointer-events: none;
 }
 
-.submission-table-shell {
-  width: 100%;
-  overflow: auto;
-}
-
-.submission-table {
-  width: 100%;
-  min-width: 900px;
-  border-collapse: collapse;
-}
-
-.submission-table th,
-.submission-table td {
-  padding: 12px 18px;
-  border-bottom: 1px solid #edf0f2;
-  text-align: left;
-  vertical-align: middle;
-}
-
-.submission-table th {
-  background: #fbfcfd;
-  color: #53627c;
-  font-size: 0.78rem;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.submission-table td {
+.submission-table-wrap :deep(td) {
   color: #344159;
   font-size: 0.88rem;
 }
 
-.submission-table tbody tr {
+.submission-table-wrap :deep(tbody tr) {
   cursor: pointer;
   outline: none;
   transition: background-color 0.2s ease;
 }
 
-.submission-table tbody tr:hover,
-.submission-table tbody tr.is-selected {
+.submission-table-wrap :deep(tbody tr:hover),
+.submission-table-wrap :deep(tbody tr.is-selected) {
   background: #eefaf4;
 }
 
-.submission-table tbody tr:focus-visible {
+.submission-table-wrap :deep(tbody tr:focus-visible) {
   box-shadow: inset 0 0 0 2px #10b981;
 }
 

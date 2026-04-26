@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import AppTable from "../AppTable.vue";
 import type { QuizPerformanceResult } from "../../data/quiz-results";
 import ResultQuizIcon from "./ResultQuizIcon.vue";
 
@@ -15,6 +16,17 @@ const emit = defineEmits<{
   page: [page: number];
   view: [quiz: QuizPerformanceResult];
 }>();
+
+const columns = [
+  { label: "Quiz" },
+  { label: "Subject" },
+  { label: "Questions" },
+  { label: "Submissions" },
+  { label: "Average score" },
+  { label: "Completion rate" },
+  { label: "Average time" },
+  { label: "Last update" },
+];
 
 function scoreClass(score: string) {
   const numericScore = Number.parseInt(score, 10);
@@ -47,65 +59,49 @@ function scoreClass(score: string) {
       </button>
     </header>
 
-    <div v-if="quizzes.length" class="performance-table-shell">
-      <table class="performance-table">
-        <thead>
-          <tr>
-            <th>Quiz</th>
-            <th>Subject</th>
-            <th>Questions</th>
-            <th>Submissions</th>
-            <th>Average score</th>
-            <th>Completion rate</th>
-            <th>Average time</th>
-            <th>Last update</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr
-            v-for="quiz in quizzes"
-            :key="quiz.id"
-            class="clickable-row"
-            tabindex="0"
-            :aria-label="`View submissions for ${quiz.title}`"
-            @click="emit('view', quiz)"
-            @keydown.enter.prevent="emit('view', quiz)"
-            @keydown.space.prevent="emit('view', quiz)"
-          >
-            <td>
-              <div class="quiz-title-cell">
-                <ResultQuizIcon :icon="quiz.icon" />
-                <span class="quiz-title-text">{{ quiz.title }}</span>
-                <span class="result-status-badge" :class="`is-${quiz.status.toLowerCase()}`">
-                  {{ quiz.status }}
-                </span>
-              </div>
-            </td>
-            <td>{{ quiz.subject }}</td>
-            <td>{{ quiz.questions }}</td>
-            <td>{{ quiz.submissions }}</td>
-            <td>
-              <span class="metric-value" :class="scoreClass(quiz.averageScore)">{{ quiz.averageScore }}</span>
-              <span class="metric-helper">{{ quiz.scoreDetail }}</span>
-            </td>
-            <td>
-              <span class="metric-value">{{ quiz.completionRate }}</span>
-              <span class="metric-helper">{{ quiz.completionDetail }}</span>
-            </td>
-            <td>
-              <span class="metric-value">{{ quiz.averageTime }}</span>
-              <span class="metric-helper">{{ quiz.averageTimeHelper }}</span>
-            </td>
-            <td>
-              <time class="last-update" :datetime="quiz.lastUpdate">
-                <span>{{ quiz.lastUpdateDate }}</span>
-                <span>{{ quiz.lastUpdateTime }}</span>
-              </time>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <AppTable v-if="quizzes.length" :columns="columns" min-width="980px">
+      <tr
+        v-for="quiz in quizzes"
+        :key="quiz.id"
+        class="clickable-row"
+        tabindex="0"
+        :aria-label="`View submissions for ${quiz.title}`"
+        @click="emit('view', quiz)"
+        @keydown.enter.prevent="emit('view', quiz)"
+        @keydown.space.prevent="emit('view', quiz)"
+      >
+        <td>
+          <div class="quiz-title-cell">
+            <ResultQuizIcon :icon="quiz.icon" />
+            <span class="quiz-title-text">{{ quiz.title }}</span>
+            <span class="result-status-badge" :class="`is-${quiz.status.toLowerCase()}`">
+              {{ quiz.status }}
+            </span>
+          </div>
+        </td>
+        <td>{{ quiz.subject }}</td>
+        <td>{{ quiz.questions }}</td>
+        <td>{{ quiz.submissions }}</td>
+        <td>
+          <span class="metric-value" :class="scoreClass(quiz.averageScore)">{{ quiz.averageScore }}</span>
+          <span class="metric-helper">{{ quiz.scoreDetail }}</span>
+        </td>
+        <td>
+          <span class="metric-value">{{ quiz.completionRate }}</span>
+          <span class="metric-helper">{{ quiz.completionDetail }}</span>
+        </td>
+        <td>
+          <span class="metric-value">{{ quiz.averageTime }}</span>
+          <span class="metric-helper">{{ quiz.averageTimeHelper }}</span>
+        </td>
+        <td>
+          <time class="last-update" :datetime="quiz.lastUpdate">
+            <span>{{ quiz.lastUpdateDate }}</span>
+            <span>{{ quiz.lastUpdateTime }}</span>
+          </time>
+        </td>
+      </tr>
+    </AppTable>
 
     <div v-else class="results-empty-state">
       <span aria-hidden="true">
@@ -204,45 +200,17 @@ function scoreClass(score: string) {
   color: #657286;
 }
 
-.performance-table-shell {
-  width: 100%;
-  overflow: auto;
-  border-top: 1px solid #edf0f2;
-}
-
-.performance-table {
-  width: 100%;
-  min-width: 980px;
-  border-collapse: collapse;
-}
-
-.performance-table th,
-.performance-table td {
-  padding: 12px 18px;
-  border-bottom: 1px solid #edf0f2;
-  text-align: left;
-  vertical-align: middle;
-}
-
-.performance-table th {
-  background: #fbfcfd;
-  color: #53627c;
-  font-size: 0.78rem;
-  font-weight: 800;
-  white-space: nowrap;
-}
-
-.performance-table td {
+.performance-card :deep(td) {
   color: #293246;
   font-size: 0.9rem;
 }
 
-.performance-table tbody tr {
+.performance-card :deep(tbody tr) {
   transition: background-color 0.2s ease;
 }
 
-.performance-table tbody tr:hover,
-.performance-table tbody tr:focus-visible {
+.performance-card :deep(tbody tr:hover),
+.performance-card :deep(tbody tr:focus-visible) {
   background: #fbfdfb;
 }
 

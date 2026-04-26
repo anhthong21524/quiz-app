@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { QuizStatus, type Quiz } from "@quiz-app/shared";
 import QuizCardList from "../components/my-quizzes/QuizCardList.vue";
@@ -26,11 +26,13 @@ const router = useRouter();
 const quizStore = useQuizStore();
 const { show: showToast } = useToast();
 
+const PAGE_SIZE = 6;
+
 const searchQuery = ref("");
 const selectedStatus = ref<MyQuizStatus | "All status">("All status");
 const selectedSubject = ref("All subjects");
-const selectedSort = ref("last-updated");
 const viewMode = ref<ViewMode>("list");
+const currentPage = ref(1);
 
 interface ConfirmState {
   open: boolean;
@@ -102,28 +104,34 @@ const filteredQuizzes = computed(() => {
     return matchesSearch && matchesStatus && matchesSubject;
   });
 
-  return [...matchingQuizzes].sort((left, right) => {
-    if (selectedSort.value === "title") {
-      return left.title.localeCompare(right.title);
-    }
-
-    if (selectedSort.value === "questions") {
-      return right.questions - left.questions;
-    }
-
-    return new Date(right.lastUpdated).getTime() - new Date(left.lastUpdated).getTime();
-  });
+  return [...matchingQuizzes].sort((left, right) =>
+    new Date(right.lastUpdated).getTime() - new Date(left.lastUpdated).getTime()
+  );
 });
+
+watch(filteredQuizzes, () => { currentPage.value = 1; });
+
+const totalPages = computed(() =>
+  Math.max(1, Math.ceil(filteredQuizzes.value.length / PAGE_SIZE))
+);
+
+const pageOffset = computed(() => (currentPage.value - 1) * PAGE_SIZE);
+
+const pagedQuizzes = computed(() =>
+  filteredQuizzes.value.slice(pageOffset.value, pageOffset.value + PAGE_SIZE)
+);
 
 const showingCopy = computed(() => {
-  const quizCount = filteredQuizzes.value.length;
-
-  if (!quizCount) {
-    return "Showing 0 to 0 of 0 quizzes";
-  }
-
-  return `Showing 1 to ${quizCount} of ${quizCount} quizzes`;
+  const total = filteredQuizzes.value.length;
+  if (!total) return "Showing 0 to 0 of 0 quizzes";
+  const from = pageOffset.value + 1;
+  const to = Math.min(pageOffset.value + PAGE_SIZE, total);
+  return `Showing ${from} to ${to} of ${total} quizzes`;
 });
+
+function setPage(page: number) {
+  currentPage.value = page;
+}
 
 // ── Empty-state helpers ───────────────────────────────────────
 // True when there are quizzes in total but the active filters match none.
@@ -141,7 +149,7 @@ const isFilteredEmpty = computed(
 const publishedCount = computed(
   () => apiQuizzes.value.filter((q) => q.status === "Published").length
 );
-const draftCount = computed(() => apiQuizzes.value.length - publishedCount.value);
+const inProgressCount = computed(() => apiQuizzes.value.length - publishedCount.value);
 
 function clearFilters() {
   searchQuery.value = "";
@@ -325,7 +333,7 @@ function shareQuiz(quiz: QuizListItem) {
   <section class="my-quizzes-page">
     <header class="my-quizzes-heading">
       <h1>My Quizzes</h1>
-      <p>Manage your quiz drafts, published quizzes, and API-backed editor work.</p>
+      <p>Manage your in-progress quizzes, published quizzes, and API-backed editor work.</p>
     </header>
 
     <!-- UX-5: Dashboard stats / empty-dashboard state.
@@ -334,7 +342,7 @@ function shareQuiz(quiz: QuizListItem) {
     <QuizStatsBar
       :total="apiQuizzes.length"
       :published="publishedCount"
-      :drafts="draftCount"
+      :in-progress="inProgressCount"
       :loading="isInitialLoad"
     />
 
@@ -361,7 +369,6 @@ function shareQuiz(quiz: QuizListItem) {
             v-model:search-query="searchQuery"
             v-model:selected-status="selectedStatus"
             v-model:selected-subject="selectedSubject"
-            v-model:selected-sort="selectedSort"
             v-model:view-mode="viewMode"
             :status-options="statusOptions"
             :subject-options="subjectOptions"
@@ -379,7 +386,9 @@ function shareQuiz(quiz: QuizListItem) {
           <template v-else-if="filteredQuizzes.length">
             <template v-if="viewMode === 'list'">
               <QuizTable
-                :quizzes="filteredQuizzes"
+                :quizzes="pagedQuizzes"
+                :offset="pageOffset"
+                :page-size="PAGE_SIZE"
                 @view="viewQuiz"
                 @edit="editQuiz"
                 @publish="publishQuiz"
@@ -389,7 +398,7 @@ function shareQuiz(quiz: QuizListItem) {
                 @share="shareQuiz"
               />
               <QuizCardList
-                :quizzes="filteredQuizzes"
+                :quizzes="pagedQuizzes"
                 @view="viewQuiz"
                 @edit="editQuiz"
                 @publish="publishQuiz"
@@ -402,7 +411,7 @@ function shareQuiz(quiz: QuizListItem) {
 
             <QuizGrid
               v-else
-              :quizzes="filteredQuizzes"
+              :quizzes="pagedQuizzes"
               @view="viewQuiz"
               @edit="editQuiz"
               @publish="publishQuiz"
@@ -412,7 +421,12 @@ function shareQuiz(quiz: QuizListItem) {
               @share="shareQuiz"
             />
 
-            <QuizPagination :showing-copy="showingCopy" />
+            <QuizPagination
+              :current-page="currentPage"
+              :total-pages="totalPages"
+              :showing-copy="showingCopy"
+              @update:current-page="setPage"
+            />
           </template>
 
           <!-- UX-4: no-quizzes (first-time) vs no-results (filtered empty) -->
@@ -496,8 +510,6 @@ function shareQuiz(quiz: QuizListItem) {
 }
 
 .quiz-manager-card {
-  height: 632px;
-  min-height: 632px;
   border: var(--surface-border);
   border-radius: var(--surface-radius);
   display: flex;
@@ -661,57 +673,6 @@ function shareQuiz(quiz: QuizListItem) {
   box-shadow: inset 0 0 0 1px #86e3bf;
 }
 
-.quiz-table-shell {
-  width: 100%;
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: auto;
-  border-top: 1px solid #edf0f2;
-}
-
-.quiz-table {
-  width: 100%;
-  min-width: 1060px;
-  border-collapse: collapse;
-}
-
-.quiz-table th,
-.quiz-table td {
-  padding: 10px 24px;
-  border-bottom: 1px solid #edf0f2;
-  text-align: left;
-}
-
-.quiz-table th {
-  background: #fbfcfd;
-  color: #8a93a3;
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-
-.quiz-table td {
-  color: #293246;
-  font-size: 0.96rem;
-}
-
-.quiz-table tbody tr {
-  transition:
-    background-color 0.2s ease,
-    box-shadow 0.2s ease;
-}
-
-.quiz-table tbody tr:hover {
-  background: #fbfdfb;
-}
-
-.quiz-title-cell {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-  color: #182033;
-  font-weight: 800;
-}
 
 .quiz-card-list,
 .quiz-grid {
@@ -773,24 +734,21 @@ function shareQuiz(quiz: QuizListItem) {
 
 .quiz-grid {
   display: grid;
-  flex: 1 1 auto;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-content: start;
-  gap: 16px;
-  min-height: 0;
-  overflow: auto;
-  padding: 18px;
+  gap: 10px;
+  padding: 12px;
 }
 
 .quiz-grid-card {
   display: grid;
-  gap: 18px;
-  padding: 18px;
+  gap: 10px;
+  padding: 12px 14px;
 }
 
 .grid-card-copy {
   display: grid;
-  gap: 6px;
+  gap: 3px;
 }
 
 .grid-card-copy h3,
@@ -801,7 +759,7 @@ function shareQuiz(quiz: QuizListItem) {
 
 .grid-card-copy h3 {
   color: #182033;
-  font-size: 1.05rem;
+  font-size: 0.95rem;
 }
 
 .grid-card-copy p,
@@ -950,11 +908,6 @@ function shareQuiz(quiz: QuizListItem) {
 }
 
 @media (max-width: 860px) {
-  .quiz-manager-card {
-    height: 620px;
-    min-height: 620px;
-  }
-
   .new-quiz-button {
     width: 100%;
   }
@@ -981,16 +934,12 @@ function shareQuiz(quiz: QuizListItem) {
     grid-column: auto;
   }
 
-  .quiz-table-shell {
-    display: none;
-  }
-
   .quiz-card-list {
     display: grid;
     flex: 1 1 auto;
     align-content: start;
     min-height: 0;
-    overflow: auto;
+    overflow: visible;
   }
 
   .quiz-grid {
