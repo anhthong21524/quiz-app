@@ -3,8 +3,9 @@ import AppPagination from "../AppPagination.vue";
 import AppTable from "../AppTable.vue";
 import type { QuizPerformanceResult } from "../../data/quiz-results";
 import ResultQuizIcon from "./ResultQuizIcon.vue";
+import QuizPerformanceGrid from "./QuizPerformanceGrid.vue";
 
-defineProps<{
+withDefaults(defineProps<{
   quizzes: QuizPerformanceResult[];
   currentPage: number;
   pageCount: number;
@@ -13,12 +14,15 @@ defineProps<{
   totalQuizzes: number;
   sortKey: string;
   sortDir: "asc" | "desc";
-}>();
+  viewMode?: "list" | "grid";
+  loading?: boolean;
+}>(), { viewMode: "list", loading: false });
 
 const emit = defineEmits<{
   page: [page: number];
   view: [quiz: QuizPerformanceResult];
   sort: [key: string, dir: "asc" | "desc"];
+  export: [];
 }>();
 
 const columns = [
@@ -27,7 +31,10 @@ const columns = [
   { label: "Subject", class: "col-subject", key: "subject" },
   { label: "Submissions", class: "col-submissions", key: "submissions" },
   { label: "Average score", class: "col-score", key: "averageScore" },
+  { label: "", class: "col-arrow" },
 ];
+
+const SKELETON_COUNT = 6;
 
 function scoreClass(score: string) {
   const numericScore = Number.parseInt(score.match(/(\d+)%$/)?.[1] ?? "", 10);
@@ -57,10 +64,9 @@ function handlePageChange(page: number) {
 </script>
 
 <template>
-  <section class="performance-card" aria-labelledby="performance-title">
+  <section class="performance-card">
     <header class="performance-card-header">
-      <h2 id="performance-title">Quizzes performance</h2>
-      <button type="button" class="export-button">
+      <button type="button" class="export-button" @click="emit('export')">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
           <path d="M12 4v10M8 10l4 4 4-4M5 20h14" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
@@ -68,41 +74,72 @@ function handlePageChange(page: number) {
       </button>
     </header>
 
-    <AppTable
-      v-if="quizzes.length"
-      :columns="columns"
-      min-width="820px"
-      column-spacing="12px"
-      first-column-variant="index"
-      sorting-enabled
-      :sort-key="sortKey"
-      :sort-dir="sortDir"
-      @sort="handleSort"
-    >
-      <tr
-        v-for="(quiz, index) in quizzes"
-        :key="quiz.id"
-        class="clickable-row"
-        tabindex="0"
-        :aria-label="`View submissions for ${quiz.title}`"
-        @click="emit('view', quiz)"
-        @keydown.enter.prevent="emit('view', quiz)"
-        @keydown.space.prevent="emit('view', quiz)"
+    <slot name="toolbar" />
+
+    <div v-if="loading" class="table-skeleton" aria-busy="true" aria-label="Loading quiz results">
+      <div v-for="i in SKELETON_COUNT" :key="i" class="skeleton-row">
+        <div class="skeleton-cell skeleton-cell--narrow" />
+        <div class="skeleton-cell skeleton-cell--wide" />
+        <div class="skeleton-cell" />
+        <div class="skeleton-cell" />
+        <div class="skeleton-cell" />
+      </div>
+    </div>
+
+    <template v-else-if="quizzes.length">
+      <AppTable
+        v-if="viewMode === 'list'"
+        :columns="columns"
+        min-width="860px"
+        column-spacing="12px"
+        first-column-variant="index"
+        sorting-enabled
+        :sort-key="sortKey"
+        :sort-dir="sortDir"
+        @sort="handleSort"
       >
-        <td class="col-num cell-num">{{ showingStart + index }}</td>
-        <td class="col-quiz">
-          <div class="quiz-title-cell">
-            <ResultQuizIcon :icon="quiz.icon" />
-            <span class="quiz-title-text">{{ quiz.title }}</span>
-          </div>
-        </td>
-        <td class="col-subject">{{ quiz.subject }}</td>
-        <td class="col-submissions">{{ quiz.submissions }}</td>
-        <td class="col-score">
-          <span class="metric-value" :class="scoreClass(quiz.averageScore)">{{ quiz.averageScore }}</span>
-        </td>
-      </tr>
-    </AppTable>
+        <tr
+          v-for="(quiz, index) in quizzes"
+          :key="quiz.id"
+          class="clickable-row"
+          tabindex="0"
+          :aria-label="`View submissions for ${quiz.title}`"
+          @click="emit('view', quiz)"
+          @keydown.enter.prevent="emit('view', quiz)"
+          @keydown.space.prevent="emit('view', quiz)"
+        >
+          <td class="col-num cell-num">{{ showingStart + index }}</td>
+          <td class="col-quiz">
+            <div class="quiz-title-cell">
+              <ResultQuizIcon :icon="quiz.icon" />
+              <span class="quiz-title-text">{{ quiz.title }}</span>
+            </div>
+          </td>
+          <td class="col-subject">{{ quiz.subject }}</td>
+          <td class="col-submissions">{{ quiz.submissions }}</td>
+          <td class="col-score">
+            <span class="metric-value" :class="scoreClass(quiz.averageScore)">{{ quiz.averageScore }}</span>
+          </td>
+          <td class="col-arrow">
+            <svg class="row-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="m9 18 6-6-6-6" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </td>
+        </tr>
+      </AppTable>
+
+      <QuizPerformanceGrid
+        v-else
+        :quizzes="quizzes"
+        @view="emit('view', $event)"
+      />
+
+      <div v-if="viewMode === 'list'" class="score-legend">
+        <span class="legend-dot legend-dot--high" />≥ 80%
+        <span class="legend-dot legend-dot--mid" />70–79%
+        <span class="legend-dot legend-dot--low" />&lt; 70%
+      </div>
+    </template>
 
     <div v-else class="results-empty-state">
       <span aria-hidden="true">
@@ -111,7 +148,7 @@ function handlePageChange(page: number) {
         </svg>
       </span>
       <h3>No quizzes match these filters</h3>
-      <p>Adjust the search, status, subject, or date filter to see quiz performance.</p>
+      <p>Adjust the search, subject, or date filter to see quiz performance.</p>
     </div>
 
     <AppPagination
@@ -136,8 +173,8 @@ function handlePageChange(page: number) {
 }
 
 .performance-card-header {
-  min-height: 62px;
-  padding: 14px 18px;
+  min-height: 54px;
+  padding: 10px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -162,6 +199,13 @@ function handlePageChange(page: number) {
   color: #283141;
   font-size: 0.86rem;
   font-weight: 800;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.export-button:hover {
+  border-color: #b0b8c4;
+  background: #f8f9fa;
 }
 
 .export-button svg {
@@ -299,6 +343,91 @@ function handlePageChange(page: number) {
 .results-empty-state p {
   max-width: 360px;
   color: #657286;
+}
+
+.col-arrow {
+  width: 36px;
+  text-align: center;
+}
+
+.row-arrow {
+  width: 18px;
+  height: 18px;
+  color: #c0c8d4;
+  opacity: 0;
+  transition: opacity 0.15s ease, color 0.15s ease;
+  vertical-align: middle;
+}
+
+.clickable-row:hover .row-arrow,
+.clickable-row:focus-visible .row-arrow {
+  opacity: 1;
+  color: #10b981;
+}
+
+/* ── Score legend ──────────────────────────────────── */
+.score-legend {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 18px;
+  border-top: 1px solid #edf0f2;
+  font-size: 0.78rem;
+  color: #8a93a3;
+  flex-wrap: wrap;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-left: 10px;
+}
+
+.legend-dot:first-child {
+  margin-left: 0;
+}
+
+.legend-dot--high { background: #10b981; }
+.legend-dot--mid  { background: #182033; }
+.legend-dot--low  { background: #f97316; }
+
+/* ── Loading skeleton ──────────────────────────────── */
+.table-skeleton {
+  border-top: 1px solid #edf0f2;
+  padding: 10px 18px;
+  display: grid;
+  gap: 2px;
+}
+
+.skeleton-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid #f3f5f7;
+}
+
+.skeleton-row:last-child {
+  border-bottom: 0;
+}
+
+.skeleton-cell {
+  height: 14px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, #f0f2f4 25%, #e4e8ec 50%, #f0f2f4 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  flex: 1;
+}
+
+.skeleton-cell--narrow { flex: 0 0 40px; }
+.skeleton-cell--wide   { flex: 2; }
+
+@keyframes shimmer {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
 }
 
 @media (max-width: 720px) {

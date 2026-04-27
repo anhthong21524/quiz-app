@@ -2,9 +2,9 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import AppStatsBar from "../components/AppStatsBar.vue";
+import AppToolbar, { type ToolbarFilter } from "../components/AppToolbar.vue";
 import QuizPerformanceTable from "../components/results/QuizPerformanceTable.vue";
 import RecentSubmissionsCard from "../components/results/RecentSubmissionsCard.vue";
-import ResultFilterPanel from "../components/results/ResultFilterPanel.vue";
 import {
   fetchQuizPerformance,
   fetchRecentSubmissions,
@@ -21,6 +21,7 @@ const router = useRouter();
 const searchQuery = ref("");
 const selectedSubject = ref("All subjects");
 const selectedDateRange = ref("All time");
+const viewMode = ref<"list" | "grid">("list");
 const isLoading = ref(false);
 const currentPage = ref(1);
 const sortKey = ref("submissions");
@@ -46,6 +47,11 @@ const SUBJECT_ICON_MAP: Record<string, string> = {
 };
 
 const ACCENT_CYCLE = ["green", "red", "blue", "purple", "orange"] as const;
+
+function stableAccent(name: string): typeof ACCENT_CYCLE[number] {
+  const hash = [...name].reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
+  return ACCENT_CYCLE[hash % ACCENT_CYCLE.length];
+}
 
 function formatTime(secs: number | null): string {
   if (secs == null) return "-";
@@ -145,14 +151,15 @@ const quizPerformanceResults = computed<QuizPerformanceResult[]>(() =>
 );
 
 const recentSubmissionResults = computed<RecentSubmissionResult[]>(() =>
-  recentData.value.map((item, index) => ({
+  recentData.value.map((item) => ({
     id: item.id,
     studentName: item.takerName,
     quizTitle: item.quizTitle,
     submittedAt: formatDate(item.submittedAt),
     submittedAtIso: item.submittedAt,
     initials: initials(item.takerName),
-    accent: ACCENT_CYCLE[index % ACCENT_CYCLE.length]
+    accent: stableAccent(item.takerName),
+    scorePercent: item.scorePercent,
   }))
 );
 
@@ -160,6 +167,16 @@ const subjectOptions = computed(() => [
   "All subjects",
   ...Array.from(new Set(quizPerformanceResults.value.map((q) => q.subject))).sort()
 ]);
+
+const toolbarFilters = computed<ToolbarFilter[]>(() => [
+  { label: "Filter by subject", options: subjectOptions.value, value: selectedSubject.value },
+  { label: "Filter by date range", options: dateRangeOptions, value: selectedDateRange.value },
+]);
+
+function onToolbarFiltersChange(filters: ToolbarFilter[]) {
+  selectedSubject.value = filters[0].value;
+  selectedDateRange.value = filters[1].value;
+}
 
 const filteredQuizzes = computed(() => {
   const normalizedSearch = searchQuery.value.trim().toLowerCase();
@@ -245,6 +262,25 @@ function openQuizSubmissions(quiz: QuizPerformanceResult) {
   router.push({ name: "result-quiz-detail", params: { quizId: quiz.id } });
 }
 
+function exportCSV() {
+  const headers = ["#", "Quiz", "Subject", "Submissions", "Average Score"];
+  const rows = sortedQuizzes.value.map((q, i) => [
+    i + 1,
+    `"${q.title.replace(/"/g, '""')}"`,
+    `"${q.subject.replace(/"/g, '""')}"`,
+    q.submissions,
+    q.averageScore,
+  ]);
+  const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "quiz-results.csv";
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
 function setPage(page: number) {
   currentPage.value = Math.min(Math.max(page, 1), pageCount.value);
 }
@@ -274,7 +310,7 @@ onMounted(async () => {
 
 <template>
   <section class="result-quiz-page" :aria-busy="isLoading">
-    <PageHeader title="Result Quiz" description="View and analyze results for all quizzes." />
+    <PageHeader title="Quiz Results" description="View and analyze results for all quizzes." />
 
     <AppStatsBar
       :items="resultOverviewItems"
@@ -296,22 +332,27 @@ onMounted(async () => {
           :total-quizzes="sortedQuizzes.length"
           :sort-key="sortKey"
           :sort-dir="sortDir"
+          :view-mode="viewMode"
+          :loading="isLoading"
           @page="setPage"
           @sort="setSort"
           @view="openQuizSubmissions"
-        />
+          @export="exportCSV"
+        >
+          <template #toolbar>
+            <AppToolbar
+              v-model:search="searchQuery"
+              search-placeholder="Search quizzes..."
+              :filters="toolbarFilters"
+              :view-mode="viewMode"
+              @update:filters="onToolbarFiltersChange"
+              @update:view-mode="viewMode = $event"
+            />
+          </template>
+        </QuizPerformanceTable>
       </main>
 
       <aside class="result-sidebar">
-        <ResultFilterPanel
-          v-model:search-query="searchQuery"
-          v-model:selected-subject="selectedSubject"
-          v-model:selected-date-range="selectedDateRange"
-          :subject-options="subjectOptions"
-          :date-range-options="dateRangeOptions"
-          @clear="clearFilters"
-        />
-
         <RecentSubmissionsCard :submissions="recentSubmissionResults" />
       </aside>
     </div>
@@ -321,59 +362,24 @@ onMounted(async () => {
 <style scoped>
 .result-quiz-page {
   display: grid;
-  gap: 18px;
+  gap: 14px;
 }
-
 
 .result-quiz-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 300px;
-  align-items: stretch;
-  gap: 22px;
+  grid-template-columns: minmax(0, 1fr) 280px;
+  align-items: start;
+  gap: 16px;
 }
 
 .result-main,
 .result-sidebar {
   min-width: 0;
-  display: grid;
-}
-
-.result-main {
-  gap: 0;
-}
-
-.result-sidebar {
-  gap: 18px;
-}
-
-.result-sidebar {
-  grid-template-rows: auto 1fr;
 }
 
 @media (max-width: 980px) {
   .result-quiz-layout {
     grid-template-columns: 1fr;
-    align-items: start;
-  }
-
-  .result-sidebar {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: none;
-  }
-
-  .result-sidebar > :first-child {
-    grid-column: 1 / -1;
-  }
-}
-
-@media (max-width: 720px) {
-  .result-quiz-heading h1 {
-    font-size: 1.7rem;
-  }
-
-  .result-sidebar {
-    grid-template-columns: 1fr;
-    grid-template-rows: none;
   }
 }
 </style>

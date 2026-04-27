@@ -28,10 +28,12 @@ const score = ref<number | null>(null);
 const totalQuestionsAtSubmit = ref<number | null>(null);
 const now = ref(Date.now());
 const showLeaveQuizModal = ref(false);
+const showClearAnswersModal = ref(false);
 const pendingNavigationPath = ref("");
 const allowQuizNavigation = ref(false);
 
 let timer: number | undefined;
+let autoAdvanceTimer: number | undefined;
 
 const slug = computed(() => String(route.params.slug ?? ""));
 const attempt = computed(() => attemptStore.currentAttempt);
@@ -46,6 +48,7 @@ const selectedOptionIndex = computed(() => answers.value[currentQuestionId.value
 const answeredCount = computed(() =>
   questions.value.filter((question, index) => answers.value[getQuestionKey(question, index)] !== undefined).length
 );
+const unansweredCount = computed(() => Math.max(totalQuestions.value - answeredCount.value, 0));
 const navigatorQuestions = computed<CreateQuizQuestion[]>(() =>
   questions.value.map((question, index) => ({
     id: getQuestionKey(question, index),
@@ -61,11 +64,13 @@ const navigatorQuestions = computed<CreateQuizQuestion[]>(() =>
     status: answers.value[getQuestionKey(question, index)] !== undefined ? "completed" : "empty"
   }))
 );
-const progressPercent = computed(() => {
+const answerProgressPercent = computed(() => {
   if (!totalQuestions.value) return 0;
-  return Math.round(((currentQuestionIndex.value + 1) / totalQuestions.value) * 100);
+  return Math.round((answeredCount.value / totalQuestions.value) * 100);
 });
-const progressWidth = computed(() => `${progressPercent.value}%`);
+const answerProgressWidth = computed(() => `${answerProgressPercent.value}%`);
+const showQuestionNavigator = computed(() => totalQuestions.value > 1);
+const canSubmitQuiz = computed(() => unansweredCount.value === 0);
 const storageKey = computed(() =>
   attempt.value ? `quiz-app-public-answers-${attempt.value.attemptId}` : ""
 );
@@ -123,6 +128,13 @@ function saveAnswers() {
 function selectAnswer(optionIndex: number) {
   if (!currentQuestion.value || isSubmitted.value) return;
   answers.value = { ...answers.value, [currentQuestionId.value]: optionIndex };
+
+  if (autoAdvanceTimer) window.clearTimeout(autoAdvanceTimer);
+  if (currentQuestionIndex.value < totalQuestions.value - 1) {
+    autoAdvanceTimer = window.setTimeout(() => {
+      goToNextQuestion();
+    }, 180);
+  }
 }
 
 function goToQuestion(index: number) {
@@ -132,7 +144,9 @@ function goToQuestion(index: number) {
 function goToPreviousQuestion() { goToQuestion(currentQuestionIndex.value - 1); }
 function goToNextQuestion() { goToQuestion(currentQuestionIndex.value + 1); }
 
-async function submitQuiz() {
+async function submitQuiz(options: { force?: boolean } = {}) {
+  if (isSubmitted.value || (!options.force && !canSubmitQuiz.value)) return;
+
   isSubmitted.value = true;
   submittedAt.value = Date.now();
   saveAnswers();
@@ -183,6 +197,21 @@ function cancelLeaveQuiz() {
   pendingNavigationPath.value = "";
 }
 
+function requestClearAnswers() {
+  if (answeredCount.value === 0 || isSubmitted.value) return;
+  showClearAnswersModal.value = true;
+}
+
+function cancelClearAnswers() {
+  showClearAnswersModal.value = false;
+}
+
+function confirmClearAnswers() {
+  answers.value = {};
+  if (storageKey.value) window.localStorage.removeItem(storageKey.value);
+  showClearAnswersModal.value = false;
+}
+
 function confirmLeaveQuiz() {
   const nextPath = pendingNavigationPath.value;
   allowQuizNavigation.value = true;
@@ -205,7 +234,7 @@ async function loadQuiz() {
       return;
     }
     if (!hasActiveAttempt.value) {
-      pageError.value = "Start from the quiz landing page so your attempt can be prepared.";
+      pageError.value = "This quiz attempt has not started or has expired. Start from the quiz landing page to begin again.";
       return;
     }
     if (!questions.value.length) {
@@ -222,7 +251,7 @@ async function loadQuiz() {
 
 watch(answers, saveAnswers, { deep: true });
 watch(remainingSeconds, (seconds) => {
-  if (seconds === 0 && !isSubmitted.value) submitQuiz();
+  if (seconds === 0 && !isSubmitted.value) submitQuiz({ force: true });
 });
 
 onBeforeRouteLeave((to) => {
@@ -241,39 +270,32 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   if (timer) window.clearInterval(timer);
+  if (autoAdvanceTimer) window.clearTimeout(autoAdvanceTimer);
   window.removeEventListener("beforeunload", handleBeforeUnload);
 });
 </script>
 
 <template>
-  <section class="relative isolate min-h-full overflow-hidden bg-[#fffdfa] text-slate-950">
-    <div class="pointer-events-none absolute inset-0 z-0" aria-hidden="true">
-      <div class="absolute left-0 top-24 hidden h-16 w-16 rounded-full bg-amber-100/80 blur-sm sm:block"></div>
-      <div class="absolute bottom-40 left-8 hidden h-20 w-28 rotate-[-15deg] rounded-[50%] border-4 border-sky-100/80 sm:block"></div>
-      <div class="absolute right-12 top-16 hidden text-6xl font-black text-slate-200/90 md:block">?</div>
-      <div class="absolute bottom-32 right-8 hidden h-16 w-28 rotate-[12deg] rounded-2xl border-4 border-emerald-100/80 md:block"></div>
-      <div class="absolute left-[23%] top-7 h-2 w-2 rotate-45 rounded-sm bg-emerald-300"></div>
-      <div class="absolute left-[32%] top-14 h-2 w-2 rotate-45 bg-amber-400"></div>
-      <div class="absolute right-[35%] top-10 h-2 w-2 rounded-full border border-amber-400"></div>
-      <div class="absolute right-[24%] top-28 h-2 w-2 rounded-full border border-emerald-300"></div>
-    </div>
-
-    <div class="relative z-10 mx-auto grid min-h-[calc(100vh-10rem)] w-full max-w-[1180px] gap-8 px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+  <section class="h-full overflow-hidden bg-[#fffdfa] text-slate-950">
+    <div class="mx-auto grid h-full w-full max-w-[1180px] grid-rows-[auto_auto_minmax(0,1fr)] gap-3 px-4 py-3 sm:px-6 lg:px-8">
       <header
         v-if="quiz && !pageError && !isLoading && !isSubmitted"
-        class="flex min-h-24 flex-wrap items-center justify-between gap-4 rounded-3xl border border-slate-200 bg-white p-5 shadow-2xl shadow-slate-900/10 sm:px-8"
+        class="flex min-h-16 flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-lg shadow-slate-900/8 sm:px-5"
       >
         <div class="min-w-0">
-          <p class="truncate text-xl font-extrabold text-slate-900">{{ quiz.title }}</p>
+          <p class="truncate text-lg font-extrabold text-slate-900">{{ quiz.title }}</p>
           <p class="mt-1 text-sm font-semibold text-slate-500">
             {{ totalQuestions || quiz.questionCount }} questions
           </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-4">
-          <div class="flex items-center gap-3">
+          <div
+            class="flex items-center gap-2 rounded-xl px-3 py-1.5"
+            :class="remainingSeconds === null ? 'bg-slate-50 text-slate-600' : 'bg-white'"
+          >
             <svg
-              class="h-9 w-9 shrink-0 text-slate-400"
+              class="h-8 w-8 shrink-0 text-slate-400"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -284,18 +306,23 @@ onBeforeUnmount(() => {
               <path d="M12 7v5l3 2" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
             <div>
-              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Time remaining</p>
+              <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                {{ remainingSeconds === null ? "Time limit" : "Time remaining" }}
+              </p>
               <p
-                class="text-xl font-extrabold tabular-nums leading-tight transition-colors"
-                :class="isTimerWarning ? 'text-red-600' : 'text-emerald-600'"
+                class="tabular-nums leading-tight transition-colors"
+                :class="[
+                  remainingSeconds === null ? 'text-sm font-extrabold text-slate-700' : 'text-lg font-extrabold',
+                  isTimerWarning ? 'text-red-600' : 'text-emerald-600'
+                ]"
               >
-                {{ timeRemainingLabel }}
+                {{ remainingSeconds === null ? "No time limit" : timeRemainingLabel }}
               </p>
             </div>
           </div>
 
           <button
-            class="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-extrabold text-slate-800 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+            class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-800 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             type="button"
             @click="exitQuiz"
           >
@@ -448,48 +475,52 @@ onBeforeUnmount(() => {
         <!-- Active quiz -->
         <template v-else-if="quiz && currentQuestion">
           <!-- Progress bar -->
-          <div class="mb-6 grid gap-2">
-            <div class="flex items-center justify-between gap-4 text-sm font-bold text-slate-600">
+          <div class="grid gap-2">
+            <div class="flex items-center justify-between gap-4 text-xs font-bold text-slate-600 sm:text-sm">
               <span>Question {{ currentQuestionIndex + 1 }} of {{ totalQuestions }}</span>
-              <span>{{ progressPercent }}% completed</span>
+              <span>{{ answeredCount }} of {{ totalQuestions }} answered</span>
             </div>
             <div
-              class="h-2.5 overflow-hidden rounded-full bg-slate-200"
+              class="h-2 overflow-hidden rounded-full bg-slate-200"
               role="progressbar"
-              :aria-valuenow="progressPercent"
+              :aria-valuenow="answerProgressPercent"
               aria-valuemin="0"
               aria-valuemax="100"
+              :aria-label="`${answeredCount} of ${totalQuestions} questions answered`"
             >
               <div
                 class="h-full rounded-full bg-emerald-600 transition-all duration-300"
-                :style="{ width: progressWidth }"
+                :style="{ width: answerProgressWidth }"
               ></div>
             </div>
           </div>
 
           <!-- Two-column layout: question card + sidebar -->
-          <div class="grid min-h-[34rem] items-stretch gap-5 lg:grid-cols-[minmax(0,1fr)_260px]">
+          <div
+            class="grid min-h-0 items-stretch gap-3 overflow-hidden"
+            :class="showQuestionNavigator ? 'lg:grid-cols-[minmax(0,1fr)_260px]' : 'mx-auto w-full max-w-4xl lg:grid-cols-1'"
+          >
 
             <!-- Question card -->
-            <article class="flex min-h-[34rem] flex-col rounded-3xl border border-white/80 bg-white p-6 shadow-xl shadow-slate-900/8 sm:p-8 lg:p-10">
+            <article class="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/80 bg-white p-4 shadow-lg shadow-slate-900/8 sm:p-5 lg:p-6">
               <p class="text-sm font-extrabold uppercase tracking-widest text-emerald-600">
                 Question {{ currentQuestionIndex + 1 }}
               </p>
-              <h2 class="mt-5 text-2xl font-extrabold leading-snug tracking-normal text-slate-900 sm:text-3xl">
+              <h2 class="mt-3 text-2xl font-extrabold leading-snug tracking-normal text-slate-900">
                 {{ currentQuestion.prompt }}
               </h2>
-              <p class="mt-3 text-base text-slate-500">Choose the correct answer.</p>
+              <p class="mt-2 text-sm text-slate-500 sm:text-base">Choose the correct answer.</p>
 
               <!-- Answer options -->
               <div
-                class="mt-8 grid gap-3"
+                class="mt-4 grid gap-2.5"
                 role="radiogroup"
                 :aria-label="`Question ${currentQuestionIndex + 1} answers`"
               >
                 <button
                   v-for="(option, optionIndex) in currentQuestion.options"
                   :key="`${currentQuestionId}-${optionIndex}`"
-                  class="grid min-h-[4.5rem] w-full grid-cols-[2.5rem_1fr] items-center gap-3 rounded-xl border px-5 text-left transition focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100"
+                  class="grid min-h-14 w-full grid-cols-[2.25rem_1fr] items-center gap-3 rounded-xl border px-4 text-left transition focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100"
                   :class="
                     selectedOptionIndex === optionIndex
                       ? 'border-emerald-500 bg-emerald-50 text-slate-950 shadow-[0_0_0_1px_rgba(5,150,105,0.35)]'
@@ -498,10 +529,11 @@ onBeforeUnmount(() => {
                   type="button"
                   role="radio"
                   :aria-checked="selectedOptionIndex === optionIndex"
+                  :aria-label="`Option ${optionLabel(optionIndex)}: ${option}`"
                   @click="selectAnswer(optionIndex)"
                 >
                   <span
-                    class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border text-sm font-semibold transition"
+                    class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-semibold transition"
                     :class="
                       selectedOptionIndex === optionIndex
                         ? 'border-emerald-600 bg-emerald-600 text-white'
@@ -516,49 +548,74 @@ onBeforeUnmount(() => {
               </div>
 
               <!-- Navigation buttons -->
-              <div class="mt-auto flex items-center justify-between gap-3 pt-10">
+              <div class="mt-4 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 border-t border-slate-100 pt-4">
                 <button
-                  class="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 text-base font-extrabold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                  class="inline-flex min-h-12 items-center justify-self-start gap-2 rounded-xl border border-slate-200 bg-white px-5 text-base font-extrabold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:text-slate-400 disabled:opacity-60 disabled:hover:border-slate-200 disabled:hover:bg-white"
                   type="button"
-                  :disabled="currentQuestionIndex === 0"
-                  @click="goToPreviousQuestion"
+                  :disabled="answeredCount === 0"
+                  :title="answeredCount === 0 ? 'No answers to clear' : 'Clear answers'"
+                  @click="requestClearAnswers"
                 >
                   <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M19 12H5m0 0 5-5m-5 5 5 5" stroke-linecap="round" stroke-linejoin="round" />
+                    <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
-                  Previous
+                  Clear answers
                 </button>
 
-                <button
-                  v-if="currentQuestionIndex < totalQuestions - 1"
-                  class="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-8 text-base font-extrabold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
-                  type="button"
-                  @click="goToNextQuestion"
-                >
-                  Next
-                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="M5 12h14m0 0-5-5m5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                </button>
+                <div class="flex min-w-0 flex-wrap items-center justify-center gap-3">
+                  <button
+                    class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-base font-extrabold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    type="button"
+                    :disabled="currentQuestionIndex === 0"
+                    @click="goToPreviousQuestion"
+                  >
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M19 12H5m0 0 5-5m-5 5 5 5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Previous
+                  </button>
 
-                <button
-                  v-else
-                  class="inline-flex min-h-14 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-8 text-base font-extrabold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
-                  type="button"
-                  @click="submitQuiz"
-                >
-                  Submit quiz
-                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                    <path d="m5 13 4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
-                  </svg>
-                </button>
+                  <button
+                    class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-white px-6 text-base font-extrabold text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400 disabled:opacity-60 disabled:hover:bg-white"
+                    type="button"
+                    :disabled="currentQuestionIndex === totalQuestions - 1"
+                    @click="goToNextQuestion"
+                  >
+                    Next
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="M5 12h14m0 0-5-5m5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                </div>
+
+                <div class="flex min-w-0 justify-end">
+                  <button
+                    class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-7 text-base font-extrabold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
+                    type="button"
+                    :disabled="!canSubmitQuiz"
+                    :title="canSubmitQuiz ? 'Submit quiz' : `Answer ${unansweredCount} more ${unansweredCount === 1 ? 'question' : 'questions'} to submit`"
+                    @click="submitQuiz()"
+                  >
+                    Submit quiz
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="m5 13 4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                </div>
               </div>
+              <p
+                v-if="currentQuestionIndex === totalQuestions - 1 && !canSubmitQuiz"
+                class="mt-3 text-right text-sm font-semibold text-slate-500"
+              >
+                Answer {{ unansweredCount }} more {{ unansweredCount === 1 ? "question" : "questions" }} to submit.
+              </p>
             </article>
 
             <QuestionNavigator
+              v-if="showQuestionNavigator"
               :questions="navigatorQuestions"
               :current-question-index="currentQuestionIndex"
-              class="min-h-[34rem] lg:top-[5.5rem]"
+              class="h-full min-h-0 self-stretch lg:top-[5.5rem]"
               @select="goToQuestion"
             />
 
@@ -614,6 +671,59 @@ onBeforeUnmount(() => {
               @click="confirmLeaveQuiz"
             >
               Leave quiz
+            </button>
+          </div>
+        </section>
+      </div>
+    </Teleport>
+
+    <Teleport to="body">
+      <div
+        v-if="showClearAnswersModal"
+        class="fixed inset-0 z-50 grid place-items-center bg-slate-950/55 px-4 py-6 backdrop-blur-sm"
+        role="presentation"
+        @click.self="cancelClearAnswers"
+      >
+        <section
+          class="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 text-slate-950 shadow-2xl shadow-slate-950/20 sm:p-7"
+          role="alertdialog"
+          aria-modal="true"
+          aria-labelledby="clear-answers-title"
+          aria-describedby="clear-answers-description"
+        >
+          <div class="flex items-start gap-4">
+            <span
+              class="grid h-12 w-12 shrink-0 place-items-center rounded-2xl bg-red-50 text-red-600"
+              aria-hidden="true"
+            >
+              <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <div class="min-w-0">
+              <h2 id="clear-answers-title" class="text-xl font-extrabold tracking-normal text-slate-950">
+                Clear all answers?
+              </h2>
+              <p id="clear-answers-description" class="mt-2 text-sm font-semibold leading-6 text-slate-600">
+                This will remove all selected answers for this attempt. You can answer the questions again before submitting.
+              </p>
+            </div>
+          </div>
+
+          <div class="mt-7 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+            <button
+              class="inline-flex min-h-12 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-extrabold text-slate-800 transition hover:bg-slate-50 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+              type="button"
+              @click="cancelClearAnswers"
+            >
+              Keep answers
+            </button>
+            <button
+              class="inline-flex min-h-12 items-center justify-center rounded-xl bg-red-600 px-5 text-sm font-extrabold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
+              type="button"
+              @click="confirmClearAnswers"
+            >
+              Clear answers
             </button>
           </div>
         </section>

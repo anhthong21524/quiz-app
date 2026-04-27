@@ -28,6 +28,7 @@ const emit = defineEmits<{
   delete: [quiz: QuizListItem];
   share: [quiz: QuizListItem];
   sort: [key: string, dir: "asc" | "desc"];
+  "row-click": [quiz: QuizListItem];
 }>();
 
 const COLUMNS = [
@@ -61,7 +62,8 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
       <tr
         v-for="(quiz, i) in paddedRows"
         :key="quiz ? quiz.id : `empty-${i}`"
-        :class="{ 'row-empty': !quiz }"
+        :class="{ 'row-empty': !quiz, 'row-clickable': quiz && Boolean(quiz.apiId) }"
+        @click="quiz && quiz.apiId && emit('row-click', quiz)"
       >
         <template v-if="quiz">
           <td class="col-num cell-num">{{ offset + i + 1 }}</td>
@@ -75,7 +77,7 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
           <td>{{ quiz.questions }}</td>
           <td><QuizStatusBadge :status="quiz.status" /></td>
           <td>{{ quiz.lastUpdatedLabel }}</td>
-          <td class="col-actions-cell">
+          <td class="col-actions-cell" @click.stop>
             <QuizRowActions
               :title="quiz.title"
               :status="quiz.status"
@@ -122,6 +124,8 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
 .row-empty { pointer-events: none; }
 .row-empty:hover { background: transparent !important; }
 .cell-empty { height: 44px; }
+
+.row-clickable { cursor: pointer; }
 
 @media (max-width: 860px) {
   .quiz-table-shell {

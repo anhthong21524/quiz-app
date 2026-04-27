@@ -15,6 +15,7 @@ const usePublicLayout = computed(() =>
   route.name === "public-quiz" ||
   route.name === "public-quiz-take"
 );
+const useQuizTakingLayout = computed(() => route.name === "public-quiz-take");
 </script>
 
 <template>
@@ -23,14 +24,24 @@ const usePublicLayout = computed(() =>
 
   <RouterView v-if="useBareLayout" />
 
-  <div v-else class="app-shell" :class="{ 'public-shell': usePublicLayout }">
+  <div
+    v-else
+    class="app-shell"
+    :class="{ 'public-shell': usePublicLayout, 'quiz-taking-shell': useQuizTakingLayout }"
+  >
     <AppHeader />
 
-    <main class="app-content" :class="{ 'public-content': usePublicLayout }">
+    <main
+      class="app-content"
+      :class="{ 'public-content': usePublicLayout, 'quiz-taking-content': useQuizTakingLayout }"
+    >
       <RouterView />
     </main>
 
-    <footer class="app-footer" :class="{ 'public-footer': usePublicLayout }">
+    <footer
+      class="app-footer"
+      :class="{ 'public-footer': usePublicLayout, 'quiz-taking-footer': useQuizTakingLayout }"
+    >
       <span>&copy; 2026 Quiz App</span>
     </footer>
   </div>

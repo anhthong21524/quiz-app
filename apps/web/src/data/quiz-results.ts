@@ -43,6 +43,7 @@ export interface RecentSubmissionResult {
   submittedAtIso: string;
   initials: string;
   accent: "green" | "red" | "blue" | "purple" | "orange";
+  scorePercent: number | null;
 }
 
 export const resultSummaryMetrics: ResultSummaryMetric[] = [

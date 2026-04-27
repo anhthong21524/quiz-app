@@ -982,7 +982,7 @@ function exitFlow() {
                 <span class="text-sm font-semibold text-slate-700">Explanation <span class="font-normal text-slate-400">(optional)</span></span>
                 <textarea
                   :value="currentQuestion.explanation"
-                  rows="2"
+                  rows="1"
                   class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   placeholder="Explain why the correct answer is right..."
                   @input="updateExplanation(($event.target as HTMLTextAreaElement).value)"
@@ -991,7 +991,7 @@ function exitFlow() {
 
               <p
                 v-if="validationErrors.question"
-                class="rounded-xl border border-red-100 bg-red-50 px-4 py-2.5 text-sm font-medium text-red-600"
+                class="rounded-xl border border-red-100 bg-red-50 px-4 py-2 text-sm font-medium text-red-600"
               >
                 {{ validationErrors.question }}
               </p>

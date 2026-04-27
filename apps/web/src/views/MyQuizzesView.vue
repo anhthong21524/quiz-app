@@ -3,12 +3,12 @@ import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { QuizStatus, type Quiz } from "@quiz-app/shared";
 import AppStatsBar from "../components/AppStatsBar.vue";
+import AppToolbar, { type ToolbarFilter } from "../components/AppToolbar.vue";
 import QuizCardList from "../components/my-quizzes/QuizCardList.vue";
 import QuizEmptyState from "../components/my-quizzes/QuizEmptyState.vue";
 import QuizGrid from "../components/my-quizzes/QuizGrid.vue";
 import QuizPagination from "../components/my-quizzes/QuizPagination.vue";
 import QuizTable from "../components/my-quizzes/QuizTable.vue";
-import QuizToolbar from "../components/my-quizzes/QuizToolbar.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 import ShareModal from "../components/ShareModal.vue";
 import SectionErrorState from "../components/feedback/SectionErrorState.vue";
@@ -22,6 +22,8 @@ import type {
 } from "../components/my-quizzes/types";
 import { useQuizStore } from "../stores/quizzes";
 import { useToast } from "../composables/useToast";
+import { isAppError } from "../lib/api/errors";
+import { fetchQuizResultDetail } from "../services/quiz-api";
 
 const router = useRouter();
 const quizStore = useQuizStore();
@@ -72,6 +74,16 @@ const statusOptions: Array<MyQuizStatus | "All status"> = [
   "In progress",
   "Unpublished"
 ];
+
+const toolbarFilters = computed<ToolbarFilter[]>(() => [
+  { label: "Filter by status", options: statusOptions as string[], value: selectedStatus.value },
+  { label: "Filter by subject", options: subjectOptions.value, value: selectedSubject.value },
+]);
+
+function onToolbarFiltersChange(filters: ToolbarFilter[]) {
+  selectedStatus.value = filters[0].value as MyQuizStatus | "All status";
+  selectedSubject.value = filters[1].value;
+}
 
 // True only on first load when there are no items yet — shows skeleton instead of blank.
 // During background refresh (items already present) we keep stale content visible.
@@ -303,10 +315,30 @@ function viewQuiz(quiz: QuizListItem) {
   }
 }
 
-function editQuiz(quiz: QuizListItem) {
+async function editQuiz(quiz: QuizListItem) {
   if (!quiz.apiId) return;
 
   if (quiz.status === "Published") {
+    // Pre-check: block entry into the editor if participants already exist.
+    // Avoids the user spending time editing only to hit a save error.
+    try {
+      const results = await fetchQuizResultDetail(quiz.apiId);
+      const activeCount    = results.totalSubmissions - results.completedSubmissions;
+      const submittedCount = results.completedSubmissions;
+
+      if (activeCount > 0 || submittedCount > 0) {
+        const parts: string[] = [];
+        if (activeCount > 0)
+          parts.push(`${activeCount} participant${activeCount > 1 ? "s" : ""} currently taking it`);
+        if (submittedCount > 0)
+          parts.push(`${submittedCount} submission${submittedCount > 1 ? "s" : ""}`);
+        showToast(`Cannot edit: this quiz has ${parts.join(" and ")}.`, "error");
+        return;
+      }
+    } catch {
+      // Check failed (network etc.) — fall through; backend will enforce the rule on save.
+    }
+
     openConfirm({
       title: "Edit published quiz",
       message: "Editing will affect the currently published quiz. Users may see changes immediately. Continue?",
@@ -352,8 +384,11 @@ function unpublishQuiz(quiz: QuizListItem) {
       try {
         await quizStore.setQuizPublished(quiz.apiId!, false);
         showToast("Quiz unpublished successfully");
-      } catch {
-        showToast("Failed to unpublish quiz", "error");
+      } catch (error) {
+        const message = isAppError(error) && error.userMessage
+          ? error.userMessage
+          : "Failed to unpublish quiz";
+        showToast(message, "error");
       }
     }
   });
@@ -387,6 +422,22 @@ function deleteQuiz(quiz: QuizListItem) {
       }
     }
   });
+}
+
+async function viewResults(quiz: QuizListItem) {
+  if (!quiz.apiId) return;
+
+  try {
+    const results = await fetchQuizResultDetail(quiz.apiId);
+    if (results.totalSubmissions === 0) {
+      showToast("No submissions yet for this quiz.", "info");
+      return;
+    }
+  } catch {
+    // Network error — fall through and let the results page handle it
+  }
+
+  router.push({ name: "result-quiz-detail", params: { quizId: quiz.apiId } });
 }
 
 function shareQuiz(quiz: QuizListItem) {
@@ -445,13 +496,13 @@ function shareQuiz(quiz: QuizListItem) {
         />
 
         <div v-else key="content" class="quiz-manager-content">
-          <QuizToolbar
-            v-model:search-query="searchQuery"
-            v-model:selected-status="selectedStatus"
-            v-model:selected-subject="selectedSubject"
-            v-model:view-mode="viewMode"
-            :status-options="statusOptions"
-            :subject-options="subjectOptions"
+          <AppToolbar
+            v-model:search="searchQuery"
+            search-placeholder="Search quizzes..."
+            :filters="toolbarFilters"
+            :view-mode="viewMode"
+            @update:filters="onToolbarFiltersChange"
+            @update:view-mode="viewMode = $event"
           />
 
           <SectionErrorState
@@ -479,6 +530,7 @@ function shareQuiz(quiz: QuizListItem) {
                 @delete="deleteQuiz"
                 @share="shareQuiz"
                 @sort="onSort"
+                @row-click="viewResults"
               />
               <QuizCardList
                 :quizzes="pagedQuizzes"

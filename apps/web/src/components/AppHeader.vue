@@ -249,7 +249,7 @@ watch(() => route.fullPath, closeMenus);
           <path d="M7 19V11M12 19V5M17 19v-8" stroke-linecap="round" />
           <path d="M4 19h16" stroke-linecap="round" opacity="0.4" />
         </svg>
-        <span>Result Quiz</span>
+        <span>Quiz Results</span>
       </RouterLink>
     </nav>
 
@@ -317,7 +317,7 @@ watch(() => route.fullPath, closeMenus);
         :to="{ name: 'results' }"
         @click="closeMenus"
       >
-        Result Quiz
+        Quiz Results
       </RouterLink>
     </nav>
   </header>

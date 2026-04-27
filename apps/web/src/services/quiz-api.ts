@@ -33,6 +33,7 @@ export interface RecentSubmissionItem {
   quizId: string;
   quizTitle: string;
   submittedAt: string;
+  scorePercent: number | null;
 }
 
 export interface SubmissionAnswerResult {

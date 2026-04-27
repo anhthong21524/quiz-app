@@ -100,6 +100,17 @@ export function getUserMessage(error: AppError, context: MessageContext = "defau
   // Errors like network/timeout/unknown already carry a userMessage from normalizeApiError
   if (error.userMessage) return error.userMessage;
 
+  // For edit/unpublish conflicts the server returns a user-safe business-rule explanation
+  // (e.g. "Cannot edit: this quiz has 2 participants currently taking it and 3 submissions.").
+  // Prefer that over the generic conflict fallback so the user knows exactly why.
+  if (
+    (context === "quiz_unpublish" || context === "quiz_save") &&
+    error.category === "conflict" &&
+    error.technicalMessage
+  ) {
+    return error.technicalMessage;
+  }
+
   const override = CONTEXT_OVERRIDES[context]?.[error.category];
   if (override) return override;
 

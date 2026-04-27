@@ -72,6 +72,7 @@ export interface RecentSubmissionItem {
   quizId: string;
   quizTitle: string;
   submittedAt: string;
+  scorePercent: number | null;
 }
 
 @Injectable()
@@ -158,13 +159,22 @@ export class AttemptService {
     const quizMap = new Map(quizzes.map((q) => [q.id!, q]));
     const recent = await this.attemptRepository.findRecent(quizIds, limit);
 
-    return recent.map((attempt) => ({
-      id: attempt.id,
-      takerName: attempt.takerName,
-      quizId: attempt.quizId,
-      quizTitle: quizMap.get(attempt.quizId)?.title ?? "Unknown Quiz",
-      submittedAt: attempt.submittedAt!
-    }));
+    return recent.map((attempt) => {
+      const quiz = quizMap.get(attempt.quizId);
+      const questionCount = quiz?.questions?.length ?? 0;
+      const scorePercent =
+        attempt.score != null && questionCount > 0
+          ? Math.round((attempt.score / questionCount) * 100)
+          : null;
+      return {
+        id: attempt.id,
+        takerName: attempt.takerName,
+        quizId: attempt.quizId,
+        quizTitle: quiz?.title ?? "Unknown Quiz",
+        submittedAt: attempt.submittedAt!,
+        scorePercent,
+      };
+    });
   }
 
   async getQuizResults(quizId: string, user: AuthenticatedUser): Promise<QuizResultDetail> {

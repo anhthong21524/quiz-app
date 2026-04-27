@@ -299,7 +299,7 @@ onMounted(async () => {
     <div class="result-detail-topbar">
       <nav class="result-breadcrumb" aria-label="Breadcrumb">
         <RouterLink :to="{ name: 'results' }">
-          Result Quiz
+          Quiz Results
         </RouterLink>
         <span aria-hidden="true">></span>
         <span>{{ summary.quizTitle }}</span>
@@ -366,7 +366,7 @@ onMounted(async () => {
   </section>
 
   <section v-else class="result-not-found-card">
-    <RouterLink class="back-link" :to="{ name: 'results' }">Back to Result Quiz</RouterLink>
+    <RouterLink class="back-link" :to="{ name: 'results' }">Back to Quiz Results</RouterLink>
     <h1>Quiz result not found</h1>
     <p>This quiz does not exist or you do not have access to it.</p>
   </section>

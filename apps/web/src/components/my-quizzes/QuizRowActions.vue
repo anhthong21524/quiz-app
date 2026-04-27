@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount } from "vue";
+import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
 import type { MyQuizStatus } from "./types";
 
 const props = defineProps<{
@@ -20,11 +20,23 @@ const emit = defineEmits<{
 
 const menuOpen = ref(false);
 const menuRef = ref<HTMLElement | null>(null);
+const triggerRef = ref<HTMLButtonElement | null>(null);
+const dropdownPos = ref({ top: 0, right: 0 });
 
 const isPublished = () => props.status === "Published";
 
+function updateDropdownPos() {
+  if (!triggerRef.value) return;
+  const rect = triggerRef.value.getBoundingClientRect();
+  dropdownPos.value = {
+    top: rect.bottom + 6,
+    right: window.innerWidth - rect.right,
+  };
+}
+
 function toggleMenu() {
   menuOpen.value = !menuOpen.value;
+  if (menuOpen.value) nextTick(updateDropdownPos);
 }
 
 function closeMenu() {
@@ -90,6 +102,7 @@ onBeforeUnmount(() => {
 
     <div v-if="isApiQuiz" ref="menuRef" class="more-menu">
       <button
+        ref="triggerRef"
         class="icon-button"
         type="button"
         :aria-label="`More options for ${title}`"
@@ -103,7 +116,12 @@ onBeforeUnmount(() => {
         </svg>
       </button>
 
-      <div v-if="menuOpen" class="more-menu-dropdown" role="menu">
+      <div
+        v-if="menuOpen"
+        class="more-menu-dropdown"
+        role="menu"
+        :style="{ top: `${dropdownPos.top}px`, right: `${dropdownPos.right}px` }"
+      >
         <!-- Published → Unpublish -->
         <template v-if="isPublished()">
           <button class="menu-item menu-item--orange" type="button" role="menuitem" @click="action(() => emit('unpublish'))">
@@ -183,11 +201,12 @@ onBeforeUnmount(() => {
 }
 
 .more-menu-dropdown {
-  position: absolute;
-  right: 0;
-  top: calc(100% + 6px);
-  z-index: 100;
-  min-width: 150px;
+  /* fixed pulls the dropdown out of every overflow:hidden ancestor and
+     places it in the viewport layer. top/right are set via JS from
+     the trigger button's getBoundingClientRect(). */
+  position: fixed;
+  z-index: 1000;
+  min-width: 160px;
   border: 1px solid #e4e8ee;
   border-radius: 12px;
   background: #ffffff;

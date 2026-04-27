@@ -20,6 +20,10 @@ const { toasts, dismiss } = useToast();
               <circle cx="12" cy="12" r="9" />
               <path d="m8.5 12 2.5 2.5 4.5-4.5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
+            <svg v-else-if="toast.type === 'info'" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="9" />
+              <path d="M12 11v5m0-8h.01" stroke-linecap="round" />
+            </svg>
             <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
               <circle cx="12" cy="12" r="9" />
               <path d="M12 8v4m0 4h.01" stroke-linecap="round" />
@@ -73,6 +77,11 @@ const { toasts, dismiss } = useToast();
 .toast--error {
   border-color: #f7c4c4;
   color: #b91c1c;
+}
+
+.toast--info {
+  border-color: #bfdbfe;
+  color: #1d4ed8;
 }
 
 .toast-icon svg {

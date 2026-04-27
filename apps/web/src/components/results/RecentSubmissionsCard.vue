@@ -1,17 +1,27 @@
 <script setup lang="ts">
+import { useRouter } from "vue-router";
 import AppDateTime from "../AppDateTime.vue";
 import type { RecentSubmissionResult } from "../../data/quiz-results";
 
 defineProps<{
   submissions: RecentSubmissionResult[];
 }>();
+
+const router = useRouter();
+
+function scoreClass(pct: number | null) {
+  if (pct == null) return "";
+  if (pct >= 80) return "score--high";
+  if (pct < 70) return "score--low";
+  return "score--mid";
+}
 </script>
 
 <template>
   <section class="sidebar-card" aria-labelledby="recent-submissions-title">
     <div class="sidebar-card-header">
       <h2 id="recent-submissions-title">Recent submissions</h2>
-      <button type="button">View all</button>
+      <RouterLink class="view-all-link" :to="{ name: 'results' }">View all</RouterLink>
     </div>
 
     <ul class="submission-list">
@@ -23,7 +33,14 @@ defineProps<{
           <strong>{{ submission.studentName }}</strong>
           <span>{{ submission.quizTitle }}</span>
         </span>
-        <AppDateTime :value="submission.submittedAtIso" />
+        <div class="submission-meta">
+          <span
+            v-if="submission.scorePercent != null"
+            class="submission-score"
+            :class="scoreClass(submission.scorePercent)"
+          >{{ submission.scorePercent }}%</span>
+          <AppDateTime :value="submission.submittedAtIso" />
+        </div>
       </li>
     </ul>
   </section>
@@ -37,7 +54,6 @@ defineProps<{
   display: grid;
   align-content: start;
   gap: 18px;
-  height: 100%;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: var(--surface-shadow);
 }
@@ -55,21 +71,24 @@ defineProps<{
   font-size: 1rem;
 }
 
-.sidebar-card-header button {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: #10b981;
-  font-size: 0.86rem;
-  font-weight: 800;
-}
-
 .submission-list {
   margin: 0;
   padding: 0;
   display: grid;
   gap: 14px;
   list-style: none;
+}
+
+.view-all-link {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #10b981;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.view-all-link:hover {
+  text-decoration: underline;
 }
 
 .submission-list li {
@@ -132,16 +151,34 @@ defineProps<{
   font-size: 0.9rem;
 }
 
-.submission-copy span,
-.submission-list time {
+.submission-copy span {
   color: #657286;
   font-size: 0.84rem;
 }
 
+.submission-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+}
+
+.submission-meta :deep(time),
 .submission-list time {
-  text-align: right;
+  color: #657286;
+  font-size: 0.82rem;
   white-space: nowrap;
 }
+
+.submission-score {
+  font-size: 0.8rem;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.submission-score.score--high { color: #10b981; }
+.submission-score.score--low  { color: #f97316; }
+.submission-score.score--mid  { color: #182033; }
 
 @media (max-width: 560px) {
   .submission-list li {
@@ -149,9 +186,12 @@ defineProps<{
     align-items: start;
   }
 
-  .submission-list time {
+  .submission-meta {
     grid-column: 2;
-    text-align: left;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
   }
 }
 </style>

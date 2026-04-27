@@ -168,7 +168,7 @@ export const router = createRouter({
       meta: {
         requiresAuth: true,
         seo: {
-          title: "Result Quiz",
+          title: "Quiz Results",
           description: "View and analyze results for all quizzes in Quiz App.",
           canonicalPath: managementPath("/results")
         }

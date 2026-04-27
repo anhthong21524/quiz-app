@@ -19,11 +19,41 @@
   box-sizing: border-box;
 }
 
+html {
+  min-width: 320px;
+  min-height: 100%;
+  overflow-y: scroll;
+  scrollbar-color: #94a3b8 #f8fafc;
+  scrollbar-gutter: stable;
+}
+
+html:has(.quiz-taking-shell) {
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+
+html::-webkit-scrollbar {
+  width: 12px;
+}
+
+html::-webkit-scrollbar-track {
+  background: #f8fafc;
+}
+
+html::-webkit-scrollbar-thumb {
+  border: 3px solid #f8fafc;
+  border-radius: 999px;
+  background: #94a3b8;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
 body {
   margin: 0;
   min-width: 320px;
   min-height: 100vh;
-  overflow-y: scroll;
   background:
     radial-gradient(circle at top center, rgba(255, 255, 255, 0.7), transparent 38%),
     linear-gradient(180deg, #f5f1eb 0%, #f1ece5 100%);
@@ -63,9 +93,20 @@ button {
   background: #ffffff;
 }
 
+.app-shell.quiz-taking-shell {
+  height: 100vh;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
 .app-content.public-content {
   max-width: none;
   gap: 0;
+}
+
+.app-content.quiz-taking-content {
+  min-height: 0;
+  overflow: hidden;
 }
 
 .app-footer.public-footer {
@@ -74,6 +115,13 @@ button {
   padding: 24px var(--page-padding);
   background: #ffffff;
   border-top: 1px solid #eef2f7;
+}
+
+.app-footer.quiz-taking-footer {
+  flex: 0 0 auto;
+  padding: 6px var(--page-padding);
+  font-size: 0.8rem;
+  line-height: 1;
 }
 
 .public-header {

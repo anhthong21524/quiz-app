@@ -18,17 +18,17 @@ const startQuizRoute = computed(() =>
 const values: ValueCard[] = [
   {
     title: "Simple by design",
-    description: "A focused quiz experience that keeps learners moving without extra noise.",
+    description: "Question flows stay direct, readable and easy to finish without extra setup.",
     icon: "spark"
   },
   {
     title: "Practice with purpose",
-    description: "Quizzes help turn quick answers into stronger recall and better habits.",
+    description: "Short quiz sessions help teachers, teams and self-learners build useful recall.",
     icon: "target"
   },
   {
     title: "Progress you can see",
-    description: "Creators and learners get clear feedback that makes the next step obvious.",
+    description: "Results and answer feedback make the next review step easier to spot.",
     icon: "progress"
   }
 ];
@@ -41,7 +41,8 @@ const values: ValueCard[] = [
         <div class="mx-auto grid max-w-2xl justify-items-center gap-6 text-center lg:mx-0 lg:justify-items-start lg:text-left">
           <p class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700">
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
-              <path d="M12 3v18M5 7h14M7 12h10M9 17h6" stroke-linecap="round" />
+              <path d="M7 5.5h10M7 11.5h7M7 17.5h5" stroke-linecap="round" />
+              <path d="M4.5 4h15v16h-15z" stroke-linejoin="round" />
             </svg>
             About Quiz App
           </p>
@@ -52,7 +53,7 @@ const values: ValueCard[] = [
               <span class="block text-emerald-600">clear and doable.</span>
             </h1>
             <p class="max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">
-              Quiz App helps people create, share and take quizzes that are easy to start, simple to follow and useful for everyday practice.
+              Quiz App helps teachers, teams and self-learners create, share and take quizzes that are easy to start, simple to follow and useful for everyday practice.
             </p>
           </div>
 
@@ -61,11 +62,11 @@ const values: ValueCard[] = [
               class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-emerald-600 px-7 font-bold text-white shadow-[0_12px_24px_rgba(5,150,105,0.18)] transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200"
               :to="startQuizRoute"
             >
-              Start a quiz
+              Create a quiz
             </RouterLink>
             <RouterLink
               class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-7 font-bold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100"
-              :to="{ name: 'quizzes' }"
+              :to="{ name: 'public-quizzes' }"
             >
               Browse quizzes
             </RouterLink>
@@ -81,7 +82,7 @@ const values: ValueCard[] = [
             </svg>
           </div>
 
-          <div class="absolute left-[9%] top-[12%] w-[58%] rounded-[26px] border border-emerald-100 bg-white p-6 shadow-[0_24px_45px_rgba(15,23,42,0.12)]">
+          <div class="absolute left-[9%] top-[12%] w-[60%] rounded-[26px] border border-emerald-100 bg-white p-6 shadow-[0_24px_45px_rgba(15,23,42,0.12)]">
             <div class="mb-6 flex items-center justify-between">
               <span class="h-3 w-28 rounded-full bg-slate-200"></span>
               <span class="grid h-9 w-9 place-items-center rounded-full bg-emerald-600 text-white">
@@ -91,58 +92,75 @@ const values: ValueCard[] = [
               </span>
             </div>
             <div class="grid gap-4">
-              <div class="rounded-2xl bg-emerald-50 p-4">
-                <span class="mb-3 block h-2.5 w-24 rounded-full bg-emerald-500"></span>
-                <span class="block h-2.5 w-full rounded-full bg-emerald-100"></span>
-              </div>
               <div class="rounded-2xl bg-slate-50 p-4">
-                <span class="mb-3 block h-2.5 w-20 rounded-full bg-slate-300"></span>
-                <span class="block h-2.5 w-11/12 rounded-full bg-slate-200"></span>
+                <span class="mb-3 block h-2.5 w-32 rounded-full bg-slate-300"></span>
+                <span class="block h-2.5 w-full rounded-full bg-slate-200"></span>
               </div>
-              <div class="rounded-2xl bg-slate-50 p-4">
-                <span class="mb-3 block h-2.5 w-28 rounded-full bg-slate-300"></span>
-                <span class="block h-2.5 w-4/5 rounded-full bg-slate-200"></span>
+              <div class="flex items-center gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
+                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-600 text-sm font-extrabold text-white">A</span>
+                <span class="grid flex-1 gap-2">
+                  <span class="block h-2.5 w-24 rounded-full bg-emerald-500"></span>
+                  <span class="block h-2.5 w-full rounded-full bg-emerald-100"></span>
+                </span>
+                <span class="grid h-7 w-7 shrink-0 place-items-center rounded-full bg-white text-emerald-600">
+                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4">
+                    <path d="m6 12 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </span>
+              </div>
+              <div class="flex items-center gap-3 rounded-2xl bg-slate-50 p-4">
+                <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-white text-sm font-extrabold text-slate-400">B</span>
+                <span class="grid flex-1 gap-2">
+                  <span class="block h-2.5 w-20 rounded-full bg-slate-300"></span>
+                  <span class="block h-2.5 w-11/12 rounded-full bg-slate-200"></span>
+                </span>
               </div>
             </div>
           </div>
 
-          <div class="absolute bottom-8 right-8 grid w-[42%] gap-3">
+          <div class="absolute bottom-8 right-8 grid w-[43%] gap-3">
             <div class="rounded-2xl bg-white p-4 shadow-[0_18px_36px_rgba(15,23,42,0.12)]">
-              <div class="mb-4 flex items-end gap-2">
-                <span class="h-9 w-4 rounded-full bg-emerald-300"></span>
-                <span class="h-14 w-4 rounded-full bg-emerald-500"></span>
-                <span class="h-20 w-4 rounded-full bg-emerald-600"></span>
+              <div class="mb-4 flex items-center justify-between gap-3">
+                <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-emerald-50 text-2xl font-extrabold text-emerald-600">3</span>
+                <span class="grid flex-1 gap-2">
+                  <span class="block h-2.5 w-full rounded-full bg-slate-200"></span>
+                  <span class="block h-2.5 w-4/5 rounded-full bg-slate-100"></span>
+                </span>
               </div>
-              <span class="block h-2.5 w-24 rounded-full bg-slate-200"></span>
+              <div class="h-2.5 overflow-hidden rounded-full bg-slate-100">
+                <span class="block h-full w-3/4 rounded-full bg-emerald-500"></span>
+              </div>
             </div>
-            <div class="rounded-2xl bg-amber-400 p-5 shadow-[0_18px_34px_rgba(245,158,11,0.18)]"></div>
+            <div class="rounded-2xl bg-amber-400 px-5 py-4 shadow-[0_18px_34px_rgba(245,158,11,0.18)]">
+              <span class="block h-2.5 w-20 rounded-full bg-white/80"></span>
+            </div>
           </div>
         </div>
       </section>
 
       <section class="grid gap-4 sm:grid-cols-3" aria-label="Quiz App highlights">
         <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-          <strong class="block text-3xl font-extrabold text-emerald-600">10k+</strong>
-          <p class="mt-2 font-bold text-slate-950">learners practicing</p>
-          <p class="mt-2 text-sm leading-6 text-slate-600">A growing community using quizzes to build confidence.</p>
+          <strong class="block text-3xl font-extrabold text-emerald-600">Create</strong>
+          <p class="mt-2 font-bold text-slate-950">quiz authoring that stays focused</p>
+          <p class="mt-2 text-sm leading-6 text-slate-600">Build questions, answers and quiz details without leaving the flow.</p>
         </article>
         <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-          <strong class="block text-3xl font-extrabold text-emerald-600">4</strong>
-          <p class="mt-2 font-bold text-slate-950">core quiz flows</p>
-          <p class="mt-2 text-sm leading-6 text-slate-600">Create, browse, edit and take quizzes from one workspace.</p>
+          <strong class="block text-3xl font-extrabold text-emerald-600">Share</strong>
+          <p class="mt-2 font-bold text-slate-950">public quizzes that are easy to start</p>
+          <p class="mt-2 text-sm leading-6 text-slate-600">Learners can browse published quizzes and start practicing quickly.</p>
         </article>
         <article class="rounded-2xl border border-slate-200 bg-white p-6 shadow-[0_10px_24px_rgba(15,23,42,0.04)]">
-          <strong class="block text-3xl font-extrabold text-emerald-600">Every day</strong>
-          <p class="mt-2 font-bold text-slate-950">steady improvement</p>
-          <p class="mt-2 text-sm leading-6 text-slate-600">Short practice sessions make learning easier to repeat.</p>
+          <strong class="block text-3xl font-extrabold text-emerald-600">Review</strong>
+          <p class="mt-2 font-bold text-slate-950">feedback that points to the next step</p>
+          <p class="mt-2 text-sm leading-6 text-slate-600">Clear results help creators and learners understand what improved.</p>
         </article>
       </section>
 
-      <section class="grid gap-6" aria-labelledby="about-values-title">
+      <section class="grid gap-8 pt-2" aria-labelledby="about-values-title">
         <div class="mx-auto grid max-w-2xl gap-3 text-center">
           <h2 id="about-values-title" class="text-3xl font-extrabold text-slate-950">What we care about</h2>
           <p class="text-slate-600">
-            The product stays focused on the little things that make quizzes more useful: clarity, momentum and feedback.
+            The product stays focused on the little things that make quizzes more useful: clear questions, steady momentum and feedback people can act on.
           </p>
         </div>
 
