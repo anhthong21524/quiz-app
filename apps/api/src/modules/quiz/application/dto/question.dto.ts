@@ -2,6 +2,7 @@ import {
   ArrayMinSize,
   IsArray,
   IsInt,
+  IsOptional,
   IsString,
   MaxLength,
   Min
@@ -20,5 +21,9 @@ export class QuestionDto {
   @IsInt()
   @Min(0)
   correctOptionIndex!: number;
-}
 
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  explanation?: string;
+}

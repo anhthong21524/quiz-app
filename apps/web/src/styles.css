@@ -84,12 +84,13 @@ button {
   min-height: 100vh;
   margin: 0 auto;
   padding: 18px var(--page-padding) 34px;
+  padding-bottom: calc(34px + 44px);
   display: flex;
   flex-direction: column;
 }
 
 .app-shell.public-shell {
-  padding: 0;
+  padding: 0 0 44px;
   background: #ffffff;
 }
 
@@ -111,17 +112,12 @@ button {
 
 .app-footer.public-footer {
   max-width: none;
-  margin: 0;
-  padding: 24px var(--page-padding);
-  background: #ffffff;
-  border-top: 1px solid #eef2f7;
 }
 
 .app-footer.quiz-taking-footer {
-  flex: 0 0 auto;
-  padding: 6px var(--page-padding);
   font-size: 0.8rem;
   line-height: 1;
+  padding: 8px var(--page-padding);
 }
 
 .public-header {
@@ -562,15 +558,31 @@ button {
 }
 
 .app-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 20;
+  width: 100%;
+  padding: 10px var(--page-padding);
+  background: #ffffff;
+  border-top: 1px solid #eef2f7;
+  color: #667287;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.app-footer-inner {
   width: 100%;
   max-width: var(--page-max-width);
-  margin: 20px auto 0;
-  padding: 8px 0 0;
-  color: #667287;
-  font-size: 0.95rem;
-  font-weight: 600;
+  margin: 0 auto;
   text-align: center;
 }
+
+.app-footer-copy {
+  color: #667287;
+}
+
 
 .section-title,
 .eyebrow {
@@ -871,7 +883,7 @@ button {
   }
 
   .app-footer {
-    padding: 8px 0 0;
+    padding: 10px var(--page-padding);
   }
 }
 

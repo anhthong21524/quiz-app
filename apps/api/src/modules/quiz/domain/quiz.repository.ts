@@ -18,6 +18,8 @@ export interface UpdateQuizData {
   difficulty?: Quiz["difficulty"];
   timeLimit?: number | null;
   status?: QuizStatus;
+  isPrivate?: boolean;
+  accessCode?: string;
   questions?: Quiz["questions"];
 }
 
@@ -27,6 +29,7 @@ export interface QuizRepository {
   findPublished(): Promise<Quiz[]>;
   findById(id: string): Promise<Quiz | null>;
   findBySlug(slug: string): Promise<Quiz | null>;
+  findByAccessCode(code: string): Promise<Quiz | null>;
   update(id: string, ownerId: string, data: UpdateQuizData): Promise<Quiz | null>;
   updateStatus(id: string, ownerId: string, status: QuizStatus): Promise<Quiz | null>;
   delete(id: string, ownerId: string): Promise<boolean>;

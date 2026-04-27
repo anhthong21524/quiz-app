@@ -20,6 +20,7 @@ const isLoading = ref(true);
 const isStarting = ref(false);
 
 const slug = computed(() => String(route.params.slug ?? ""));
+const accessCode = computed(() => String(route.query.accessCode ?? "").toUpperCase() || undefined);
 const timeLimitLabel = computed(() =>
   quiz.value?.timeLimit ? `${quiz.value.timeLimit} Minutes` : "Unlimited"
 );
@@ -29,7 +30,7 @@ async function loadQuiz() {
   pageError.value = "";
 
   try {
-    quiz.value = await getPublicQuizBySlug(slug.value);
+    quiz.value = await getPublicQuizBySlug(slug.value, accessCode.value);
     if (!quiz.value) {
       pageError.value = "We could not find this quiz. Please check the link and try again.";
       return;
@@ -71,7 +72,8 @@ async function startQuiz() {
   try {
     const attempt = await createQuizAttempt({
       quizId: quiz.value.id,
-      takerName: trimmedName
+      takerName: trimmedName,
+      accessCode: accessCode.value
     });
 
     attemptStore.setAttempt({
@@ -79,7 +81,8 @@ async function startQuiz() {
       quizId: quiz.value.id,
       quizSlug: quiz.value.slug,
       takerName: trimmedName,
-      startedAt: attempt.startedAt
+      startedAt: attempt.startedAt,
+      accessCode: accessCode.value
     });
 
     router.push({ name: "public-quiz-take", params: { slug: quiz.value.slug } });

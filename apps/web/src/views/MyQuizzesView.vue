@@ -290,7 +290,9 @@ function mapApiQuiz(quiz: Quiz): QuizListItem {
     status: mapQuizStatus(quiz.status),
     lastUpdated: quiz.updatedAt ?? quiz.createdAt ?? "",
     lastUpdatedLabel: formatLastUpdated(quiz.updatedAt ?? quiz.createdAt),
-    icon: getQuizIcon(subject)
+    icon: getQuizIcon(subject),
+    isPrivate: quiz.isPrivate ?? false,
+    accessCode: quiz.accessCode
   };
 }
 

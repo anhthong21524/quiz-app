@@ -1,5 +1,6 @@
-import { ConflictException, Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { ConflictException, ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { QuizStatus, type Quiz } from "@quiz-app/shared";
+import { randomBytes } from "node:crypto";
 import { CreateQuizDto } from "./dto/create-quiz.dto";
 import { UpdateQuizDto } from "./dto/update-quiz.dto";
 import { ATTEMPT_REPOSITORY, AttemptRepository } from "../domain/attempt.repository";
@@ -35,9 +36,21 @@ export class QuizService {
     return this.quizRepository.findPublished();
   }
 
-  async findBySlug(slug: string) {
+  async findBySlug(slug: string, accessCode?: string) {
     const quiz = await this.quizRepository.findBySlug(slug);
-    return this.requireQuiz(quiz, slug);
+    if (!quiz) throw new NotFoundException(`Quiz ${slug} was not found.`);
+    if (quiz.isPrivate) {
+      if (!accessCode || accessCode.toUpperCase() !== quiz.accessCode) {
+        throw new ForbiddenException("A valid access code is required for this quiz.");
+      }
+    }
+    return quiz;
+  }
+
+  async validateAccessCode(code: string): Promise<Quiz> {
+    const quiz = await this.quizRepository.findByAccessCode(code);
+    if (!quiz) throw new NotFoundException("No published private quiz found with that code.");
+    return quiz;
   }
 
   async findById(id: string) {
@@ -64,8 +77,19 @@ export class QuizService {
       }
     }
 
-    const quiz = await this.quizRepository.update(id, user.id, payload);
+    const updateData = { ...payload } as typeof payload & { accessCode?: string };
+    if (payload.isPrivate && !existing?.accessCode) {
+      updateData.accessCode = this.generateAccessCode();
+    } else if (payload.isPrivate === false) {
+      updateData.accessCode = undefined;
+    }
+
+    const quiz = await this.quizRepository.update(id, user.id, updateData);
     return this.requireQuiz(quiz, id);
+  }
+
+  private generateAccessCode(): string {
+    return randomBytes(3).toString("hex").toUpperCase();
   }
 
   async publish(id: string, user: AuthenticatedUser) {

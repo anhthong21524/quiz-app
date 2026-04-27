@@ -11,13 +11,17 @@ export interface PublicQuizInfo {
   questionCount: number;
   timeLimit: number | null;
   questionType: string;
+  difficulty?: string;
+  subject?: string;
   isPublished: boolean;
+  isPrivate?: boolean;
   questions: PublicQuizQuestion[];
 }
 
 export interface CreateQuizAttemptPayload {
   quizId: string;
   takerName: string;
+  accessCode?: string;
 }
 
 export interface QuizAttemptResponse {
@@ -37,8 +41,12 @@ interface PublicQuizApiResponse {
   questions?: Quiz["questions"];
   timeLimit?: number | null;
   questionType?: string;
+  difficulty?: string;
+  subject?: string;
   status?: QuizStatus | string;
   isPublished?: boolean;
+  isPrivate?: boolean;
+  accessCode?: string;
 }
 
 interface QuizAttemptApiResponse {
@@ -80,7 +88,10 @@ function normalizeQuiz(data: PublicQuizApiResponse, fallbackSlug: string): Publi
     questionCount,
     timeLimit: data.timeLimit ?? null,
     questionType: data.questionType ?? "Multiple Choice",
+    difficulty: data.difficulty,
+    subject: data.subject,
     isPublished,
+    isPrivate: data.isPrivate ?? false,
     questions: data.questions ?? []
   };
 }
@@ -96,9 +107,10 @@ export async function getPublicQuizzes(): Promise<PublicQuizInfo[]> {
     .filter((quiz) => quiz.isPublished);
 }
 
-export async function getPublicQuizBySlug(slug: string): Promise<PublicQuizInfo | null> {
+export async function getPublicQuizBySlug(slug: string, accessCode?: string): Promise<PublicQuizInfo | null> {
+  const params = accessCode ? `?accessCode=${encodeURIComponent(accessCode)}` : "";
   try {
-    const response = await httpClient.get<unknown>(`/quizzes/slug/${slug}`);
+    const response = await httpClient.get<unknown>(`/quizzes/slug/${slug}${params}`);
     if (!isPublicQuizApiResponse(response.data)) {
       throw new Error("Public quiz endpoint returned an incompatible response.");
     }
@@ -118,6 +130,33 @@ export async function getPublicQuizBySlug(slug: string): Promise<PublicQuizInfo 
   } catch {
     return null;
   }
+}
+
+export interface PrivateQuizInfo {
+  id: string;
+  slug: string;
+  title: string;
+  description: string;
+  questionCount: number;
+  timeLimit: number | null;
+  difficulty?: string;
+  subject?: string;
+}
+
+export async function validatePrivateQuizCode(code: string): Promise<PrivateQuizInfo> {
+  const response = await httpClient.post<PublicQuizApiResponse>("/quizzes/access-code", { code: code.toUpperCase() });
+  const data = response.data;
+  const id = data.id ?? data._id ?? "";
+  return {
+    id,
+    slug: data.slug ?? id,
+    title: data.title,
+    description: data.description ?? "",
+    questionCount: data.questionCount ?? data.questions?.length ?? 0,
+    timeLimit: data.timeLimit ?? null,
+    difficulty: data.difficulty,
+    subject: data.subject
+  };
 }
 
 export interface SubmitAttemptPayload {
@@ -158,9 +197,11 @@ export async function createQuizAttempt(
   payload: CreateQuizAttemptPayload
 ): Promise<QuizAttemptResponse> {
   try {
+    const body: Record<string, string> = { takerName: payload.takerName };
+    if (payload.accessCode) body.accessCode = payload.accessCode;
     const response = await httpClient.post<QuizAttemptApiResponse>(
       `/quizzes/${payload.quizId}/attempts`,
-      { takerName: payload.takerName }
+      body
     );
     const data = response.data;
 

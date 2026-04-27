@@ -71,6 +71,17 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
             <div class="quiz-title-cell">
               <QuizIconAvatar :icon="quiz.icon" />
               <span>{{ quiz.title }}</span>
+              <span
+                v-if="quiz.isPrivate"
+                class="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700"
+                title="Private quiz — requires access code"
+              >
+                <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                  <rect x="3" y="11" width="18" height="11" rx="2" stroke-linejoin="round" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-linecap="round" />
+                </svg>
+                Private
+              </span>
             </div>
           </td>
           <td>{{ quiz.subject }}</td>

@@ -20,6 +20,8 @@ export function normalizeQuiz(document: {
   difficulty?: Quiz["difficulty"];
   timeLimit?: number | null;
   status: Quiz["status"];
+  isPrivate?: boolean;
+  accessCode?: string;
   questions: Quiz["questions"];
   createdAt?: Date | string;
   updatedAt?: Date | string;
@@ -39,6 +41,8 @@ export function normalizeQuiz(document: {
     difficulty: document.difficulty,
     timeLimit: document.timeLimit ?? null,
     status: document.status,
+    isPrivate: document.isPrivate ?? false,
+    accessCode: document.accessCode,
     questions: document.questions,
     createdAt: document.createdAt
       ? new Date(document.createdAt).toISOString()

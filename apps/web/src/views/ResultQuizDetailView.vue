@@ -29,7 +29,7 @@ const activeTab = ref<"submissions" | "submission-detail">("submissions");
 const isLoading = ref(false);
 const quizDetail = ref<MockQuizResultDetail | null>(null);
 
-const pageSize = 10;
+const pageSize = 6;
 const scoreOptions = ["All scores", "80% and above", "70% - 79%", "Below 70%"];
 const dateOptions = ["All time", "Today", "Last 7 days"];
 const tabs = [

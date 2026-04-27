@@ -13,9 +13,11 @@ const usePublicLayout = computed(() =>
   route.name === "about" ||
   route.name === "login" ||
   route.name === "public-quiz" ||
-  route.name === "public-quiz-take"
+  route.name === "public-quiz-take" ||
+  route.name === "private-quiz-entry"
 );
 const useQuizTakingLayout = computed(() => route.name === "public-quiz-take");
+const currentYear = new Date().getFullYear();
 </script>
 
 <template>
@@ -42,7 +44,9 @@ const useQuizTakingLayout = computed(() => route.name === "public-quiz-take");
       class="app-footer"
       :class="{ 'public-footer': usePublicLayout, 'quiz-taking-footer': useQuizTakingLayout }"
     >
-      <span>&copy; 2026 Quiz App</span>
+      <div class="app-footer-inner">
+        <span class="app-footer-copy">&copy; {{ currentYear }} Quiz App &mdash; Learn. Challenge. Grow.</span>
+      </div>
     </footer>
   </div>
 </template>

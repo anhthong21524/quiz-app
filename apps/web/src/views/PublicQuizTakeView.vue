@@ -23,6 +23,7 @@ const currentQuestionIndex = ref(0);
 const isLoading = ref(true);
 const pageError = ref("");
 const isSubmitted = ref(false);
+const isReviewMode = ref(false);
 const submittedAt = ref<number | null>(null);
 const score = ref<number | null>(null);
 const totalQuestionsAtSubmit = ref<number | null>(null);
@@ -43,32 +44,47 @@ const hasActiveAttempt = computed(
 const questions = computed(() => quiz.value?.questions ?? []);
 const totalQuestions = computed(() => questions.value.length);
 const currentQuestion = computed(() => questions.value[currentQuestionIndex.value] ?? null);
+const currentQuestionExplanation = computed(() => currentQuestion.value?.explanation?.trim() ?? "");
 const currentQuestionId = computed(() => getQuestionKey(currentQuestion.value, currentQuestionIndex.value));
 const selectedOptionIndex = computed(() => answers.value[currentQuestionId.value]);
 const answeredCount = computed(() =>
   questions.value.filter((question, index) => answers.value[getQuestionKey(question, index)] !== undefined).length
 );
 const unansweredCount = computed(() => Math.max(totalQuestions.value - answeredCount.value, 0));
+const reviewStatuses = computed<Record<string, CreateQuizQuestion["reviewStatus"]>>(() => {
+  if (!isReviewMode.value) return {};
+
+  return questions.value.reduce<Record<string, CreateQuizQuestion["reviewStatus"]>>((statuses, question, index) => {
+    const questionKey = getQuestionKey(question, index);
+    statuses[questionKey] = answers.value[questionKey] === question.correctOptionIndex ? "correct" : "incorrect";
+    return statuses;
+  }, {});
+});
 const navigatorQuestions = computed<CreateQuizQuestion[]>(() =>
-  questions.value.map((question, index) => ({
-    id: getQuestionKey(question, index),
-    questionText: question.prompt,
-    options: question.options.map((option, optionIndex) => ({
-      id: `${getQuestionKey(question, index)}-option-${optionIndex}`,
-      label: optionLabel(optionIndex),
-      text: option,
-      isCorrect: optionIndex === question.correctOptionIndex
-    })),
-    multipleCorrect: false,
-    explanation: "",
-    status: answers.value[getQuestionKey(question, index)] !== undefined ? "completed" : "empty"
-  }))
+  questions.value.map((question, index) => {
+    const questionKey = getQuestionKey(question, index);
+    const selectedIndex = answers.value[questionKey];
+
+    return {
+      id: questionKey,
+      questionText: question.prompt,
+      options: question.options.map((option, optionIndex) => ({
+        id: `${questionKey}-option-${optionIndex}`,
+        label: optionLabel(optionIndex),
+        text: option,
+        isCorrect: optionIndex === question.correctOptionIndex
+      })),
+      multipleCorrect: false,
+      explanation: question.explanation ?? "",
+      status: selectedIndex !== undefined ? "completed" : "empty",
+      reviewStatus: reviewStatuses.value[questionKey]
+    };
+  })
 );
 const answerProgressPercent = computed(() => {
   if (!totalQuestions.value) return 0;
   return Math.round((answeredCount.value / totalQuestions.value) * 100);
 });
-const answerProgressWidth = computed(() => `${answerProgressPercent.value}%`);
 const showQuestionNavigator = computed(() => totalQuestions.value > 1);
 const canSubmitQuiz = computed(() => unansweredCount.value === 0);
 const storageKey = computed(() =>
@@ -91,7 +107,7 @@ const isTimerWarning = computed(() =>
   remainingSeconds.value !== null && remainingSeconds.value <= 60
 );
 const shouldConfirmNavigation = computed(() =>
-  Boolean(quiz.value) && !pageError.value && !isLoading.value && !isSubmitted.value
+  Boolean(quiz.value) && !pageError.value && !isLoading.value && !isSubmitted.value && !isReviewMode.value
 );
 const timeTakenLabel = computed(() => {
   if (!attempt.value?.startedAt) return "-";
@@ -102,13 +118,138 @@ const timeTakenLabel = computed(() => {
   const seconds = elapsedSeconds % 60;
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
 });
+const submittedTotalQuestions = computed(() => totalQuestionsAtSubmit.value ?? totalQuestions.value);
+const scorePercent = computed(() => {
+  if (score.value === null || submittedTotalQuestions.value === 0) return null;
+  return Math.round((score.value / submittedTotalQuestions.value) * 100);
+});
+const reviewProgressPercent = computed(() => {
+  if (!totalQuestions.value) return 0;
+  return Math.round(((currentQuestionIndex.value + 1) / totalQuestions.value) * 100);
+});
+const activeProgressPercent = computed(() =>
+  isReviewMode.value ? reviewProgressPercent.value : answerProgressPercent.value
+);
+const activeProgressWidth = computed(() => `${activeProgressPercent.value}%`);
+const resultTone = computed(() => {
+  if (scorePercent.value === null) {
+    return {
+      label: "Submission saved",
+      title: "Submission recorded",
+      message: "Your answers have been saved. Results will be available soon.",
+      panelClass: "border-slate-200 bg-slate-50/80",
+      iconClass: "bg-slate-100 text-slate-600",
+      textClass: "text-slate-700",
+      scoreClass: "text-slate-700",
+      badgeClass: "bg-slate-100 text-slate-700"
+    };
+  }
 
+  if (scorePercent.value >= 80) {
+    return {
+      label: "Excellent",
+      title: "Excellent work!",
+      message: "Review the details to reinforce what you know.",
+      panelClass: "border-emerald-200 bg-emerald-50/80",
+      iconClass: "bg-emerald-100 text-emerald-600",
+      textClass: "text-emerald-800",
+      scoreClass: "text-emerald-600",
+      badgeClass: "bg-emerald-100 text-emerald-700"
+    };
+  }
+
+  if (scorePercent.value >= 60) {
+    return {
+      label: "Good progress",
+      title: "Good progress",
+      message: "Review the missed answers below to sharpen the remaining gaps.",
+      panelClass: "border-sky-200 bg-sky-50/80",
+      iconClass: "bg-sky-100 text-sky-600",
+      textClass: "text-sky-800",
+      scoreClass: "text-sky-600",
+      badgeClass: "bg-sky-100 text-sky-700"
+    };
+  }
+
+  return {
+    label: "Needs review",
+    title: "",
+    message: "Review missed answers, then retake when you are ready.",
+    panelClass: "border-amber-200 bg-amber-50/80",
+    iconClass: "bg-amber-100 text-amber-600",
+    textClass: "text-amber-800",
+    scoreClass: "text-amber-600",
+    badgeClass: "bg-amber-100 text-amber-700"
+  };
+});
 function getQuestionKey(question: PublicQuizQuestion | null, index: number) {
   return question?.id ?? `question-${index}`;
 }
 
 function optionLabel(index: number) {
   return String.fromCharCode(65 + index);
+}
+
+function isOptionSelected(optionIndex: number) {
+  return selectedOptionIndex.value === optionIndex;
+}
+
+function isCorrectOption(optionIndex: number) {
+  return currentQuestion.value?.correctOptionIndex === optionIndex;
+}
+
+function getOptionButtonClasses(optionIndex: number) {
+  if (isReviewMode.value) {
+    if (isCorrectOption(optionIndex)) {
+      return "border-emerald-500 bg-emerald-50 text-slate-950 shadow-[0_0_0_1px_rgba(5,150,105,0.28)]";
+    }
+
+    if (isOptionSelected(optionIndex)) {
+      return "border-rose-400 bg-rose-50 text-slate-950 shadow-[0_0_0_1px_rgba(244,63,94,0.22)]";
+    }
+
+    return "border-gray-200 bg-white text-slate-500";
+  }
+
+  return isOptionSelected(optionIndex)
+    ? "border-emerald-500 bg-emerald-50 text-slate-950 shadow-[0_0_0_1px_rgba(5,150,105,0.35)]"
+    : "border-gray-200 bg-white text-slate-800 hover:border-emerald-200 hover:bg-emerald-50/50";
+}
+
+function getOptionLetterClasses(optionIndex: number) {
+  if (isReviewMode.value) {
+    if (isCorrectOption(optionIndex)) {
+      return "border-emerald-600 bg-emerald-600 text-white";
+    }
+
+    if (isOptionSelected(optionIndex)) {
+      return "border-rose-500 bg-rose-500 text-white";
+    }
+
+    return "border-slate-300 bg-white text-slate-500";
+  }
+
+  return isOptionSelected(optionIndex)
+    ? "border-emerald-600 bg-emerald-600 text-white"
+    : "border-emerald-500 bg-white text-gray-700";
+}
+
+function getReviewOptionLabel(optionIndex: number) {
+  if (!isReviewMode.value) return "";
+
+  if (isCorrectOption(optionIndex) && isOptionSelected(optionIndex)) {
+    return "Your correct answer";
+  }
+
+  if (isCorrectOption(optionIndex)) {
+    return "Correct answer";
+  }
+
+  if (isOptionSelected(optionIndex)) {
+    return "Your answer";
+  }
+
+  return "";
 }
 
 function loadSavedAnswers() {
@@ -126,7 +267,7 @@ function saveAnswers() {
 }
 
 function selectAnswer(optionIndex: number) {
-  if (!currentQuestion.value || isSubmitted.value) return;
+  if (!currentQuestion.value || isSubmitted.value || isReviewMode.value) return;
   answers.value = { ...answers.value, [currentQuestionId.value]: optionIndex };
 
   if (autoAdvanceTimer) window.clearTimeout(autoAdvanceTimer);
@@ -145,9 +286,10 @@ function goToPreviousQuestion() { goToQuestion(currentQuestionIndex.value - 1); 
 function goToNextQuestion() { goToQuestion(currentQuestionIndex.value + 1); }
 
 async function submitQuiz(options: { force?: boolean } = {}) {
-  if (isSubmitted.value || (!options.force && !canSubmitQuiz.value)) return;
+  if (isSubmitted.value || isReviewMode.value || (!options.force && !canSubmitQuiz.value)) return;
 
   isSubmitted.value = true;
+  isReviewMode.value = false;
   submittedAt.value = Date.now();
   saveAnswers();
 
@@ -174,16 +316,31 @@ function exitQuiz() {
 
 function restartQuiz() {
   if (storageKey.value) window.localStorage.removeItem(storageKey.value);
+  attemptStore.clearAttempt();
+  allowQuizNavigation.value = true;
   answers.value = {};
   currentQuestionIndex.value = 0;
   isSubmitted.value = false;
+  isReviewMode.value = false;
   submittedAt.value = null;
   score.value = null;
   totalQuestionsAtSubmit.value = null;
+  router.push({ name: "public-quiz", params: { slug: slug.value } });
 }
 
 function goToPublicQuizzes() {
   router.push({ name: "public-quizzes" });
+}
+
+function reviewAnswers() {
+  currentQuestionIndex.value = 0;
+  isSubmitted.value = false;
+  isReviewMode.value = true;
+}
+
+function returnToResults() {
+  isReviewMode.value = false;
+  isSubmitted.value = true;
 }
 
 function handleBeforeUnload(event: BeforeUnloadEvent) {
@@ -198,7 +355,7 @@ function cancelLeaveQuiz() {
 }
 
 function requestClearAnswers() {
-  if (answeredCount.value === 0 || isSubmitted.value) return;
+  if (answeredCount.value === 0 || isSubmitted.value || isReviewMode.value) return;
   showClearAnswersModal.value = true;
 }
 
@@ -224,7 +381,7 @@ async function loadQuiz() {
   isLoading.value = true;
   pageError.value = "";
   try {
-    quiz.value = await getPublicQuizBySlug(slug.value);
+    quiz.value = await getPublicQuizBySlug(slug.value, attempt.value?.accessCode);
     if (!quiz.value) {
       pageError.value = "We could not find this quiz. Please check the link and try again.";
       return;
@@ -251,7 +408,7 @@ async function loadQuiz() {
 
 watch(answers, saveAnswers, { deep: true });
 watch(remainingSeconds, (seconds) => {
-  if (seconds === 0 && !isSubmitted.value) submitQuiz({ force: true });
+  if (seconds === 0 && !isSubmitted.value && !isReviewMode.value) submitQuiz({ force: true });
 });
 
 onBeforeRouteLeave((to) => {
@@ -277,7 +434,9 @@ onBeforeUnmount(() => {
 
 <template>
   <section class="h-full overflow-hidden bg-[#fffdfa] text-slate-950">
-    <div class="mx-auto grid h-full w-full max-w-[1180px] grid-rows-[auto_auto_minmax(0,1fr)] gap-3 px-4 py-3 sm:px-6 lg:px-8">
+    <div
+      class="mx-auto grid h-full w-full max-w-[1180px] grid-rows-[auto_auto_minmax(0,1fr)] gap-3 px-4 py-3 sm:px-6 lg:px-8"
+    >
       <header
         v-if="quiz && !pageError && !isLoading && !isSubmitted"
         class="flex min-h-16 flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 shadow-lg shadow-slate-900/8 sm:px-5"
@@ -285,16 +444,17 @@ onBeforeUnmount(() => {
         <div class="min-w-0">
           <p class="truncate text-lg font-extrabold text-slate-900">{{ quiz.title }}</p>
           <p class="mt-1 text-sm font-semibold text-slate-500">
-            {{ totalQuestions || quiz.questionCount }} questions
+            {{ isReviewMode ? "Review mode" : `${totalQuestions || quiz.questionCount} questions` }}
           </p>
         </div>
 
         <div class="flex flex-wrap items-center gap-4">
           <div
             class="flex items-center gap-2 rounded-xl px-3 py-1.5"
-            :class="remainingSeconds === null ? 'bg-slate-50 text-slate-600' : 'bg-white'"
+            :class="isReviewMode || remainingSeconds === null ? 'bg-slate-50 text-slate-600' : 'bg-white'"
           >
             <svg
+              v-if="!isReviewMode"
               class="h-8 w-8 shrink-0 text-slate-400"
               viewBox="0 0 24 24"
               fill="none"
@@ -307,16 +467,18 @@ onBeforeUnmount(() => {
             </svg>
             <div>
               <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                {{ remainingSeconds === null ? "Time limit" : "Time remaining" }}
+                {{ isReviewMode ? "Score" : remainingSeconds === null ? "Time limit" : "Time remaining" }}
               </p>
               <p
                 class="tabular-nums leading-tight transition-colors"
                 :class="[
-                  remainingSeconds === null ? 'text-sm font-extrabold text-slate-700' : 'text-lg font-extrabold',
-                  isTimerWarning ? 'text-red-600' : 'text-emerald-600'
+                  isReviewMode || remainingSeconds === null ? 'text-sm font-extrabold text-slate-700' : 'text-lg font-extrabold',
+                  !isReviewMode && isTimerWarning ? 'text-red-600' : 'text-emerald-600'
                 ]"
               >
-                {{ remainingSeconds === null ? "No time limit" : timeRemainingLabel }}
+                {{ isReviewMode
+                  ? `${score !== null ? score : "-"} / ${submittedTotalQuestions}`
+                  : remainingSeconds === null ? "No time limit" : timeRemainingLabel }}
               </p>
             </div>
           </div>
@@ -324,13 +486,13 @@ onBeforeUnmount(() => {
           <button
             class="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-extrabold text-slate-800 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
             type="button"
-            @click="exitQuiz"
+            @click="isReviewMode ? returnToResults() : exitQuiz()"
           >
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
               <path d="M15 17l5-5-5-5M20 12H9" stroke-linecap="round" stroke-linejoin="round" />
               <path d="M11 19H5V5h6" stroke-linecap="round" />
             </svg>
-            Exit quiz
+            {{ isReviewMode ? "Back to results" : "Exit quiz" }}
           </button>
         </div>
       </header>
@@ -379,96 +541,135 @@ onBeforeUnmount(() => {
         <!-- Results -->
         <section
           v-else-if="quiz && isSubmitted"
-          class="rounded-3xl border border-slate-200/80 bg-[#fffdfa]/90 px-4 py-10 text-center shadow-xl shadow-slate-900/5 sm:px-8 lg:px-12"
+          class="overflow-hidden rounded-3xl border border-slate-200/80 bg-[#fffdfa]/90 px-4 py-3 text-center shadow-xl shadow-slate-900/5 sm:px-8 sm:py-3 lg:px-12"
         >
           <div class="mx-auto grid max-w-3xl justify-items-center">
             <div
-              class="relative grid h-24 w-24 place-items-center rounded-full bg-emerald-100 text-emerald-600 shadow-[0_0_0_18px_rgba(209,250,229,0.55)]"
+              class="relative grid h-14 w-14 place-items-center rounded-full bg-emerald-100 text-emerald-600 shadow-[0_0_0_9px_rgba(209,250,229,0.55)] sm:h-16 sm:w-16 sm:shadow-[0_0_0_11px_rgba(209,250,229,0.55)]"
               aria-hidden="true"
             >
-              <svg class="h-11 w-11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <svg class="h-8 w-8 sm:h-9 sm:w-9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="m5 13 4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
             </div>
-            <h1 class="mt-8 text-4xl font-extrabold tracking-normal text-slate-950 sm:text-5xl">
+            <h1 class="mt-4 text-4xl font-extrabold tracking-normal text-slate-950 sm:text-[2.65rem]">
               Quiz submitted!
             </h1>
-            <p class="mt-5 max-w-md text-base font-semibold leading-7 text-slate-500">
-              Great job<span v-if="attempt?.takerName">, {{ attempt.takerName }}</span>! Your answers have been submitted successfully.
+            <p class="mt-3 max-w-full whitespace-nowrap text-base font-semibold leading-6 text-slate-500 max-sm:whitespace-normal">
+              {{ attempt?.takerName ? `${attempt.takerName}, your` : "Your" }} answers have been submitted successfully.
             </p>
 
             <section
-              class="mt-8 w-full rounded-2xl border border-slate-200 bg-white p-6 text-left shadow-xl shadow-slate-900/10 sm:p-8"
+              class="mt-5 w-full rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-xl shadow-slate-900/10 sm:p-5"
               aria-labelledby="submission-summary-title"
             >
-              <h2 id="submission-summary-title" class="text-xl font-extrabold text-slate-900">Summary</h2>
-              <div class="mt-7 grid gap-6 sm:grid-cols-3 sm:divide-x sm:divide-slate-200">
-                <div class="grid justify-items-center gap-3 px-2 text-center">
-                  <span class="grid h-16 w-16 place-items-center rounded-full bg-emerald-50 text-emerald-600">
-                    <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <h2 id="submission-summary-title" class="text-xl font-extrabold text-slate-900">Summary</h2>
+                <span
+                  class="inline-flex min-h-8 items-center rounded-full px-3 text-sm font-extrabold"
+                  :class="resultTone.badgeClass"
+                >
+                  {{ resultTone.label }}
+                </span>
+              </div>
+              <div class="mt-4 grid gap-4 sm:grid-cols-[1fr_1fr_1.25fr] sm:divide-x sm:divide-slate-200">
+                <div class="grid justify-items-center gap-2 px-2 text-center">
+                  <span class="grid h-12 w-12 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <path d="M8 6h13M8 12h13M8 18h13" stroke-linecap="round" />
                       <path d="M3 6h.01M3 12h.01M3 18h.01" stroke-linecap="round" stroke-width="3" />
                     </svg>
                   </span>
-                  <p class="text-3xl font-extrabold text-emerald-600">{{ totalQuestions }}</p>
+                  <p class="text-3xl font-extrabold leading-none text-emerald-600">{{ totalQuestions }}</p>
                   <p class="-mt-2 text-sm font-semibold text-slate-500">Questions</p>
                 </div>
 
-                <div class="grid justify-items-center gap-3 px-2 text-center">
-                  <span class="grid h-16 w-16 place-items-center rounded-full bg-emerald-50 text-emerald-600">
-                    <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <div class="grid justify-items-center gap-2 px-2 text-center">
+                  <span class="grid h-12 w-12 place-items-center rounded-full bg-sky-50 text-sky-600">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <circle cx="12" cy="12" r="8" />
                       <path d="M12 7v5l4 2" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                   </span>
-                  <p class="text-3xl font-extrabold text-emerald-600 tabular-nums">{{ timeTakenLabel }}</p>
+                  <p class="text-3xl font-extrabold leading-none text-sky-600 tabular-nums">{{ timeTakenLabel }}</p>
                   <p class="-mt-2 text-sm font-semibold text-slate-500">Time taken</p>
                 </div>
 
-                <div class="grid justify-items-center gap-3 px-2 text-center">
-                  <span class="grid h-16 w-16 place-items-center rounded-full bg-emerald-50 text-emerald-600">
-                    <svg class="h-8 w-8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <div class="grid justify-items-center gap-2 px-2 text-center">
+                  <span class="grid h-12 w-12 place-items-center rounded-full" :class="resultTone.iconClass">
+                    <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <circle cx="12" cy="12" r="8" />
                       <circle cx="12" cy="12" r="3" />
                       <path d="m15 9 4-4M19 5v4M19 5h-4" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                   </span>
-                  <p class="text-3xl font-extrabold text-emerald-600">
+                  <p class="text-4xl font-extrabold leading-none tabular-nums" :class="resultTone.scoreClass">
                     {{ score !== null && totalQuestionsAtSubmit !== null ? `${score}/${totalQuestionsAtSubmit}` : '-' }}
                   </p>
-                  <p class="-mt-2 text-sm font-semibold text-slate-500">Score</p>
+                  <p class="-mt-2 text-sm font-semibold text-slate-500">
+                    Score<span v-if="scorePercent !== null"> - {{ scorePercent }}%</span>
+                  </p>
                 </div>
               </div>
             </section>
 
-            <section class="mt-7 grid w-full grid-cols-[3.5rem_1fr] items-center gap-4 rounded-2xl border border-emerald-200 bg-emerald-50/70 p-5 text-left sm:p-6">
-              <span class="grid h-14 w-14 place-items-center rounded-full bg-emerald-100 text-emerald-600" aria-hidden="true">
-                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
+            <section
+              class="mt-4 grid w-full grid-cols-[2.75rem_1fr] items-center gap-3 rounded-2xl border p-3 text-left sm:p-4"
+              :class="resultTone.panelClass"
+            >
+              <span class="grid h-11 w-11 place-items-center rounded-full" :class="resultTone.iconClass" aria-hidden="true">
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M12 3 5 5.8v5.6c0 4.2 2.8 7.9 7 9.6 4.2-1.7 7-5.4 7-9.6V5.8L12 3Zm3.5 7.8-4.1 4.1a1 1 0 0 1-1.4 0l-1.8-1.8 1.4-1.4 1.1 1.1 3.4-3.4 1.4 1.4Z" />
                 </svg>
               </span>
               <div>
-                <h2 class="text-base font-extrabold text-slate-900">
-                  {{ score !== null ? 'Your results are in!' : 'Submission recorded' }}
+                <h2 v-if="resultTone.title" class="text-base font-extrabold text-slate-900">
+                  {{ resultTone.title }}
                 </h2>
-                <p class="mt-1 text-sm font-semibold leading-6 text-slate-500">
-                  {{ score !== null
-                    ? `You answered ${score} out of ${totalQuestionsAtSubmit} questions correctly.`
-                    : 'Your answers have been saved. Results will be available soon.' }}
+                <p class="text-sm font-semibold leading-5" :class="resultTone.textClass">
+                  <span v-if="score !== null">
+                    You answered {{ score }} out of {{ submittedTotalQuestions }} questions correctly. {{ resultTone.message }}
+                  </span>
+                  <span v-else>{{ resultTone.message }}</span>
                 </p>
               </div>
             </section>
 
-            <button
-              class="mt-10 inline-flex min-h-14 w-full max-w-md items-center justify-center gap-3 rounded-xl bg-emerald-600 px-8 text-base font-extrabold text-white shadow-lg shadow-emerald-600/25 transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
-              type="button"
-              @click="goToPublicQuizzes"
-            >
-              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" stroke-linejoin="round" />
-              </svg>
-              Back to quizzes
-            </button>
+            <div class="mt-4 grid w-full gap-3 sm:grid-cols-3">
+              <button
+                class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-base font-extrabold text-white shadow-lg shadow-emerald-600/25 transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
+                type="button"
+                @click="reviewAnswers"
+              >
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M9 11l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" />
+                  <path d="M7 4h10a2 2 0 0 1 2 2v14l-4-2-3 2-3-2-4 2V6a2 2 0 0 1 2-2Z" stroke-linejoin="round" />
+                </svg>
+                Review answers
+              </button>
+
+              <button
+                class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-base font-extrabold text-slate-800 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                type="button"
+                @click="restartQuiz"
+              >
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v6h6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+                Retake quiz
+              </button>
+
+              <button
+                class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-base font-extrabold text-slate-800 shadow-sm transition hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-400"
+                type="button"
+                @click="goToPublicQuizzes"
+              >
+                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" stroke-linejoin="round" />
+                </svg>
+                Back to quizzes
+              </button>
+            </div>
           </div>
         </section>
 
@@ -477,20 +678,26 @@ onBeforeUnmount(() => {
           <!-- Progress bar -->
           <div class="grid gap-2">
             <div class="flex items-center justify-between gap-4 text-xs font-bold text-slate-600 sm:text-sm">
-              <span>Question {{ currentQuestionIndex + 1 }} of {{ totalQuestions }}</span>
-              <span>{{ answeredCount }} of {{ totalQuestions }} answered</span>
+              <span>{{ isReviewMode ? "Reviewing" : "Question" }} {{ currentQuestionIndex + 1 }} of {{ totalQuestions }}</span>
+              <span>
+                {{ isReviewMode
+                  ? `${score !== null ? score : "-"} of ${submittedTotalQuestions} correct`
+                  : `${answeredCount} of ${totalQuestions} answered` }}
+              </span>
             </div>
             <div
               class="h-2 overflow-hidden rounded-full bg-slate-200"
               role="progressbar"
-              :aria-valuenow="answerProgressPercent"
+              :aria-valuenow="activeProgressPercent"
               aria-valuemin="0"
               aria-valuemax="100"
-              :aria-label="`${answeredCount} of ${totalQuestions} questions answered`"
+              :aria-label="isReviewMode
+                ? `Reviewing question ${currentQuestionIndex + 1} of ${totalQuestions}`
+                : `${answeredCount} of ${totalQuestions} questions answered`"
             >
               <div
                 class="h-full rounded-full bg-emerald-600 transition-all duration-300"
-                :style="{ width: answerProgressWidth }"
+                :style="{ width: activeProgressWidth }"
               ></div>
             </div>
           </div>
@@ -504,12 +711,14 @@ onBeforeUnmount(() => {
             <!-- Question card -->
             <article class="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/80 bg-white p-4 shadow-lg shadow-slate-900/8 sm:p-5 lg:p-6">
               <p class="text-sm font-extrabold uppercase tracking-widest text-emerald-600">
-                Question {{ currentQuestionIndex + 1 }}
+                {{ isReviewMode ? "Review question" : "Question" }} {{ currentQuestionIndex + 1 }}
               </p>
               <h2 class="mt-3 text-2xl font-extrabold leading-snug tracking-normal text-slate-900">
                 {{ currentQuestion.prompt }}
               </h2>
-              <p class="mt-2 text-sm text-slate-500 sm:text-base">Choose the correct answer.</p>
+              <p class="mt-2 text-sm text-slate-500 sm:text-base">
+                {{ isReviewMode ? "Compare your answer with the correct answer." : "Choose the correct answer." }}
+              </p>
 
               <!-- Answer options -->
               <div
@@ -520,36 +729,62 @@ onBeforeUnmount(() => {
                 <button
                   v-for="(option, optionIndex) in currentQuestion.options"
                   :key="`${currentQuestionId}-${optionIndex}`"
-                  class="grid min-h-14 w-full grid-cols-[2.25rem_1fr] items-center gap-3 rounded-xl border px-4 text-left transition focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100"
-                  :class="
-                    selectedOptionIndex === optionIndex
-                      ? 'border-emerald-500 bg-emerald-50 text-slate-950 shadow-[0_0_0_1px_rgba(5,150,105,0.35)]'
-                      : 'border-gray-200 bg-white text-slate-800 hover:border-emerald-200 hover:bg-emerald-50/50'
-                  "
+                  class="grid min-h-14 w-full items-center gap-3 rounded-xl border px-4 text-left transition focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100 disabled:cursor-default"
+                  :class="[
+                    isReviewMode ? 'grid-cols-[2.25rem_minmax(0,1fr)_auto]' : 'grid-cols-[2.25rem_1fr]',
+                    getOptionButtonClasses(optionIndex)
+                  ]"
                   type="button"
                   role="radio"
+                  :disabled="isReviewMode"
                   :aria-checked="selectedOptionIndex === optionIndex"
                   :aria-label="`Option ${optionLabel(optionIndex)}: ${option}`"
                   @click="selectAnswer(optionIndex)"
                 >
                   <span
                     class="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border text-sm font-semibold transition"
-                    :class="
-                      selectedOptionIndex === optionIndex
-                        ? 'border-emerald-600 bg-emerald-600 text-white'
-                        : 'border-emerald-500 bg-white text-gray-700'
-                    "
+                    :class="getOptionLetterClasses(optionIndex)"
                     aria-hidden="true"
                   >
                     {{ optionLabel(optionIndex) }}
                   </span>
                   <span class="text-base font-semibold">{{ option }}</span>
+                  <span
+                    v-if="getReviewOptionLabel(optionIndex)"
+                    class="rounded-full px-3 py-1 text-xs font-extrabold"
+                    :class="isCorrectOption(optionIndex) ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700'"
+                  >
+                    {{ getReviewOptionLabel(optionIndex) }}
+                  </span>
                 </button>
               </div>
+
+              <section
+                v-if="isReviewMode && currentQuestionExplanation"
+                class="mt-4 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 text-left"
+                aria-label="Answer explanation"
+              >
+                <div class="flex items-start gap-3">
+                  <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-sky-100 text-sky-700" aria-hidden="true">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                      <path d="M12 17v-5" stroke-linecap="round" />
+                      <path d="M12 8h.01" stroke-linecap="round" stroke-width="3" />
+                      <circle cx="12" cy="12" r="9" />
+                    </svg>
+                  </span>
+                  <div class="min-w-0">
+                    <h3 class="text-sm font-extrabold text-slate-900">Explanation</h3>
+                    <p class="mt-1 text-sm font-semibold leading-6 text-slate-600">
+                      {{ currentQuestionExplanation }}
+                    </p>
+                  </div>
+                </div>
+              </section>
 
               <!-- Navigation buttons -->
               <div class="mt-4 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 border-t border-slate-100 pt-4">
                 <button
+                  v-if="!isReviewMode"
                   class="inline-flex min-h-12 items-center justify-self-start gap-2 rounded-xl border border-slate-200 bg-white px-5 text-base font-extrabold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:text-slate-400 disabled:opacity-60 disabled:hover:border-slate-200 disabled:hover:bg-white"
                   type="button"
                   :disabled="answeredCount === 0"
@@ -561,6 +796,7 @@ onBeforeUnmount(() => {
                   </svg>
                   Clear answers
                 </button>
+                <div v-else class="min-h-12" aria-hidden="true"></div>
 
                 <div class="flex min-w-0 flex-wrap items-center justify-center gap-3">
                   <button
@@ -588,7 +824,7 @@ onBeforeUnmount(() => {
                   </button>
                 </div>
 
-                <div class="flex min-w-0 justify-end">
+                <div v-if="!isReviewMode" class="flex min-w-0 justify-end">
                   <button
                     class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-7 text-base font-extrabold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
                     type="button"
@@ -602,9 +838,21 @@ onBeforeUnmount(() => {
                     </svg>
                   </button>
                 </div>
+                <div v-else class="flex min-w-0 justify-end">
+                  <button
+                    class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-7 text-base font-extrabold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                    type="button"
+                    @click="returnToResults"
+                  >
+                    Done reviewing
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                      <path d="m5 13 4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                </div>
               </div>
               <p
-                v-if="currentQuestionIndex === totalQuestions - 1 && !canSubmitQuiz"
+                v-if="!isReviewMode && currentQuestionIndex === totalQuestions - 1 && !canSubmitQuiz"
                 class="mt-3 text-right text-sm font-semibold text-slate-500"
               >
                 Answer {{ unansweredCount }} more {{ unansweredCount === 1 ? "question" : "questions" }} to submit.
@@ -615,6 +863,8 @@ onBeforeUnmount(() => {
               v-if="showQuestionNavigator"
               :questions="navigatorQuestions"
               :current-question-index="currentQuestionIndex"
+              :is-review-mode="isReviewMode"
+              :review-statuses="reviewStatuses"
               class="h-full min-h-0 self-stretch lg:top-[5.5rem]"
               @select="goToQuestion"
             />
@@ -729,5 +979,6 @@ onBeforeUnmount(() => {
         </section>
       </div>
     </Teleport>
+
   </section>
 </template>

@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, HttpStatus, Param, Patch, Post, Query, Req } from "@nestjs/common";
 import type { Request } from "express";
 import { Public } from "../../auth/decorators/public.decorator";
+import { AccessCodeDto } from "../application/dto/access-code.dto";
 import { CreateAttemptDto } from "../application/dto/create-attempt.dto";
 import { CreateQuizDto } from "../application/dto/create-quiz.dto";
 import { SubmitAttemptDto } from "../application/dto/submit-attempt.dto";
@@ -30,10 +31,16 @@ export class QuizController {
     return this.quizService.findPublished();
   }
 
+  @Post("access-code")
+  @Public()
+  validateAccessCode(@Body() body: AccessCodeDto) {
+    return this.quizService.validateAccessCode(body.code);
+  }
+
   @Get("slug/:slug")
   @Public()
-  findBySlug(@Param("slug") slug: string) {
-    return this.quizService.findBySlug(slug);
+  findBySlug(@Param("slug") slug: string, @Query("accessCode") accessCode?: string) {
+    return this.quizService.findBySlug(slug, accessCode);
   }
 
   @Get("results/summary")
@@ -96,7 +103,7 @@ export class QuizController {
   @Post(":id/attempts")
   @Public()
   createAttempt(@Param("id") id: string, @Body() body: CreateAttemptDto) {
-    return this.attemptService.createAttempt(id, body.takerName);
+    return this.attemptService.createAttempt(id, body.takerName, body.accessCode);
   }
 
   @Post(":id/attempts/:attemptId/submit")

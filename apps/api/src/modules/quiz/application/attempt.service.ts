@@ -1,4 +1,4 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { QuizStatus, type Quiz } from "@quiz-app/shared";
 import { ATTEMPT_REPOSITORY, AttemptRepository } from "../domain/attempt.repository";
 import { QuizAttempt } from "../domain/quiz-attempt";
@@ -84,9 +84,14 @@ export class AttemptService {
     private readonly quizRepository: QuizRepository
   ) {}
 
-  async createAttempt(quizId: string, takerName: string): Promise<QuizAttempt> {
+  async createAttempt(quizId: string, takerName: string, accessCode?: string): Promise<QuizAttempt> {
     const quiz = await this.quizRepository.findById(quizId);
     if (!quiz) throw new NotFoundException(`Quiz ${quizId} was not found.`);
+    if (quiz.isPrivate) {
+      if (!accessCode || accessCode.toUpperCase() !== quiz.accessCode) {
+        throw new ForbiddenException("A valid access code is required to start this quiz.");
+      }
+    }
     return this.attemptRepository.create(quizId, takerName);
   }
 

@@ -49,10 +49,20 @@ export class InMemoryQuizRepository implements QuizRepository {
 
   async findPublished(): Promise<Quiz[]> {
     return Array.from(this.quizzes.values())
-      .filter((quiz) => quiz.status === QuizStatus.PUBLISHED)
+      .filter((quiz) => quiz.status === QuizStatus.PUBLISHED && !quiz.isPrivate)
       .sort((left, right) =>
         (right.updatedAt ?? "").localeCompare(left.updatedAt ?? "")
       );
+  }
+
+  async findByAccessCode(code: string): Promise<Quiz | null> {
+    const upper = code.toUpperCase();
+    for (const quiz of this.quizzes.values()) {
+      if (quiz.accessCode === upper && quiz.status === QuizStatus.PUBLISHED && quiz.isPrivate) {
+        return quiz;
+      }
+    }
+    return null;
   }
 
   async findById(id: string): Promise<Quiz | null> {
@@ -112,6 +122,8 @@ export class InMemoryQuizRepository implements QuizRepository {
       id: newId,
       title: `Copy of ${quiz.title}`,
       status: QuizStatus.IN_PROGRESS,
+      isPrivate: false,
+      accessCode: undefined,
       questions: quiz.questions.map((q) => ({ ...q, id: randomUUID() })),
       createdAt: timestamp,
       updatedAt: timestamp

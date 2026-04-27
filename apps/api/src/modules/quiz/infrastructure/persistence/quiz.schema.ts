@@ -11,6 +11,9 @@ export class QuestionEntity {
 
   @Prop({ required: true, min: 0 })
   correctOptionIndex!: number;
+
+  @Prop({ trim: true, maxlength: 500 })
+  explanation?: string;
 }
 
 export const QuestionSchema = SchemaFactory.createForClass(QuestionEntity);
@@ -47,6 +50,12 @@ export class QuizEntity {
 
   @Prop({ trim: true, index: true, sparse: true })
   slug?: string;
+
+  @Prop({ type: Boolean, default: false })
+  isPrivate!: boolean;
+
+  @Prop({ trim: true, uppercase: true, index: true, sparse: true })
+  accessCode?: string;
 
   @Prop({ type: [QuestionSchema], default: [] })
   questions!: QuestionEntity[];

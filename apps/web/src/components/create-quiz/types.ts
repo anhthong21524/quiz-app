@@ -5,6 +5,7 @@ export type CreateQuizStep = 1 | 2;
 export type DifficultyLevel = QuizDifficulty;
 
 export type QuestionStatus = "empty" | "in_progress" | "completed";
+export type QuestionReviewStatus = "correct" | "incorrect";
 
 export interface QuestionOption {
   id: string;
@@ -20,4 +21,5 @@ export interface CreateQuizQuestion {
   multipleCorrect: boolean;
   explanation: string;
   status: QuestionStatus;
+  reviewStatus?: QuestionReviewStatus;
 }

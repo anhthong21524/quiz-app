@@ -5,6 +5,8 @@ import type { CreateQuizQuestion } from "./types";
 const props = defineProps<{
   questions: CreateQuizQuestion[];
   currentQuestionIndex: number;
+  isReviewMode?: boolean;
+  reviewStatuses?: Record<string, CreateQuizQuestion["reviewStatus"]>;
 }>();
 
 const emit = defineEmits<{
@@ -14,18 +16,42 @@ const emit = defineEmits<{
 const completedCount = computed(
   () => props.questions.filter((question) => question.status === "completed").length
 );
+const correctReviewCount = computed(
+  () => props.questions.filter((question) => getReviewStatus(question) === "correct").length
+);
 
 const completionPercentage = computed(() => {
   if (props.questions.length === 0) {
     return 0;
   }
 
-  return Math.round((completedCount.value / props.questions.length) * 100);
+  const count = props.isReviewMode ? correctReviewCount.value : completedCount.value;
+  return Math.round((count / props.questions.length) * 100);
 });
 
 const usesCompactLayout = computed(() => props.questions.length >= 41);
 
-function getButtonClasses(status: CreateQuizQuestion["status"], isActive: boolean) {
+function getReviewStatus(question: CreateQuizQuestion) {
+  return props.reviewStatuses?.[question.id] ?? question.reviewStatus;
+}
+
+function getButtonClasses(
+  status: CreateQuizQuestion["status"],
+  isActive: boolean,
+  reviewStatus?: CreateQuizQuestion["reviewStatus"]
+) {
+  if (reviewStatus === "correct") {
+    return isActive
+      ? "border-emerald-600 bg-emerald-600 text-white shadow-[0_8px_18px_rgba(5,150,105,0.22)]"
+      : "border-emerald-300 bg-emerald-50 text-emerald-800 hover:border-emerald-400 hover:bg-emerald-100";
+  }
+
+  if (reviewStatus === "incorrect") {
+    return isActive
+      ? "border-rose-600 bg-rose-600 text-white shadow-[0_8px_18px_rgba(225,29,72,0.24)]"
+      : "border-rose-400 bg-rose-100 text-rose-800 hover:border-rose-500 hover:bg-rose-200";
+  }
+
   if (isActive) {
     return "border-emerald-600 bg-emerald-600 text-white shadow-[0_8px_18px_rgba(5,150,105,0.22)]";
   }
@@ -41,7 +67,18 @@ function getButtonClasses(status: CreateQuizQuestion["status"], isActive: boolea
   return "border-gray-200 bg-white text-gray-700 hover:border-gray-300";
 }
 
-function getStatusLabel(status: CreateQuizQuestion["status"]) {
+function getStatusLabel(
+  status: CreateQuizQuestion["status"],
+  reviewStatus?: CreateQuizQuestion["reviewStatus"]
+) {
+  if (reviewStatus === "correct") {
+    return "correct";
+  }
+
+  if (reviewStatus === "incorrect") {
+    return "incorrect";
+  }
+
   if (status === "completed") {
     return "completed";
   }
@@ -59,16 +96,22 @@ function getStatusLabel(status: CreateQuizQuestion["status"]) {
     <div class="flex items-start justify-between gap-3">
       <div>
         <h2 class="text-base font-bold text-gray-900">Questions</h2>
-        <p class="mt-0.5 text-xs text-gray-500">{{ completedCount }} of {{ questions.length }} complete</p>
+        <p class="mt-0.5 text-xs text-gray-500">
+          {{ isReviewMode ? `${correctReviewCount} of ${questions.length} correct` : `${completedCount} of ${questions.length} complete` }}
+        </p>
       </div>
-      <span class="rounded-full bg-emerald-50 px-2 py-1 text-xs font-bold text-emerald-700">
+      <span
+        class="rounded-full px-2 py-1 text-xs font-bold"
+        :class="isReviewMode && completionPercentage < 60 ? 'bg-rose-50 text-rose-700' : 'bg-emerald-50 text-emerald-700'"
+      >
         {{ completionPercentage }}%
       </span>
     </div>
 
     <div class="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-100">
       <div
-        class="h-full rounded-full bg-emerald-500 transition-all duration-300"
+        class="h-full rounded-full transition-all duration-300"
+        :class="isReviewMode && completionPercentage < 60 ? 'bg-rose-500' : 'bg-emerald-500'"
         :style="{ width: `${completionPercentage}%` }"
       ></div>
     </div>
@@ -89,31 +132,46 @@ function getStatusLabel(status: CreateQuizQuestion["status"]) {
           class="relative flex items-center justify-center overflow-hidden rounded-xl border font-semibold transition focus:outline-none focus:ring-4 focus:ring-emerald-100"
           :class="[
             usesCompactLayout ? 'h-9 text-[13px]' : 'h-10 text-sm',
-            getButtonClasses(question.status, currentQuestionIndex === index)
+            getButtonClasses(question.status, currentQuestionIndex === index, getReviewStatus(question))
           ]"
-          :aria-label="`Question ${index + 1}: ${getStatusLabel(question.status)}${currentQuestionIndex === index ? ', selected' : ''}`"
-          :title="`Question ${index + 1}: ${getStatusLabel(question.status)}`"
+          :aria-label="`Question ${index + 1}: ${getStatusLabel(question.status, getReviewStatus(question))}${currentQuestionIndex === index ? ', selected' : ''}`"
+          :title="`Question ${index + 1}: ${getStatusLabel(question.status, getReviewStatus(question))}`"
           @click="emit('select', index)"
         >
           <span class="relative z-10 inline-flex items-center justify-center gap-1">
             <span>{{ index + 1 }}</span>
             <svg
-              v-if="question.status === 'completed' && currentQuestionIndex !== index"
+              v-if="(getReviewStatus(question) === 'correct' || (!getReviewStatus(question) && question.status === 'completed')) && currentQuestionIndex !== index"
               viewBox="0 0 20 20"
               fill="none"
               stroke="currentColor"
               stroke-width="2.4"
-              class="text-emerald-600"
-              :class="usesCompactLayout ? 'h-2.5 w-2.5' : 'h-3 w-3'"
+              :class="[
+                getReviewStatus(question) ? 'text-current' : 'text-emerald-600',
+                usesCompactLayout ? 'h-2.5 w-2.5' : 'h-3 w-3'
+              ]"
             >
               <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <svg
+              v-else-if="getReviewStatus(question) === 'incorrect' && currentQuestionIndex !== index"
+              viewBox="0 0 20 20"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2.4"
+              :class="usesCompactLayout ? 'h-2.5 w-2.5' : 'h-3 w-3'"
+            >
+              <path d="M5 5l10 10M15 5 5 15" stroke-linecap="round" />
             </svg>
           </span>
         </button>
       </div>
 
       <div class="mt-auto space-y-3">
-        <div v-if="completedCount < questions.length" class="rounded-xl bg-slate-50 px-3 py-2.5 text-xs text-slate-500">
+        <div v-if="isReviewMode" class="rounded-xl bg-rose-50 px-3 py-2.5 text-xs font-medium text-rose-700">
+          Red questions need review. Green questions were answered correctly.
+        </div>
+        <div v-else-if="completedCount < questions.length" class="rounded-xl bg-slate-50 px-3 py-2.5 text-xs text-slate-500">
           <span class="font-semibold text-slate-600">{{ questions.length - completedCount }}</span>
           {{ questions.length - completedCount === 1 ? "question" : "questions" }} left to complete.
         </div>

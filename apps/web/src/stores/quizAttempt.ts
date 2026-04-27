@@ -8,6 +8,7 @@ export interface QuizAttemptSession {
   quizSlug: string;
   takerName: string;
   startedAt: string;
+  accessCode?: string;
 }
 
 interface QuizAttemptState {

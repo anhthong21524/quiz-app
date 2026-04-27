@@ -11,6 +11,7 @@ export interface Question {
   prompt: string;
   options: string[];
   correctOptionIndex: number;
+  explanation?: string;
 }
 
 export interface Quiz {
@@ -24,6 +25,8 @@ export interface Quiz {
   difficulty?: QuizDifficulty;
   timeLimit?: number | null;
   status: QuizStatus;
+  isPrivate?: boolean;
+  accessCode?: string;
   questions: Question[];
   createdAt?: string;
   updatedAt?: string;

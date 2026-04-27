@@ -77,6 +77,7 @@ export interface QuizPayload {
   subject?: string;
   difficulty?: Quiz["difficulty"];
   timeLimit?: number | null;
+  isPrivate?: boolean;
   questions: Quiz["questions"];
 }
 

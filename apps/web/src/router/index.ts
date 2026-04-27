@@ -15,6 +15,7 @@ import AccountSettingsView from "../views/AccountSettingsView.vue";
 import PasswordSettingsView from "../views/PasswordSettingsView.vue";
 import PublicQuizLandingPage from "../views/PublicQuizLandingPage.vue";
 import PublicQuizTakeView from "../views/PublicQuizTakeView.vue";
+import PrivateQuizEntryView from "../views/PrivateQuizEntryView.vue";
 import AuthCallbackView from "../views/AuthCallbackView.vue";
 import { applySeo } from "../services/seo";
 
@@ -90,6 +91,26 @@ export const router = createRouter({
       name: "auth-callback",
       component: AuthCallbackView,
       meta: { bareLayout: true }
+    },
+    {
+      path: "/quizzes/private",
+      name: "private-quiz-entry",
+      component: PrivateQuizEntryView,
+      meta: {
+        seo: {
+          title: "Private Quiz",
+          description: "Enter your private quiz access code to unlock and start the quiz.",
+          canonicalPath: "/quizzes/private",
+          breadcrumbs: [
+            { name: "Home", path: "/" },
+            { name: "Private Quiz", path: "/quizzes/private" }
+          ]
+        }
+      }
+    },
+    {
+      path: "/join",
+      redirect: { name: "private-quiz-entry" }
     },
     {
       path: "/q/:slug",

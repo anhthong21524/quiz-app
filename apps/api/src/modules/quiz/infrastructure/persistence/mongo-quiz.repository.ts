@@ -78,10 +78,17 @@ export class MongoQuizRepository
 
   async findPublished(): Promise<Quiz[]> {
     const quizzes = await this.getModel()
-      .find({ status: QuizStatus.PUBLISHED })
+      .find({ status: QuizStatus.PUBLISHED, isPrivate: { $ne: true } })
       .sort({ updatedAt: -1 })
       .lean();
     return quizzes.map((quiz) => normalizeQuiz(quiz));
+  }
+
+  async findByAccessCode(code: string): Promise<Quiz | null> {
+    const quiz = await this.getModel()
+      .findOne({ accessCode: code.toUpperCase(), status: QuizStatus.PUBLISHED, isPrivate: true })
+      .lean();
+    return quiz ? normalizeQuiz(quiz) : null;
   }
 
   async findById(id: string): Promise<Quiz | null> {
@@ -134,7 +141,9 @@ export class MongoQuizRepository
     const copy = await this.getModel().create({
       ...rest,
       title: `Copy of ${quiz.title ?? rest.title}`,
-      status: QuizStatus.IN_PROGRESS
+      status: QuizStatus.IN_PROGRESS,
+      isPrivate: false,
+      accessCode: undefined
     });
     return normalizeQuiz(copy.toObject());
   }

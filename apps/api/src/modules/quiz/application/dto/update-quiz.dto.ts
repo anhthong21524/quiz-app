@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
 import {
+  IsBoolean,
   IsIn,
   IsArray,
   IsInt,
@@ -37,6 +38,10 @@ export class UpdateQuizDto {
   @Min(1)
   @Max(180)
   timeLimit?: number | null;
+
+  @IsOptional()
+  @IsBoolean()
+  isPrivate?: boolean;
 
   @IsOptional()
   @IsArray()

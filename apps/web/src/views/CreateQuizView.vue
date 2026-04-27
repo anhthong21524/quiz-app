@@ -25,6 +25,7 @@ interface ConfigurationForm {
   difficulty: DifficultyLevel;
   timeLimitEnabled: boolean;
   timeLimitMinutes: number | null;
+  isPrivate: boolean;
 }
 
 interface ValidationErrors {
@@ -66,8 +67,11 @@ const configuration = reactive<ConfigurationForm>({
   numberOfQuestions: 1,
   difficulty: "Easy",
   timeLimitEnabled: false,
-  timeLimitMinutes: null
+  timeLimitMinutes: null,
+  isPrivate: false
 });
+
+const activeQuizAccessCode = ref<string | undefined>(undefined);
 
 const questions = ref<CreateQuizQuestion[]>([]);
 
@@ -161,6 +165,8 @@ function resetFlow() {
   configuration.difficulty = "Easy";
   configuration.timeLimitEnabled = false;
   configuration.timeLimitMinutes = null;
+  configuration.isPrivate = false;
+  activeQuizAccessCode.value = undefined;
   questions.value = [];
   originalDescription.value = "";
   currentQuestionIndex.value = 0;
@@ -262,7 +268,7 @@ function mapQuestionToDraft(question: Question, index: number): CreateQuizQuesti
     questionText: question.prompt,
     options: relabelOptions(options),
     multipleCorrect: false,
-    explanation: "",
+    explanation: question.explanation ?? "",
     status: "empty"
   };
 
@@ -284,6 +290,8 @@ function populateEditFlow(quiz: Quiz) {
   configuration.difficulty = quiz.difficulty ?? "Easy";
   configuration.timeLimitEnabled = quiz.timeLimit !== null && quiz.timeLimit !== undefined;
   configuration.timeLimitMinutes = quiz.timeLimit ?? null;
+  configuration.isPrivate = quiz.isPrivate ?? false;
+  activeQuizAccessCode.value = quiz.accessCode;
   originalDescription.value = quiz.description;
   questions.value = quiz.questions.length
     ? quiz.questions.map(mapQuestionToDraft)
@@ -577,7 +585,8 @@ function toQuestionPayload(question: CreateQuizQuestion): Question {
     correctOptionIndex: Math.max(
       0,
       populatedOptions.findIndex((option) => option.id === firstCorrectOption?.id)
-    )
+    ),
+    explanation: question.explanation.trim()
   };
 }
 
@@ -588,14 +597,18 @@ async function submitQuiz() {
 
   isSaving.value = true;
   try {
-    await quizStore.saveQuiz({
+    const savedQuiz = await quizStore.saveQuiz({
       title: configuration.title.trim(),
       description: createQuizDescription(),
       subject: configuration.subject,
       difficulty: configuration.difficulty,
       timeLimit: configuration.timeLimitEnabled ? configuration.timeLimitMinutes : null,
+      isPrivate: configuration.isPrivate,
       questions: questions.value.map(toQuestionPayload)
     }, quizId.value);
+    if (savedQuiz?.accessCode) {
+      activeQuizAccessCode.value = savedQuiz.accessCode;
+    }
 
     showToast(isEditing.value ? "Quiz updated successfully" : "Quiz saved successfully");
     await router.push({ name: "quizzes" });
@@ -639,6 +652,12 @@ function handleStepSelection(step: 1 | 2) {
 
 function exitFlow() {
   router.push({ name: "quizzes" });
+}
+
+function copyAccessCode() {
+  if (activeQuizAccessCode.value) {
+    navigator.clipboard?.writeText(activeQuizAccessCode.value);
+  }
 }
 </script>
 
@@ -883,6 +902,45 @@ function exitFlow() {
                         </span>
                         <span>{{ difficulty }}</span>
                       </button>
+                    </div>
+                  </div>
+
+                  <!-- Private quiz toggle -->
+                  <div class="rounded-xl border border-gray-200 bg-gray-50 p-3">
+                    <div class="flex items-center justify-between gap-3">
+                      <div>
+                        <span class="text-sm font-semibold text-slate-700">Private quiz</span>
+                        <p class="text-xs text-slate-500 mt-0.5">Hidden from public list. Requires an access code.</p>
+                      </div>
+                      <button
+                        type="button"
+                        role="switch"
+                        :aria-checked="configuration.isPrivate"
+                        class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition"
+                        :class="configuration.isPrivate ? 'bg-amber-500' : 'bg-gray-200'"
+                        @click="configuration.isPrivate = !configuration.isPrivate"
+                      >
+                        <span
+                          class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition"
+                          :class="configuration.isPrivate ? 'translate-x-6' : 'translate-x-1'"
+                        ></span>
+                      </button>
+                    </div>
+
+                    <!-- Fixed-height info row — always rendered so the box never shifts -->
+                    <div class="mt-2 flex h-5 items-center gap-2">
+                      <template v-if="configuration.isPrivate">
+                        <template v-if="activeQuizAccessCode">
+                          <span class="text-xs font-bold text-amber-800">Code:</span>
+                          <span class="font-mono text-sm font-extrabold tracking-[0.18em] text-amber-900">{{ activeQuizAccessCode }}</span>
+                          <button
+                            type="button"
+                            class="ml-auto text-xs font-semibold text-amber-700 underline underline-offset-2 hover:text-amber-900"
+                            @click="copyAccessCode"
+                          >Copy</button>
+                        </template>
+                        <span v-else class="text-xs text-amber-700">Code generated when you save.</span>
+                      </template>
                     </div>
                   </div>
                 </div>

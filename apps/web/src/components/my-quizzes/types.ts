@@ -21,4 +21,6 @@ export interface QuizListItem {
   lastUpdated: string;
   lastUpdatedLabel: string;
   icon: MyQuizIcon;
+  isPrivate?: boolean;
+  accessCode?: string;
 }
