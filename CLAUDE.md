@@ -163,8 +163,13 @@ Legacy paths (`/quizzes`, `/editor`, `/editor/:id`, etc.) redirect to their `/ma
 |--------|------|------|--------|
 | GET | `/api/quizzes` | Required | List quizzes for current user |
 | GET | `/api/quizzes/public` | Public | List all published quizzes |
-| GET | `/api/quizzes/slug/:slug` | Public | Get quiz by slug |
+| POST | `/api/quizzes/access-code` | Public | Validate a private quiz access code |
+| GET | `/api/quizzes/results/summary` | Required | Aggregate results summary for current user |
+| GET | `/api/quizzes/results/performance` | Required | Per-quiz performance stats for current user |
+| GET | `/api/quizzes/results/recent` | Required | Recent submissions (`?limit=N`, default 5) |
+| GET | `/api/quizzes/slug/:slug` | Public | Get quiz by slug (optional `?accessCode=`) |
 | GET | `/api/quizzes/:id` | Public | Get quiz by ID |
+| GET | `/api/quizzes/:id/results` | Required | All submissions for a specific quiz |
 | POST | `/api/quizzes` | Required | Create quiz |
 | PATCH | `/api/quizzes/:id` | Required | Update quiz |
 | PATCH | `/api/quizzes/:id/publish` | Required | Publish quiz |
