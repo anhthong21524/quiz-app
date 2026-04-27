@@ -2,6 +2,7 @@ import { Type } from "class-transformer";
 import {
   ArrayMinSize,
   IsArray,
+  IsBoolean,
   IsIn,
   IsInt,
   IsOptional,
@@ -36,6 +37,10 @@ export class CreateQuizDto {
   @Min(1)
   @Max(180)
   timeLimit?: number | null;
+
+  @IsOptional()
+  @IsBoolean()
+  isPrivate?: boolean;
 
   @IsArray()
   @ArrayMinSize(0)

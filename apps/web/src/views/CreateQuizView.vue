@@ -712,11 +712,6 @@ async function submitQuiz() {
 }
 
 async function saveAndNext() {
-  if (isEditing.value) {
-    await submitQuiz();
-    return;
-  }
-
   if (!validateCurrentQuestion()) {
     return;
   }
@@ -1175,8 +1170,8 @@ function copyAccessCode() {
             >
               <span>{{
                 isSaving ? "Saving..." :
-                isEditing ? "Update quiz" :
                 currentQuestionIndex < questions.length - 1 ? "Next question" :
+                isEditing ? "Update quiz" :
                 "Save quiz"
               }}</span>
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
