@@ -7,6 +7,7 @@ const props = defineProps<{
   isDragging?: boolean;
   isDragTarget?: boolean;
   allowMultiple?: boolean;
+  readonly?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -22,7 +23,40 @@ const emit = defineEmits<{
 </script>
 
 <template>
+  <div v-if="readonly" class="flex items-center gap-2.5 rounded-xl">
+    <div
+      class="flex h-9 w-9 shrink-0 items-center justify-center border text-sm font-semibold"
+      :class="[
+        allowMultiple ? 'rounded-lg' : 'rounded-full',
+        option.isCorrect
+          ? 'border-emerald-600 bg-emerald-600 text-white'
+          : 'border-gray-200 bg-white text-gray-600'
+      ]"
+    >
+      <svg
+        v-if="option.isCorrect"
+        viewBox="0 0 20 20"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        class="h-4 w-4"
+      >
+        <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span v-else>{{ option.label }}</span>
+    </div>
+    <span
+      class="min-w-0 flex-1 rounded-xl border px-4 py-2 text-sm"
+      :class="
+        option.isCorrect
+          ? 'border-emerald-200 bg-emerald-50 font-medium text-emerald-800'
+          : 'border-gray-200 bg-gray-50 text-gray-700'
+      "
+    >{{ option.text }}</span>
+  </div>
+
   <div
+    v-else
     class="flex items-center gap-2.5 rounded-xl transition"
     :class="[
       isDragging ? 'opacity-50' : '',

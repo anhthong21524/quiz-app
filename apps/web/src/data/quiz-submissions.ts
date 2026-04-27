@@ -14,6 +14,10 @@ export interface QuizSubmissionAnswer {
   userAnswer: string;
   correctAnswer: string;
   isCorrect: boolean;
+  options?: string[];
+  selectedIndex?: number | null;
+  correctIndex?: number;
+  explanation?: string;
 }
 
 export interface QuizSubmission extends SharedQuizSubmission {

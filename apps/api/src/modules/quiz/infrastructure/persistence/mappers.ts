@@ -22,6 +22,9 @@ export function normalizeQuiz(document: {
   status: Quiz["status"];
   isPrivate?: boolean;
   accessCode?: string;
+  allowSummary?: boolean;
+  allowReviewAnswers?: boolean;
+  allowRetake?: boolean;
   questions: Quiz["questions"];
   createdAt?: Date | string;
   updatedAt?: Date | string;
@@ -43,6 +46,9 @@ export function normalizeQuiz(document: {
     status: document.status,
     isPrivate: document.isPrivate ?? false,
     accessCode: document.accessCode,
+    allowSummary: document.allowSummary ?? true,
+    allowReviewAnswers: document.allowReviewAnswers ?? true,
+    allowRetake: document.allowRetake ?? true,
     questions: document.questions,
     createdAt: document.createdAt
       ? new Date(document.createdAt).toISOString()

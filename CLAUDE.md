@@ -91,12 +91,21 @@ These rules apply to all frontend work. Follow them without being asked.
 
 **`StatCard` props:** `value`, `label`, `hint`, `color` (`green` | `amber` | `teal` | `gray`), optional `width` / `height`.
 
+### No layout shifts
+
+Interactive state changes (toggling a switch, publish/unpublish buttons, loading spinners, badge text) must never cause surrounding elements to move or resize. When building or modifying interactive components:
+- Give buttons and badges a fixed `min-width` so their width doesn't change between states (e.g. "Publish" ↔ "Unpublish", "Active" ↔ "Inactive").
+- Use `visibility: hidden` or opacity transitions instead of `v-if` / `display: none` for elements that appear on hover or state change, when removing them would shift the layout.
+- Spinners inside buttons must not expand the button — size them to match the label height and use `position: absolute` or replace only the icon, not the full button content.
+- Never let an async update (loading state → result) shift sibling or parent elements.
+
 ### No scrollbars
 
 Pages and cards must never produce a visible scrollbar. When adding new UI:
 - Avoid fixed `height` / `min-height` on containers that hold variable-length content.
 - Use `padding` and `gap` conservatively — prefer compact values so content fits without overflow.
 - Remove `overflow: auto` / `overflow-y: auto` from inner containers unless the container has an explicit, intentional fixed height.
+- The quiz management page (`MyQuizzesView`) in particular must not scroll; rely on `AppTable`'s built-in pagination to keep content within the viewport.
 - Test at the standard viewport after every layout change.
 
 ### Frontend

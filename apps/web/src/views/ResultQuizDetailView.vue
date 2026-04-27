@@ -75,7 +75,11 @@ function toQuizSubmission(attempt: SubmissionResult, index: number, questionCoun
     question: a.question,
     userAnswer: a.selectedIndex != null ? (a.options[a.selectedIndex] ?? "-") : "-",
     correctAnswer: a.options[a.correctIndex] ?? "-",
-    isCorrect: a.isCorrect
+    isCorrect: a.isCorrect,
+    options: a.options,
+    selectedIndex: a.selectedIndex,
+    correctIndex: a.correctIndex,
+    explanation: a.explanation
   }));
 
   return {

@@ -27,6 +27,11 @@ export class InMemoryQuizRepository implements QuizRepository {
       difficulty: data.difficulty,
       timeLimit: data.timeLimit ?? null,
       status: QuizStatus.IN_PROGRESS,
+      isPrivate: data.isPrivate ?? false,
+      accessCode: data.accessCode,
+      allowSummary: data.allowSummary ?? true,
+      allowReviewAnswers: data.allowReviewAnswers ?? true,
+      allowRetake: data.allowRetake ?? true,
       questions: data.questions.map((question) => ({
         ...question,
         id: question.id ?? randomUUID()

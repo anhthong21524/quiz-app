@@ -44,6 +44,23 @@ export class UpdateQuizDto {
   isPrivate?: boolean;
 
   @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  accessCode?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  allowSummary?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  allowReviewAnswers?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  allowRetake?: boolean;
+
+  @IsOptional()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => QuestionDto)

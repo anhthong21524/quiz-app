@@ -12,6 +12,7 @@ export interface SubmissionAnswerResult {
   selectedIndex: number | null;
   correctIndex: number;
   isCorrect: boolean;
+  explanation?: string;
 }
 
 export interface SubmissionResult {
@@ -216,7 +217,8 @@ export class AttemptService {
             options: question.options,
             selectedIndex,
             correctIndex: question.correctOptionIndex,
-            isCorrect: selectedIndex === question.correctOptionIndex
+            isCorrect: selectedIndex === question.correctOptionIndex,
+            explanation: question.explanation || undefined
           };
         })
       }));

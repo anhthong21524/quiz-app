@@ -560,6 +560,7 @@ onBeforeUnmount(() => {
             </p>
 
             <section
+              v-if="quiz.allowSummary"
               class="mt-5 w-full rounded-2xl border border-slate-200 bg-white p-4 text-left shadow-xl shadow-slate-900/10 sm:p-5"
               aria-labelledby="submission-summary-title"
             >
@@ -614,6 +615,7 @@ onBeforeUnmount(() => {
             </section>
 
             <section
+              v-if="quiz.allowSummary"
               class="mt-4 grid w-full grid-cols-[2.75rem_1fr] items-center gap-3 rounded-2xl border p-3 text-left sm:p-4"
               :class="resultTone.panelClass"
             >
@@ -635,8 +637,15 @@ onBeforeUnmount(() => {
               </div>
             </section>
 
-            <div class="mt-4 grid w-full gap-3 sm:grid-cols-3">
+            <div
+              class="mt-4 w-full gap-3"
+              :class="[quiz.allowReviewAnswers || quiz.allowRetake ? 'grid' : 'flex justify-center',
+                [quiz.allowReviewAnswers, quiz.allowRetake].filter(Boolean).length === 2 ? 'sm:grid-cols-3' :
+                [quiz.allowReviewAnswers, quiz.allowRetake].filter(Boolean).length === 1 ? 'sm:grid-cols-2' :
+                'sm:grid-cols-1']"
+            >
               <button
+                v-if="quiz.allowReviewAnswers"
                 class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-5 text-base font-extrabold text-white shadow-lg shadow-emerald-600/25 transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
                 type="button"
                 @click="reviewAnswers"
@@ -649,6 +658,7 @@ onBeforeUnmount(() => {
               </button>
 
               <button
+                v-if="quiz.allowRetake"
                 class="inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-base font-extrabold text-slate-800 shadow-sm transition hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
                 type="button"
                 @click="restartQuiz"

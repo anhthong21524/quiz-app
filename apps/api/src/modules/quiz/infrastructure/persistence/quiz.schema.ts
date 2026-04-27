@@ -57,6 +57,15 @@ export class QuizEntity {
   @Prop({ trim: true, uppercase: true, index: true, sparse: true })
   accessCode?: string;
 
+  @Prop({ type: Boolean, default: true })
+  allowSummary!: boolean;
+
+  @Prop({ type: Boolean, default: true })
+  allowReviewAnswers!: boolean;
+
+  @Prop({ type: Boolean, default: true })
+  allowRetake!: boolean;
+
   @Prop({ type: [QuestionSchema], default: [] })
   questions!: QuestionEntity[];
 }

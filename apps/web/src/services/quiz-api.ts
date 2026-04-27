@@ -43,6 +43,7 @@ export interface SubmissionAnswerResult {
   selectedIndex: number | null;
   correctIndex: number;
   isCorrect: boolean;
+  explanation?: string;
 }
 
 export interface SubmissionResult {
@@ -78,6 +79,10 @@ export interface QuizPayload {
   difficulty?: Quiz["difficulty"];
   timeLimit?: number | null;
   isPrivate?: boolean;
+  accessCode?: string;
+  allowSummary?: boolean;
+  allowReviewAnswers?: boolean;
+  allowRetake?: boolean;
   questions?: Quiz["questions"];
 }
 

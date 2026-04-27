@@ -27,6 +27,9 @@ export interface Quiz {
   status: QuizStatus;
   isPrivate?: boolean;
   accessCode?: string;
+  allowSummary?: boolean;
+  allowReviewAnswers?: boolean;
+  allowRetake?: boolean;
   questions: Question[];
   createdAt?: string;
   updatedAt?: string;

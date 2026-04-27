@@ -162,12 +162,15 @@ async function copyCode() {
 }
 
 .btn-copy {
+  width: 120px;
+  flex-shrink: 0;
   min-height: 44px;
   border: 0;
   border-radius: 10px;
   padding: 0 16px;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   background: #e9fbf2;
   color: #0f9f6e;

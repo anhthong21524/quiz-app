@@ -15,6 +15,9 @@ export interface PublicQuizInfo {
   subject?: string;
   isPublished: boolean;
   isPrivate?: boolean;
+  allowSummary: boolean;
+  allowReviewAnswers: boolean;
+  allowRetake: boolean;
   questions: PublicQuizQuestion[];
 }
 
@@ -47,6 +50,9 @@ interface PublicQuizApiResponse {
   isPublished?: boolean;
   isPrivate?: boolean;
   accessCode?: string;
+  allowSummary?: boolean;
+  allowReviewAnswers?: boolean;
+  allowRetake?: boolean;
 }
 
 interface QuizAttemptApiResponse {
@@ -92,6 +98,9 @@ function normalizeQuiz(data: PublicQuizApiResponse, fallbackSlug: string): Publi
     subject: data.subject,
     isPublished,
     isPrivate: data.isPrivate ?? false,
+    allowSummary: data.allowSummary ?? true,
+    allowReviewAnswers: data.allowReviewAnswers ?? true,
+    allowRetake: data.allowRetake ?? true,
     questions: data.questions ?? []
   };
 }

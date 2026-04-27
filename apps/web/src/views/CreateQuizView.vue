@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { Question, Quiz } from "@quiz-app/shared";
+import { QuizStatus } from "@quiz-app/shared";
 import AnswerOptionRow from "../components/create-quiz/AnswerOptionRow.vue";
 import CreateQuizStepper from "../components/create-quiz/CreateQuizStepper.vue";
 import QuestionNavigator from "../components/create-quiz/QuestionNavigator.vue";
@@ -27,6 +28,9 @@ interface ConfigurationForm {
   timeLimitEnabled: boolean;
   timeLimitMinutes: number | null;
   isPrivate: boolean;
+  allowSummary: boolean;
+  allowReviewAnswers: boolean;
+  allowRetake: boolean;
 }
 
 interface ValidationErrors {
@@ -70,10 +74,14 @@ const configuration = reactive<ConfigurationForm>({
   difficulty: "Easy",
   timeLimitEnabled: false,
   timeLimitMinutes: null,
-  isPrivate: false
+  isPrivate: false,
+  allowSummary: true,
+  allowReviewAnswers: true,
+  allowRetake: true
 });
 
 const activeQuizAccessCode = ref<string | undefined>(undefined);
+const accessCodeCopied = ref(false);
 const skipNextLoad = ref(false);
 
 const CONFIG_DRAFT_KEY = "quiz-create-config-draft";
@@ -82,6 +90,8 @@ const questions = ref<CreateQuizQuestion[]>([]);
 
 const quizId = computed(() => route.params.id?.toString());
 const isEditing = computed(() => Boolean(quizId.value));
+const isPublished = computed(() => quizStore.activeQuiz?.status === QuizStatus.PUBLISHED);
+const isReadOnly = computed(() => isEditing.value && isPublished.value);
 const currentQuestion = computed(() => questions.value[currentQuestionIndex.value]);
 const completedQuestions = computed(
   () => questions.value.filter((question) => question.status === "completed").length
@@ -92,14 +102,21 @@ const progressPercent = computed(() =>
 const loadError = computed(() =>
   quizStore.error && !quizStore.isLoading ? quizStore.error : null
 );
-const pageTitle = computed(() => (isEditing.value ? "Edit quiz" : "Create new quiz"));
+const pageTitle = computed(() => {
+  if (isReadOnly.value) return "View quiz";
+  return isEditing.value ? "Edit quiz" : "Create new quiz";
+});
 const stepIntro = computed(() => {
+  if (isReadOnly.value) {
+    return currentStep.value === 1
+      ? "This quiz is published. Configuration is view-only."
+      : "This quiz is published. Questions are view-only.";
+  }
   if (currentStep.value === 1) {
     return isEditing.value
       ? "Review the quiz details before updating questions."
       : "Set up the basic details for your quiz before adding questions.";
   }
-
   return isEditing.value
     ? "Update and organize your questions before saving changes."
     : "Write and organize your questions before saving the quiz.";
@@ -196,6 +213,9 @@ function resetFlow() {
   configuration.timeLimitEnabled = false;
   configuration.timeLimitMinutes = null;
   configuration.isPrivate = false;
+  configuration.allowSummary = true;
+  configuration.allowReviewAnswers = true;
+  configuration.allowRetake = true;
   activeQuizAccessCode.value = undefined;
   questions.value = [];
   originalDescription.value = "";
@@ -322,13 +342,16 @@ function populateEditFlow(quiz: Quiz) {
   configuration.timeLimitEnabled = quiz.timeLimit !== null && quiz.timeLimit !== undefined;
   configuration.timeLimitMinutes = quiz.timeLimit ?? null;
   configuration.isPrivate = quiz.isPrivate ?? false;
+  configuration.allowSummary = quiz.allowSummary ?? true;
+  configuration.allowReviewAnswers = quiz.allowReviewAnswers ?? true;
+  configuration.allowRetake = quiz.allowRetake ?? true;
   activeQuizAccessCode.value = quiz.accessCode;
   originalDescription.value = quiz.description;
   questions.value = quiz.questions.length
     ? quiz.questions.map(mapQuestionToDraft)
     : [createEmptyQuestion(0)];
   currentQuestionIndex.value = 0;
-  currentStep.value = 2;
+  currentStep.value = quiz.status === QuizStatus.PUBLISHED ? 1 : 2;
   resetValidationErrors();
   resetOptionDragState();
 }
@@ -377,6 +400,10 @@ async function goToQuestionsStep() {
         difficulty: configuration.difficulty,
         timeLimit: configuration.timeLimitEnabled ? configuration.timeLimitMinutes : null,
         isPrivate: configuration.isPrivate,
+        accessCode: configuration.isPrivate ? activeQuizAccessCode.value : undefined,
+        allowSummary: configuration.allowSummary,
+        allowReviewAnswers: configuration.allowReviewAnswers,
+        allowRetake: configuration.allowRetake,
         questions: []
       });
       if (savedQuiz?.accessCode) {
@@ -412,7 +439,10 @@ async function saveConfigOnly() {
       subject: configuration.subject,
       difficulty: configuration.difficulty,
       timeLimit: configuration.timeLimitEnabled ? configuration.timeLimitMinutes : null,
-      isPrivate: configuration.isPrivate
+      isPrivate: configuration.isPrivate,
+      allowSummary: configuration.allowSummary,
+      allowReviewAnswers: configuration.allowReviewAnswers,
+      allowRetake: configuration.allowRetake
     }, quizId.value);
     if (savedQuiz?.accessCode) {
       activeQuizAccessCode.value = savedQuiz.accessCode;
@@ -694,6 +724,9 @@ async function submitQuiz() {
       difficulty: configuration.difficulty,
       timeLimit: configuration.timeLimitEnabled ? configuration.timeLimitMinutes : null,
       isPrivate: configuration.isPrivate,
+      allowSummary: configuration.allowSummary,
+      allowReviewAnswers: configuration.allowReviewAnswers,
+      allowRetake: configuration.allowRetake,
       questions: questions.value.map(toQuestionPayload)
     }, quizId.value);
     if (savedQuiz?.accessCode) {
@@ -732,6 +765,8 @@ function goBackToConfiguration() {
 function handleStepSelection(step: 1 | 2) {
   if (step === 1 && currentStep.value === 2) {
     goBackToConfiguration();
+  } else if (step === 2 && currentStep.value === 1 && isReadOnly.value) {
+    currentStep.value = 2;
   }
 }
 
@@ -740,8 +775,32 @@ function exitFlow() {
 }
 
 function copyAccessCode() {
-  if (activeQuizAccessCode.value) {
-    navigator.clipboard?.writeText(activeQuizAccessCode.value);
+  if (!activeQuizAccessCode.value) return;
+  navigator.clipboard?.writeText(activeQuizAccessCode.value);
+  accessCodeCopied.value = true;
+  setTimeout(() => { accessCodeCopied.value = false; }, 2000);
+}
+
+function generateAccessCode(): string {
+  return Array.from(crypto.getRandomValues(new Uint8Array(3)))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("")
+    .toUpperCase();
+}
+
+function togglePrivate() {
+  const next = !configuration.isPrivate;
+  configuration.isPrivate = next;
+  if (next) {
+    activeQuizAccessCode.value = generateAccessCode();
+    configuration.allowSummary = false;
+    configuration.allowReviewAnswers = false;
+    configuration.allowRetake = false;
+  } else {
+    activeQuizAccessCode.value = undefined;
+    configuration.allowSummary = true;
+    configuration.allowReviewAnswers = true;
+    configuration.allowRetake = true;
   }
 }
 </script>
@@ -769,7 +828,7 @@ function copyAccessCode() {
           class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
           :class="currentStep === 1 ? 'pt-1' : ''"
         >
-          <CreateQuizStepper :current-step="currentStep" @select="handleStepSelection" />
+          <CreateQuizStepper :current-step="currentStep" :all-clickable="isReadOnly" @select="handleStepSelection" />
 
           <button
             v-if="currentStep === 2"
@@ -783,19 +842,35 @@ function copyAccessCode() {
             Back to configuration
           </button>
         </div>
+
+        <div
+          v-if="isReadOnly"
+          class="flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800"
+        >
+          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0">
+            <rect x="5" y="9" width="10" height="8" rx="1.5" />
+            <path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke-linecap="round" />
+          </svg>
+          <span>This quiz is published and is in view-only mode. Unpublish it from My Quizzes to make changes.</span>
+        </div>
       </div>
 
       <div v-if="currentStep === 1">
-        <div class="rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-5 shadow-[0_10px_26px_rgba(46,35,20,0.06)]">
-          <div class="space-y-4">
+        <div class="rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-4 shadow-[0_10px_26px_rgba(46,35,20,0.06)]">
+          <div class="space-y-3">
             <!-- Two-column layout on large screens -->
-            <div class="grid gap-5 lg:grid-cols-[1fr_320px]">
-              <!-- Left: Basic information -->
-              <section class="space-y-3">
+            <div class="grid gap-4 lg:grid-cols-[1fr_312px]">
+              <!-- Left: Basic information — flex so description fills remaining height -->
+              <section class="flex flex-col gap-3">
                 <h2 class="text-base font-bold text-slate-900">Basic information</h2>
 
-                <div class="space-y-3">
-                  <label class="block space-y-1.5">
+                <div class="flex flex-1 flex-col gap-3">
+                  <!-- Quiz title -->
+                  <div v-if="isReadOnly" class="space-y-1">
+                    <span class="text-sm font-semibold text-slate-700">Quiz title</span>
+                    <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">{{ configuration.title }}</p>
+                  </div>
+                  <label v-else class="block space-y-1">
                     <span class="text-sm font-semibold text-slate-700">Quiz title</span>
                     <input
                       v-model="configuration.title"
@@ -803,60 +878,67 @@ function copyAccessCode() {
                       placeholder="e.g. Mathematics Quiz #1"
                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                     />
-                    <p v-if="validationErrors.title" class="text-sm font-medium text-red-500">
-                      {{ validationErrors.title }}
-                    </p>
+                    <p v-if="validationErrors.title" class="text-sm font-medium text-red-500">{{ validationErrors.title }}</p>
                   </label>
 
-                  <label class="block space-y-1.5">
+                  <!-- Quiz description — flex-1 so it fills all remaining height -->
+                  <div v-if="isReadOnly" class="flex flex-1 flex-col space-y-1">
+                    <span class="text-sm font-semibold text-slate-700">Quiz description</span>
+                    <p class="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-500 italic">
+                      {{ configuration.description || 'No description.' }}
+                    </p>
+                  </div>
+                  <label v-else class="flex flex-1 flex-col gap-1">
                     <div class="flex items-center justify-between gap-3">
                       <span class="text-sm font-semibold text-slate-700">Quiz description</span>
                       <span class="text-xs text-slate-400">{{ configuration.description.length }} / 500</span>
                     </div>
                     <textarea
                       v-model="configuration.description"
-                      rows="2"
                       maxlength="500"
                       placeholder="Describe what learners will practice in this quiz."
-                      class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                      class="min-h-0 flex-1 resize-none rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                     ></textarea>
-                    <p v-if="validationErrors.description" class="text-sm font-medium text-red-500">
-                      {{ validationErrors.description }}
-                    </p>
+                    <p v-if="validationErrors.description" class="text-sm font-medium text-red-500">{{ validationErrors.description }}</p>
                   </label>
 
-                  <label class="block space-y-1.5">
+                  <!-- Subject / Domain -->
+                  <div v-if="isReadOnly" class="space-y-1">
+                    <span class="text-sm font-semibold text-slate-700">Subject / Domain</span>
+                    <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">{{ configuration.subject }}</p>
+                  </div>
+                  <label v-else class="block space-y-1">
                     <span class="text-sm font-semibold text-slate-700">Subject / Domain</span>
                     <select
                       v-model="configuration.subject"
                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                     >
                       <option disabled value="">Select a subject</option>
-                      <option v-for="subject in subjectOptions" :key="subject" :value="subject">
-                        {{ subject }}
-                      </option>
+                      <option v-for="subject in subjectOptions" :key="subject" :value="subject">{{ subject }}</option>
                     </select>
-                    <p v-if="validationErrors.subject" class="text-sm font-medium text-red-500">
-                      {{ validationErrors.subject }}
-                    </p>
+                    <p v-if="validationErrors.subject" class="text-sm font-medium text-red-500">{{ validationErrors.subject }}</p>
                   </label>
                 </div>
               </section>
 
               <!-- Right: Quiz setup -->
-              <section class="space-y-3 border-t border-gray-100 pt-4 lg:border-l lg:border-t-0 lg:pl-5 lg:pt-0">
+              <section class="flex flex-col gap-2 border-t border-gray-100 pt-4 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
                 <h2 class="text-base font-bold text-slate-900">Quiz setup</h2>
 
-                <div class="space-y-3">
-                  <div class="space-y-1.5">
+                  <!-- Number of questions -->
+                  <div v-if="isReadOnly" class="space-y-1">
+                    <span class="text-sm font-semibold text-slate-700">Number of questions</span>
+                    <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">{{ configuration.numberOfQuestions }}</p>
+                  </div>
+                  <div v-else class="space-y-1">
                     <div class="flex items-center justify-between gap-3">
                       <span class="text-sm font-semibold text-slate-700">Number of questions</span>
                       <span class="text-xs text-slate-400">1 – 50</span>
                     </div>
-                    <div class="flex h-10 overflow-hidden rounded-xl border border-gray-200 bg-white transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100">
+                    <div class="flex h-9 overflow-hidden rounded-xl border border-gray-200 bg-white transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100">
                       <button
                         type="button"
-                        class="flex w-10 shrink-0 items-center justify-center border-r border-gray-200 bg-gray-50 text-lg font-semibold text-slate-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        class="flex w-9 shrink-0 items-center justify-center border-r border-gray-200 bg-gray-50 text-lg font-semibold text-slate-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
                         :disabled="configuration.numberOfQuestions <= minQuestions"
                         @click="configuration.numberOfQuestions = Math.max(minQuestions, configuration.numberOfQuestions - 1)"
                       >−</button>
@@ -869,7 +951,7 @@ function copyAccessCode() {
                       />
                       <button
                         type="button"
-                        class="flex w-10 shrink-0 items-center justify-center border-l border-gray-200 bg-gray-50 text-lg font-semibold text-slate-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                        class="flex w-9 shrink-0 items-center justify-center border-l border-gray-200 bg-gray-50 text-lg font-semibold text-slate-600 transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
                         :disabled="configuration.numberOfQuestions >= maxQuestions"
                         @click="configuration.numberOfQuestions = Math.min(maxQuestions, configuration.numberOfQuestions + 1)"
                       >+</button>
@@ -879,107 +961,84 @@ function copyAccessCode() {
                     </p>
                   </div>
 
-                  <div class="space-y-1.5">
+                  <!-- Time limit -->
+                  <div v-if="isReadOnly" class="space-y-1">
                     <span class="text-sm font-semibold text-slate-700">Time limit</span>
-                    <div class="flex flex-col gap-2">
-                      <div class="flex flex-wrap gap-x-4 gap-y-2">
-                        <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
-                          <input
-                            type="radio"
-                            name="time-limit-mode"
-                            class="sr-only"
-                            :checked="!configuration.timeLimitEnabled"
-                            @change="setUnlimitedTimeLimit"
-                          />
-                          <span
-                            class="inline-flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border"
-                            :class="
-                              !configuration.timeLimitEnabled
-                                ? 'border-emerald-600 bg-emerald-600 text-white'
-                                : 'border-gray-300 bg-white text-transparent'
-                            "
-                          >
-                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" class="h-2.5 w-2.5">
-                              <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </span>
-                          <span>Unlimited</span>
-                        </label>
-
-                        <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
-                          <input
-                            type="radio"
-                            name="time-limit-mode"
-                            class="sr-only"
-                            :checked="configuration.timeLimitEnabled"
-                            @change="setTimedTimeLimit"
-                          />
-                          <span
-                            class="inline-flex h-4.5 w-4.5 shrink-0 items-center justify-center rounded-full border"
-                            :class="
-                              configuration.timeLimitEnabled
-                                ? 'border-emerald-600 bg-emerald-600 text-white'
-                                : 'border-gray-300 bg-white text-transparent'
-                            "
-                          >
-                            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" class="h-2.5 w-2.5">
-                              <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                          </span>
-                          <span>Set time limit</span>
-                        </label>
-                      </div>
-
-                      <div class="space-y-1">
-                        <label
-                          class="flex h-10 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100"
-                          :class="!configuration.timeLimitEnabled ? 'pointer-events-none opacity-50' : ''"
+                    <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">
+                      {{ configuration.timeLimitEnabled ? `${configuration.timeLimitMinutes} minutes` : 'Unlimited' }}
+                    </p>
+                  </div>
+                  <div v-else class="space-y-1">
+                    <span class="text-sm font-semibold text-slate-700">Time limit</span>
+                    <div class="flex flex-wrap gap-x-4 gap-y-1.5">
+                      <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+                        <input type="radio" name="time-limit-mode" class="sr-only" :checked="!configuration.timeLimitEnabled" @change="setUnlimitedTimeLimit" />
+                        <span
+                          class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border"
+                          :class="!configuration.timeLimitEnabled ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-gray-300 bg-white text-transparent'"
                         >
-                          <span class="sr-only">Time limit minutes</span>
-                          <input
-                            v-model.number="configuration.timeLimitMinutes"
-                            type="number"
-                            min="1"
-                            :max="maxTimeLimitMinutes"
-                            :placeholder="String(defaultTimeLimitMinutes)"
-                            class="min-w-0 flex-1 border-0 bg-white px-3 text-sm text-slate-900 outline-none placeholder:text-gray-400"
-                            @click="setTimedTimeLimit"
-                            @focus="setTimedTimeLimit"
-                          />
-                          <span class="grid min-w-20 place-items-center border-l border-gray-200 bg-gray-50 px-3 text-xs font-medium text-slate-600">
-                            minutes
-                          </span>
-                        </label>
-                        <p class="text-xs text-slate-400">1 – 180 minutes</p>
-                      </div>
+                          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" class="h-2.5 w-2.5">
+                            <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </span>
+                        <span>Unlimited</span>
+                      </label>
+                      <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
+                        <input type="radio" name="time-limit-mode" class="sr-only" :checked="configuration.timeLimitEnabled" @change="setTimedTimeLimit" />
+                        <span
+                          class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border"
+                          :class="configuration.timeLimitEnabled ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-gray-300 bg-white text-transparent'"
+                        >
+                          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" class="h-2.5 w-2.5">
+                            <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                        </span>
+                        <span>Set time limit</span>
+                      </label>
                     </div>
+                    <label
+                      class="flex h-9 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100"
+                      :class="!configuration.timeLimitEnabled ? 'pointer-events-none opacity-50' : ''"
+                    >
+                      <span class="sr-only">Time limit minutes</span>
+                      <input
+                        v-model.number="configuration.timeLimitMinutes"
+                        type="number"
+                        min="1"
+                        :max="maxTimeLimitMinutes"
+                        :placeholder="String(defaultTimeLimitMinutes)"
+                        class="min-w-0 flex-1 border-0 bg-white px-3 text-sm text-slate-900 outline-none placeholder:text-gray-400"
+                        @click="setTimedTimeLimit"
+                        @focus="setTimedTimeLimit"
+                      />
+                      <span class="grid min-w-20 place-items-center border-l border-gray-200 bg-gray-50 px-3 text-xs font-medium text-slate-600">minutes</span>
+                    </label>
                     <p v-if="validationErrors.timeLimitMinutes" class="text-sm font-medium text-red-500">
                       {{ validationErrors.timeLimitMinutes }}
                     </p>
                   </div>
 
-                  <div class="space-y-1.5">
+                  <!-- Difficulty -->
+                  <div v-if="isReadOnly" class="space-y-1">
                     <span class="text-sm font-semibold text-slate-700">Difficulty level</span>
-                    <div class="grid grid-cols-3 gap-2">
+                    <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">{{ configuration.difficulty }}</p>
+                  </div>
+                  <div v-else class="space-y-1">
+                    <span class="text-sm font-semibold text-slate-700">Difficulty level</span>
+                    <div class="grid grid-cols-3 gap-1.5">
                       <button
                         v-for="difficulty in difficultyOptions"
                         :key="difficulty"
                         type="button"
-                        class="inline-flex h-9 items-center justify-center gap-1.5 rounded-xl border px-3 text-sm font-semibold transition"
-                        :class="
-                          configuration.difficulty === difficulty
-                            ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
-                            : 'border-gray-200 bg-white text-slate-700 hover:border-emerald-200 hover:text-emerald-700'
-                        "
+                        class="inline-flex h-8 items-center justify-center gap-1.5 rounded-xl border px-3 text-sm font-semibold transition"
+                        :class="configuration.difficulty === difficulty
+                          ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                          : 'border-gray-200 bg-white text-slate-700 hover:border-emerald-200 hover:text-emerald-700'"
                         @click="configuration.difficulty = difficulty"
                       >
                         <span
-                          class="inline-flex h-4 w-4 shrink-0 items-center justify-center rounded-full border"
-                          :class="
-                            configuration.difficulty === difficulty
-                              ? 'border-emerald-600 bg-emerald-600 text-white'
-                              : 'border-gray-300 bg-white text-transparent'
-                          "
+                          class="inline-flex h-3.5 w-3.5 shrink-0 items-center justify-center rounded-full border"
+                          :class="configuration.difficulty === difficulty ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-gray-300 bg-white text-transparent'"
                         >
                           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2.5" class="h-2.5 w-2.5">
                             <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
@@ -990,76 +1049,167 @@ function copyAccessCode() {
                     </div>
                   </div>
 
-                  <!-- Private quiz toggle -->
-                  <div class="rounded-xl border border-gray-200 bg-gray-50 p-3">
-                    <div class="flex items-center justify-between gap-3">
-                      <div>
-                        <span class="text-sm font-semibold text-slate-700">Private quiz</span>
-                        <p class="text-xs text-slate-500 mt-0.5">Hidden from public list. Requires an access code.</p>
-                      </div>
-                      <button
-                        type="button"
-                        role="switch"
-                        :aria-checked="configuration.isPrivate"
-                        class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition"
-                        :class="configuration.isPrivate ? 'bg-amber-500' : 'bg-gray-200'"
-                        @click="configuration.isPrivate = !configuration.isPrivate"
-                      >
+                  <!-- Access & behavior — Private quiz + Participant options merged -->
+                  <div class="overflow-hidden rounded-xl border border-gray-200">
+                    <!-- Private quiz row -->
+                    <div class="bg-gray-50 px-3 py-2.5">
+                      <div class="flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                          <p class="text-sm font-semibold text-slate-700">Private quiz</p>
+                          <p class="text-xs text-slate-500">Hidden. Requires an access code.</p>
+                        </div>
                         <span
-                          class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition"
-                          :class="configuration.isPrivate ? 'translate-x-6' : 'translate-x-1'"
-                        ></span>
-                      </button>
+                          v-if="isReadOnly"
+                          class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
+                          :class="configuration.isPrivate ? 'bg-amber-100 text-amber-700' : 'bg-gray-200 text-slate-500'"
+                        >{{ configuration.isPrivate ? 'On' : 'Off' }}</span>
+                        <button
+                          v-else
+                          type="button"
+                          role="switch"
+                          :aria-checked="configuration.isPrivate"
+                          class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition"
+                          :class="configuration.isPrivate ? 'bg-amber-500' : 'bg-gray-200'"
+                          @click="togglePrivate"
+                        >
+                          <span class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition" :class="configuration.isPrivate ? 'translate-x-6' : 'translate-x-1'"></span>
+                        </button>
+                      </div>
+                      <div class="mt-1.5 flex h-4 items-center gap-2" :class="!(configuration.isPrivate && activeQuizAccessCode) && 'invisible'">
+                        <span class="text-xs font-bold text-amber-800">Code:</span>
+                        <span class="font-mono text-sm font-extrabold tracking-[0.18em] text-amber-900">{{ activeQuizAccessCode }}</span>
+                        <button
+                          type="button"
+                          class="ml-auto inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-semibold transition"
+                          :class="accessCodeCopied
+                            ? 'bg-amber-200 text-amber-900 cursor-default'
+                            : 'bg-amber-100 text-amber-700 hover:bg-amber-200 hover:text-amber-900'"
+                          @click="copyAccessCode"
+                        >
+                          <svg v-if="!accessCodeCopied" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="h-3 w-3">
+                            <rect x="7" y="7" width="9" height="11" rx="1.5" />
+                            <path d="M13 7V5a1.5 1.5 0 0 0-1.5-1.5h-6A1.5 1.5 0 0 0 4 5v9A1.5 1.5 0 0 0 5.5 15.5H7" stroke-linecap="round" />
+                          </svg>
+                          <svg v-else viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3">
+                            <path d="m4 10 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
+                          </svg>
+                          <span>{{ accessCodeCopied ? 'Copied!' : 'Copy' }}</span>
+                        </button>
+                      </div>
                     </div>
 
-                    <!-- Fixed-height info row — always rendered so the box never shifts -->
-                    <div class="mt-2 flex h-5 items-center gap-2">
-                      <template v-if="configuration.isPrivate">
-                        <template v-if="activeQuizAccessCode">
-                          <span class="text-xs font-bold text-amber-800">Code:</span>
-                          <span class="font-mono text-sm font-extrabold tracking-[0.18em] text-amber-900">{{ activeQuizAccessCode }}</span>
-                          <button
-                            type="button"
-                            class="ml-auto text-xs font-semibold text-amber-700 underline underline-offset-2 hover:text-amber-900"
-                            @click="copyAccessCode"
-                          >Copy</button>
-                        </template>
-                        <span v-else class="text-xs text-amber-700">Code generated when you save.</span>
-                      </template>
+                    <!-- Participant option rows -->
+                    <div class="divide-y divide-gray-100 border-t border-gray-200 bg-white">
+                      <!-- Show summary -->
+                      <div class="flex items-center justify-between gap-2 px-3 py-2">
+                        <p class="text-sm font-medium text-slate-700">Show summary</p>
+                        <span
+                          v-if="isReadOnly"
+                          class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
+                          :class="configuration.allowSummary ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-slate-500'"
+                        >{{ configuration.allowSummary ? 'On' : 'Off' }}</span>
+                        <button
+                          v-else
+                          type="button"
+                          role="switch"
+                          :aria-checked="configuration.allowSummary"
+                          class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition"
+                          :class="configuration.allowSummary ? 'bg-emerald-500' : 'bg-gray-200'"
+                          @click="configuration.allowSummary = !configuration.allowSummary"
+                        >
+                          <span class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition" :class="configuration.allowSummary ? 'translate-x-6' : 'translate-x-1'"></span>
+                        </button>
+                      </div>
+                      <!-- Allow answer review -->
+                      <div class="flex items-center justify-between gap-2 px-3 py-2">
+                        <p class="text-sm font-medium text-slate-700">Allow answer review</p>
+                        <span
+                          v-if="isReadOnly"
+                          class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
+                          :class="configuration.allowReviewAnswers ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-slate-500'"
+                        >{{ configuration.allowReviewAnswers ? 'On' : 'Off' }}</span>
+                        <button
+                          v-else
+                          type="button"
+                          role="switch"
+                          :aria-checked="configuration.allowReviewAnswers"
+                          class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition"
+                          :class="configuration.allowReviewAnswers ? 'bg-emerald-500' : 'bg-gray-200'"
+                          @click="configuration.allowReviewAnswers = !configuration.allowReviewAnswers"
+                        >
+                          <span class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition" :class="configuration.allowReviewAnswers ? 'translate-x-6' : 'translate-x-1'"></span>
+                        </button>
+                      </div>
+                      <!-- Allow retake -->
+                      <div class="flex items-center justify-between gap-2 px-3 py-2">
+                        <p class="text-sm font-medium text-slate-700">Allow retake</p>
+                        <span
+                          v-if="isReadOnly"
+                          class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
+                          :class="configuration.allowRetake ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-slate-500'"
+                        >{{ configuration.allowRetake ? 'On' : 'Off' }}</span>
+                        <button
+                          v-else
+                          type="button"
+                          role="switch"
+                          :aria-checked="configuration.allowRetake"
+                          class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition"
+                          :class="configuration.allowRetake ? 'bg-emerald-500' : 'bg-gray-200'"
+                          @click="configuration.allowRetake = !configuration.allowRetake"
+                        >
+                          <span class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition" :class="configuration.allowRetake ? 'translate-x-6' : 'translate-x-1'"></span>
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
               </section>
             </div>
 
-            <!-- Footer row: hint + CTA -->
+            <!-- Footer row -->
             <div class="flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-              <p class="text-sm text-emerald-700">
-                <span class="mr-1 inline-block rounded-lg bg-emerald-50 px-2 py-0.5 font-medium">Tip</span>
-                {{ isEditing ? "Save configuration to apply changes without editing questions." : "Settings are saved automatically when you proceed." }}
-              </p>
-              <div class="flex items-center gap-2">
-                <button
-                  v-if="isEditing"
-                  type="button"
-                  class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
-                  :disabled="isSaving"
-                  @click="saveConfigOnly"
-                >
-                  <span>{{ isSaving ? "Saving..." : "Save configuration" }}</span>
-                </button>
+              <!-- Read-only footer -->
+              <template v-if="isReadOnly">
+                <p class="text-sm text-slate-500">Unpublish this quiz to make configuration changes.</p>
                 <button
                   type="button"
-                  class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[180px]"
-                  :disabled="isSaving"
-                  @click="goToQuestionsStep"
+                  class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 sm:min-w-[180px]"
+                  @click="currentStep = 2"
                 >
-                  <span>{{ isSaving ? "Saving..." : isEditing ? "Edit questions" : "Create questions" }}</span>
+                  <span>View questions</span>
                   <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                     <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
                 </button>
-              </div>
+              </template>
+              <!-- Editable footer -->
+              <template v-else>
+                <p class="text-sm text-emerald-700">
+                  <span class="mr-1 inline-block rounded-lg bg-emerald-50 px-2 py-0.5 font-medium">Tip</span>
+                  {{ isEditing ? "Save configuration to apply changes without editing questions." : "Settings are saved automatically when you proceed." }}
+                </p>
+                <div class="flex items-center gap-2">
+                  <button
+                    v-if="isEditing"
+                    type="button"
+                    class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    :disabled="isSaving"
+                    @click="saveConfigOnly"
+                  >
+                    <span>{{ isSaving ? "Saving..." : "Save configuration" }}</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[180px]"
+                    :disabled="isSaving"
+                    @click="goToQuestionsStep"
+                  >
+                    <span>{{ isSaving ? "Saving..." : isEditing ? "Edit questions" : "Create questions" }}</span>
+                    <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                      <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                  </button>
+                </div>
+              </template>
             </div>
           </div>
         </div>
@@ -1069,7 +1219,12 @@ function copyAccessCode() {
         <div class="items-stretch gap-4 xl:grid xl:grid-cols-[minmax(0,1.95fr)_252px]">
           <div class="rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-4 shadow-[0_10px_26px_rgba(46,35,20,0.06)]">
             <div v-if="currentQuestion" class="space-y-3">
-              <label class="block space-y-1.5">
+              <!-- Question text -->
+              <div v-if="isReadOnly" class="space-y-1.5">
+                <span class="text-sm font-semibold text-slate-700">Question</span>
+                <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">{{ currentQuestion.questionText }}</p>
+              </div>
+              <label v-else class="block space-y-1.5">
                 <span class="text-sm font-semibold text-slate-700">Question</span>
                 <textarea
                   :value="currentQuestion.questionText"
@@ -1084,7 +1239,12 @@ function copyAccessCode() {
                 <div class="flex items-center justify-between gap-2">
                   <span class="text-sm font-semibold text-slate-700">Answer options</span>
 
+                  <!-- Read-only: multiple correct indicator -->
+                  <span v-if="isReadOnly && currentQuestion.multipleCorrect" class="text-xs text-slate-500">Multiple correct answers</span>
+
+                  <!-- Editable: multiple correct toggle -->
                   <button
+                    v-else-if="!isReadOnly"
                     type="button"
                     class="inline-flex items-center gap-2 text-sm text-slate-500"
                     :aria-pressed="currentQuestion.multipleCorrect"
@@ -1112,6 +1272,7 @@ function copyAccessCode() {
                     :is-dragging="draggedOptionIndex === optionIndex"
                     :is-drag-target="dragTargetOptionIndex === optionIndex && draggedOptionIndex !== optionIndex"
                     :allow-multiple="currentQuestion.multipleCorrect"
+                    :readonly="isReadOnly"
                     @update-text="updateOptionText(optionIndex, $event)"
                     @toggle-correct="toggleCorrectOption(optionIndex)"
                     @delete="deleteOption(optionIndex)"
@@ -1124,6 +1285,7 @@ function copyAccessCode() {
                 </div>
 
                 <button
+                  v-if="!isReadOnly"
                   type="button"
                   class="flex w-full items-center justify-center rounded-xl border border-dashed border-gray-300 px-4 py-2 text-sm font-semibold text-emerald-700 transition hover:border-emerald-300 hover:bg-emerald-50 disabled:cursor-not-allowed disabled:opacity-50"
                   :disabled="currentQuestion.options.length >= maxOptions"
@@ -1133,7 +1295,15 @@ function copyAccessCode() {
                 </button>
               </section>
 
-              <label class="block space-y-1.5">
+              <!-- Explanation -->
+              <div v-if="isReadOnly" class="space-y-1.5">
+                <span class="text-sm font-semibold text-slate-700">Explanation</span>
+                <p
+                  class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm"
+                  :class="currentQuestion.explanation ? 'text-slate-900' : 'italic text-slate-400'"
+                >{{ currentQuestion.explanation || 'No explanation provided.' }}</p>
+              </div>
+              <label v-else class="block space-y-1.5">
                 <span class="text-sm font-semibold text-slate-700">Explanation <span class="font-normal text-slate-400">(optional)</span></span>
                 <textarea
                   :value="currentQuestion.explanation"
@@ -1145,7 +1315,7 @@ function copyAccessCode() {
               </label>
 
               <p
-                v-if="validationErrors.question"
+                v-if="!isReadOnly && validationErrors.question"
                 class="rounded-xl border border-red-100 bg-red-50 px-4 py-2 text-sm font-medium text-red-600"
               >
                 {{ validationErrors.question }}
@@ -1161,7 +1331,22 @@ function copyAccessCode() {
               @select="selectQuestion"
             />
 
+            <!-- Read-only: back to quizzes -->
             <button
+              v-if="isReadOnly"
+              type="button"
+              class="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-gray-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700"
+              @click="exitFlow"
+            >
+              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                <path d="M12 5 7 10l5 5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+              <span>Back to My Quizzes</span>
+            </button>
+
+            <!-- Editable: save / next -->
+            <button
+              v-else
               type="button"
               class="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
               :disabled="isSaving"

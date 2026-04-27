@@ -8,6 +8,11 @@ export interface CreateQuizData {
   subject?: string;
   difficulty?: Quiz["difficulty"];
   timeLimit?: number | null;
+  isPrivate?: boolean;
+  accessCode?: string;
+  allowSummary?: boolean;
+  allowReviewAnswers?: boolean;
+  allowRetake?: boolean;
   questions: Quiz["questions"];
 }
 
@@ -20,6 +25,9 @@ export interface UpdateQuizData {
   status?: QuizStatus;
   isPrivate?: boolean;
   accessCode?: string;
+  allowSummary?: boolean;
+  allowReviewAnswers?: boolean;
+  allowRetake?: boolean;
   questions?: Quiz["questions"];
 }
 

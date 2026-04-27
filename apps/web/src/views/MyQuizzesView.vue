@@ -327,42 +327,9 @@ function viewQuiz(quiz: QuizListItem) {
   }
 }
 
-async function editQuiz(quiz: QuizListItem) {
+function editQuiz(quiz: QuizListItem) {
   if (!quiz.apiId) return;
-
-  if (quiz.status === "Published") {
-    // Pre-check: block entry into the editor if participants already exist.
-    // Avoids the user spending time editing only to hit a save error.
-    try {
-      const results = await fetchQuizResultDetail(quiz.apiId);
-      const activeCount    = results.totalSubmissions - results.completedSubmissions;
-      const submittedCount = results.completedSubmissions;
-
-      if (activeCount > 0 || submittedCount > 0) {
-        const parts: string[] = [];
-        if (activeCount > 0)
-          parts.push(`${activeCount} participant${activeCount > 1 ? "s" : ""} currently taking it`);
-        if (submittedCount > 0)
-          parts.push(`${submittedCount} submission${submittedCount > 1 ? "s" : ""}`);
-        showToast(`Cannot edit: this quiz has ${parts.join(" and ")}.`, "error");
-        return;
-      }
-    } catch {
-      // Check failed (network etc.) — fall through; backend will enforce the rule on save.
-    }
-
-    openConfirm({
-      title: "Edit published quiz",
-      message: "Editing will affect the currently published quiz. Users may see changes immediately. Continue?",
-      confirmLabel: "Edit anyway",
-      danger: false,
-      onConfirm: async () => {
-        router.push({ name: "edit-quiz-questions", params: { id: quiz.apiId! } });
-      }
-    });
-  } else {
-    router.push({ name: "edit-quiz-questions", params: { id: quiz.apiId } });
-  }
+  router.push({ name: "edit-quiz-questions", params: { id: quiz.apiId } });
 }
 
 function publishQuiz(quiz: QuizListItem) {

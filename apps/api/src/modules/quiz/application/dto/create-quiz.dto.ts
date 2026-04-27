@@ -42,6 +42,23 @@ export class CreateQuizDto {
   @IsBoolean()
   isPrivate?: boolean;
 
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  accessCode?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  allowSummary?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  allowReviewAnswers?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  allowRetake?: boolean;
+
   @IsArray()
   @ArrayMinSize(0)
   @ValidateNested({ each: true })

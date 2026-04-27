@@ -24,8 +24,16 @@ export class QuizService {
     return this.quizRepository.create({
       ...payload,
       ownerId: user.id,
-      ownerEmail: user.email
+      ownerEmail: user.email,
+      ...(payload.isPrivate
+        ? { accessCode: payload.accessCode?.toUpperCase() || this.generateAccessCode() }
+        : {}
+      )
     });
+  }
+
+  private generateAccessCode(): string {
+    return randomBytes(3).toString("hex").toUpperCase();
   }
 
   findAll(user: AuthenticatedUser) {
@@ -79,17 +87,13 @@ export class QuizService {
 
     const updateData = { ...payload } as typeof payload & { accessCode?: string };
     if (payload.isPrivate && !existing?.accessCode) {
-      updateData.accessCode = this.generateAccessCode();
+      updateData.accessCode = payload.accessCode?.toUpperCase() || this.generateAccessCode();
     } else if (payload.isPrivate === false) {
       updateData.accessCode = undefined;
     }
 
     const quiz = await this.quizRepository.update(id, user.id, updateData);
     return this.requireQuiz(quiz, id);
-  }
-
-  private generateAccessCode(): string {
-    return randomBytes(3).toString("hex").toUpperCase();
   }
 
   async publish(id: string, user: AuthenticatedUser) {

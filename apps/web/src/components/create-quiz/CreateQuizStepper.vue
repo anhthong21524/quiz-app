@@ -8,6 +8,7 @@ interface StepDefinition {
 
 const props = defineProps<{
   currentStep: CreateQuizStep;
+  allClickable?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -28,7 +29,7 @@ function isActive(step: CreateQuizStep) {
 }
 
 function isClickable(step: CreateQuizStep) {
-  return step < props.currentStep;
+  return props.allClickable || step < props.currentStep;
 }
 </script>
 
