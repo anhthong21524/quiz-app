@@ -2,7 +2,7 @@
 import { RouterLink } from "vue-router";
 
 defineProps<{
-  activeSection: "profile" | "account" | "password";
+  activeSection: "profile" | "configuration" | "password";
 }>();
 
 function handleUpgrade() {
@@ -11,7 +11,7 @@ function handleUpgrade() {
 </script>
 
 <template>
-  <aside class="settings-sidebar" aria-label="Account settings">
+  <aside class="settings-sidebar" aria-label="Configuration settings">
     <nav class="settings-nav" aria-label="Settings sections">
       <RouterLink
         class="settings-nav-link"
@@ -27,8 +27,8 @@ function handleUpgrade() {
 
       <RouterLink
         class="settings-nav-link"
-        :class="{ 'is-active': activeSection === 'account' }"
-        :to="{ name: 'account' }"
+        :class="{ 'is-active': activeSection === 'configuration' }"
+        :to="{ name: 'configuration' }"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <circle cx="12" cy="12" r="3" />
@@ -38,7 +38,7 @@ function handleUpgrade() {
             stroke-linejoin="round"
           />
         </svg>
-        <span>Account</span>
+        <span>Configuration</span>
       </RouterLink>
 
       <RouterLink
@@ -75,26 +75,25 @@ function handleUpgrade() {
 <style scoped>
 .settings-sidebar {
   height: 100%;
-  min-height: 100%;
-  padding: 28px 24px;
+  padding: 20px 20px;
   border: var(--surface-border);
   border-radius: var(--surface-radius);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 28px;
+  gap: 20px;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: var(--surface-shadow);
 }
 
 .settings-nav {
   display: grid;
-  gap: 14px;
+  gap: 8px;
 }
 
 .settings-nav-link {
   width: 100%;
-  min-height: 56px;
+  min-height: 48px;
   padding: 0 18px;
   border-radius: 12px;
   display: flex;
@@ -121,12 +120,12 @@ function handleUpgrade() {
 }
 
 .upgrade-card {
-  padding: 28px 24px 24px;
+  padding: 20px 18px 18px;
   border: 1px solid #d6f3e7;
   border-radius: 16px;
   display: grid;
   justify-items: center;
-  gap: 12px;
+  gap: 8px;
   background:
     radial-gradient(circle at center 20%, rgba(16, 185, 129, 0.14), transparent 45%),
     linear-gradient(180deg, #f5fffa 0%, #f9fffc 100%);
@@ -134,8 +133,8 @@ function handleUpgrade() {
 }
 
 .upgrade-icon {
-  width: 74px;
-  height: 74px;
+  width: 52px;
+  height: 52px;
   border-radius: 999px;
   display: grid;
   place-items: center;
@@ -144,8 +143,8 @@ function handleUpgrade() {
 }
 
 .upgrade-icon svg {
-  width: 36px;
-  height: 36px;
+  width: 26px;
+  height: 26px;
 }
 
 .upgrade-card h2,
@@ -155,7 +154,7 @@ function handleUpgrade() {
 
 .upgrade-card h2 {
   color: #10b981;
-  font-size: 1.35rem;
+  font-size: 1.1rem;
   line-height: 1.2;
 }
 

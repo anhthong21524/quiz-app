@@ -16,6 +16,7 @@ const emit = defineEmits<{
   duplicate: [quiz: QuizListItem];
   delete: [quiz: QuizListItem];
   share: [quiz: QuizListItem];
+  copyCode: [quiz: QuizListItem];
 }>();
 </script>
 
@@ -56,6 +57,7 @@ const emit = defineEmits<{
           :title="quiz.title"
           :status="quiz.status"
           :is-api-quiz="Boolean(quiz.apiId)"
+          :is-private="quiz.isPrivate"
           @view="emit('view', quiz)"
           @edit="emit('edit', quiz)"
           @publish="emit('publish', quiz)"
@@ -63,6 +65,7 @@ const emit = defineEmits<{
           @duplicate="emit('duplicate', quiz)"
           @delete="emit('delete', quiz)"
           @share="emit('share', quiz)"
+          @copy-code="emit('copyCode', quiz)"
         />
       </div>
     </article>

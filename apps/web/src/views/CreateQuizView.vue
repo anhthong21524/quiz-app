@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, reactive, ref, watch } from "vue";
+import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { Question, Quiz } from "@quiz-app/shared";
 import AnswerOptionRow from "../components/create-quiz/AnswerOptionRow.vue";
@@ -9,6 +9,7 @@ import FullPageErrorState from "../components/feedback/FullPageErrorState.vue";
 import EditorFormSkeleton from "../components/loading/EditorFormSkeleton.vue";
 import PageHeader from "../components/PageHeader.vue";
 import { useToast } from "../composables/useToast";
+import { useConfigurationStore } from "../stores/configuration";
 import { useQuizStore } from "../stores/quizzes";
 import type {
   CreateQuizQuestion,
@@ -39,6 +40,7 @@ interface ValidationErrors {
 
 const router = useRouter();
 const quizStore = useQuizStore();
+const configurationStore = useConfigurationStore();
 const { show: showToast } = useToast();
 
 const difficultyOptions: DifficultyLevel[] = ["Easy", "Medium", "Hard"];
@@ -63,7 +65,7 @@ const validationErrors = reactive<ValidationErrors>({});
 const configuration = reactive<ConfigurationForm>({
   title: "Quiz 1",
   description: "",
-  subject: "Science",
+  subject: configurationStore.primarySubjectDomain,
   numberOfQuestions: 1,
   difficulty: "Easy",
   timeLimitEnabled: false,
@@ -72,6 +74,9 @@ const configuration = reactive<ConfigurationForm>({
 });
 
 const activeQuizAccessCode = ref<string | undefined>(undefined);
+const skipNextLoad = ref(false);
+
+const CONFIG_DRAFT_KEY = "quiz-create-config-draft";
 
 const questions = ref<CreateQuizQuestion[]>([]);
 
@@ -99,23 +104,48 @@ const stepIntro = computed(() => {
     ? "Update and organize your questions before saving changes."
     : "Write and organize your questions before saving the quiz.";
 });
-const baseSubjectOptions = [
-  "Mathematics",
-  "Science",
-  "History",
-  "Geography",
-  "English",
-  "Programming"
-];
 const subjectOptions = computed(() => {
   const currentSubject = configuration.subject.trim();
+  const configuredSubjects = configurationStore.subjectDomains;
 
-  if (currentSubject && !baseSubjectOptions.includes(currentSubject)) {
-    return [currentSubject, ...baseSubjectOptions];
+  if (currentSubject && !configuredSubjects.includes(currentSubject)) {
+    return [currentSubject, ...configuredSubjects];
   }
 
-  return baseSubjectOptions;
+  return configuredSubjects;
 });
+
+function setDefaultSubjectIfNeeded() {
+  if (!isEditing.value && !subjectOptions.value.includes(configuration.subject)) {
+    configuration.subject = configurationStore.primarySubjectDomain;
+  }
+}
+
+onMounted(async () => {
+  await configurationStore.loadConfiguration();
+
+  if (!isEditing.value) {
+    const stored = sessionStorage.getItem(CONFIG_DRAFT_KEY);
+    if (stored) {
+      try {
+        Object.assign(configuration, JSON.parse(stored));
+      } catch {
+        sessionStorage.removeItem(CONFIG_DRAFT_KEY);
+      }
+    }
+  }
+
+  setDefaultSubjectIfNeeded();
+});
+
+watch(
+  () => ({ ...configuration }),
+  (value) => {
+    if (!isEditing.value) {
+      sessionStorage.setItem(CONFIG_DRAFT_KEY, JSON.stringify(value));
+    }
+  }
+);
 
 function createId(prefix: string) {
   return `${prefix}-${Math.random().toString(36).slice(2, 10)}`;
@@ -160,7 +190,7 @@ function resetValidationErrors() {
 function resetFlow() {
   configuration.title = "Quiz 1";
   configuration.description = "";
-  configuration.subject = "Science";
+  configuration.subject = configurationStore.primarySubjectDomain;
   configuration.numberOfQuestions = 1;
   configuration.difficulty = "Easy";
   configuration.timeLimitEnabled = false;
@@ -173,6 +203,7 @@ function resetFlow() {
   currentStep.value = 1;
   resetValidationErrors();
   resetOptionDragState();
+  sessionStorage.removeItem(CONFIG_DRAFT_KEY);
 }
 
 function getDraftStatus(question: CreateQuizQuestion): QuestionStatus {
@@ -321,19 +352,78 @@ watch(
       return;
     }
 
+    if (skipNextLoad.value) {
+      skipNextLoad.value = false;
+      return;
+    }
+
     await loadQuizForEditing(id);
   },
   { immediate: true }
 );
 
-function goToQuestionsStep() {
-  if (!validateConfiguration()) {
+async function goToQuestionsStep() {
+  if (!validateConfiguration() || isSaving.value) {
     return;
+  }
+
+  if (!isEditing.value) {
+    isSaving.value = true;
+    try {
+      const savedQuiz = await quizStore.saveQuiz({
+        title: configuration.title.trim(),
+        description: createQuizDescription(),
+        subject: configuration.subject,
+        difficulty: configuration.difficulty,
+        timeLimit: configuration.timeLimitEnabled ? configuration.timeLimitMinutes : null,
+        isPrivate: configuration.isPrivate,
+        questions: []
+      });
+      if (savedQuiz?.accessCode) {
+        activeQuizAccessCode.value = savedQuiz.accessCode;
+      }
+      sessionStorage.removeItem(CONFIG_DRAFT_KEY);
+      skipNextLoad.value = true;
+      await router.replace({ name: "edit-quiz-questions", params: { id: savedQuiz.id } });
+    } catch {
+      const message = quizStore.error?.userMessage ?? "Failed to save quiz. Please try again.";
+      showToast(message, "error");
+      isSaving.value = false;
+      return;
+    }
+    isSaving.value = false;
   }
 
   syncQuestionPlaceholders();
   currentQuestionIndex.value = 0;
   currentStep.value = 2;
+}
+
+async function saveConfigOnly() {
+  if (!validateConfiguration() || isSaving.value) {
+    return;
+  }
+
+  isSaving.value = true;
+  try {
+    const savedQuiz = await quizStore.saveQuiz({
+      title: configuration.title.trim(),
+      description: createQuizDescription(),
+      subject: configuration.subject,
+      difficulty: configuration.difficulty,
+      timeLimit: configuration.timeLimitEnabled ? configuration.timeLimitMinutes : null,
+      isPrivate: configuration.isPrivate
+    }, quizId.value);
+    if (savedQuiz?.accessCode) {
+      activeQuizAccessCode.value = savedQuiz.accessCode;
+    }
+    showToast("Configuration saved");
+  } catch {
+    const message = quizStore.error?.userMessage ?? "Failed to save configuration. Please try again.";
+    showToast(message, "error");
+  } finally {
+    isSaving.value = false;
+  }
 }
 
 function setUnlimitedTimeLimit() {
@@ -951,18 +1041,30 @@ function copyAccessCode() {
             <div class="flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
               <p class="text-sm text-emerald-700">
                 <span class="mr-1 inline-block rounded-lg bg-emerald-50 px-2 py-0.5 font-medium">Tip</span>
-                You can change these settings later.
+                {{ isEditing ? "Save configuration to apply changes without editing questions." : "Settings are saved automatically when you proceed." }}
               </p>
-              <button
-                type="button"
-                class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 sm:min-w-[180px]"
-                @click="goToQuestionsStep"
-              >
-                <span>{{ isEditing ? "Update questions" : "Create questions" }}</span>
-                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
-                  <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
-                </svg>
-              </button>
+              <div class="flex items-center gap-2">
+                <button
+                  v-if="isEditing"
+                  type="button"
+                  class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  :disabled="isSaving"
+                  @click="saveConfigOnly"
+                >
+                  <span>{{ isSaving ? "Saving..." : "Save configuration" }}</span>
+                </button>
+                <button
+                  type="button"
+                  class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[180px]"
+                  :disabled="isSaving"
+                  @click="goToQuestionsStep"
+                >
+                  <span>{{ isSaving ? "Saving..." : isEditing ? "Edit questions" : "Create questions" }}</span>
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                    <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>

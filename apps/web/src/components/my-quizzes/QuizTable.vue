@@ -1,4 +1,4 @@
-<script setup lang="ts">
+﻿<script setup lang="ts">
 import { computed } from "vue";
 import AppTable from "../AppTable.vue";
 import QuizIconAvatar from "./QuizIconAvatar.vue";
@@ -27,6 +27,7 @@ const emit = defineEmits<{
   duplicate: [quiz: QuizListItem];
   delete: [quiz: QuizListItem];
   share: [quiz: QuizListItem];
+  copyCode: [quiz: QuizListItem];
   sort: [key: string, dir: "asc" | "desc"];
   "row-click": [quiz: QuizListItem];
 }>();
@@ -74,7 +75,7 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
               <span
                 v-if="quiz.isPrivate"
                 class="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700"
-                title="Private quiz — requires access code"
+                title="Private quiz â€” requires access code"
               >
                 <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
                   <rect x="3" y="11" width="18" height="11" rx="2" stroke-linejoin="round" />
@@ -93,6 +94,7 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
               :title="quiz.title"
               :status="quiz.status"
               :is-api-quiz="Boolean(quiz.apiId)"
+              :is-private="quiz.isPrivate"
               @view="emit('view', quiz)"
               @edit="emit('edit', quiz)"
               @publish="emit('publish', quiz)"
@@ -100,6 +102,7 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
               @duplicate="emit('duplicate', quiz)"
               @delete="emit('delete', quiz)"
               @share="emit('share', quiz)"
+              @copy-code="emit('copyCode', quiz)"
             />
           </td>
         </template>

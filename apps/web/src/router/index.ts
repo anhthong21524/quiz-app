@@ -11,7 +11,7 @@ import ResultQuizPage from "../views/ResultQuizPage.vue";
 import ResultQuizDetailView from "../views/ResultQuizDetailView.vue";
 import CreateQuizView from "../views/CreateQuizView.vue";
 import ProfileView from "../views/ProfileView.vue";
-import AccountSettingsView from "../views/AccountSettingsView.vue";
+import ConfigurationSettingsView from "../views/ConfigurationSettingsView.vue";
 import PasswordSettingsView from "../views/PasswordSettingsView.vue";
 import PublicQuizLandingPage from "../views/PublicQuizLandingPage.vue";
 import PublicQuizTakeView from "../views/PublicQuizTakeView.vue";
@@ -109,10 +109,6 @@ export const router = createRouter({
       }
     },
     {
-      path: "/join",
-      redirect: { name: "private-quiz-entry" }
-    },
-    {
       path: "/q/:slug",
       name: "public-quiz",
       component: PublicQuizLandingPage,
@@ -156,7 +152,11 @@ export const router = createRouter({
     },
     {
       path: "/account",
-      redirect: { name: "account" }
+      redirect: { name: "configuration" }
+    },
+    {
+      path: "/configuration",
+      redirect: { name: "configuration" }
     },
     {
       path: "/password",
@@ -243,18 +243,19 @@ export const router = createRouter({
       }
     },
     {
-      path: managementPath("/account"),
-      name: "account",
-      component: AccountSettingsView,
+      path: managementPath("/configuration"),
+      alias: [managementPath("/account")],
+      name: "configuration",
+      component: ConfigurationSettingsView,
       meta: {
         requiresAuth: true,
         seo: {
-          title: "Account",
-          description: "Manage account settings for your Quiz App account.",
-          canonicalPath: managementPath("/account"),
+          title: "Configuration",
+          description: "Configure quiz setup defaults and Subject / Domain choices in Quiz App.",
+          canonicalPath: managementPath("/configuration"),
           breadcrumbs: [
             { name: "Management", path: "/management" },
-            { name: "Account", path: managementPath("/account") }
+            { name: "Configuration", path: managementPath("/configuration") }
           ]
         }
       }

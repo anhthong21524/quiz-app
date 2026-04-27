@@ -388,8 +388,8 @@ async function handleSubmit() {
 .password-card {
   display: grid;
   align-content: start;
-  gap: 20px;
-  padding: 28px 28px 0;
+  gap: 12px;
+  padding: 18px 28px 0;
   border: 1px solid #dfe5ea;
   border-radius: 14px;
   background: #ffffff;
@@ -404,7 +404,7 @@ async function handleSubmit() {
 
 .password-form {
   display: grid;
-  gap: 22px;
+  gap: 13px;
 }
 
 .password-field {
@@ -425,7 +425,7 @@ async function handleSubmit() {
 
 .password-input-wrap input {
   width: 100%;
-  min-height: 52px;
+  min-height: 46px;
   padding: 0 54px;
   border: 1px solid #d7dee8;
   border-radius: 11px;
@@ -497,7 +497,7 @@ async function handleSubmit() {
 
 .password-rules {
   display: grid;
-  gap: 12px;
+  gap: 8px;
   font-size: 0.88rem;
 }
 
@@ -544,7 +544,7 @@ async function handleSubmit() {
 }
 
 .password-action-row {
-  min-height: 84px;
+  min-height: 58px;
   border-top: 1px solid #dfe5ea;
   display: flex;
   align-items: center;
@@ -595,7 +595,7 @@ async function handleSubmit() {
 
 @media (max-width: 720px) {
   .password-card {
-    padding: 24px 20px 0;
+    padding: 20px 20px 0;
   }
 }
 

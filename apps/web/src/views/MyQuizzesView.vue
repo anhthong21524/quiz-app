@@ -11,6 +11,7 @@ import QuizPagination from "../components/my-quizzes/QuizPagination.vue";
 import QuizTable from "../components/my-quizzes/QuizTable.vue";
 import ConfirmModal from "../components/ConfirmModal.vue";
 import ShareModal from "../components/ShareModal.vue";
+import PrivateCodeModal from "../components/PrivateCodeModal.vue";
 import SectionErrorState from "../components/feedback/SectionErrorState.vue";
 import QuizListSkeleton from "../components/loading/QuizListSkeleton.vue";
 import PageHeader from "../components/PageHeader.vue";
@@ -66,6 +67,12 @@ const shareState = ref<{ open: boolean; title: string; url: string }>({
   open: false,
   title: "",
   url: ""
+});
+
+const privateCodeState = ref<{ open: boolean; title: string; code: string }>({
+  open: false,
+  title: "",
+  code: ""
 });
 
 const statusOptions: Array<MyQuizStatus | "All status"> = [
@@ -311,7 +318,10 @@ async function runConfirm() {
 function viewQuiz(quiz: QuizListItem) {
   if (quiz.status === "Published" && quiz.slug) {
     const baseUrl = import.meta.env.VITE_SITE_URL ?? window.location.origin;
-    window.open(`${baseUrl}/q/${quiz.slug}`, "_blank", "noopener");
+    const url = quiz.isPrivate && quiz.accessCode
+      ? `${baseUrl}/q/${quiz.slug}?accessCode=${quiz.accessCode}`
+      : `${baseUrl}/q/${quiz.slug}`;
+    window.open(url, "_blank", "noopener");
   } else if (quiz.apiId) {
     router.push({ name: "edit-quiz-questions", params: { id: quiz.apiId } });
   }
@@ -454,6 +464,15 @@ function shareQuiz(quiz: QuizListItem) {
   };
 }
 
+function copyPrivateCode(quiz: QuizListItem) {
+  if (!quiz.accessCode) return;
+  privateCodeState.value = {
+    open: true,
+    title: quiz.title,
+    code: quiz.accessCode
+  };
+}
+
 </script>
 
 <template>
@@ -531,6 +550,7 @@ function shareQuiz(quiz: QuizListItem) {
                 @duplicate="duplicateQuiz"
                 @delete="deleteQuiz"
                 @share="shareQuiz"
+                @copy-code="copyPrivateCode"
                 @sort="onSort"
                 @row-click="viewResults"
               />
@@ -543,6 +563,7 @@ function shareQuiz(quiz: QuizListItem) {
                 @duplicate="duplicateQuiz"
                 @delete="deleteQuiz"
                 @share="shareQuiz"
+                @copy-code="copyPrivateCode"
               />
             </template>
 
@@ -556,6 +577,7 @@ function shareQuiz(quiz: QuizListItem) {
               @duplicate="duplicateQuiz"
               @delete="deleteQuiz"
               @share="shareQuiz"
+              @copy-code="copyPrivateCode"
             />
 
             <QuizPagination
@@ -593,6 +615,13 @@ function shareQuiz(quiz: QuizListItem) {
     :title="shareState.title"
     :url="shareState.url"
     @close="shareState.open = false"
+  />
+
+  <PrivateCodeModal
+    v-if="privateCodeState.open"
+    :title="privateCodeState.title"
+    :code="privateCodeState.code"
+    @close="privateCodeState.open = false"
   />
 </template>
 

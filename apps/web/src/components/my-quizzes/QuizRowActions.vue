@@ -6,6 +6,7 @@ const props = defineProps<{
   title: string;
   status?: MyQuizStatus;
   isApiQuiz?: boolean;
+  isPrivate?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -16,6 +17,7 @@ const emit = defineEmits<{
   duplicate: [];
   delete: [];
   share: [];
+  copyCode: [];
 }>();
 
 const menuOpen = ref(false);
@@ -70,7 +72,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="row-actions">
-    <button class="icon-button" type="button" :aria-label="isPublished() ? `Preview ${title}` : `View ${title}`" @click="emit('view')">
+    <button v-if="status !== 'In progress'" class="icon-button" type="button" :aria-label="isPublished() ? `Preview ${title}` : `View ${title}`" @click="emit('view')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke-linejoin="round" />
         <circle cx="12" cy="12" r="2.5" />
@@ -84,9 +86,9 @@ onBeforeUnmount(() => {
       </svg>
     </button>
 
-    <!-- Share as top-level button for published quizzes -->
+    <!-- Share link for published public quizzes -->
     <button
-      v-if="isApiQuiz && isPublished()"
+      v-if="isApiQuiz && isPublished() && !isPrivate"
       class="icon-button"
       type="button"
       :aria-label="`Share ${title}`"
@@ -97,6 +99,20 @@ onBeforeUnmount(() => {
         <circle cx="6" cy="12" r="3" />
         <circle cx="18" cy="19" r="3" />
         <path d="m8.7 13.5 6.6 4M15.3 6.5l-6.6 4" stroke-linecap="round" />
+      </svg>
+    </button>
+
+    <!-- Copy access code for published private quizzes -->
+    <button
+      v-if="isApiQuiz && isPublished() && isPrivate"
+      class="icon-button icon-button--amber"
+      type="button"
+      :aria-label="`Copy access code for ${title}`"
+      @click="emit('copyCode')"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+        <rect x="3" y="11" width="18" height="11" rx="2" stroke-linejoin="round" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-linecap="round" />
       </svg>
     </button>
 
@@ -189,6 +205,11 @@ onBeforeUnmount(() => {
 .icon-button:hover {
   background: #eef9f4;
   color: #10b981;
+}
+
+.icon-button--amber:hover {
+  background: #fff8e6;
+  color: #d97706;
 }
 
 .icon-button svg {

@@ -78,7 +78,7 @@ export interface QuizPayload {
   difficulty?: Quiz["difficulty"];
   timeLimit?: number | null;
   isPrivate?: boolean;
-  questions: Quiz["questions"];
+  questions?: Quiz["questions"];
 }
 
 export async function fetchQuizzes() {

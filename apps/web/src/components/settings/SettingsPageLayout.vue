@@ -2,7 +2,7 @@
 import SettingsSidebar from "./SettingsSidebar.vue";
 
 defineProps<{
-  activeSection: "profile" | "account" | "password";
+  activeSection: "profile" | "configuration" | "password";
   title: string;
   subtitle: string;
   titleId: string;
@@ -29,7 +29,7 @@ defineProps<{
 
 <style scoped>
 .settings-page-layout {
-  min-height: 780px;
+  height: calc(100vh - 200px);
   display: grid;
   grid-template-columns: minmax(240px, 290px) minmax(0, 1fr);
   gap: 16px;
@@ -37,14 +37,15 @@ defineProps<{
 }
 
 .settings-content-shell {
-  min-height: 100%;
-  padding: 38px 28px;
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px 28px;
   border: var(--surface-border);
   border-radius: var(--surface-radius);
   display: grid;
   grid-template-rows: auto 1fr;
   align-content: start;
-  gap: 28px;
+  gap: 20px;
   background: rgba(255, 255, 255, 0.98);
   box-shadow: var(--surface-shadow);
 }
@@ -61,7 +62,7 @@ defineProps<{
 
 .settings-heading h1 {
   color: #182033;
-  font-size: 2rem;
+  font-size: 1.65rem;
   font-weight: 400;
   line-height: 1.15;
 }
@@ -79,11 +80,13 @@ defineProps<{
 
 @media (max-width: 980px) {
   .settings-page-layout {
+    height: auto;
     grid-template-columns: 1fr;
   }
 
   .settings-content-shell {
-    min-height: auto;
+    height: auto;
+    overflow-y: visible;
   }
 }
 
