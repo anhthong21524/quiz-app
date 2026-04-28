@@ -1204,7 +1204,7 @@ function togglePrivate() {
                     :disabled="isSaving"
                     @click="goToQuestionsStep"
                   >
-                    <span>{{ isSaving ? "Saving..." : isEditing ? "Edit questions" : "Create questions" }}</span>
+                    <span>{{ isSaving ? "Saving..." : isEditing ? "Save & continue" : "Save & continue" }}</span>
                     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                       <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>

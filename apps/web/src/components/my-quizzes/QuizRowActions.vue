@@ -37,6 +37,10 @@ function updateDropdownPos() {
 }
 
 function toggleMenu() {
+  if (!menuOpen.value) {
+    const rect = triggerRef.value?.getBoundingClientRect();
+    if (rect && rect.width === 0 && rect.height === 0) return;
+  }
   menuOpen.value = !menuOpen.value;
   if (menuOpen.value) nextTick(updateDropdownPos);
 }

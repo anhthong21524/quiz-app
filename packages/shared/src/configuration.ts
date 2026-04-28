@@ -6,7 +6,8 @@ export const DEFAULT_SUBJECT_DOMAINS = [
   "History",
   "Geography",
   "English",
-  "Programming"
+  "Programming",
+  "General Knowledge"
 ];
 
 export interface SubjectDomainConfiguration {

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import { RouterLink, useRoute } from "vue-router";
+import { RouterLink, useRoute, useRouter } from "vue-router";
 import StatCard from "../../components/StatCard.vue";
 import ResultTabs from "../../components/results/ResultTabs.vue";
 import SubmissionDetailPanel from "../../components/results/SubmissionDetailPanel.vue";
@@ -19,6 +19,7 @@ import {
 import { ACCENT_CYCLE } from "../../lib/accent";
 
 const route = useRoute();
+const router = useRouter();
 
 const searchQuery = ref("");
 const scoreFilter = ref("All scores");
@@ -179,7 +180,10 @@ const selectedSubmission = computed(() => {
 watch(
   submissions,
   (next) => {
-    selectedSubmissionId.value = next[0]?.id ?? null;
+    const currentIdValid = next.some((s) => s.id === selectedSubmissionId.value);
+    if (!currentIdValid) {
+      selectedSubmissionId.value = next[0]?.id ?? null;
+    }
     currentPage.value = 1;
   },
   { immediate: true }
@@ -212,12 +216,14 @@ function isInSelectedDateRange(value: string) {
 function selectTab(tabId: string) {
   if (tabId === "submissions" || tabId === "submission-detail") {
     activeTab.value = tabId;
+    router.replace({ query: { ...route.query, tab: tabId } });
   }
 }
 
 function selectSubmission(submission: QuizSubmission) {
   selectedSubmissionId.value = submission.id;
   activeTab.value = "submission-detail";
+  router.replace({ query: { ...route.query, tab: "submission-detail", submissionId: submission.id } });
 }
 
 function setPage(page: number) {
@@ -255,6 +261,14 @@ onMounted(async () => {
   loadError.value = false;
   try {
     quizDetail.value = toDisplayDetail(await fetchQuizResultDetail(quizId));
+    const queryTab = route.query.tab as string | undefined;
+    const querySubmissionId = route.query.submissionId as string | undefined;
+    if (querySubmissionId && quizDetail.value?.submissions.some((s) => s.id === querySubmissionId)) {
+      selectedSubmissionId.value = querySubmissionId;
+    }
+    if (queryTab === "submission-detail") {
+      activeTab.value = "submission-detail";
+    }
   } catch {
     loadError.value = true;
   } finally {
@@ -300,7 +314,7 @@ onMounted(async () => {
           <path d="M20 19v-1.3a3.6 3.6 0 0 0-2.7-3.5M15.5 5.2a3 3 0 0 1 0 5.6" stroke-linecap="round" />
         </svg>
       </StatCard>
-      <StatCard :value="`${summary.averageScorePercent}%`" label="Average score" hint="" color="amber">
+      <StatCard :value="`${summary.averageScorePercent}%`" label="Average score" hint="" :color="summary.averageScorePercent >= 70 ? 'green' : 'amber'">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="m12 3.7 2.5 5.1 5.6.8-4 3.9.9 5.5-5-2.6L7 19l.9-5.5-4-3.9 5.6-.8L12 3.7Z" stroke-linejoin="round" />
         </svg>

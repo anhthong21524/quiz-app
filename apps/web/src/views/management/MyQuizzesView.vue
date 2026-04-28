@@ -439,7 +439,7 @@ function copyPrivateCode(quiz: QuizListItem) {
       :items="quizStatsItems"
       height="56px"
       :loading="isInitialLoad"
-      :empty="apiQuizzes.length === 0"
+      :empty="false"
       :clickable="apiQuizzes.length > 0"
       aria-label="Quiz dashboard stats"
       loading-label="Loading dashboard stats"
@@ -447,6 +447,24 @@ function copyPrivateCode(quiz: QuizListItem) {
       empty-description="Your stats, including total quizzes, published count, and recent activity, will appear here once you create your first quiz."
       @item-click="handleStatClick"
     />
+
+    <div
+      v-if="!isInitialLoad && inProgressCount > 0"
+      class="publish-prompt-banner"
+      role="status"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+        <circle cx="12" cy="12" r="9" />
+        <path d="M12 8v8M8 12l4-4 4 4" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+      <span>
+        You have <strong>{{ inProgressCount }} {{ inProgressCount === 1 ? "quiz" : "quizzes" }}</strong> saved but not yet published.
+        Publish {{ inProgressCount === 1 ? "it" : "them" }} to make {{ inProgressCount === 1 ? "it" : "them" }} available to participants.
+      </span>
+      <button type="button" class="publish-prompt-action" @click="handleStatClick('in-progress')">
+        Review
+      </button>
+    </div>
 
     <section
       class="quiz-manager-card"
@@ -793,6 +811,46 @@ function copyPrivateCode(quiz: QuizListItem) {
   box-shadow: inset 0 0 0 1px #86e3bf;
 }
 
+
+.publish-prompt-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  background: #fffbeb;
+  border: 1px solid #fcd34d;
+  color: #92400e;
+  font-size: 0.875rem;
+}
+
+.publish-prompt-banner svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: #d97706;
+}
+
+.publish-prompt-banner span {
+  flex: 1;
+}
+
+.publish-prompt-action {
+  flex-shrink: 0;
+  border: 1px solid #d97706;
+  border-radius: 8px;
+  padding: 4px 12px;
+  background: transparent;
+  color: #b45309;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s;
+}
+
+.publish-prompt-action:hover {
+  background: #fef3c7;
+}
 
 .quiz-card-list,
 .quiz-grid {
