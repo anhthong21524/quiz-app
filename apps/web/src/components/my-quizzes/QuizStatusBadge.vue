@@ -1,18 +1,33 @@
 <script setup lang="ts">
 import type { MyQuizStatus } from "./types";
+import { useI18n } from "../../i18n";
 
 const props = defineProps<{
   status: MyQuizStatus;
 }>();
 
+const { t } = useI18n();
+
 function statusClass() {
   return `is-${props.status.toLowerCase().replace(/\s+/g, "-")}`;
+}
+
+function labelForStatus(status: MyQuizStatus) {
+  if (status === "Published") {
+    return t("myQuizzes.status.published");
+  }
+
+  if (status === "In progress") {
+    return t("myQuizzes.status.inProgress");
+  }
+
+  return t("myQuizzes.status.unpublished");
 }
 </script>
 
 <template>
   <span class="status-badge" :class="statusClass()">
-    {{ status }}
+    {{ labelForStatus(status) }}
   </span>
 </template>
 

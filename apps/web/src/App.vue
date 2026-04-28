@@ -4,8 +4,10 @@ import { useRoute } from "vue-router";
 import AppHeader from "./components/AppHeader.vue";
 import AppToastList from "./components/AppToastList.vue";
 import GlobalLoadingBar from "./components/GlobalLoadingBar.vue";
+import { useI18n } from "./i18n";
 
 const route = useRoute();
+const { t } = useI18n();
 const useBareLayout = computed(() => route.meta.bareLayout === true);
 const usePublicLayout = computed(() =>
   route.name === "home" ||
@@ -46,7 +48,9 @@ const currentYear = new Date().getFullYear();
       :class="{ 'public-footer': usePublicLayout, 'quiz-taking-footer': useQuizTakingLayout }"
     >
       <div class="app-footer-inner">
-        <span class="app-footer-copy">&copy; {{ currentYear }} Quiz App &mdash; Learn. Challenge. Grow.</span>
+        <span class="app-footer-copy">
+          &copy; {{ currentYear }} {{ t("common.appName") }} &mdash; {{ t("footer.tagline") }}
+        </span>
       </div>
     </footer>
   </div>

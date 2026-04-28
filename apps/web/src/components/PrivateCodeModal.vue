@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useToast } from "../composables/useToast";
+import { useI18n } from "../i18n";
 
 const props = defineProps<{
   title: string;
@@ -10,16 +11,17 @@ const props = defineProps<{
 const emit = defineEmits<{ close: [] }>();
 
 const { show } = useToast();
+const { t } = useI18n();
 const copied = ref(false);
 
 async function copyCode() {
   try {
     await navigator.clipboard.writeText(props.code);
     copied.value = true;
-    show("Access code copied to clipboard");
+    show(t("myQuizzes.modals.copyCodeSuccess"));
     setTimeout(() => (copied.value = false), 2000);
   } catch {
-    show("Failed to copy code", "error");
+    show(t("myQuizzes.modals.copyCodeFailed"), "error");
   }
 }
 </script>
@@ -29,8 +31,8 @@ async function copyCode() {
     <div class="modal-overlay" role="dialog" aria-modal="true" @mousedown.self="emit('close')">
       <div class="modal-box">
         <header class="modal-header">
-          <h2 class="modal-title">Private access code</h2>
-          <button class="modal-close" type="button" aria-label="Close" @click="emit('close')">
+          <h2 class="modal-title">{{ t("myQuizzes.modals.privateAccessTitle") }}</h2>
+          <button class="modal-close" type="button" :aria-label="t('common.close')" @click="emit('close')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round" />
             </svg>
@@ -39,9 +41,7 @@ async function copyCode() {
 
         <div class="modal-body">
           <p class="modal-quiz-name">{{ title }}</p>
-          <p class="modal-hint">
-            Share this code with people you want to give access to this private quiz.
-          </p>
+          <p class="modal-hint">{{ t("myQuizzes.modals.privateAccessHint") }}</p>
 
           <div class="code-row">
             <div class="code-display">{{ code }}</div>
@@ -53,13 +53,13 @@ async function copyCode() {
               <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="m5 12 5 5 9-9" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-              {{ copied ? "Copied!" : "Copy code" }}
+              {{ copied ? t("common.copied") : t("common.copy") }}
             </button>
           </div>
         </div>
 
         <footer class="modal-footer">
-          <button class="btn-done" type="button" @click="emit('close')">Done</button>
+          <button class="btn-done" type="button" @click="emit('close')">{{ t("common.done") }}</button>
         </footer>
       </div>
     </div>

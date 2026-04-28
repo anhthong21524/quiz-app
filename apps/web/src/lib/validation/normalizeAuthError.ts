@@ -1,4 +1,4 @@
-import { authValidationMessages } from "./errorMessages";
+import { getAuthValidationMessages } from "./errorMessages";
 import type { AuthFieldErrors, LoginFormValues, RegisterFormValues } from "./authSchema";
 import { getFieldErrors, getUserMessage } from "../api/error-messages";
 import type { AppError } from "../api/errors";
@@ -31,6 +31,7 @@ export function normalizeAuthError(
   }
 
   if (context === "login" && error.category === "unauthorized") {
+    const authValidationMessages = getAuthValidationMessages();
     return {
       fieldErrors,
       formError: authValidationMessages.form.invalidLogin

@@ -1,7 +1,15 @@
 <script setup lang="ts">
+import { computed } from "vue";
+import { useI18n } from "../i18n";
+
+export interface ToolbarOption {
+  label: string;
+  value: string;
+}
+
 export interface ToolbarFilter {
-  label: string;    // accessible (sr-only) label
-  options: string[];
+  label: string;
+  options: Array<string | ToolbarOption>;
   value: string;
 }
 
@@ -23,6 +31,16 @@ const emit = defineEmits<{
   "update:filters": [filters: ToolbarFilter[]];
   "update:viewMode": [value: "list" | "grid"];
 }>();
+
+const { t } = useI18n();
+const normalizedFilters = computed(() =>
+  props.filters.map((filter) => ({
+    ...filter,
+    options: filter.options.map((option) =>
+      typeof option === "string" ? { label: option, value: option } : option
+    )
+  }))
+);
 
 function onFilterChange(index: number, value: string) {
   const updated = props.filters!.map((f, i) => i === index ? { ...f, value } : f);
@@ -48,7 +66,7 @@ function onFilterChange(index: number, value: string) {
         v-if="search"
         class="app-toolbar__search-clear"
         type="button"
-        aria-label="Clear search"
+        :aria-label="t('modals.clearSearch')"
         @click="emit('update:search', '')"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -59,7 +77,7 @@ function onFilterChange(index: number, value: string) {
 
     <div v-if="filters && filters.length" class="app-toolbar__filters">
       <label
-        v-for="(filter, i) in filters"
+        v-for="(filter, i) in normalizedFilters"
         :key="i"
         class="app-toolbar__select"
       >
@@ -68,7 +86,9 @@ function onFilterChange(index: number, value: string) {
           :value="filter.value"
           @change="onFilterChange(i, ($event.target as HTMLSelectElement).value)"
         >
-          <option v-for="opt in filter.options" :key="opt" :value="opt">{{ opt }}</option>
+          <option v-for="opt in filter.options" :key="opt.value" :value="opt.value">
+            {{ opt.label }}
+          </option>
         </select>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
           <path d="m7 10 5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
@@ -80,13 +100,13 @@ function onFilterChange(index: number, value: string) {
       v-if="viewMode !== undefined"
       class="app-toolbar__view-toggle"
       role="group"
-      aria-label="Choose view"
+      :aria-label="t('modals.chooseView')"
     >
       <button
         class="app-toolbar__view-btn"
         :class="{ 'is-active': viewMode === 'list' }"
         type="button"
-        aria-label="List view"
+        :aria-label="t('modals.listView')"
         :aria-pressed="viewMode === 'list'"
         @click="emit('update:viewMode', 'list')"
       >
@@ -99,7 +119,7 @@ function onFilterChange(index: number, value: string) {
         class="app-toolbar__view-btn"
         :class="{ 'is-active': viewMode === 'grid' }"
         type="button"
-        aria-label="Grid view"
+        :aria-label="t('modals.gridView')"
         :aria-pressed="viewMode === 'grid'"
         @click="emit('update:viewMode', 'grid')"
       >

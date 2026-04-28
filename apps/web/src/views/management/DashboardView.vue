@@ -6,7 +6,7 @@ import AppTable from "../../components/AppTable.vue";
 import StatCard from "../../components/StatCard.vue";
 import QuizIconAvatar from "../../components/my-quizzes/QuizIconAvatar.vue";
 import QuizStatusBadge from "../../components/my-quizzes/QuizStatusBadge.vue";
-import type { MyQuizStatus } from "../../components/my-quizzes/types";
+import { useI18n } from "../../i18n";
 import { getQuizIcon, mapQuizStatus } from "../../lib/quiz-helpers";
 import { useQuizStore } from "../../stores/quizzes";
 import { fetchResultsSummary } from "../../services/quiz-api";
@@ -14,6 +14,7 @@ import { fetchResultsSummary } from "../../services/quiz-api";
 const quizStore = useQuizStore();
 const RECENT_QUIZZES_LIMIT = 5;
 const totalSubmissions = ref<number | null>(null);
+const { t, formatDateTime: formatLocalizedDateTime } = useI18n();
 
 onMounted(async () => {
   const quizzesPromise = !quizStore.items.length && !quizStore.isLoading
@@ -23,19 +24,17 @@ onMounted(async () => {
   totalSubmissions.value = summary.totalSubmissions;
 });
 
-
 function formatDateTime(value?: string) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat(undefined, {
+  return formatLocalizedDateTime(value, {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
-    minute: "2-digit",
-  }).format(new Date(value));
+    minute: "2-digit"
+  });
 }
 
-// ── Hero: last in-progress quiz (or most recently updated) ───
 const heroQuiz = computed<Quiz | null>(() => {
   const items = quizStore.items;
   if (!items.length) return null;
@@ -53,7 +52,6 @@ const heroQuiz = computed<Quiz | null>(() => {
   )[0];
 });
 
-// ── Recent quizzes table (always 5 rows, padded with nulls) ──
 const recentQuizzes = computed<(Quiz | null)[]>(() => {
   const sorted = [...quizStore.items]
     .sort((a, b) =>
@@ -66,7 +64,6 @@ const recentQuizzes = computed<(Quiz | null)[]>(() => {
   return padded;
 });
 
-// ── Stats ─────────────────────────────────────────────────────
 const totalCount = computed(() => quizStore.items.length);
 const inProgressCount = computed(
   () => quizStore.items.filter((q) => q.status === QuizStatus.IN_PROGRESS).length
@@ -76,20 +73,19 @@ const publishedCount = computed(
 );
 
 const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length);
+
+function questionCountLabel(count: number) {
+  return t(count === 1 ? "dashboard.questionCount.one" : "dashboard.questionCount.other", { count });
+}
 </script>
 
 <template>
   <div class="dash">
-
-    <!-- ══ HERO ══════════════════════════════════════════════════ -->
-    <!-- Always rendered: skeleton → empty-welcome → continue-editing -->
     <section
       class="dash-hero"
       :class="{ 'dash-hero--empty': !isLoading && !heroQuiz }"
-      :aria-label="heroQuiz ? 'Continue editing' : 'Get started'"
+      :aria-label="heroQuiz ? t('dashboard.hero.continueAria') : t('dashboard.hero.getStartedAria')"
     >
-
-      <!-- Skeleton -->
       <template v-if="isLoading">
         <div class="hero-body">
           <div class="skel skel--eyebrow" />
@@ -99,27 +95,26 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
         </div>
       </template>
 
-      <!-- Empty: no quizzes yet -->
       <template v-else-if="!heroQuiz">
         <div class="hero-body">
           <p class="hero-eyebrow">
             <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
               <path d="M9 2.5v13M2.5 9h13" stroke-linecap="round" />
             </svg>
-            Get started
+            {{ t("dashboard.hero.getStarted") }}
           </p>
-          <h1 class="hero-title">Create your first quiz</h1>
+          <h1 class="hero-title">{{ t("dashboard.hero.createFirstQuiz") }}</h1>
           <p class="hero-subtitle">
-            Build a quiz, add questions, and publish it for others to take.
+            {{ t("dashboard.hero.createFirstQuizDescription") }}
           </p>
           <RouterLink class="hero-cta" :to="{ name: 'create-quiz' }">
-            Create quiz
+            {{ t("dashboard.hero.createQuiz") }}
             <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.64L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.16-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd" />
             </svg>
           </RouterLink>
         </div>
-        <!-- Decorative mockup (empty state) -->
+
         <div class="hero-mockup" aria-hidden="true">
           <div class="mockup-card">
             <div class="mockup-line mockup-line--short" />
@@ -143,39 +138,35 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
         </div>
       </template>
 
-      <!-- Has quiz: status-aware hero -->
       <template v-else>
         <div class="hero-body">
           <p class="hero-eyebrow">
-            <!-- In-progress: refresh/continue icon -->
             <template v-if="heroQuiz.status === QuizStatus.IN_PROGRESS">
               <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                 <path d="M14.5 9A5.5 5.5 0 1 1 9 3.5" stroke-linecap="round" />
                 <path d="M14.5 3.5v3h-3" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-              Continue editing
+              {{ t("dashboard.hero.continueEditing") }}
             </template>
-            <!-- Published: checkmark/send icon -->
             <template v-else-if="heroQuiz.status === QuizStatus.PUBLISHED">
               <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                 <path d="M3 9l4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-              Published
+              {{ t("dashboard.hero.published") }}
             </template>
-            <!-- Unpublished: eye-off icon -->
             <template v-else>
               <svg viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                 <path d="M2 2l14 14M7.5 7.6A3 3 0 0 0 10.4 10.5" stroke-linecap="round" />
                 <path d="M5 4.6C3.3 5.7 2 7.5 2 9s3.1 5 7 5a9 9 0 0 0 3-.5M8 4c.3 0 .7 0 1 .1C13 4.6 16 7 16 9c0 .8-.4 1.6-1 2.3" stroke-linecap="round" />
               </svg>
-              Unpublished
+              {{ t("dashboard.hero.unpublished") }}
             </template>
           </p>
 
           <h1 class="hero-title">{{ heroQuiz.title }}</h1>
 
           <p class="hero-meta">
-            <span>{{ heroQuiz.questions.length }} question{{ heroQuiz.questions.length !== 1 ? "s" : "" }}</span>
+            <span>{{ questionCountLabel(heroQuiz.questions.length) }}</span>
             <span class="hero-dot" aria-hidden="true">•</span>
             <QuizStatusBadge :status="mapQuizStatus(heroQuiz.status)" />
           </p>
@@ -184,14 +175,13 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
             class="hero-cta"
             :to="{ name: 'edit-quiz-questions', params: { id: heroQuiz.id } }"
           >
-            {{ heroQuiz.status === QuizStatus.IN_PROGRESS ? 'Continue' : 'Edit' }}
+            {{ heroQuiz.status === QuizStatus.IN_PROGRESS ? t("dashboard.hero.continue") : t("dashboard.hero.edit") }}
             <svg viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
               <path fill-rule="evenodd" d="M3 10a.75.75 0 0 1 .75-.75h10.64L10.23 5.29a.75.75 0 1 1 1.04-1.08l5.5 5.25a.75.75 0 0 1 0 1.08l-5.5 5.25a.75.75 0 1 1-1.04-1.08l4.16-3.96H3.75A.75.75 0 0 1 3 10Z" clip-rule="evenodd" />
             </svg>
           </RouterLink>
         </div>
 
-        <!-- Decorative quiz mockup -->
         <div class="hero-mockup" aria-hidden="true">
           <div class="mockup-card">
             <div class="mockup-line mockup-line--short" />
@@ -216,10 +206,7 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
       </template>
     </section>
 
-    <!-- ══ STATS GRID ════════════════════════════════════════════ -->
-    <section class="stats-grid" aria-label="Quiz stats overview">
-
-      <!-- Skeleton -->
+    <section class="stats-grid" :aria-label="t('dashboard.stats.overviewAria')">
       <template v-if="isLoading">
         <div v-for="n in 4" :key="n" class="stat-card stat-card--skeleton" aria-hidden="true">
           <div class="skel skel--stat-icon" />
@@ -232,7 +219,7 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
       </template>
 
       <template v-else>
-        <StatCard :value="totalCount" label="Total quizzes" hint="All quizzes you've created" color="green">
+        <StatCard :value="totalCount" :label="t('dashboard.stats.totalQuizzes')" :hint="t('dashboard.stats.totalQuizzesHint')" color="green">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
             <path d="M6 3h8l4 4v14H6z" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M14 3v4h4" stroke-linecap="round" stroke-linejoin="round" />
@@ -240,52 +227,49 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
           </svg>
         </StatCard>
 
-        <StatCard :value="inProgressCount" label="In progress" hint="Being actively edited" color="amber">
+        <StatCard :value="inProgressCount" :label="t('dashboard.stats.inProgress')" :hint="t('dashboard.stats.inProgressHint')" color="amber">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
             <path d="M11 4H4v16h16v-7" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </StatCard>
 
-        <StatCard :value="publishedCount" label="Published" hint="Publicly available" color="green">
+        <StatCard :value="publishedCount" :label="t('dashboard.stats.published')" :hint="t('dashboard.stats.publishedHint')" color="green">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
             <path d="M22 2 11 13" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M22 2 15 22l-4-9-9-4 20-7Z" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </StatCard>
 
-        <StatCard :value="totalSubmissions ?? '—'" label="Total submissions" hint="Across all published quizzes" color="teal">
+        <StatCard :value="totalSubmissions ?? '—'" :label="t('dashboard.stats.totalSubmissions')" :hint="t('dashboard.stats.totalSubmissionsHint')" color="teal">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linecap="round" stroke-linejoin="round" />
             <circle cx="9" cy="7" r="4" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </StatCard>
-
       </template>
     </section>
 
-    <!-- ══ RECENT QUIZZES TABLE ══════════════════════════════════ -->
     <section class="dash-card" aria-labelledby="recent-heading">
       <div class="card-header">
-        <h2 id="recent-heading" class="card-title">Recent quizzes</h2>
+        <h2 id="recent-heading" class="card-title">{{ t("dashboard.recent.title") }}</h2>
         <RouterLink class="card-link" :to="{ name: 'quizzes' }">
-          View all
+          {{ t("dashboard.recent.viewAll") }}
           <svg viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
             <path fill-rule="evenodd" d="M6.22 4.22a.75.75 0 0 1 1.06 0l3.25 3.25a.75.75 0 0 1 0 1.06l-3.25 3.25a.75.75 0 0 1-1.06-1.06L9.19 8 6.22 5.03a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
           </svg>
         </RouterLink>
       </div>
 
-      <!-- Skeleton rows -->
       <AppTable
         v-if="isLoading"
         :columns="[
-          { label: 'Quiz title' },
-          { label: 'Subject' },
-          { label: 'Questions' },
-          { label: 'Status' },
-          { label: 'Last updated' },
+          { label: t('dashboard.recent.columns.quizTitle') },
+          { label: t('dashboard.recent.columns.subject') },
+          { label: t('dashboard.recent.columns.questions') },
+          { label: t('dashboard.recent.columns.status') },
+          { label: t('dashboard.recent.columns.lastUpdated') }
         ]"
         aria-busy="true"
       >
@@ -298,17 +282,16 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
         </tr>
       </AppTable>
 
-      <!-- Data table (always 5 rows) -->
       <AppTable
         v-else
         first-column-variant="index"
         :columns="[
-          { label: '#', class: 'col-num' },
-          { label: 'Quiz title' },
-          { label: 'Subject' },
-          { label: 'Questions' },
-          { label: 'Status' },
-          { label: 'Last updated' },
+          { label: t('dashboard.recent.columns.number'), class: 'col-num' },
+          { label: t('dashboard.recent.columns.quizTitle') },
+          { label: t('dashboard.recent.columns.subject') },
+          { label: t('dashboard.recent.columns.questions') },
+          { label: t('dashboard.recent.columns.status') },
+          { label: t('dashboard.recent.columns.lastUpdated') }
         ]"
       >
         <tr
@@ -324,7 +307,7 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
                 <span>{{ quiz.title }}</span>
               </div>
             </td>
-            <td class="cell-muted">{{ quiz.subject ?? "Custom" }}</td>
+            <td class="cell-muted">{{ quiz.subject ?? t("dashboard.recent.customSubject") }}</td>
             <td class="cell-muted">{{ quiz.questions.length }}</td>
             <td><QuizStatusBadge :status="mapQuizStatus(quiz.status)" /></td>
             <td class="cell-muted">{{ formatDateTime(quiz.updatedAt ?? quiz.createdAt) }}</td>
@@ -335,18 +318,15 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
         </tr>
       </AppTable>
     </section>
-
   </div>
 </template>
 
 <style scoped>
-/* ── Page shell ──────────────────────────────────────────────── */
 .dash {
   display: grid;
   gap: 12px;
 }
 
-/* ══ HERO ════════════════════════════════════════════════════════ */
 .dash-hero {
   position: relative;
   overflow: hidden;
@@ -392,7 +372,6 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
   line-height: 1.15;
 }
 
-/* Empty hero: softer tint so it doesn't compete with content */
 .dash-hero--empty {
   background: linear-gradient(135deg, #f0fdf8 0%, #e8fbf2 100%);
   border-color: #d1f5e4;
@@ -440,7 +419,6 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
 .hero-cta:hover { background: #0ea873; transform: translateY(-1px); }
 .hero-cta:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; }
 
-/* Decorative mockup */
 .hero-mockup {
   position: absolute;
   right: 48px;
@@ -488,10 +466,8 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
 }
 
 .mockup-line--short { flex: none; width: 60%; }
-
 .mockup-line--selected { background: #10b981; opacity: 0.5; }
 
-/* ══ SHARED CARD ═════════════════════════════════════════════════ */
 .dash-card {
   border: var(--surface-border, 1px solid rgba(226, 223, 218, 0.92));
   border-radius: var(--surface-radius, 20px);
@@ -529,7 +505,6 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
 .card-link:hover { color: #065f46; }
 .card-link:focus-visible { outline: 2px solid #10b981; outline-offset: 2px; border-radius: 3px; }
 
-/* ══ RECENT QUIZZES TABLE ════════════════════════════════════════ */
 .quiz-title-cell {
   display: flex;
   align-items: center;
@@ -539,7 +514,6 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
   font-weight: 700;
 }
 
-
 .cell-muted { color: #657286; }
 .col-num { width: 40px; text-align: center; }
 
@@ -547,7 +521,6 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
 .row-empty:hover { background: transparent !important; }
 .cell-empty { height: 38px; }
 
-/* ══ STATS GRID ══════════════════════════════════════════════════ */
 .stats-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
@@ -563,7 +536,6 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
   min-height: 68px;
 }
 
-/* ══ SKELETON SHIMMER ════════════════════════════════════════════ */
 .skel {
   border-radius: 6px;
   background: linear-gradient(90deg, #f0f2f5 25%, #e4e8ed 50%, #f0f2f5 75%);
@@ -571,20 +543,15 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
   animation: shimmer 1.4s ease infinite;
 }
 
-/* Hero skeletons */
 .skel--eyebrow  { height: 11px; width: 110px; }
 .skel--title    { height: 32px; width: 200px; }
 .skel--meta     { height: 22px; width: 160px; }
 .skel--btn      { height: 42px; width: 120px; border-radius: 12px; }
-
-/* Table row skeletons */
 .skel--row-title  { height: 14px; width: 70%; }
 .skel--row-sm     { height: 12px; width: 80px; }
 .skel--row-xs     { height: 12px; width: 28px; }
 .skel--row-badge  { height: 22px; width: 86px; border-radius: 999px; }
 .skel--row-md     { height: 12px; width: 130px; }
-
-/* Stats skeletons */
 .skel--stat-icon  { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; }
 .skel--stat-num   { height: 20px; width: 40px; margin-bottom: 2px; }
 .skel--stat-label { height: 11px; width: 80px; margin-bottom: 2px; }
@@ -595,7 +562,6 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
   100% { background-position: -200% 0; }
 }
 
-/* ══ RESPONSIVE ══════════════════════════════════════════════════ */
 @media (max-width: 1024px) {
   .stats-grid { grid-template-columns: repeat(2, 1fr); }
 }
@@ -613,7 +579,6 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
 
 @media (prefers-reduced-motion: reduce) {
   .skel { animation: none; }
-  .hero-cta,
-  .hero-edit-btn { transition: none; }
+  .hero-cta { transition: none; }
 }
 </style>

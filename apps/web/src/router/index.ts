@@ -14,10 +14,10 @@ export const router = createRouter({
       component: () => import("../views/public/HomeView.vue"),
       meta: {
         seo: {
-          title: "Home",
-          description: "Take quizzes, explore topics, and improve every day with Quiz App.",
+          titleKey: "seo.home.title",
+          descriptionKey: "seo.home.description",
           canonicalPath: "/",
-          breadcrumbs: [{ name: "Home", path: "/" }]
+          breadcrumbs: [{ nameKey: "navigation.home", path: "/" }]
         }
       }
     },
@@ -31,13 +31,12 @@ export const router = createRouter({
       component: () => import("../views/public/UserGuidelineView.vue"),
       meta: {
         seo: {
-          title: "User Guideline",
-          description:
-            "Learn how to use Quiz App — getting started, creating quizzes, and taking quizzes as a participant.",
+          titleKey: "seo.guide.title",
+          descriptionKey: "seo.guide.description",
           canonicalPath: "/guide",
           breadcrumbs: [
-            { name: "Home", path: "/" },
-            { name: "User Guideline", path: "/guide" }
+            { nameKey: "navigation.home", path: "/" },
+            { nameKey: "seo.guide.title", path: "/guide" }
           ]
         }
       }
@@ -48,13 +47,12 @@ export const router = createRouter({
       component: () => import("../views/public/AboutView.vue"),
       meta: {
         seo: {
-          title: "About",
-          description:
-            "Learn how Quiz App helps learners practice, improve, and build knowledge with simple quizzes.",
+          titleKey: "seo.about.title",
+          descriptionKey: "seo.about.description",
           canonicalPath: "/about",
           breadcrumbs: [
-            { name: "Home", path: "/" },
-            { name: "About", path: "/about" }
+            { nameKey: "navigation.home", path: "/" },
+            { nameKey: "navigation.about", path: "/about" }
           ]
         }
       }
@@ -65,12 +63,12 @@ export const router = createRouter({
       component: () => import("../views/participant/QuizBrowseView.vue"),
       meta: {
         seo: {
-          title: "Public Quizzes",
-          description: "Browse published public quizzes and start one without signing in.",
+          titleKey: "seo.publicQuizzes.title",
+          descriptionKey: "seo.publicQuizzes.description",
           canonicalPath: "/quizzes",
           breadcrumbs: [
-            { name: "Home", path: "/" },
-            { name: "Public Quizzes", path: "/quizzes" }
+            { nameKey: "navigation.home", path: "/" },
+            { nameKey: "seo.publicQuizzes.title", path: "/quizzes" }
           ]
         }
       }
@@ -81,10 +79,10 @@ export const router = createRouter({
       component: () => import("../views/public/LoginView.vue"),
       meta: {
         seo: {
-          title: "Sign in",
-          description: "Sign in to Quiz App to create, manage, and publish quizzes.",
+          titleKey: "seo.login.title",
+          descriptionKey: "seo.login.description",
           canonicalPath: "/login",
-          breadcrumbs: [{ name: "Sign in", path: "/login" }]
+          breadcrumbs: [{ nameKey: "seo.login.title", path: "/login" }]
         }
       }
     },
@@ -100,12 +98,12 @@ export const router = createRouter({
       component: () => import("../views/participant/PrivateQuizEntryView.vue"),
       meta: {
         seo: {
-          title: "Private Quiz",
-          description: "Enter your private quiz access code to unlock and start the quiz.",
+          titleKey: "seo.privateQuiz.title",
+          descriptionKey: "seo.privateQuiz.description",
           canonicalPath: "/quizzes/private",
           breadcrumbs: [
-            { name: "Home", path: "/" },
-            { name: "Private Quiz", path: "/quizzes/private" }
+            { nameKey: "navigation.home", path: "/" },
+            { nameKey: "seo.privateQuiz.title", path: "/quizzes/private" }
           ]
         }
       }
@@ -116,9 +114,9 @@ export const router = createRouter({
       component: () => import("../views/participant/QuizLandingView.vue"),
       meta: {
         seo: {
-          title: "Public Quiz",
-          description: "Enter your name and start a public Quiz App quiz.",
-          breadcrumbs: [{ name: "Public Quiz", path: "/q" }]
+          titleKey: "seo.publicQuiz.title",
+          descriptionKey: "seo.publicQuiz.description",
+          breadcrumbs: [{ nameKey: "seo.publicQuiz.title", path: "/q" }]
         }
       }
     },
@@ -128,9 +126,9 @@ export const router = createRouter({
       component: () => import("../views/participant/QuizTakeView.vue"),
       meta: {
         seo: {
-          title: "Take Quiz",
-          description: "Answer questions in a public Quiz App quiz.",
-          breadcrumbs: [{ name: "Take Quiz", path: "/q" }]
+          titleKey: "seo.takeQuiz.title",
+          descriptionKey: "seo.takeQuiz.description",
+          breadcrumbs: [{ nameKey: "seo.takeQuiz.title", path: "/q" }]
         }
       }
     },
@@ -141,11 +139,10 @@ export const router = createRouter({
       meta: {
         requiresAuth: true,
         seo: {
-          title: "Management",
-          description:
-            "Your Quiz App management dashboard — stats, recent quizzes, and quick actions.",
+          titleKey: "seo.management.title",
+          descriptionKey: "seo.management.description",
           canonicalPath: "/management",
-          breadcrumbs: [{ name: "Management", path: "/management" }]
+          breadcrumbs: [{ nameKey: "seo.management.title", path: "/management" }]
         }
       }
     },
@@ -216,8 +213,8 @@ export const router = createRouter({
       meta: {
         requiresAuth: true,
         seo: {
-          title: "Quiz Results",
-          description: "View and analyze results for all quizzes in Quiz App.",
+          titleKey: "seo.results.title",
+          descriptionKey: "seo.results.description",
           canonicalPath: managementPath("/quizzes/results")
         }
       }
@@ -229,8 +226,8 @@ export const router = createRouter({
       meta: {
         requiresAuth: true,
         seo: {
-          title: "Quiz Results",
-          description: "View submissions and analytics for a single quiz.",
+          titleKey: "seo.resultDetail.title",
+          descriptionKey: "seo.resultDetail.description",
           canonicalPath: managementPath("/quizzes/results")
         }
       }
@@ -242,12 +239,12 @@ export const router = createRouter({
       meta: {
         requiresAuth: true,
         seo: {
-          title: "My Quizzes",
-          description: "Search, filter, sort, publish, and edit quizzes in Quiz App.",
+          titleKey: "seo.myQuizzes.title",
+          descriptionKey: "seo.myQuizzes.description",
           canonicalPath: managementPath("/quizzes"),
           breadcrumbs: [
-            { name: "Management", path: "/management" },
-            { name: "My Quizzes", path: managementPath("/quizzes") }
+            { nameKey: "seo.management.title", path: "/management" },
+            { nameKey: "seo.myQuizzes.title", path: managementPath("/quizzes") }
           ]
         }
       }
@@ -259,13 +256,12 @@ export const router = createRouter({
       meta: {
         requiresAuth: true,
         seo: {
-          title: "Profile",
-          description:
-            "Manage your personal information and profile settings in Quiz App.",
+          titleKey: "seo.profile.title",
+          descriptionKey: "seo.profile.description",
           canonicalPath: managementPath("/me/profile"),
           breadcrumbs: [
-            { name: "Management", path: "/management" },
-            { name: "Profile", path: managementPath("/me/profile") }
+            { nameKey: "seo.management.title", path: "/management" },
+            { nameKey: "seo.profile.title", path: managementPath("/me/profile") }
           ]
         }
       }
@@ -278,13 +274,12 @@ export const router = createRouter({
       meta: {
         requiresAuth: true,
         seo: {
-          title: "Configuration",
-          description:
-            "Configure quiz setup defaults and Subject / Domain choices in Quiz App.",
+          titleKey: "seo.configuration.title",
+          descriptionKey: "seo.configuration.description",
           canonicalPath: managementPath("/me/configuration"),
           breadcrumbs: [
-            { name: "Management", path: "/management" },
-            { name: "Configuration", path: managementPath("/me/configuration") }
+            { nameKey: "seo.management.title", path: "/management" },
+            { nameKey: "seo.configuration.title", path: managementPath("/me/configuration") }
           ]
         }
       }
@@ -296,12 +291,12 @@ export const router = createRouter({
       meta: {
         requiresAuth: true,
         seo: {
-          title: "Password",
-          description: "Manage password settings for your Quiz App account.",
+          titleKey: "seo.password.title",
+          descriptionKey: "seo.password.description",
           canonicalPath: managementPath("/me/password"),
           breadcrumbs: [
-            { name: "Management", path: "/management" },
-            { name: "Password", path: managementPath("/me/password") }
+            { nameKey: "seo.management.title", path: "/management" },
+            { nameKey: "seo.password.title", path: managementPath("/me/password") }
           ]
         }
       }
@@ -313,13 +308,12 @@ export const router = createRouter({
       meta: {
         requiresAuth: true,
         seo: {
-          title: "Create Quiz",
-          description:
-            "Build a new quiz with setup details, guided question entry, and answer options.",
+          titleKey: "seo.createQuiz.title",
+          descriptionKey: "seo.createQuiz.description",
           canonicalPath: managementPath("/create-quiz"),
           breadcrumbs: [
-            { name: "Management", path: "/management" },
-            { name: "Create Quiz", path: managementPath("/create-quiz") }
+            { nameKey: "seo.management.title", path: "/management" },
+            { nameKey: "seo.createQuiz.title", path: managementPath("/create-quiz") }
           ]
         }
       }
@@ -332,12 +326,12 @@ export const router = createRouter({
       meta: {
         requiresAuth: true,
         seo: {
-          title: "Edit Quiz",
-          description: "Edit quiz configuration and questions in the guided quiz builder.",
+          titleKey: "seo.editQuiz.title",
+          descriptionKey: "seo.editQuiz.description",
           breadcrumbs: [
-            { name: "Management", path: "/management" },
-            { name: "My Quizzes", path: managementPath("/quizzes") },
-            { name: "Edit Questions", path: managementPath("/quizzes") }
+            { nameKey: "seo.management.title", path: "/management" },
+            { nameKey: "seo.myQuizzes.title", path: managementPath("/quizzes") },
+            { nameKey: "seo.editQuiz.title", path: managementPath("/quizzes") }
           ]
         }
       }
@@ -356,9 +350,12 @@ export const router = createRouter({
       component: () => import("../views/public/NotFoundView.vue"),
       meta: {
         seo: {
-          title: "Page Not Found",
-          description: "The page you are looking for does not exist.",
-          breadcrumbs: [{ name: "Home", path: "/" }, { name: "Not Found", path: "" }]
+          titleKey: "seo.notFound.title",
+          descriptionKey: "seo.notFound.description",
+          breadcrumbs: [
+            { nameKey: "navigation.home", path: "/" },
+            { nameKey: "seo.notFound.title", path: "" }
+          ]
         }
       }
     }

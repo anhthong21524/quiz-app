@@ -1,0 +1,1185 @@
+export const messages = {
+  en: {
+    common: {
+      appName: "Quiz App",
+      close: "Close",
+      cancel: "Cancel",
+      confirm: "Confirm",
+      done: "Done",
+      copy: "Copy",
+      copied: "Copied!",
+      openLink: "Open link",
+      notAvailable: "Not available",
+      quizFallbackUser: "User",
+      locale: {
+        label: "Language",
+        en: "English",
+        vi: "Vietnamese"
+      },
+      theme: {
+        light: "Light"
+      }
+    },
+    footer: {
+      tagline: "Learn. Challenge. Grow."
+    },
+    navigation: {
+      home: "Home",
+      quizzes: "Quizzes",
+      about: "About",
+      guide: "Guide",
+      login: "Login",
+      myQuizzes: "My Quizzes",
+      quizResults: "Quiz Results",
+      dashboard: "Dashboard",
+      createQuiz: "Create quiz",
+      signOut: "Sign out",
+      getStarted: "Get started"
+    },
+    header: {
+      openNavigation: "Open navigation menu",
+      publicNav: "Primary",
+      mobilePublicNav: "Mobile primary",
+      dashboardNav: "Primary",
+      mobileDashboardNav: "Mobile primary",
+      managementHomeTitle: "Go to management home",
+      managementHomeAria: "Quiz App go to management home",
+      openAccountMenu: "Open account menu",
+      greeting: "Hi {name}"
+    },
+    seo: {
+      defaults: {
+        description:
+          "Quiz App helps educators create, manage, and publish quizzes from one focused web workspace."
+      },
+      home: {
+        title: "Home",
+        description: "Take quizzes, explore topics, and improve every day with Quiz App."
+      },
+      guide: {
+        title: "User Guideline",
+        description:
+          "Learn how to use Quiz App: getting started, creating quizzes, and taking quizzes as a participant."
+      },
+      about: {
+        title: "About",
+        description:
+          "Learn how Quiz App helps learners practice, improve, and build knowledge with simple quizzes."
+      },
+      publicQuizzes: {
+        title: "Public Quizzes",
+        description: "Browse published public quizzes and start one without signing in."
+      },
+      login: {
+        title: "Sign in",
+        description: "Sign in to Quiz App to create, manage, and publish quizzes."
+      },
+      privateQuiz: {
+        title: "Private Quiz",
+        description: "Enter your private quiz access code to unlock and start the quiz."
+      },
+      publicQuiz: {
+        title: "Public Quiz",
+        description: "Enter your name and start a public Quiz App quiz."
+      },
+      takeQuiz: {
+        title: "Take Quiz",
+        description: "Answer questions in a public Quiz App quiz."
+      },
+      management: {
+        title: "Management",
+        description:
+          "Your Quiz App management dashboard: stats, recent quizzes, and quick actions."
+      },
+      results: {
+        title: "Quiz Results",
+        description: "View and analyze results for all quizzes in Quiz App."
+      },
+      resultDetail: {
+        title: "Quiz Results",
+        description: "View submissions and analytics for a single quiz."
+      },
+      myQuizzes: {
+        title: "My Quizzes",
+        description: "Search, filter, sort, publish, and edit quizzes in Quiz App."
+      },
+      profile: {
+        title: "Profile",
+        description: "Manage your personal information and profile settings in Quiz App."
+      },
+      configuration: {
+        title: "Configuration",
+        description:
+          "Configure quiz setup defaults and Subject / Domain choices in Quiz App."
+      },
+      password: {
+        title: "Password",
+        description: "Manage password settings for your Quiz App account."
+      },
+      createQuiz: {
+        title: "Create Quiz",
+        description:
+          "Build a new quiz with setup details, guided question entry, and answer options."
+      },
+      editQuiz: {
+        title: "Edit Quiz",
+        description: "Edit quiz configuration and questions in the guided quiz builder."
+      },
+      notFound: {
+        title: "Page Not Found",
+        description: "The page you are looking for does not exist."
+      }
+    },
+    home: {
+      badge: "Test your knowledge. Improve every day.",
+      titleLine1: "Learn. Challenge.",
+      titleLine2: "Grow.",
+      subtitle:
+        "Take quizzes on a variety of topics, track your progress and improve every day.",
+      primaryCta: "Start a quiz",
+      secondaryCta: "Browse quizzes",
+      community: "Join a growing community of curious learners",
+      questionProgress: "Question 2 of 5",
+      questionPrompt: "What is the capital of France?",
+      scoreTitle: "Great score!",
+      scoreRank: "Top 8%",
+      featuresTitle: "Quiz App features",
+      featureCards: [
+        {
+          title: "Many Topics",
+          description: "Explore quizzes across a wide range of categories.",
+          icon: "book"
+        },
+        {
+          title: "Timed Challenges",
+          description: "Test your speed and knowledge with timed quizzes.",
+          icon: "clock"
+        },
+        {
+          title: "Track Progress",
+          description: "Monitor your performance and see how you improve.",
+          icon: "chart"
+        },
+        {
+          title: "Compete & Rank",
+          description: "Climb the leaderboard and become a quiz champion.",
+          icon: "trophy"
+        }
+      ],
+      ctaTitle: "Ready to challenge yourself?",
+      ctaDescription:
+        "Browse hundreds of quizzes across all topics and start improving today.",
+      ctaBrowse: "Browse quizzes",
+      ctaRegister: "Create an account - it's free"
+    },
+    login: {
+      titleSignIn: "Sign in to Quiz App",
+      titleCreateAccount: "Create your Quiz App account",
+      tabSignIn: "Sign in",
+      tabCreateAccount: "Create account",
+      authOptions: "Authentication options",
+      continueWithGoogle: "Continue with Google",
+      checkingGoogle: "Checking Google...",
+      divider: "or",
+      fields: {
+        email: "Email",
+        password: "Password",
+        confirmPassword: "Confirm password"
+      },
+      placeholders: {
+        email: "you@example.com",
+        password: "Password",
+        confirmPassword: "Confirm password"
+      },
+      actions: {
+        forgotPassword: "Forgot password?",
+        signIn: "Sign in ->",
+        createAccount: "Create account ->",
+        signingIn: "Signing in...",
+        creatingAccount: "Creating account..."
+      },
+      visibility: {
+        showPassword: "Show password",
+        hidePassword: "Hide password",
+        showConfirmPassword: "Show confirm password",
+        hideConfirmPassword: "Hide confirm password"
+      },
+      brandMessages: [
+        {
+          title: "Learn by doing",
+          description: "Instant feedback on every question helps you improve fast."
+        },
+        {
+          title: "Track your progress",
+          description: "See your scores grow as you master new topics."
+        }
+      ],
+      errors: {
+        googleUnavailable:
+          "Google sign-in isn't configured for this environment yet. Use email and password for now.",
+        generic: "We couldn't complete that request right now. Please try again."
+      }
+    },
+    auth: {
+      passwordHintTrigger: "Use 8-72 characters.",
+      passwordRequirements: "Password requirements",
+      validation: {
+        required: {
+          email: "Email is required.",
+          password: "Password is required.",
+          confirmPassword: "Confirm your password.",
+          name: "Name is required."
+        },
+        email: {
+          invalid: "Enter a valid email address.",
+          maxLength: "Email must be {max} characters or fewer."
+        },
+        password: {
+          minLength: "Use at least {min} characters.",
+          maxLength: "Use {max} characters or fewer.",
+          spacesOnly: "Password can't be only spaces.",
+          weak: "Choose a less common password.",
+          mismatch: "Passwords do not match."
+        },
+        name: {
+          maxLength: "Name must be {max} characters or fewer."
+        },
+        form: {
+          invalidLogin: "Incorrect email or password. Please try again.",
+          loginValidation: "Please check your email and password.",
+          registerValidation: "Please check your account details.",
+          generic: "Something went wrong. Please try again."
+        },
+        hint:
+          "Use {min}-{max} characters. Avoid common passwords; a mix of letters, numbers, and symbols is recommended.",
+        rules: {
+          length: "{min}-{max} characters",
+          notSpacesOnly: "Not only spaces",
+          notCommon: "Not a common password",
+          match: "Passwords match"
+        }
+      }
+    },
+    errors: {
+      api: {
+        defaults: {
+          network: "Unable to reach the server. Check your connection and try again.",
+          timeout: "The request took too long. Please try again.",
+          unauthorized: "Your session has expired. Please sign in again.",
+          forbidden: "You don't have permission to do that.",
+          notFound: "The requested resource was not found.",
+          validation: "Please correct the highlighted fields.",
+          conflict: "This action conflicts with the current state. Refresh and try again.",
+          rateLimited: "Too many requests. Please wait a moment and try again.",
+          server: "Something went wrong on our end. Please try again shortly.",
+          unknown: "Something went wrong. Please try again."
+        },
+        contexts: {
+          quizListLoad: {
+            network: "Unable to load your quizzes. Check your connection and try again.",
+            server: "We couldn't load your quizzes right now. Please try again.",
+            notFound: "Your quiz list could not be found."
+          },
+          quizLoad: {
+            notFound: "This quiz no longer exists. It may have been deleted.",
+            network: "Unable to load the quiz. Check your connection and try again.",
+            server: "We couldn't load this quiz right now. Please try again.",
+            forbidden: "You don't have permission to view this quiz."
+          },
+          quizSave: {
+            validation: "Please fix the errors in your quiz before saving.",
+            server: "We couldn't save your quiz right now. Your edits are intact - please try again.",
+            conflict:
+              "This quiz was modified elsewhere. Refresh to get the latest version before saving.",
+            notFound: "This quiz no longer exists and can't be saved.",
+            network: "Unable to save. Check your connection and try again."
+          },
+          quizPublish: {
+            notFound: "This quiz no longer exists and can't be published.",
+            server: "We couldn't publish the quiz right now. Please try again.",
+            forbidden: "You don't have permission to publish this quiz.",
+            conflict: "The quiz status changed unexpectedly. Refresh and try again.",
+            validation: "The quiz can't be published in its current state."
+          },
+          quizUnpublish: {
+            notFound: "This quiz no longer exists and can't be unpublished.",
+            server: "We couldn't unpublish the quiz right now. Please try again.",
+            forbidden: "You don't have permission to unpublish this quiz.",
+            conflict: "The quiz status changed unexpectedly. Refresh and try again."
+          },
+          quizDelete: {
+            notFound: "This quiz was already deleted.",
+            server: "We couldn't delete the quiz right now. Please try again.",
+            forbidden: "You don't have permission to delete this quiz."
+          },
+          quizDuplicate: {
+            notFound: "The original quiz no longer exists and can't be duplicated.",
+            server: "We couldn't duplicate the quiz right now. Please try again."
+          },
+          login: {
+            unauthorized: "Incorrect email or password. Please try again.",
+            validation: "Please check your email and password.",
+            server: "We couldn't sign you in right now. Please try again.",
+            network: "Unable to reach the server. Check your connection.",
+            conflict: "An account with this email already exists. Try signing in instead."
+          },
+          register: {
+            conflict: "An account with this email already exists. Try signing in instead.",
+            validation: "Please check your email and password.",
+            server: "We couldn't create your account right now. Please try again.",
+            network: "Unable to reach the server. Check your connection."
+          }
+        }
+      }
+    },
+    dashboard: {
+      hero: {
+        continueEditing: "Continue editing",
+        published: "Published",
+        unpublished: "Unpublished",
+        getStarted: "Get started",
+        createFirstQuiz: "Create your first quiz",
+        createFirstQuizDescription:
+          "Build a quiz, add questions, and publish it for others to take.",
+        createQuiz: "Create quiz",
+        continue: "Continue",
+        edit: "Edit",
+        continueAria: "Continue editing",
+        getStartedAria: "Get started"
+      },
+      stats: {
+        totalQuizzes: "Total quizzes",
+        totalQuizzesHint: "All quizzes you've created",
+        inProgress: "In progress",
+        inProgressHint: "Being actively edited",
+        published: "Published",
+        publishedHint: "Publicly available",
+        totalSubmissions: "Total submissions",
+        totalSubmissionsHint: "Across all published quizzes",
+        overviewAria: "Quiz stats overview"
+      },
+      recent: {
+        title: "Recent quizzes",
+        viewAll: "View all",
+        columns: {
+          number: "#",
+          quizTitle: "Quiz title",
+          subject: "Subject",
+          questions: "Questions",
+          status: "Status",
+          lastUpdated: "Last updated"
+        },
+        customSubject: "Custom"
+      },
+      questionCount: {
+        one: "{count} question",
+        other: "{count} questions"
+      }
+    },
+    myQuizzes: {
+      title: "My Quizzes",
+      description: "Manage, publish, and share all your quizzes.",
+      stats: {
+        total: "Total",
+        published: "Published",
+        inProgress: "In progress",
+        unpublished: "Unpublished",
+        aria: "Quiz dashboard stats",
+        loading: "Loading dashboard stats",
+        emptyTitle: "Welcome to your quiz dashboard",
+        emptyDescription:
+          "Your stats, including total quizzes, published count, and recent activity, will appear here once you create your first quiz."
+      },
+      banner: {
+        prefix: "You have",
+        quiz: "quiz",
+        quizzes: "quizzes",
+        savedNotPublished: "saved but not yet published.",
+        publishSingular: "Publish it to make it available to participants.",
+        publishPlural: "Publish them to make them available to participants.",
+        review: "Review"
+      },
+      listTitle: "My quizzes list",
+      loading: "Loading quizzes",
+      toolbar: {
+        searchPlaceholder: "Search quizzes...",
+        filterByStatus: "Filter by status",
+        filterBySubject: "Filter by subject",
+        allStatuses: "All status",
+        allSubjects: "All subjects"
+      },
+      retry: "Reload quizzes",
+      pagination: {
+        showing: "Showing {from} to {to} of {total} quizzes",
+        empty: "Showing 0 to 0 of 0 quizzes"
+      },
+      empty: {
+        noQuizzesTitle: "No quizzes yet",
+        noQuizzesDescription:
+          "Create your first quiz to start building your question library and sharing knowledge with others.",
+        createQuiz: "Create quiz",
+        howItWorks: "How it works",
+        noResultsTitle: "No quizzes match your filters",
+        noResultsDescription:
+          "Try adjusting your search terms, status, or subject filter - or clear everything to see all quizzes.",
+        clearFilters: "Clear filters"
+      },
+      status: {
+        published: "Published",
+        inProgress: "In progress",
+        unpublished: "Unpublished"
+      },
+      actions: {
+        publishTitle: "Publish quiz",
+        publishMessage: "\"{title}\" will become publicly visible. Are you sure you want to publish?",
+        publishConfirm: "Publish",
+        unpublishTitle: "Unpublish quiz",
+        unpublishMessage:
+          "\"{title}\" will no longer be visible to users. You can re-publish at any time.",
+        unpublishConfirm: "Unpublish",
+        deleteTitle: "Delete quiz",
+        deleteMessage: "\"{title}\" will be permanently deleted. This action cannot be undone.",
+        deleteConfirm: "Delete"
+      },
+      toasts: {
+        quizPublished: "Quiz published successfully",
+        publishFailed: "Failed to publish quiz",
+        quizUnpublished: "Quiz unpublished successfully",
+        unpublishFailed: "Failed to unpublish quiz",
+        duplicated: "\"{title}\" duplicated successfully",
+        duplicateFailed: "Failed to duplicate quiz",
+        deleted: "Quiz deleted successfully",
+        deleteFailed: "Failed to delete quiz",
+        noSubmissions: "No submissions yet for this quiz."
+      },
+      modals: {
+        shareTitle: "Share quiz",
+        shareHint: "Share this link with anyone to let them take the quiz.",
+        copyLinkSuccess: "Link copied to clipboard",
+        copyLinkFailed: "Failed to copy link",
+        privateAccessTitle: "Private access code",
+        privateAccessHint:
+          "Share this code with people you want to give access to this private quiz.",
+        copyCodeSuccess: "Access code copied to clipboard",
+        copyCodeFailed: "Failed to copy code"
+      }
+    },
+    settings: {
+      navigation: {
+        aria: "Configuration settings",
+        sectionsAria: "Settings sections",
+        profile: "Profile",
+        configuration: "Configuration",
+        password: "Password"
+      },
+      upgrade: {
+        title: "Upgrade to Pro",
+        description: "Unlock advanced analytics, custom themes and more.",
+        action: "Upgrade now"
+      },
+      profile: {
+        title: "Profile",
+        subtitle: "Manage your personal information and profile settings.",
+        summaryAria: "Profile summary",
+        detailsAria: "Profile details",
+        username: "Username",
+        email: "Email",
+        editProfile: "Edit profile",
+        uploadAvatar: "Upload avatar",
+        uploadingAvatar: "Uploading avatar...",
+        avatarAlt: "{name} avatar",
+        chooseImage: "Choose an image file.",
+        imageTooLarge: "Choose an image smaller than 2 MB.",
+        imageReadFailed: "Could not read this image.",
+        uploadFailed: "Failed to upload avatar. Please try again.",
+        notAvailable: "Not available",
+        details: {
+          language: "Language",
+          timezone: "Timezone",
+          preferredTheme: "Preferred theme"
+        },
+        timezoneValue: "(UTC+07:00) Bangkok, Hanoi, Jakarta"
+      },
+      configuration: {
+        title: "Configuration",
+        subtitle: "Configure quiz setup defaults and Subject / Domain choices.",
+        setupEyebrow: "Quiz setup",
+        subjectDomainTitle: "Subject / Domain",
+        subjectDomainDescription: "These choices appear in the quiz creation dropdown.",
+        resetDefaults: "Reset defaults",
+        fieldLabel: "Subject / Domain name",
+        fieldPlaceholder: "Example: Literature",
+        add: "Add",
+        adding: "Adding...",
+        loading: "Loading Subject / Domain configuration...",
+        configuredAria: "Configured Subject / Domain values",
+        removePrompt: "Remove {name}?",
+        remove: "Remove",
+        removing: "Removing...",
+        editField: "Edit Subject / Domain name",
+        saving: "Saving...",
+        save: "Save",
+        dragToReorder: "Drag to reorder",
+        editAction: "Edit {name}",
+        removeAction: "Remove {name}",
+        summaryOne: "{count} Subject / Domain choice configured.",
+        summaryOther: "{count} Subject / Domain choices configured.",
+        resetConfirmTitle: "Reset to defaults?",
+        resetConfirmMessage:
+          "This will replace your current Subject / Domain list with the original defaults. This cannot be undone.",
+        resetConfirmLabel: "Reset defaults",
+        toasts: {
+          added: "Subject / Domain added",
+          updated: "Subject / Domain updated",
+          removed: "\"{name}\" removed",
+          restored: "Subject / Domain defaults restored"
+        }
+      },
+      password: {
+        title: "Password",
+        subtitle: "Manage your password to keep your account secure.",
+        heading: "Change password",
+        fields: {
+          currentPassword: "Current password",
+          newPassword: "New password",
+          confirmPassword: "Confirm new password"
+        },
+        placeholders: {
+          currentPassword: "Enter your current password",
+          newPassword: "Enter your new password",
+          confirmPassword: "Confirm your new password"
+        },
+        visibility: {
+          showCurrent: "Show current password",
+          hideCurrent: "Hide current password",
+          showNew: "Show new password",
+          hideNew: "Hide new password",
+          showConfirm: "Show confirm password",
+          hideConfirm: "Hide confirm password"
+        },
+        validation: {
+          currentRequired: "Current password is required.",
+          newRequired: "New password is required.",
+          newInvalid:
+            "Use at least 8 characters with uppercase, lowercase, number, and special character.",
+          confirmRequired: "Confirm password is required.",
+          confirmMismatch: "Confirm password must match the new password."
+        },
+        rulesIntro: "Password must be at least 8 characters and include:",
+        rules: {
+          uppercase: "Uppercase letter (A-Z)",
+          lowercase: "Lowercase letter (a-z)",
+          number: "Number (0-9)",
+          special: "Special character (!@#$%^&*)"
+        },
+        update: "Update password",
+        updating: "Updating...",
+        updateFailed:
+          "We could not update your password. Please check your current password and try again."
+      }
+    },
+    modals: {
+      shareQuiz: "Share quiz",
+      privateAccessCode: "Private access code",
+      clearSearch: "Clear search",
+      chooseView: "Choose view",
+      listView: "List view",
+      gridView: "Grid view",
+      dismissToast: "Dismiss"
+    }
+  },
+  vi: {
+    common: {
+      appName: "Quiz App",
+      close: "Đóng",
+      cancel: "Hủy",
+      confirm: "Xác nhận",
+      done: "Xong",
+      copy: "Sao chép",
+      copied: "Đã sao chép!",
+      openLink: "Mở liên kết",
+      notAvailable: "Không có",
+      quizFallbackUser: "Người dùng",
+      locale: {
+        label: "Ngôn ngữ",
+        en: "Tiếng Anh",
+        vi: "Tiếng Việt"
+      },
+      theme: {
+        light: "Sáng"
+      }
+    },
+    footer: {
+      tagline: "Học hỏi. Thử thách. Phát triển."
+    },
+    navigation: {
+      home: "Trang chủ",
+      quizzes: "Bài quiz",
+      about: "Giới thiệu",
+      guide: "Hướng dẫn",
+      login: "Đăng nhập",
+      myQuizzes: "Quiz của tôi",
+      quizResults: "Kết quả quiz",
+      dashboard: "Bảng điều khiển",
+      createQuiz: "Tạo quiz",
+      signOut: "Đăng xuất",
+      getStarted: "Bắt đầu"
+    },
+    header: {
+      openNavigation: "Mở menu điều hướng",
+      publicNav: "Điều hướng chính",
+      mobilePublicNav: "Điều hướng chính trên di động",
+      dashboardNav: "Điều hướng chính",
+      mobileDashboardNav: "Điều hướng chính trên di động",
+      managementHomeTitle: "Đi đến trang quản lý",
+      managementHomeAria: "Quiz App đi đến trang quản lý",
+      openAccountMenu: "Mở menu tài khoản",
+      greeting: "Xin chào {name}"
+    },
+    seo: {
+      defaults: {
+        description:
+          "Quiz App giúp giảng viên tạo, quản lý và xuất bản quiz trong một không gian làm việc web tập trung."
+      },
+      home: {
+        title: "Trang chủ",
+        description: "Làm quiz, khám phá chủ đề và tiến bộ mỗi ngày cùng Quiz App."
+      },
+      guide: {
+        title: "Hướng dẫn sử dụng",
+        description:
+          "Tìm hiểu cách dùng Quiz App: bắt đầu, tạo quiz và làm quiz với vai trò người tham gia."
+      },
+      about: {
+        title: "Giới thiệu",
+        description:
+          "Tìm hiểu cách Quiz App giúp người học luyện tập, tiến bộ và xây dựng kiến thức qua những bài quiz đơn giản."
+      },
+      publicQuizzes: {
+        title: "Quiz công khai",
+        description: "Duyệt các quiz công khai đã xuất bản và bắt đầu mà không cần đăng nhập."
+      },
+      login: {
+        title: "Đăng nhập",
+        description: "Đăng nhập vào Quiz App để tạo, quản lý và xuất bản quiz."
+      },
+      privateQuiz: {
+        title: "Quiz riêng tư",
+        description: "Nhập mã truy cập quiz riêng tư để mở khóa và bắt đầu quiz."
+      },
+      publicQuiz: {
+        title: "Quiz công khai",
+        description: "Nhập tên của bạn và bắt đầu một quiz công khai trên Quiz App."
+      },
+      takeQuiz: {
+        title: "Làm quiz",
+        description: "Trả lời câu hỏi trong một quiz công khai của Quiz App."
+      },
+      management: {
+        title: "Quản lý",
+        description:
+          "Bảng điều khiển quản lý Quiz App của bạn: thống kê, quiz gần đây và thao tác nhanh."
+      },
+      results: {
+        title: "Kết quả quiz",
+        description: "Xem và phân tích kết quả cho tất cả quiz trong Quiz App."
+      },
+      resultDetail: {
+        title: "Kết quả quiz",
+        description: "Xem bài nộp và phân tích cho một quiz cụ thể."
+      },
+      myQuizzes: {
+        title: "Quiz của tôi",
+        description: "Tìm kiếm, lọc, sắp xếp, xuất bản và chỉnh sửa quiz trong Quiz App."
+      },
+      profile: {
+        title: "Hồ sơ",
+        description: "Quản lý thông tin cá nhân và cài đặt hồ sơ của bạn trong Quiz App."
+      },
+      configuration: {
+        title: "Cấu hình",
+        description:
+          "Thiết lập mặc định cho quiz và các lựa chọn Môn học / Lĩnh vực trong Quiz App."
+      },
+      password: {
+        title: "Mật khẩu",
+        description: "Quản lý cài đặt mật khẩu cho tài khoản Quiz App của bạn."
+      },
+      createQuiz: {
+        title: "Tạo quiz",
+        description:
+          "Tạo quiz mới với thông tin thiết lập, quy trình nhập câu hỏi có hướng dẫn và các lựa chọn đáp án."
+      },
+      editQuiz: {
+        title: "Chỉnh sửa quiz",
+        description: "Chỉnh sửa cấu hình và câu hỏi quiz trong trình tạo quiz có hướng dẫn."
+      },
+      notFound: {
+        title: "Không tìm thấy trang",
+        description: "Trang bạn đang tìm kiếm không tồn tại."
+      }
+    },
+    home: {
+      badge: "Kiểm tra kiến thức của bạn. Tiến bộ mỗi ngày.",
+      titleLine1: "Học hỏi. Thử thách.",
+      titleLine2: "Phát triển.",
+      subtitle:
+        "Làm quiz ở nhiều chủ đề khác nhau, theo dõi tiến độ và cải thiện bản thân mỗi ngày.",
+      primaryCta: "Bắt đầu quiz",
+      secondaryCta: "Duyệt quiz",
+      community: "Tham gia cộng đồng người học ham khám phá đang ngày càng lớn mạnh",
+      questionProgress: "Câu hỏi 2 trên 5",
+      questionPrompt: "Thủ đô của nước Pháp là gì?",
+      scoreTitle: "Điểm tuyệt vời!",
+      scoreRank: "Top 8%",
+      featuresTitle: "Tính năng của Quiz App",
+      featureCards: [
+        {
+          title: "Nhiều chủ đề",
+          description: "Khám phá quiz ở nhiều danh mục khác nhau.",
+          icon: "book"
+        },
+        {
+          title: "Thử thách có thời gian",
+          description: "Kiểm tra tốc độ và kiến thức của bạn với các quiz giới hạn thời gian.",
+          icon: "clock"
+        },
+        {
+          title: "Theo dõi tiến độ",
+          description: "Theo dõi kết quả và xem bạn tiến bộ như thế nào.",
+          icon: "chart"
+        },
+        {
+          title: "Thi đấu và xếp hạng",
+          description: "Leo bảng xếp hạng và trở thành nhà vô địch quiz.",
+          icon: "trophy"
+        }
+      ],
+      ctaTitle: "Sẵn sàng thử thách bản thân?",
+      ctaDescription:
+        "Duyệt hàng trăm quiz thuộc mọi chủ đề và bắt đầu cải thiện từ hôm nay.",
+      ctaBrowse: "Duyệt quiz",
+      ctaRegister: "Tạo tài khoản - miễn phí"
+    },
+    login: {
+      titleSignIn: "Đăng nhập vào Quiz App",
+      titleCreateAccount: "Tạo tài khoản Quiz App",
+      tabSignIn: "Đăng nhập",
+      tabCreateAccount: "Tạo tài khoản",
+      authOptions: "Tùy chọn xác thực",
+      continueWithGoogle: "Tiếp tục với Google",
+      checkingGoogle: "Đang kiểm tra Google...",
+      divider: "hoặc",
+      fields: {
+        email: "Email",
+        password: "Mật khẩu",
+        confirmPassword: "Xác nhận mật khẩu"
+      },
+      placeholders: {
+        email: "you@example.com",
+        password: "Mật khẩu",
+        confirmPassword: "Xác nhận mật khẩu"
+      },
+      actions: {
+        forgotPassword: "Quên mật khẩu?",
+        signIn: "Đăng nhập ->",
+        createAccount: "Tạo tài khoản ->",
+        signingIn: "Đang đăng nhập...",
+        creatingAccount: "Đang tạo tài khoản..."
+      },
+      visibility: {
+        showPassword: "Hiện mật khẩu",
+        hidePassword: "Ẩn mật khẩu",
+        showConfirmPassword: "Hiện mật khẩu xác nhận",
+        hideConfirmPassword: "Ẩn mật khẩu xác nhận"
+      },
+      brandMessages: [
+        {
+          title: "Học bằng cách thực hành",
+          description: "Phản hồi tức thì cho từng câu hỏi giúp bạn tiến bộ nhanh hơn."
+        },
+        {
+          title: "Theo dõi tiến độ",
+          description: "Xem điểm số tăng lên khi bạn chinh phục những chủ đề mới."
+        }
+      ],
+      errors: {
+        googleUnavailable:
+          "Google Sign-in chưa được cấu hình cho môi trường này. Hiện tại hãy dùng email và mật khẩu.",
+        generic: "Hiện tại chúng tôi chưa thể hoàn tất yêu cầu này. Vui lòng thử lại."
+      }
+    },
+    auth: {
+      passwordHintTrigger: "Dùng 8-72 ký tự.",
+      passwordRequirements: "Yêu cầu mật khẩu",
+      validation: {
+        required: {
+          email: "Email là bắt buộc.",
+          password: "Mật khẩu là bắt buộc.",
+          confirmPassword: "Vui lòng xác nhận mật khẩu.",
+          name: "Tên là bắt buộc."
+        },
+        email: {
+          invalid: "Nhập địa chỉ email hợp lệ.",
+          maxLength: "Email phải có tối đa {max} ký tự."
+        },
+        password: {
+          minLength: "Dùng ít nhất {min} ký tự.",
+          maxLength: "Dùng tối đa {max} ký tự.",
+          spacesOnly: "Mật khẩu không được chỉ gồm khoảng trắng.",
+          weak: "Hãy chọn mật khẩu ít phổ biến hơn.",
+          mismatch: "Mật khẩu xác nhận không khớp."
+        },
+        name: {
+          maxLength: "Tên phải có tối đa {max} ký tự."
+        },
+        form: {
+          invalidLogin: "Email hoặc mật khẩu không đúng. Vui lòng thử lại.",
+          loginValidation: "Vui lòng kiểm tra email và mật khẩu của bạn.",
+          registerValidation: "Vui lòng kiểm tra thông tin tài khoản.",
+          generic: "Đã có lỗi xảy ra. Vui lòng thử lại."
+        },
+        hint:
+          "Dùng từ {min}-{max} ký tự. Tránh mật khẩu quá phổ biến; nên kết hợp chữ cái, số và ký hiệu.",
+        rules: {
+          length: "{min}-{max} ký tự",
+          notSpacesOnly: "Không chỉ là khoảng trắng",
+          notCommon: "Không phải mật khẩu phổ biến",
+          match: "Mật khẩu khớp nhau"
+        }
+      }
+    },
+    errors: {
+      api: {
+        defaults: {
+          network: "Không thể kết nối đến máy chủ. Hãy kiểm tra mạng và thử lại.",
+          timeout: "Yêu cầu mất quá nhiều thời gian. Vui lòng thử lại.",
+          unauthorized: "Phiên đăng nhập của bạn đã hết hạn. Vui lòng đăng nhập lại.",
+          forbidden: "Bạn không có quyền thực hiện thao tác này.",
+          notFound: "Không tìm thấy tài nguyên được yêu cầu.",
+          validation: "Vui lòng sửa các trường được đánh dấu.",
+          conflict: "Thao tác này xung đột với trạng thái hiện tại. Hãy tải lại và thử lại.",
+          rateLimited: "Có quá nhiều yêu cầu. Vui lòng đợi một chút rồi thử lại.",
+          server: "Phía hệ thống đã gặp sự cố. Vui lòng thử lại sau.",
+          unknown: "Đã có lỗi xảy ra. Vui lòng thử lại."
+        },
+        contexts: {
+          quizListLoad: {
+            network: "Không thể tải danh sách quiz của bạn. Hãy kiểm tra mạng và thử lại.",
+            server: "Hiện tại chúng tôi chưa thể tải danh sách quiz. Vui lòng thử lại.",
+            notFound: "Không tìm thấy danh sách quiz của bạn."
+          },
+          quizLoad: {
+            notFound: "Quiz này không còn tồn tại. Có thể nó đã bị xóa.",
+            network: "Không thể tải quiz. Hãy kiểm tra mạng và thử lại.",
+            server: "Hiện tại chúng tôi chưa thể tải quiz này. Vui lòng thử lại.",
+            forbidden: "Bạn không có quyền xem quiz này."
+          },
+          quizSave: {
+            validation: "Vui lòng sửa lỗi trong quiz trước khi lưu.",
+            server:
+              "Hiện tại chúng tôi chưa thể lưu quiz. Các chỉnh sửa của bạn vẫn được giữ lại - hãy thử lại.",
+            conflict:
+              "Quiz này đã bị chỉnh sửa ở nơi khác. Hãy tải lại để lấy phiên bản mới nhất trước khi lưu.",
+            notFound: "Quiz này không còn tồn tại nên không thể lưu.",
+            network: "Không thể lưu. Hãy kiểm tra mạng và thử lại."
+          },
+          quizPublish: {
+            notFound: "Quiz này không còn tồn tại nên không thể xuất bản.",
+            server: "Hiện tại chúng tôi chưa thể xuất bản quiz. Vui lòng thử lại.",
+            forbidden: "Bạn không có quyền xuất bản quiz này.",
+            conflict: "Trạng thái quiz đã thay đổi ngoài dự kiến. Hãy tải lại và thử lại.",
+            validation: "Quiz chưa thể xuất bản ở trạng thái hiện tại."
+          },
+          quizUnpublish: {
+            notFound: "Quiz này không còn tồn tại nên không thể hủy xuất bản.",
+            server: "Hiện tại chúng tôi chưa thể hủy xuất bản quiz. Vui lòng thử lại.",
+            forbidden: "Bạn không có quyền hủy xuất bản quiz này.",
+            conflict: "Trạng thái quiz đã thay đổi ngoài dự kiến. Hãy tải lại và thử lại."
+          },
+          quizDelete: {
+            notFound: "Quiz này đã bị xóa trước đó.",
+            server: "Hiện tại chúng tôi chưa thể xóa quiz. Vui lòng thử lại.",
+            forbidden: "Bạn không có quyền xóa quiz này."
+          },
+          quizDuplicate: {
+            notFound: "Quiz gốc không còn tồn tại nên không thể nhân bản.",
+            server: "Hiện tại chúng tôi chưa thể nhân bản quiz. Vui lòng thử lại."
+          },
+          login: {
+            unauthorized: "Email hoặc mật khẩu không đúng. Vui lòng thử lại.",
+            validation: "Vui lòng kiểm tra email và mật khẩu của bạn.",
+            server: "Hiện tại chúng tôi chưa thể đăng nhập cho bạn. Vui lòng thử lại.",
+            network: "Không thể kết nối đến máy chủ. Hãy kiểm tra mạng.",
+            conflict: "Đã tồn tại tài khoản với email này. Hãy thử đăng nhập."
+          },
+          register: {
+            conflict: "Đã tồn tại tài khoản với email này. Hãy thử đăng nhập.",
+            validation: "Vui lòng kiểm tra email và mật khẩu của bạn.",
+            server: "Hiện tại chúng tôi chưa thể tạo tài khoản. Vui lòng thử lại.",
+            network: "Không thể kết nối đến máy chủ. Hãy kiểm tra mạng."
+          }
+        }
+      }
+    },
+    dashboard: {
+      hero: {
+        continueEditing: "Tiếp tục chỉnh sửa",
+        published: "Đã xuất bản",
+        unpublished: "Chưa xuất bản",
+        getStarted: "Bắt đầu",
+        createFirstQuiz: "Tạo quiz đầu tiên",
+        createFirstQuizDescription:
+          "Tạo một quiz, thêm câu hỏi và xuất bản để người khác có thể tham gia.",
+        createQuiz: "Tạo quiz",
+        continue: "Tiếp tục",
+        edit: "Chỉnh sửa",
+        continueAria: "Tiếp tục chỉnh sửa",
+        getStartedAria: "Bắt đầu"
+      },
+      stats: {
+        totalQuizzes: "Tổng quiz",
+        totalQuizzesHint: "Tất cả quiz bạn đã tạo",
+        inProgress: "Đang soạn",
+        inProgressHint: "Đang được chỉnh sửa",
+        published: "Đã xuất bản",
+        publishedHint: "Có sẵn công khai",
+        totalSubmissions: "Tổng lượt nộp",
+        totalSubmissionsHint: "Trên tất cả quiz đã xuất bản",
+        overviewAria: "Tổng quan thống kê quiz"
+      },
+      recent: {
+        title: "Quiz gần đây",
+        viewAll: "Xem tất cả",
+        columns: {
+          number: "#",
+          quizTitle: "Tiêu đề quiz",
+          subject: "Môn học",
+          questions: "Câu hỏi",
+          status: "Trạng thái",
+          lastUpdated: "Cập nhật lần cuối"
+        },
+        customSubject: "Tùy chỉnh"
+      },
+      questionCount: {
+        one: "{count} câu hỏi",
+        other: "{count} câu hỏi"
+      }
+    },
+    myQuizzes: {
+      title: "Quiz của tôi",
+      description: "Quản lý, xuất bản và chia sẻ tất cả quiz của bạn.",
+      stats: {
+        total: "Tổng",
+        published: "Đã xuất bản",
+        inProgress: "Đang soạn",
+        unpublished: "Chưa xuất bản",
+        aria: "Thống kê bảng điều khiển quiz",
+        loading: "Đang tải thống kê bảng điều khiển",
+        emptyTitle: "Chào mừng đến với bảng điều khiển quiz",
+        emptyDescription:
+          "Thống kê của bạn, gồm tổng số quiz, số quiz đã xuất bản và hoạt động gần đây, sẽ xuất hiện ở đây sau khi bạn tạo quiz đầu tiên."
+      },
+      banner: {
+        prefix: "Bạn có",
+        quiz: "quiz",
+        quizzes: "quiz",
+        savedNotPublished: "đã lưu nhưng chưa xuất bản.",
+        publishSingular: "Hãy xuất bản để người tham gia có thể truy cập.",
+        publishPlural: "Hãy xuất bản chúng để người tham gia có thể truy cập.",
+        review: "Xem lại"
+      },
+      listTitle: "Danh sách quiz của tôi",
+      loading: "Đang tải quiz",
+      toolbar: {
+        searchPlaceholder: "Tìm quiz...",
+        filterByStatus: "Lọc theo trạng thái",
+        filterBySubject: "Lọc theo môn học",
+        allStatuses: "Tất cả trạng thái",
+        allSubjects: "Tất cả môn học"
+      },
+      retry: "Tải lại quiz",
+      pagination: {
+        showing: "Hiển thị {from} đến {to} trên tổng {total} quiz",
+        empty: "Hiển thị 0 đến 0 trên tổng 0 quiz"
+      },
+      empty: {
+        noQuizzesTitle: "Chưa có quiz nào",
+        noQuizzesDescription:
+          "Tạo quiz đầu tiên để bắt đầu xây dựng thư viện câu hỏi và chia sẻ kiến thức với người khác.",
+        createQuiz: "Tạo quiz",
+        howItWorks: "Cách hoạt động",
+        noResultsTitle: "Không có quiz nào khớp bộ lọc",
+        noResultsDescription:
+          "Hãy thử điều chỉnh từ khóa tìm kiếm, trạng thái hoặc môn học - hoặc xóa toàn bộ bộ lọc để xem tất cả quiz.",
+        clearFilters: "Xóa bộ lọc"
+      },
+      status: {
+        published: "Đã xuất bản",
+        inProgress: "Đang soạn",
+        unpublished: "Chưa xuất bản"
+      },
+      actions: {
+        publishTitle: "Xuất bản quiz",
+        publishMessage:
+          "\"{title}\" sẽ hiển thị công khai. Bạn có chắc chắn muốn xuất bản không?",
+        publishConfirm: "Xuất bản",
+        unpublishTitle: "Hủy xuất bản quiz",
+        unpublishMessage:
+          "\"{title}\" sẽ không còn hiển thị với người dùng. Bạn có thể xuất bản lại bất kỳ lúc nào.",
+        unpublishConfirm: "Hủy xuất bản",
+        deleteTitle: "Xóa quiz",
+        deleteMessage: "\"{title}\" sẽ bị xóa vĩnh viễn. Không thể hoàn tác thao tác này.",
+        deleteConfirm: "Xóa"
+      },
+      toasts: {
+        quizPublished: "Đã xuất bản quiz thành công",
+        publishFailed: "Xuất bản quiz thất bại",
+        quizUnpublished: "Đã hủy xuất bản quiz thành công",
+        unpublishFailed: "Hủy xuất bản quiz thất bại",
+        duplicated: "Đã nhân bản \"{title}\" thành công",
+        duplicateFailed: "Nhân bản quiz thất bại",
+        deleted: "Đã xóa quiz thành công",
+        deleteFailed: "Xóa quiz thất bại",
+        noSubmissions: "Quiz này chưa có bài nộp nào."
+      },
+      modals: {
+        shareTitle: "Chia sẻ quiz",
+        shareHint: "Chia sẻ liên kết này để mọi người có thể làm quiz.",
+        copyLinkSuccess: "Đã sao chép liên kết",
+        copyLinkFailed: "Sao chép liên kết thất bại",
+        privateAccessTitle: "Mã truy cập riêng tư",
+        privateAccessHint:
+          "Chia sẻ mã này với những người bạn muốn cấp quyền truy cập quiz riêng tư.",
+        copyCodeSuccess: "Đã sao chép mã truy cập",
+        copyCodeFailed: "Sao chép mã truy cập thất bại"
+      }
+    },
+    settings: {
+      navigation: {
+        aria: "Cài đặt cấu hình",
+        sectionsAria: "Các mục cài đặt",
+        profile: "Hồ sơ",
+        configuration: "Cấu hình",
+        password: "Mật khẩu"
+      },
+      upgrade: {
+        title: "Nâng cấp lên Pro",
+        description: "Mở khóa phân tích nâng cao, giao diện tùy chỉnh và nhiều hơn nữa.",
+        action: "Nâng cấp ngay"
+      },
+      profile: {
+        title: "Hồ sơ",
+        subtitle: "Quản lý thông tin cá nhân và cài đặt hồ sơ của bạn.",
+        summaryAria: "Tóm tắt hồ sơ",
+        detailsAria: "Chi tiết hồ sơ",
+        username: "Tên người dùng",
+        email: "Email",
+        editProfile: "Chỉnh sửa hồ sơ",
+        uploadAvatar: "Tải ảnh đại diện",
+        uploadingAvatar: "Đang tải ảnh đại diện...",
+        avatarAlt: "Ảnh đại diện của {name}",
+        chooseImage: "Hãy chọn một tệp hình ảnh.",
+        imageTooLarge: "Hãy chọn hình ảnh nhỏ hơn 2 MB.",
+        imageReadFailed: "Không thể đọc hình ảnh này.",
+        uploadFailed: "Tải ảnh đại diện thất bại. Vui lòng thử lại.",
+        notAvailable: "Không có",
+        details: {
+          language: "Ngôn ngữ",
+          timezone: "Múi giờ",
+          preferredTheme: "Giao diện ưu tiên"
+        },
+        timezoneValue: "(UTC+07:00) Bangkok, Hà Nội, Jakarta"
+      },
+      configuration: {
+        title: "Cấu hình",
+        subtitle: "Thiết lập mặc định cho quiz và các lựa chọn Môn học / Lĩnh vực.",
+        setupEyebrow: "Thiết lập quiz",
+        subjectDomainTitle: "Môn học / Lĩnh vực",
+        subjectDomainDescription: "Các lựa chọn này sẽ xuất hiện trong danh sách khi tạo quiz.",
+        resetDefaults: "Khôi phục mặc định",
+        fieldLabel: "Tên Môn học / Lĩnh vực",
+        fieldPlaceholder: "Ví dụ: Văn học",
+        add: "Thêm",
+        adding: "Đang thêm...",
+        loading: "Đang tải cấu hình Môn học / Lĩnh vực...",
+        configuredAria: "Các giá trị Môn học / Lĩnh vực đã cấu hình",
+        removePrompt: "Xóa {name}?",
+        remove: "Xóa",
+        removing: "Đang xóa...",
+        editField: "Chỉnh sửa tên Môn học / Lĩnh vực",
+        saving: "Đang lưu...",
+        save: "Lưu",
+        dragToReorder: "Kéo để sắp xếp lại",
+        editAction: "Sửa {name}",
+        removeAction: "Xóa {name}",
+        summaryOne: "Đã cấu hình {count} lựa chọn Môn học / Lĩnh vực.",
+        summaryOther: "Đã cấu hình {count} lựa chọn Môn học / Lĩnh vực.",
+        resetConfirmTitle: "Khôi phục mặc định?",
+        resetConfirmMessage:
+          "Thao tác này sẽ thay thế danh sách Môn học / Lĩnh vực hiện tại bằng danh sách mặc định ban đầu. Không thể hoàn tác.",
+        resetConfirmLabel: "Khôi phục mặc định",
+        toasts: {
+          added: "Đã thêm Môn học / Lĩnh vực",
+          updated: "Đã cập nhật Môn học / Lĩnh vực",
+          removed: "Đã xóa \"{name}\"",
+          restored: "Đã khôi phục mặc định Môn học / Lĩnh vực"
+        }
+      },
+      password: {
+        title: "Mật khẩu",
+        subtitle: "Quản lý mật khẩu để giữ an toàn cho tài khoản của bạn.",
+        heading: "Đổi mật khẩu",
+        fields: {
+          currentPassword: "Mật khẩu hiện tại",
+          newPassword: "Mật khẩu mới",
+          confirmPassword: "Xác nhận mật khẩu mới"
+        },
+        placeholders: {
+          currentPassword: "Nhập mật khẩu hiện tại",
+          newPassword: "Nhập mật khẩu mới",
+          confirmPassword: "Xác nhận mật khẩu mới"
+        },
+        visibility: {
+          showCurrent: "Hiện mật khẩu hiện tại",
+          hideCurrent: "Ẩn mật khẩu hiện tại",
+          showNew: "Hiện mật khẩu mới",
+          hideNew: "Ẩn mật khẩu mới",
+          showConfirm: "Hiện mật khẩu xác nhận",
+          hideConfirm: "Ẩn mật khẩu xác nhận"
+        },
+        validation: {
+          currentRequired: "Mật khẩu hiện tại là bắt buộc.",
+          newRequired: "Mật khẩu mới là bắt buộc.",
+          newInvalid:
+            "Dùng ít nhất 8 ký tự với chữ hoa, chữ thường, số và ký tự đặc biệt.",
+          confirmRequired: "Xác nhận mật khẩu là bắt buộc.",
+          confirmMismatch: "Mật khẩu xác nhận phải khớp với mật khẩu mới."
+        },
+        rulesIntro: "Mật khẩu phải có ít nhất 8 ký tự và bao gồm:",
+        rules: {
+          uppercase: "Chữ hoa (A-Z)",
+          lowercase: "Chữ thường (a-z)",
+          number: "Số (0-9)",
+          special: "Ký tự đặc biệt (!@#$%^&*)"
+        },
+        update: "Cập nhật mật khẩu",
+        updating: "Đang cập nhật...",
+        updateFailed:
+          "Chúng tôi không thể cập nhật mật khẩu. Vui lòng kiểm tra mật khẩu hiện tại và thử lại."
+      }
+    },
+    modals: {
+      shareQuiz: "Chia sẻ quiz",
+      privateAccessCode: "Mã truy cập riêng tư",
+      clearSearch: "Xóa tìm kiếm",
+      chooseView: "Chọn chế độ xem",
+      listView: "Chế độ danh sách",
+      gridView: "Chế độ lưới",
+      dismissToast: "Ẩn thông báo"
+    }
+  }
+} as const;
+
+export type MessageSchema = typeof messages.en;
+export type SupportedLocale = keyof typeof messages;

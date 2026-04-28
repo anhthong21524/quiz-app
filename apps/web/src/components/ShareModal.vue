@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from "vue";
 import { useToast } from "../composables/useToast";
+import { useI18n } from "../i18n";
 
 const props = defineProps<{
   title: string;
@@ -10,16 +11,17 @@ const props = defineProps<{
 const emit = defineEmits<{ close: [] }>();
 
 const { show } = useToast();
+const { t } = useI18n();
 const copied = ref(false);
 
 async function copyLink() {
   try {
     await navigator.clipboard.writeText(props.url);
     copied.value = true;
-    show("Link copied to clipboard");
+    show(t("myQuizzes.modals.copyLinkSuccess"));
     setTimeout(() => (copied.value = false), 2000);
   } catch {
-    show("Failed to copy link", "error");
+    show(t("myQuizzes.modals.copyLinkFailed"), "error");
   }
 }
 
@@ -33,8 +35,8 @@ function openLink() {
     <div class="modal-overlay" role="dialog" aria-modal="true" @mousedown.self="emit('close')">
       <div class="modal-box">
         <header class="modal-header">
-          <h2 class="modal-title">Share quiz</h2>
-          <button class="modal-close" type="button" aria-label="Close" @click="emit('close')">
+          <h2 class="modal-title">{{ t("myQuizzes.modals.shareTitle") }}</h2>
+          <button class="modal-close" type="button" :aria-label="t('common.close')" @click="emit('close')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round" />
             </svg>
@@ -43,7 +45,7 @@ function openLink() {
 
         <div class="modal-body">
           <p class="modal-quiz-name">{{ title }}</p>
-          <p class="modal-hint">Share this link with anyone to let them take the quiz.</p>
+          <p class="modal-hint">{{ t("myQuizzes.modals.shareHint") }}</p>
 
           <div class="url-row">
             <input class="url-input" type="text" readonly :value="url" />
@@ -55,7 +57,7 @@ function openLink() {
               <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
                 <path d="m5 12 5 5 9-9" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-              {{ copied ? "Copied!" : "Copy" }}
+              {{ copied ? t("common.copied") : t("common.copy") }}
             </button>
           </div>
         </div>
@@ -66,9 +68,9 @@ function openLink() {
               <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
               <path d="M15 3h6v6M10 14 21 3" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            Open link
+            {{ t("common.openLink") }}
           </button>
-          <button class="btn-done" type="button" @click="emit('close')">Done</button>
+          <button class="btn-done" type="button" @click="emit('close')">{{ t("common.done") }}</button>
         </footer>
       </div>
     </div>

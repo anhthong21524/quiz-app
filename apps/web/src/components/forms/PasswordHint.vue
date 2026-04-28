@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { getPasswordRuleStatuses } from "../../lib/validation/validators";
-import { passwordHintText } from "../../lib/validation/errorMessages";
+import { getPasswordHintText } from "../../lib/validation/errorMessages";
+import { useI18n } from "../../i18n";
 
 const props = defineProps<{
   id?: string;
@@ -10,6 +11,8 @@ const props = defineProps<{
   showConfirmation?: boolean;
 }>();
 
+const { t } = useI18n();
+
 const rules = computed(() =>
   getPasswordRuleStatuses(
     props.password,
@@ -17,6 +20,7 @@ const rules = computed(() =>
     props.showConfirmation ?? false
   )
 );
+const passwordHintText = computed(() => getPasswordHintText());
 </script>
 
 <template>
@@ -26,13 +30,13 @@ const rules = computed(() =>
       class="password-hint-trigger"
       :aria-describedby="id ? `${id}-details` : undefined"
     >
-      <span>Use 8-72 characters.</span>
+      <span>{{ t("auth.passwordHintTrigger") }}</span>
       <span class="hint-icon" aria-hidden="true">?</span>
     </button>
 
     <div :id="id ? `${id}-details` : undefined" class="password-hint-panel" role="tooltip">
       <p>{{ passwordHintText }}</p>
-      <ul aria-label="Password requirements">
+      <ul :aria-label="t('auth.passwordRequirements')">
         <li
           v-for="rule in rules"
           :key="rule.id"

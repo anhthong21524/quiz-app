@@ -1,5 +1,6 @@
 import { AUTH_FIELD_LIMITS, AUTH_PASSWORD_POLICY } from "@quiz-app/shared";
-import { authValidationMessages } from "./errorMessages";
+import { getAuthValidationMessages } from "./errorMessages";
+import { t } from "../../i18n";
 
 export type AuthFieldName = "email" | "password" | "confirmPassword" | "name";
 
@@ -37,6 +38,7 @@ export function normalizeOptionalName(value: string | undefined): string {
 }
 
 export function validateEmail(value: string): ValidationIssue[] {
+  const authValidationMessages = getAuthValidationMessages();
   const email = normalizeEmail(value);
   const issues: ValidationIssue[] = [];
 
@@ -69,6 +71,7 @@ export function validateEmail(value: string): ValidationIssue[] {
 }
 
 export function validateRequiredPassword(value: string): ValidationIssue[] {
+  const authValidationMessages = getAuthValidationMessages();
   if (!value || !value.trim()) {
     return [
       {
@@ -83,6 +86,7 @@ export function validateRequiredPassword(value: string): ValidationIssue[] {
 }
 
 export function validateNewPassword(value: string): ValidationIssue[] {
+  const authValidationMessages = getAuthValidationMessages();
   const issues = validateRequiredPassword(value);
 
   if (issues.length > 0) {
@@ -128,6 +132,7 @@ export function validatePasswordConfirmation(
   password: string,
   confirmPassword: string
 ): ValidationIssue[] {
+  const authValidationMessages = getAuthValidationMessages();
   if (!confirmPassword) {
     return [
       {
@@ -152,6 +157,7 @@ export function validatePasswordConfirmation(
 }
 
 export function validateOptionalName(value: string | undefined): ValidationIssue[] {
+  const authValidationMessages = getAuthValidationMessages();
   const name = normalizeOptionalName(value);
 
   if (name.length > AUTH_FIELD_LIMITS.nameMaxLength) {
@@ -176,19 +182,22 @@ export function getPasswordRuleStatuses(
   const statuses: PasswordRuleStatus[] = [
     {
       id: "length",
-      label: `${AUTH_PASSWORD_POLICY.minLength}-${AUTH_PASSWORD_POLICY.maxLength} characters`,
+      label: t("auth.validation.rules.length", {
+        min: AUTH_PASSWORD_POLICY.minLength,
+        max: AUTH_PASSWORD_POLICY.maxLength
+      }),
       passed:
         password.length >= AUTH_PASSWORD_POLICY.minLength &&
         password.length <= AUTH_PASSWORD_POLICY.maxLength
     },
     {
       id: "notSpacesOnly",
-      label: "Not only spaces",
+      label: t("auth.validation.rules.notSpacesOnly"),
       passed: Boolean(password.trim())
     },
     {
       id: "notCommon",
-      label: "Not a common password",
+      label: t("auth.validation.rules.notCommon"),
       passed: !WEAK_PASSWORDS.has(normalizedPassword)
     }
   ];
@@ -196,7 +205,7 @@ export function getPasswordRuleStatuses(
   if (includeMatch) {
     statuses.push({
       id: "match",
-      label: "Passwords match",
+      label: t("auth.validation.rules.match"),
       passed: Boolean(confirmPassword) && password === confirmPassword
     });
   }

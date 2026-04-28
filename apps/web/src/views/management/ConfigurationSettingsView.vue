@@ -498,7 +498,7 @@ function onDragEnd() {
 .list-scroll-wrap {
   position: relative;
   max-height: 240px; /* shows 4 rows + peek of 5th */
-  overflow-y: auto;
+  overflow: hidden auto;
   border-radius: 8px;
   scrollbar-width: thin;
   scrollbar-color: #d1d9e0 transparent;

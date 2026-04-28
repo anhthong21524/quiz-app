@@ -38,7 +38,7 @@ defineProps<{
 
 .settings-content-shell {
   height: 100%;
-  overflow-y: auto;
+  overflow: hidden auto;
   padding: 20px 28px;
   border: var(--surface-border);
   border-radius: var(--surface-radius);

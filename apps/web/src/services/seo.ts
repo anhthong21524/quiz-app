@@ -1,5 +1,6 @@
 import type { RouteLocationNormalizedLoaded } from "vue-router";
 import { env } from "../config/env";
+import { getOpenGraphLocale, t } from "../i18n";
 
 type RobotsDirective = {
   index: boolean;
@@ -7,13 +8,16 @@ type RobotsDirective = {
 };
 
 type BreadcrumbItem = {
-  name: string;
+  name?: string;
+  nameKey?: string;
   path: string;
 };
 
 export type SeoRouteMeta = {
-  title: string;
-  description: string;
+  title?: string;
+  titleKey?: string;
+  description?: string;
+  descriptionKey?: string;
   canonicalPath?: string;
   breadcrumbs?: BreadcrumbItem[];
   robots?: RobotsDirective;
@@ -27,9 +31,6 @@ declare module "vue-router" {
   }
 }
 
-const appName = "Quiz App";
-const defaultDescription =
-  "Quiz App helps educators create, manage, and publish quizzes from one focused web workspace.";
 const defaultImagePath = "/og-image.png";
 const defaultImageWidth = "1200";
 const defaultImageHeight = "630";
@@ -44,8 +45,8 @@ const privateRobots: RobotsDirective = {
 
 export function applySeo(to: RouteLocationNormalizedLoaded) {
   const seo = to.meta.seo;
-  const title = formatTitle(seo?.title);
-  const description = seo?.description ?? defaultDescription;
+  const title = formatTitle(resolveText(seo?.title, seo?.titleKey));
+  const description = resolveText(seo?.description, seo?.descriptionKey) ?? getDefaultDescription();
   const canonicalUrl = resolveUrl(seo?.canonicalPath ?? to.path);
   const imageUrl = resolveUrl(defaultImagePath);
   const robots = seo?.robots ?? (to.meta.requiresAuth ? privateRobots : defaultRobots);
@@ -56,7 +57,7 @@ export function applySeo(to: RouteLocationNormalizedLoaded) {
   setMeta("robots", formatRobots(robots));
   setMeta("googlebot", formatRobots(robots));
 
-  setMetaProperty("og:site_name", appName);
+  setMetaProperty("og:site_name", getAppName());
   setMetaProperty("og:type", "website");
   setMetaProperty("og:title", title);
   setMetaProperty("og:description", description);
@@ -64,7 +65,7 @@ export function applySeo(to: RouteLocationNormalizedLoaded) {
   setMetaProperty("og:image", imageUrl);
   setMetaProperty("og:image:width", defaultImageWidth);
   setMetaProperty("og:image:height", defaultImageHeight);
-  setMetaProperty("og:locale", "en_US");
+  setMetaProperty("og:locale", getOpenGraphLocale());
 
   setMeta("twitter:card", "summary_large_image");
   setMeta("twitter:title", title);
@@ -76,6 +77,8 @@ export function applySeo(to: RouteLocationNormalizedLoaded) {
 }
 
 function formatTitle(title?: string) {
+  const appName = getAppName();
+
   if (!title || title === appName) {
     return appName;
   }
@@ -85,6 +88,22 @@ function formatTitle(title?: string) {
 
 function formatRobots(robots: RobotsDirective) {
   return `${robots.index ? "index" : "noindex"}, ${robots.follow ? "follow" : "nofollow"}`;
+}
+
+function resolveText(value?: string, key?: string) {
+  if (key) {
+    return t(key);
+  }
+
+  return value;
+}
+
+function getAppName() {
+  return t("common.appName");
+}
+
+function getDefaultDescription() {
+  return t("seo.defaults.description");
 }
 
 function resolveUrl(path: string) {
@@ -142,9 +161,9 @@ function buildStructuredData(seo: SeoRouteMeta | undefined, canonicalUrl: string
     {
       "@type": "WebPage",
       "@id": `${canonicalUrl}#webpage`,
-      name: seo?.title ? formatTitle(seo.title) : appName,
+      name: formatTitle(resolveText(seo?.title, seo?.titleKey)),
       url: canonicalUrl,
-      description: seo?.description ?? defaultDescription,
+      description: resolveText(seo?.description, seo?.descriptionKey) ?? getDefaultDescription(),
       isPartOf: {
         "@id": resolveUrl("/#website")
       }
@@ -152,25 +171,25 @@ function buildStructuredData(seo: SeoRouteMeta | undefined, canonicalUrl: string
     {
       "@type": "WebSite",
       "@id": resolveUrl("/#website"),
-      name: appName,
+      name: getAppName(),
       url: env.siteUrl,
-      description: defaultDescription
+      description: getDefaultDescription()
     },
     {
       "@type": "Organization",
       "@id": resolveUrl("/#organization"),
-      name: appName,
+      name: getAppName(),
       url: env.siteUrl,
       logo: resolveUrl("/icon-512.png")
     },
     {
       "@type": "SoftwareApplication",
       "@id": resolveUrl("/#application"),
-      name: appName,
+      name: getAppName(),
       applicationCategory: "EducationalApplication",
       operatingSystem: "Web",
       url: env.siteUrl,
-      description: defaultDescription
+      description: getDefaultDescription()
     }
   ];
 
@@ -180,7 +199,7 @@ function buildStructuredData(seo: SeoRouteMeta | undefined, canonicalUrl: string
       itemListElement: seo.breadcrumbs.map((item, index) => ({
         "@type": "ListItem",
         position: index + 1,
-        name: item.name,
+        name: item.nameKey ? t(item.nameKey) : item.name,
         item: resolveUrl(item.path)
       }))
     });

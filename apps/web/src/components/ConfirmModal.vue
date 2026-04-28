@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "../i18n";
+
 defineProps<{
   title: string;
   message: string;
@@ -10,6 +12,8 @@ const emit = defineEmits<{
   confirm: [];
   cancel: [];
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -18,7 +22,7 @@ const emit = defineEmits<{
       <div class="modal-box">
         <header class="modal-header">
           <h2 class="modal-title">{{ title }}</h2>
-          <button class="modal-close" type="button" aria-label="Close" @click="emit('cancel')">
+          <button class="modal-close" type="button" :aria-label="t('common.close')" @click="emit('cancel')">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round" />
             </svg>
@@ -28,14 +32,14 @@ const emit = defineEmits<{
         <p class="modal-message">{{ message }}</p>
 
         <footer class="modal-footer">
-          <button class="btn-cancel" type="button" @click="emit('cancel')">Cancel</button>
+          <button class="btn-cancel" type="button" @click="emit('cancel')">{{ t("common.cancel") }}</button>
           <button
             class="btn-confirm"
             :class="{ 'btn-danger': danger }"
             type="button"
             @click="emit('confirm')"
           >
-            {{ confirmLabel ?? "Confirm" }}
+            {{ confirmLabel ?? t("common.confirm") }}
           </button>
         </footer>
       </div>

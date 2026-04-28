@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import SettingsPageLayout from "../../components/settings/SettingsPageLayout.vue";
+import { useI18n } from "../../i18n";
 import { useAuthStore } from "../../stores/auth";
 
 type ProfileDetail = {
@@ -10,6 +11,7 @@ type ProfileDetail = {
 };
 
 const authStore = useAuthStore();
+const { locale, t } = useI18n();
 const avatarInput = ref<HTMLInputElement | null>(null);
 const avatarError = ref("");
 const avatarUploading = ref(false);
@@ -19,7 +21,7 @@ const username = computed(() => {
   const email = authStore.user?.email?.trim();
 
   if (!email) {
-    return "User";
+    return t("common.quizFallbackUser");
   }
 
   const [emailName] = email.split("@");
@@ -30,25 +32,25 @@ const avatarUrl = computed(() => authStore.user?.avatarUrl ?? "");
 
 const profile = computed(() => ({
   username: username.value,
-  email: authStore.user?.email?.trim() || "Not available",
-  language: "English",
-  timezone: "(UTC+07:00) Bangkok, Hanoi, Jakarta",
-  preferredTheme: "Light"
+  email: authStore.user?.email?.trim() || t("settings.profile.notAvailable"),
+  language: locale.value === "vi" ? t("common.locale.vi") : t("common.locale.en"),
+  timezone: t("settings.profile.timezoneValue"),
+  preferredTheme: t("common.theme.light")
 }));
 
 const profileDetails = computed<ProfileDetail[]>(() => [
   {
-    label: "Language",
+    label: t("settings.profile.details.language"),
     value: profile.value.language,
     icon: "language"
   },
   {
-    label: "Timezone",
+    label: t("settings.profile.details.timezone"),
     value: profile.value.timezone,
     icon: "timezone"
   },
   {
-    label: "Preferred theme",
+    label: t("settings.profile.details.preferredTheme"),
     value: profile.value.preferredTheme,
     icon: "theme"
   }
@@ -89,13 +91,13 @@ function handleAvatarUpload(event: Event) {
   }
 
   if (!file.type.startsWith("image/")) {
-    avatarError.value = "Choose an image file.";
+    avatarError.value = t("settings.profile.chooseImage");
     input.value = "";
     return;
   }
 
   if (file.size > maxAvatarSizeBytes) {
-    avatarError.value = "Choose an image smaller than 2 MB.";
+    avatarError.value = t("settings.profile.imageTooLarge");
     input.value = "";
     return;
   }
@@ -104,7 +106,7 @@ function handleAvatarUpload(event: Event) {
 
   reader.onload = async () => {
     if (typeof reader.result !== "string") {
-      avatarError.value = "Could not read this image.";
+      avatarError.value = t("settings.profile.imageReadFailed");
       input.value = "";
       return;
     }
@@ -117,14 +119,14 @@ function handleAvatarUpload(event: Event) {
       const compressed = await compressImage(reader.result, 256, 0.8);
       await authStore.updateAvatar(compressed);
     } catch {
-      avatarError.value = "Failed to upload avatar. Please try again.";
+      avatarError.value = t("settings.profile.uploadFailed");
     } finally {
       avatarUploading.value = false;
     }
   };
 
   reader.onerror = () => {
-    avatarError.value = "Could not read this image.";
+    avatarError.value = t("settings.profile.imageReadFailed");
     input.value = "";
   };
 
@@ -135,11 +137,11 @@ function handleAvatarUpload(event: Event) {
 <template>
   <SettingsPageLayout
     active-section="profile"
-    title="Profile"
-    subtitle="Manage your personal information and profile settings."
+    :title="t('settings.profile.title')"
+    :subtitle="t('settings.profile.subtitle')"
     title-id="profile-title"
   >
-      <article class="profile-card" aria-label="Profile summary">
+      <article class="profile-card" :aria-label="t('settings.profile.summaryAria')">
         <div class="profile-summary">
           <div class="profile-avatar-wrap">
             <div class="profile-avatar" aria-hidden="true">
@@ -147,7 +149,7 @@ function handleAvatarUpload(event: Event) {
                 v-if="avatarUrl"
                 class="profile-avatar-image"
                 :src="avatarUrl"
-                :alt="`${profile.username} avatar`"
+                :alt="t('settings.profile.avatarAlt', { name: profile.username })"
               />
               <svg v-else viewBox="0 0 120 120" fill="currentColor">
                 <circle cx="60" cy="44" r="19" />
@@ -187,11 +189,11 @@ function handleAvatarUpload(event: Event) {
           <div class="profile-identity">
             <dl>
               <div>
-                <dt>Username</dt>
+                <dt>{{ t("settings.profile.username") }}</dt>
                 <dd>{{ profile.username }}</dd>
               </div>
               <div>
-                <dt>Email</dt>
+                <dt>{{ t("settings.profile.email") }}</dt>
                 <dd>{{ profile.email }}</dd>
               </div>
             </dl>
@@ -199,13 +201,13 @@ function handleAvatarUpload(event: Event) {
         </div>
 
         <button class="edit-profile-button" type="button" @click="editProfile">
-          Edit profile
+          {{ t("settings.profile.editProfile") }}
         </button>
 
         <p v-if="avatarError" class="avatar-error" role="alert">{{ avatarError }}</p>
       </article>
 
-      <article class="profile-details-card" aria-label="Profile details">
+      <article class="profile-details-card" :aria-label="t('settings.profile.detailsAria')">
         <div v-for="detail in profileDetails" :key="detail.label" class="detail-row">
           <div class="detail-label">
             <svg

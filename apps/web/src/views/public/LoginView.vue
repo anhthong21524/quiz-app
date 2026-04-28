@@ -5,6 +5,7 @@ import FieldErrorText from "../../components/forms/FieldErrorText.vue";
 import FormErrorBanner from "../../components/forms/FormErrorBanner.vue";
 import PasswordHint from "../../components/forms/PasswordHint.vue";
 import { env } from "../../config/env";
+import { useI18n } from "../../i18n";
 import { getGoogleAuthStatus } from "../../services/auth-api";
 import { useAuthStore } from "../../stores/auth";
 import { isAppError } from "../../lib/api/errors";
@@ -34,20 +35,7 @@ type BrandMessage = {
 const BRAND_ROTATION_MS = 4000;
 const ADMIN_EMAIL = "admin@quiz.app";
 const ADMIN_PASSWORD = "admin1234";
-const GOOGLE_AUTH_UNAVAILABLE_MESSAGE =
-  "Google sign-in isn't configured for this environment yet. Use email and password for now.";
-const GENERIC_AUTH_ERROR = "We couldn't complete that request right now. Please try again.";
-
-const brandMessages: BrandMessage[] = [
-  {
-    title: "Learn by doing",
-    description: "Instant feedback on every question helps you improve fast."
-  },
-  {
-    title: "Track your progress",
-    description: "See your scores grow as you master new topics."
-  }
-];
+const { t, tm } = useI18n();
 
 const loginForm = reactive<LoginFormValues>({
   email: ADMIN_EMAIL,
@@ -74,19 +62,20 @@ const registerDirty = reactive<FieldFlags>({});
 const loginServerErrors = reactive<AuthFieldErrors>({});
 const registerServerErrors = reactive<AuthFieldErrors>({});
 const formError = ref("");
+const brandMessages = computed(() => tm<BrandMessage[]>("login.brandMessages"));
 
 const isSignIn = computed(() => authMode.value === "signIn");
 const authTitle = computed(() =>
-  isSignIn.value ? "Sign in to Quiz App" : "Create your Quiz App account"
+  isSignIn.value ? t("login.titleSignIn") : t("login.titleCreateAccount")
 );
 const passwordInputType = computed(() => (showPassword.value ? "text" : "password"));
 const confirmPasswordInputType = computed(() =>
   showConfirmPassword.value ? "text" : "password"
 );
-const panelContent = computed(() => brandMessages[activeBrandIndex.value]);
-const submitLabel = computed(() => (isSignIn.value ? "Sign in ->" : "Create account ->"));
+const panelContent = computed(() => brandMessages.value[activeBrandIndex.value]);
+const submitLabel = computed(() => (isSignIn.value ? t("login.actions.signIn") : t("login.actions.createAccount")));
 const loadingLabel = computed(() =>
-  isSignIn.value ? "Signing in..." : "Creating account..."
+  isSignIn.value ? t("login.actions.signingIn") : t("login.actions.creatingAccount")
 );
 const loginValidation = computed(() => validateLoginForm(loginForm));
 const registerValidation = computed(() => validateRegisterForm(registerForm));
@@ -204,7 +193,7 @@ const handleSubmit = async () => {
       applyServerErrors(normalizedError.fieldErrors);
       formError.value = normalizedError.formError;
     } else {
-      formError.value = GENERIC_AUTH_ERROR;
+      formError.value = t("login.errors.generic");
     }
   } finally {
     isSubmitting.value = false;
@@ -230,7 +219,7 @@ const handleGoogleSignIn = async () => {
     }
 
     if (googleAuthEnabled.value === false) {
-      formError.value = GOOGLE_AUTH_UNAVAILABLE_MESSAGE;
+      formError.value = t("login.errors.googleUnavailable");
       return;
     }
 
@@ -248,7 +237,7 @@ onMounted(() => {
   void loadGoogleAuthStatus();
 
   brandRotationTimer = window.setInterval(() => {
-    activeBrandIndex.value = (activeBrandIndex.value + 1) % brandMessages.length;
+    activeBrandIndex.value = (activeBrandIndex.value + 1) % brandMessages.value.length;
   }, BRAND_ROTATION_MS);
 });
 
@@ -265,7 +254,7 @@ onBeforeUnmount(() => {
       <aside class="brand-panel" aria-hidden="true">
         <div class="brand-mark">
           <div class="brand-badge">Q</div>
-          <span>Quiz App</span>
+          <span>{{ t("common.appName") }}</span>
         </div>
 
         <Transition name="brand-copy" mode="out-in">
@@ -280,7 +269,7 @@ onBeforeUnmount(() => {
         <div class="form-shell">
           <h1 class="auth-title">{{ authTitle }}</h1>
 
-          <div class="tabs" role="tablist" aria-label="Authentication options">
+          <div class="tabs" role="tablist" :aria-label="t('login.authOptions')">
             <button
               type="button"
               class="tab"
@@ -289,7 +278,7 @@ onBeforeUnmount(() => {
               :aria-selected="isSignIn"
               @click="switchMode('signIn')"
             >
-              Sign in
+              {{ t("login.tabSignIn") }}
             </button>
             <button
               type="button"
@@ -299,7 +288,7 @@ onBeforeUnmount(() => {
               :aria-selected="!isSignIn"
               @click="switchMode('createAccount')"
             >
-              Create account
+              {{ t("login.tabCreateAccount") }}
             </button>
           </div>
 
@@ -336,26 +325,26 @@ onBeforeUnmount(() => {
                       fill="#EA4335"
                     />
                   </svg>
-                  <span>{{ isCheckingGoogleAuth ? "Checking Google..." : "Continue with Google" }}</span>
+                  <span>{{ isCheckingGoogleAuth ? t("login.checkingGoogle") : t("login.continueWithGoogle") }}</span>
                 </button>
 
                 <div class="divider" aria-hidden="true">
                   <span></span>
-                  <p>or</p>
+                  <p>{{ t("login.divider") }}</p>
                   <span></span>
                 </div>
               </div>
 
               <form class="login-form" @submit.prevent="handleSubmit" novalidate>
                 <div class="field-group">
-                  <label for="signin-email">Email</label>
+                  <label for="signin-email">{{ t("login.fields.email") }}</label>
                   <input
                     id="signin-email"
                     v-model="loginForm.email"
                     type="email"
                     name="email"
                     autocomplete="email"
-                    placeholder="you@example.com"
+                    :placeholder="t('login.placeholders.email')"
                     :aria-invalid="Boolean(fieldError('email'))"
                     :aria-describedby="fieldError('email') ? 'signin-email-error' : undefined"
                     @blur="markFieldTouched('email')"
@@ -365,7 +354,7 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="field-group">
-                  <label for="signin-password">Password</label>
+                  <label for="signin-password">{{ t("login.fields.password") }}</label>
                   <div class="password-field">
                     <input
                       id="signin-password"
@@ -373,7 +362,7 @@ onBeforeUnmount(() => {
                       :type="passwordInputType"
                       name="password"
                       autocomplete="current-password"
-                      placeholder="Password"
+                      :placeholder="t('login.placeholders.password')"
                       :aria-invalid="Boolean(fieldError('password'))"
                       :aria-describedby="fieldError('password') ? 'signin-password-error' : undefined"
                       @blur="markFieldTouched('password')"
@@ -382,7 +371,7 @@ onBeforeUnmount(() => {
                     <button
                       type="button"
                       class="password-toggle"
-                      :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                      :aria-label="showPassword ? t('login.visibility.hidePassword') : t('login.visibility.showPassword')"
                       @click="showPassword = !showPassword"
                     >
                       <svg
@@ -422,7 +411,7 @@ onBeforeUnmount(() => {
 
                 <div class="form-links">
                   <button type="button" class="text-link" @click="handleForgotPassword">
-                    Forgot password?
+                    {{ t("login.actions.forgotPassword") }}
                   </button>
                 </div>
 
@@ -448,14 +437,14 @@ onBeforeUnmount(() => {
             >
               <form class="login-form create-account" @submit.prevent="handleSubmit" novalidate>
                 <div class="field-group">
-                  <label for="signup-email">Email</label>
+                  <label for="signup-email">{{ t("login.fields.email") }}</label>
                   <input
                     id="signup-email"
                     v-model="registerForm.email"
                     type="email"
                     name="email"
                     autocomplete="email"
-                    placeholder="you@example.com"
+                    :placeholder="t('login.placeholders.email')"
                     :aria-invalid="Boolean(fieldError('email'))"
                     :aria-describedby="fieldError('email') ? 'signup-email-error' : undefined"
                     @blur="markFieldTouched('email')"
@@ -465,7 +454,7 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="field-group">
-                  <label for="signup-password">Password</label>
+                  <label for="signup-password">{{ t("login.fields.password") }}</label>
                   <div class="password-field">
                     <input
                       id="signup-password"
@@ -473,7 +462,7 @@ onBeforeUnmount(() => {
                       :type="passwordInputType"
                       name="password"
                       autocomplete="new-password"
-                      placeholder="Password"
+                      :placeholder="t('login.placeholders.password')"
                       :aria-invalid="Boolean(fieldError('password'))"
                       :aria-describedby="
                         ['signup-password-hint', fieldError('password') ? 'signup-password-error' : undefined]
@@ -486,7 +475,7 @@ onBeforeUnmount(() => {
                     <button
                       type="button"
                       class="password-toggle"
-                      :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                      :aria-label="showPassword ? t('login.visibility.hidePassword') : t('login.visibility.showPassword')"
                       @click="showPassword = !showPassword"
                     >
                       <svg
@@ -532,7 +521,7 @@ onBeforeUnmount(() => {
                 />
 
                 <div class="field-group">
-                  <label for="signup-confirm-password">Confirm password</label>
+                  <label for="signup-confirm-password">{{ t("login.fields.confirmPassword") }}</label>
                   <div class="password-field">
                     <input
                       id="signup-confirm-password"
@@ -540,7 +529,7 @@ onBeforeUnmount(() => {
                       :type="confirmPasswordInputType"
                       name="confirmPassword"
                       autocomplete="new-password"
-                      placeholder="Confirm password"
+                      :placeholder="t('login.placeholders.confirmPassword')"
                       :aria-invalid="Boolean(fieldError('confirmPassword'))"
                       :aria-describedby="
                         fieldError('confirmPassword') ? 'signup-confirm-password-error' : undefined
@@ -551,7 +540,7 @@ onBeforeUnmount(() => {
                     <button
                       type="button"
                       class="password-toggle"
-                      :aria-label="showConfirmPassword ? 'Hide confirm password' : 'Show confirm password'"
+                      :aria-label="showConfirmPassword ? t('login.visibility.hideConfirmPassword') : t('login.visibility.showConfirmPassword')"
                       @click="showConfirmPassword = !showConfirmPassword"
                     >
                       <svg

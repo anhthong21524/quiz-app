@@ -1,5 +1,7 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { RouterLink } from "vue-router";
+import { useI18n } from "../../i18n";
 
 type FeatureCard = {
   title: string;
@@ -7,35 +9,13 @@ type FeatureCard = {
   icon: "book" | "clock" | "chart" | "trophy";
 };
 
-const featureCards: FeatureCard[] = [
-  {
-    title: "Many Topics",
-    description: "Explore quizzes across a wide range of categories.",
-    icon: "book"
-  },
-  {
-    title: "Timed Challenges",
-    description: "Test your speed and knowledge with timed quizzes.",
-    icon: "clock"
-  },
-  {
-    title: "Track Progress",
-    description: "Monitor your performance and see how you improve.",
-    icon: "chart"
-  },
-  {
-    title: "Compete & Rank",
-    description: "Climb the leaderboard and become a quiz champion.",
-    icon: "trophy"
-  }
-];
+const { t, tm } = useI18n();
+const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
 </script>
 
 <template>
   <section class="min-h-full bg-white text-slate-950">
     <div class="mx-auto grid w-full max-w-[1180px] gap-14 px-4 pb-16 pt-10 sm:px-6 lg:px-8 lg:pt-14">
-
-      <!-- Hero -->
       <section
         class="grid items-center gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,1fr)] lg:gap-12"
         aria-labelledby="home-hero-title"
@@ -45,7 +25,7 @@ const featureCards: FeatureCard[] = [
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
               <path d="m12 3 2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7L12 3Z" stroke-linejoin="round" />
             </svg>
-            Test your knowledge. Improve every day.
+            {{ t("home.badge") }}
           </p>
 
           <div class="grid gap-5">
@@ -53,11 +33,11 @@ const featureCards: FeatureCard[] = [
               id="home-hero-title"
               class="max-w-[720px] text-5xl font-extrabold leading-[1.04] tracking-normal text-slate-950 sm:text-6xl lg:text-7xl"
             >
-              Learn. Challenge.
-              <span class="block text-emerald-600">Grow.</span>
+              {{ t("home.titleLine1") }}
+              <span class="block text-emerald-600">{{ t("home.titleLine2") }}</span>
             </h1>
             <p class="max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">
-              Take quizzes on a variety of topics, track your progress and improve every day.
+              {{ t("home.subtitle") }}
             </p>
           </div>
 
@@ -69,7 +49,7 @@ const featureCards: FeatureCard[] = [
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M8 5.6v12.8a1 1 0 0 0 1.55.84l9.85-6.4a1 1 0 0 0 0-1.68L9.55 4.76A1 1 0 0 0 8 5.6Z" />
               </svg>
-              Start a quiz
+              {{ t("home.primaryCta") }}
             </RouterLink>
             <RouterLink
               class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-7 font-bold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100"
@@ -78,7 +58,7 @@ const featureCards: FeatureCard[] = [
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
                 <path d="M5 5h5v5H5zM14 5h5v5h-5zM5 14h5v5H5zM14 14h5v5h-5z" stroke-linejoin="round" />
               </svg>
-              Browse quizzes
+              {{ t("home.secondaryCta") }}
             </RouterLink>
           </div>
 
@@ -89,11 +69,10 @@ const featureCards: FeatureCard[] = [
               <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-sky-100 text-sm font-extrabold text-sky-700">C</span>
               <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-rose-100 text-sm font-extrabold text-rose-700">D</span>
             </div>
-            <p>Join a growing community of curious learners</p>
+            <p>{{ t("home.community") }}</p>
           </div>
         </div>
 
-        <!-- Hero illustration -->
         <div class="relative mx-auto h-[330px] w-full max-w-[560px] sm:h-[420px]" aria-hidden="true">
           <div class="absolute inset-6 rounded-full bg-emerald-50"></div>
           <div class="absolute left-4 top-20 h-3 w-3 rounded-full bg-emerald-200"></div>
@@ -103,18 +82,15 @@ const featureCards: FeatureCard[] = [
             </svg>
           </div>
 
-          <!-- Clipboard mockup -->
           <div class="absolute left-[8%] top-[14%] h-[74%] w-[52%] rounded-[28px] border-[12px] border-emerald-900/45 bg-white shadow-[0_20px_45px_rgba(15,23,42,0.16)]">
             <div class="absolute -top-10 left-1/2 h-12 w-28 -translate-x-1/2 rounded-lg bg-slate-700 shadow-lg">
               <span class="absolute left-1/2 top-3 h-3 w-3 -translate-x-1/2 rounded-full bg-white"></span>
             </div>
             <div class="grid gap-5 p-6 pt-12">
-              <!-- Question prompt -->
               <div class="grid gap-1.5">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Question 2 of 5</span>
-                <span class="text-xs font-semibold leading-snug text-slate-700">What is the capital of France?</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">{{ t("home.questionProgress") }}</span>
+                <span class="text-xs font-semibold leading-snug text-slate-700">{{ t("home.questionPrompt") }}</span>
               </div>
-              <!-- Correct answer -->
               <div class="flex items-center gap-3">
                 <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-600 text-white">
                   <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -123,12 +99,10 @@ const featureCards: FeatureCard[] = [
                 </span>
                 <span class="h-2 w-20 rounded-full bg-emerald-500"></span>
               </div>
-              <!-- Wrong answer -->
               <div class="flex items-center gap-3">
                 <span class="h-8 w-8 shrink-0 rounded-full border-[3px] border-slate-200"></span>
                 <span class="h-2 w-28 rounded-full bg-slate-200"></span>
               </div>
-              <!-- Wrong answer -->
               <div class="flex items-center gap-3">
                 <span class="h-8 w-8 shrink-0 rounded-full border-[3px] border-slate-200"></span>
                 <span class="h-2 w-24 rounded-full bg-slate-100"></span>
@@ -136,23 +110,20 @@ const featureCards: FeatureCard[] = [
             </div>
           </div>
 
-          <!-- Score badge -->
           <div class="absolute right-[14%] top-[12%] flex items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_24px_rgba(15,23,42,0.12)]">
             <span class="text-2xl font-extrabold text-emerald-600">92%</span>
             <div class="grid gap-0.5">
-              <span class="text-[10px] font-bold text-slate-800">Great score!</span>
-              <span class="text-[10px] text-slate-400">Top 8%</span>
+              <span class="text-[10px] font-bold text-slate-800">{{ t("home.scoreTitle") }}</span>
+              <span class="text-[10px] text-slate-400">{{ t("home.scoreRank") }}</span>
             </div>
           </div>
 
-          <!-- Answer bars -->
           <div class="absolute bottom-10 right-10 grid w-[38%] gap-2 sm:right-4">
             <div class="h-14 rounded-[18px] bg-emerald-500 shadow-[0_14px_28px_rgba(16,185,129,0.25)]"></div>
             <div class="h-12 rounded-[18px] bg-amber-400 shadow-[0_14px_28px_rgba(245,158,11,0.18)]"></div>
             <div class="h-12 rounded-[18px] bg-blue-500 shadow-[0_14px_28px_rgba(59,130,246,0.18)]"></div>
           </div>
 
-          <!-- Pencil -->
           <div class="absolute bottom-8 right-4 h-36 w-5 rotate-12 rounded-full bg-emerald-500 shadow-lg sm:right-0">
             <span class="absolute -top-4 left-0 h-5 w-5 rounded-full bg-rose-300"></span>
             <span class="absolute -bottom-7 left-0 h-8 w-5 bg-slate-800 [clip-path:polygon(50%_100%,0_0,100%_0)]"></span>
@@ -160,9 +131,8 @@ const featureCards: FeatureCard[] = [
         </div>
       </section>
 
-      <!-- Features -->
       <section id="features" class="grid gap-5" aria-labelledby="features-title">
-        <h2 id="features-title" class="sr-only">Quiz App features</h2>
+        <h2 id="features-title" class="sr-only">{{ t("home.featuresTitle") }}</h2>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           <article
             v-for="feature in featureCards"
@@ -192,15 +162,14 @@ const featureCards: FeatureCard[] = [
         </div>
       </section>
 
-      <!-- Bottom CTA -->
       <section class="rounded-3xl bg-emerald-600 px-8 py-12 text-center" aria-labelledby="cta-title">
         <div class="mx-auto grid max-w-lg gap-6">
           <div class="grid gap-3">
             <h2 id="cta-title" class="text-3xl font-extrabold text-white sm:text-4xl">
-              Ready to challenge yourself?
+              {{ t("home.ctaTitle") }}
             </h2>
             <p class="text-base leading-7 text-emerald-100">
-              Browse hundreds of quizzes across all topics and start improving today.
+              {{ t("home.ctaDescription") }}
             </p>
           </div>
           <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
@@ -211,18 +180,17 @@ const featureCards: FeatureCard[] = [
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M8 5.6v12.8a1 1 0 0 0 1.55.84l9.85-6.4a1 1 0 0 0 0-1.68L9.55 4.76A1 1 0 0 0 8 5.6Z" />
               </svg>
-              Browse quizzes
+              {{ t("home.ctaBrowse") }}
             </RouterLink>
             <RouterLink
               class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-emerald-400 px-7 font-bold text-white transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300"
               :to="{ name: 'login' }"
             >
-              Create an account — it's free
+              {{ t("home.ctaRegister") }}
             </RouterLink>
           </div>
         </div>
       </section>
-
     </div>
   </section>
 </template>

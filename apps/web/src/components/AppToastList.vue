@@ -1,7 +1,9 @@
 <script setup lang="ts">
 import { useToast } from "../composables/useToast";
+import { useI18n } from "../i18n";
 
 const { toasts, dismiss } = useToast();
+const { t } = useI18n();
 </script>
 
 <template>
@@ -30,7 +32,7 @@ const { toasts, dismiss } = useToast();
             </svg>
           </span>
           <span class="toast-message">{{ toast.message }}</span>
-          <button class="toast-close" type="button" aria-label="Dismiss" @click="dismiss(toast.id)">
+          <button class="toast-close" type="button" :aria-label="t('modals.dismissToast')" @click="dismiss(toast.id)">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M18 6 6 18M6 6l12 12" stroke-linecap="round" />
             </svg>

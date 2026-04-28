@@ -1,34 +1,48 @@
 import { AUTH_FIELD_LIMITS, AUTH_PASSWORD_POLICY } from "@quiz-app/shared";
+import { t } from "../../i18n";
 
-export const authValidationMessages = {
-  required: {
-    email: "Email is required.",
-    password: "Password is required.",
-    confirmPassword: "Confirm your password.",
-    name: "Name is required."
-  },
-  email: {
-    invalid: "Enter a valid email address.",
-    maxLength: `Email must be ${AUTH_FIELD_LIMITS.emailMaxLength} characters or fewer.`
-  },
-  password: {
-    minLength: `Use at least ${AUTH_PASSWORD_POLICY.minLength} characters.`,
-    maxLength: `Use ${AUTH_PASSWORD_POLICY.maxLength} characters or fewer.`,
-    spacesOnly: "Password can't be only spaces.",
-    weak: "Choose a less common password.",
-    mismatch: "Passwords do not match."
-  },
-  name: {
-    maxLength: `Name must be ${AUTH_FIELD_LIMITS.nameMaxLength} characters or fewer.`
-  },
-  form: {
-    invalidLogin: "Incorrect email or password. Please try again.",
-    loginValidation: "Please check your email and password.",
-    registerValidation: "Please check your account details.",
-    generic: "Something went wrong. Please try again."
-  }
-} as const;
+export function getAuthValidationMessages() {
+  return {
+    required: {
+      email: t("auth.validation.required.email"),
+      password: t("auth.validation.required.password"),
+      confirmPassword: t("auth.validation.required.confirmPassword"),
+      name: t("auth.validation.required.name")
+    },
+    email: {
+      invalid: t("auth.validation.email.invalid"),
+      maxLength: t("auth.validation.email.maxLength", {
+        max: AUTH_FIELD_LIMITS.emailMaxLength
+      })
+    },
+    password: {
+      minLength: t("auth.validation.password.minLength", {
+        min: AUTH_PASSWORD_POLICY.minLength
+      }),
+      maxLength: t("auth.validation.password.maxLength", {
+        max: AUTH_PASSWORD_POLICY.maxLength
+      }),
+      spacesOnly: t("auth.validation.password.spacesOnly"),
+      weak: t("auth.validation.password.weak"),
+      mismatch: t("auth.validation.password.mismatch")
+    },
+    name: {
+      maxLength: t("auth.validation.name.maxLength", {
+        max: AUTH_FIELD_LIMITS.nameMaxLength
+      })
+    },
+    form: {
+      invalidLogin: t("auth.validation.form.invalidLogin"),
+      loginValidation: t("auth.validation.form.loginValidation"),
+      registerValidation: t("auth.validation.form.registerValidation"),
+      generic: t("auth.validation.form.generic")
+    }
+  } as const;
+}
 
-export const passwordHintText =
-  `Use ${AUTH_PASSWORD_POLICY.minLength}-${AUTH_PASSWORD_POLICY.maxLength} characters. ` +
-  "Avoid common passwords; a mix of letters, numbers, and symbols is recommended.";
+export function getPasswordHintText() {
+  return t("auth.validation.hint", {
+    min: AUTH_PASSWORD_POLICY.minLength,
+    max: AUTH_PASSWORD_POLICY.maxLength
+  });
+}

@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { RouterLink } from "vue-router";
+import { useI18n } from "../../i18n";
 
 defineProps<{
   activeSection: "profile" | "configuration" | "password";
 }>();
+
+const { t } = useI18n();
 
 function handleUpgrade() {
   // TODO: Route to the upgrade/pricing flow when it exists.
@@ -11,8 +14,8 @@ function handleUpgrade() {
 </script>
 
 <template>
-  <aside class="settings-sidebar" aria-label="Configuration settings">
-    <nav class="settings-nav" aria-label="Settings sections">
+  <aside class="settings-sidebar" :aria-label="t('settings.navigation.aria')">
+    <nav class="settings-nav" :aria-label="t('settings.navigation.sectionsAria')">
       <RouterLink
         class="settings-nav-link"
         :class="{ 'is-active': activeSection === 'profile' }"
@@ -22,7 +25,7 @@ function handleUpgrade() {
           <path d="M12 12a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z" />
           <path d="M4.5 20a7.5 7.5 0 0 1 15 0" stroke-linecap="round" />
         </svg>
-        <span>Profile</span>
+        <span>{{ t("settings.navigation.profile") }}</span>
       </RouterLink>
 
       <RouterLink
@@ -38,7 +41,7 @@ function handleUpgrade() {
             stroke-linejoin="round"
           />
         </svg>
-        <span>Configuration</span>
+        <span>{{ t("settings.navigation.configuration") }}</span>
       </RouterLink>
 
       <RouterLink
@@ -51,7 +54,7 @@ function handleUpgrade() {
           <path d="M8 10V7a4 4 0 0 1 8 0v3" stroke-linecap="round" />
           <path d="M12 14.5v1.75" stroke-linecap="round" />
         </svg>
-        <span>Password</span>
+        <span>{{ t("settings.navigation.password") }}</span>
       </RouterLink>
     </nav>
 
@@ -65,9 +68,9 @@ function handleUpgrade() {
           <path d="M5.5 20h13" stroke-linecap="round" />
         </svg>
       </div>
-      <h2 id="upgrade-title">Upgrade to Pro</h2>
-      <p>Unlock advanced analytics, custom themes and more.</p>
-      <button class="upgrade-button" type="button" @click="handleUpgrade">Upgrade now</button>
+      <h2 id="upgrade-title">{{ t("settings.upgrade.title") }}</h2>
+      <p>{{ t("settings.upgrade.description") }}</p>
+      <button class="upgrade-button" type="button" @click="handleUpgrade">{{ t("settings.upgrade.action") }}</button>
     </section>
   </aside>
 </template>
