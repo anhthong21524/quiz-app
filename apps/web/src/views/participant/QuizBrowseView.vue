@@ -4,7 +4,7 @@ import { RouterLink } from "vue-router";
 import {
   getPublicQuizzes,
   type PublicQuizInfo
-} from "../services/publicQuizApi";
+} from "../../services/publicQuizApi";
 
 const quizzes = ref<PublicQuizInfo[]>([]);
 const searchTerm = ref("");

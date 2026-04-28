@@ -1,21 +1,22 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink, useRoute } from "vue-router";
-import QuizResultSummaryCard from "../components/results/QuizResultSummaryCard.vue";
-import ResultTabs from "../components/results/ResultTabs.vue";
-import SubmissionDetailPanel from "../components/results/SubmissionDetailPanel.vue";
-import SubmissionTable from "../components/results/SubmissionTable.vue";
+import StatCard from "../../components/StatCard.vue";
+import ResultTabs from "../../components/results/ResultTabs.vue";
+import SubmissionDetailPanel from "../../components/results/SubmissionDetailPanel.vue";
+import SubmissionTable from "../../components/results/SubmissionTable.vue";
 import {
   type QuizResultDetail as DisplayQuizResultDetail,
   type QuizSubmission,
   type QuizSubmissionAnswer
-} from "../data/quiz-submissions";
+} from "../../data/quiz-submissions";
 import type { QuizResultSummary } from "@quiz-app/shared";
 import {
   fetchQuizResultDetail,
   type QuizResultDetail as ApiQuizResultDetail,
   type SubmissionResult
-} from "../services/quiz-api";
+} from "../../services/quiz-api";
+import { ACCENT_CYCLE } from "../../lib/accent";
 
 const route = useRoute();
 
@@ -36,8 +37,6 @@ const tabs = [
   { id: "submissions", label: "Submissions" },
   { id: "submission-detail", label: "Submission detail", disabled: true }
 ];
-
-const ACCENT_CYCLE = ["green", "red", "blue", "purple", "orange"] as const;
 
 function formatTime(secs: number | null): string {
   if (secs == null) return "-";
@@ -140,32 +139,6 @@ function toDisplayDetail(detail: ApiQuizResultDetail): DisplayQuizResultDetail {
 
 const summary = computed(() => quizDetail.value?.summary ?? null);
 const submissions = computed<QuizSubmission[]>(() => quizDetail.value?.submissions ?? []);
-
-const summaryCards = computed(() => {
-  const s = summary.value;
-  if (!s) return [];
-
-  return [
-    {
-      id: "total-submissions",
-      label: "Total submissions",
-      value: String(s.totalSubmissions),
-      icon: "users" as const
-    },
-    {
-      id: "average-score",
-      label: "Average score",
-      value: `${s.averageScorePercent}%`,
-      icon: "star" as const
-    },
-    {
-      id: "average-time",
-      label: "Average time",
-      value: s.averageTime,
-      icon: "clock" as const
-    }
-  ];
-});
 
 const filteredSubmissions = computed(() => {
   const normalizedSearch = searchQuery.value.trim().toLowerCase();
@@ -320,13 +293,24 @@ onMounted(async () => {
     </div>
 
     <section class="summary-grid" aria-label="Result summary">
-      <QuizResultSummaryCard
-        v-for="card in summaryCards"
-        :key="card.id"
-        :label="card.label"
-        :value="card.value"
-        :icon="card.icon"
-      />
+      <StatCard :value="String(summary.totalSubmissions)" label="Total submissions" hint="" color="teal">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="M16 19v-1.4a3.6 3.6 0 0 0-3.6-3.6H7.6A3.6 3.6 0 0 0 4 17.6V19" stroke-linecap="round" />
+          <circle cx="10" cy="8" r="3" />
+          <path d="M20 19v-1.3a3.6 3.6 0 0 0-2.7-3.5M15.5 5.2a3 3 0 0 1 0 5.6" stroke-linecap="round" />
+        </svg>
+      </StatCard>
+      <StatCard :value="`${summary.averageScorePercent}%`" label="Average score" hint="" color="amber">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <path d="m12 3.7 2.5 5.1 5.6.8-4 3.9.9 5.5-5-2.6L7 19l.9-5.5-4-3.9 5.6-.8L12 3.7Z" stroke-linejoin="round" />
+        </svg>
+      </StatCard>
+      <StatCard :value="summary.averageTime" label="Average time" hint="" color="gray">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="8.5" />
+          <path d="M12 7.5V12l3 2" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </StatCard>
     </section>
 
     <section class="submissions-card" aria-labelledby="result-detail-table-title">

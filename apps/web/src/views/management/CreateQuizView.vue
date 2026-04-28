@@ -3,21 +3,21 @@ import { computed, onMounted, reactive, ref, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import type { Question, Quiz } from "@quiz-app/shared";
 import { QuizStatus } from "@quiz-app/shared";
-import AnswerOptionRow from "../components/create-quiz/AnswerOptionRow.vue";
-import CreateQuizStepper from "../components/create-quiz/CreateQuizStepper.vue";
-import QuestionNavigator from "../components/create-quiz/QuestionNavigator.vue";
-import FullPageErrorState from "../components/feedback/FullPageErrorState.vue";
-import EditorFormSkeleton from "../components/loading/EditorFormSkeleton.vue";
-import PageHeader from "../components/PageHeader.vue";
-import { useToast } from "../composables/useToast";
-import { useConfigurationStore } from "../stores/configuration";
-import { useQuizStore } from "../stores/quizzes";
+import AnswerOptionRow from "../../components/create-quiz/AnswerOptionRow.vue";
+import CreateQuizStepper from "../../components/create-quiz/CreateQuizStepper.vue";
+import QuestionNavigator from "../../components/create-quiz/QuestionNavigator.vue";
+import FullPageErrorState from "../../components/feedback/FullPageErrorState.vue";
+import EditorFormSkeleton from "../../components/loading/EditorFormSkeleton.vue";
+import PageHeader from "../../components/PageHeader.vue";
+import { useToast } from "../../composables/useToast";
+import { useConfigurationStore } from "../../stores/configuration";
+import { useQuizStore } from "../../stores/quizzes";
 import type {
   CreateQuizQuestion,
   DifficultyLevel,
   QuestionOption,
   QuestionStatus
-} from "../components/create-quiz/types";
+} from "../../components/create-quiz/types";
 
 interface ConfigurationForm {
   title: string;

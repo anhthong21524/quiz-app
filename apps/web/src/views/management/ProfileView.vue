@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
-import SettingsPageLayout from "../components/settings/SettingsPageLayout.vue";
-import { useAuthStore } from "../stores/auth";
+import SettingsPageLayout from "../../components/settings/SettingsPageLayout.vue";
+import { useAuthStore } from "../../stores/auth";
 
 type ProfileDetail = {
   label: string;

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
-import SettingsPageLayout from "../components/settings/SettingsPageLayout.vue";
-import { updatePassword } from "../services/auth-api";
+import SettingsPageLayout from "../../components/settings/SettingsPageLayout.vue";
+import { updatePassword } from "../../services/auth-api";
 
 type PasswordField = "currentPassword" | "newPassword" | "confirmPassword";
 

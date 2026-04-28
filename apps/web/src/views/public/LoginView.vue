@@ -1,26 +1,26 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import FieldErrorText from "../components/forms/FieldErrorText.vue";
-import FormErrorBanner from "../components/forms/FormErrorBanner.vue";
-import PasswordHint from "../components/forms/PasswordHint.vue";
-import { env } from "../config/env";
-import { getGoogleAuthStatus } from "../services/auth-api";
-import { useAuthStore } from "../stores/auth";
-import { isAppError } from "../lib/api/errors";
+import FieldErrorText from "../../components/forms/FieldErrorText.vue";
+import FormErrorBanner from "../../components/forms/FormErrorBanner.vue";
+import PasswordHint from "../../components/forms/PasswordHint.vue";
+import { env } from "../../config/env";
+import { getGoogleAuthStatus } from "../../services/auth-api";
+import { useAuthStore } from "../../stores/auth";
+import { isAppError } from "../../lib/api/errors";
 import {
   validateLoginForm,
   validateRegisterForm,
   type AuthFieldErrors,
   type LoginFormValues,
   type RegisterFormValues
-} from "../lib/validation/authSchema";
+} from "../../lib/validation/authSchema";
 import {
   loginPayloadFrom,
   normalizeAuthError,
   registerPayloadFrom
-} from "../lib/validation/normalizeAuthError";
-import type { AuthFieldName } from "../lib/validation/validators";
+} from "../../lib/validation/normalizeAuthError";
+import type { AuthFieldName } from "../../lib/validation/validators";
 
 type FieldFlags = Partial<Record<AuthFieldName, boolean>>;
 

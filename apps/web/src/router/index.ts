@@ -11,7 +11,7 @@ export const router = createRouter({
     {
       path: "/",
       name: "home",
-      component: () => import("../views/HomeView.vue"),
+      component: () => import("../views/public/HomeView.vue"),
       meta: {
         seo: {
           title: "Home",
@@ -28,7 +28,7 @@ export const router = createRouter({
     {
       path: "/guide",
       name: "user-guideline",
-      component: () => import("../views/UserGuidelineView.vue"),
+      component: () => import("../views/public/UserGuidelineView.vue"),
       meta: {
         seo: {
           title: "User Guideline",
@@ -45,7 +45,7 @@ export const router = createRouter({
     {
       path: "/about",
       name: "about",
-      component: () => import("../views/AboutView.vue"),
+      component: () => import("../views/public/AboutView.vue"),
       meta: {
         seo: {
           title: "About",
@@ -62,7 +62,7 @@ export const router = createRouter({
     {
       path: "/quizzes",
       name: "public-quizzes",
-      component: () => import("../views/PublicQuizzesView.vue"),
+      component: () => import("../views/participant/QuizBrowseView.vue"),
       meta: {
         seo: {
           title: "Public Quizzes",
@@ -78,7 +78,7 @@ export const router = createRouter({
     {
       path: "/login",
       name: "login",
-      component: () => import("../views/LoginView.vue"),
+      component: () => import("../views/public/LoginView.vue"),
       meta: {
         seo: {
           title: "Sign in",
@@ -91,13 +91,13 @@ export const router = createRouter({
     {
       path: "/auth/callback",
       name: "auth-callback",
-      component: () => import("../views/AuthCallbackView.vue"),
+      component: () => import("../views/public/AuthCallbackView.vue"),
       meta: { bareLayout: true }
     },
     {
       path: "/quizzes/private",
       name: "private-quiz-entry",
-      component: () => import("../views/PrivateQuizEntryView.vue"),
+      component: () => import("../views/participant/PrivateQuizEntryView.vue"),
       meta: {
         seo: {
           title: "Private Quiz",
@@ -113,7 +113,7 @@ export const router = createRouter({
     {
       path: "/q/:slug",
       name: "public-quiz",
-      component: () => import("../views/PublicQuizLandingPage.vue"),
+      component: () => import("../views/participant/QuizLandingView.vue"),
       meta: {
         seo: {
           title: "Public Quiz",
@@ -125,7 +125,7 @@ export const router = createRouter({
     {
       path: "/q/:slug/take",
       name: "public-quiz-take",
-      component: () => import("../views/PublicQuizTakeView.vue"),
+      component: () => import("../views/participant/QuizTakeView.vue"),
       meta: {
         seo: {
           title: "Take Quiz",
@@ -137,7 +137,7 @@ export const router = createRouter({
     {
       path: "/management",
       name: "management",
-      component: () => import("../views/ManagementView.vue"),
+      component: () => import("../views/management/DashboardView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
@@ -212,7 +212,7 @@ export const router = createRouter({
     {
       path: managementPath("/quizzes/results"),
       name: "results",
-      component: () => import("../views/ResultQuizPage.vue"),
+      component: () => import("../views/management/QuizResultsView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
@@ -225,7 +225,7 @@ export const router = createRouter({
     {
       path: managementPath("/quizzes/results/:quizId"),
       name: "result-quiz-detail",
-      component: () => import("../views/ResultQuizDetailView.vue"),
+      component: () => import("../views/management/QuizResultDetailView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
@@ -238,7 +238,7 @@ export const router = createRouter({
     {
       path: managementPath("/quizzes"),
       name: "quizzes",
-      component: () => import("../views/MyQuizzesView.vue"),
+      component: () => import("../views/management/MyQuizzesView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
@@ -255,7 +255,7 @@ export const router = createRouter({
     {
       path: managementPath("/me/profile"),
       name: "profile",
-      component: () => import("../views/ProfileView.vue"),
+      component: () => import("../views/management/ProfileView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
@@ -274,7 +274,7 @@ export const router = createRouter({
       path: managementPath("/me/configuration"),
       alias: [managementPath("/me/account")],
       name: "configuration",
-      component: () => import("../views/ConfigurationSettingsView.vue"),
+      component: () => import("../views/management/ConfigurationSettingsView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
@@ -292,7 +292,7 @@ export const router = createRouter({
     {
       path: managementPath("/me/password"),
       name: "password",
-      component: () => import("../views/PasswordSettingsView.vue"),
+      component: () => import("../views/management/PasswordSettingsView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
@@ -309,7 +309,7 @@ export const router = createRouter({
     {
       path: managementPath("/create-quiz"),
       name: "create-quiz",
-      component: () => import("../views/CreateQuizView.vue"),
+      component: () => import("../views/management/CreateQuizView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
@@ -327,7 +327,7 @@ export const router = createRouter({
     {
       path: managementPath("/quizzes/:id/questions"),
       name: "edit-quiz-questions",
-      component: () => import("../views/CreateQuizView.vue"),
+      component: () => import("../views/management/CreateQuizView.vue"),
       props: true,
       meta: {
         requiresAuth: true,
@@ -353,7 +353,7 @@ export const router = createRouter({
     {
       path: "/:pathMatch(.*)*",
       name: "not-found",
-      component: () => import("../views/NotFoundView.vue"),
+      component: () => import("../views/public/NotFoundView.vue"),
       meta: {
         seo: {
           title: "Page Not Found",

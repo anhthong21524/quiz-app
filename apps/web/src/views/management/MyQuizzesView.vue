@@ -2,29 +2,29 @@
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import { QuizStatus, type Quiz } from "@quiz-app/shared";
-import AppStatsBar from "../components/AppStatsBar.vue";
-import AppToolbar, { type ToolbarFilter } from "../components/AppToolbar.vue";
-import QuizCardList from "../components/my-quizzes/QuizCardList.vue";
-import QuizEmptyState from "../components/my-quizzes/QuizEmptyState.vue";
-import QuizGrid from "../components/my-quizzes/QuizGrid.vue";
-import QuizPagination from "../components/my-quizzes/QuizPagination.vue";
-import QuizTable from "../components/my-quizzes/QuizTable.vue";
-import ConfirmModal from "../components/ConfirmModal.vue";
-import ShareModal from "../components/ShareModal.vue";
-import PrivateCodeModal from "../components/PrivateCodeModal.vue";
-import SectionErrorState from "../components/feedback/SectionErrorState.vue";
-import QuizListSkeleton from "../components/loading/QuizListSkeleton.vue";
-import PageHeader from "../components/PageHeader.vue";
+import AppStatsBar from "../../components/AppStatsBar.vue";
+import AppToolbar, { type ToolbarFilter } from "../../components/AppToolbar.vue";
+import QuizCardList from "../../components/my-quizzes/QuizCardList.vue";
+import QuizEmptyState from "../../components/my-quizzes/QuizEmptyState.vue";
+import QuizGrid from "../../components/my-quizzes/QuizGrid.vue";
+import QuizPagination from "../../components/my-quizzes/QuizPagination.vue";
+import QuizTable from "../../components/my-quizzes/QuizTable.vue";
+import ConfirmModal from "../../components/ConfirmModal.vue";
+import ShareModal from "../../components/ShareModal.vue";
+import PrivateCodeModal from "../../components/PrivateCodeModal.vue";
+import SectionErrorState from "../../components/feedback/SectionErrorState.vue";
+import QuizListSkeleton from "../../components/loading/QuizListSkeleton.vue";
+import PageHeader from "../../components/PageHeader.vue";
 import type {
   MyQuizStatus,
   QuizListItem,
   ViewMode
-} from "../components/my-quizzes/types";
-import { getQuizIcon, mapQuizStatus } from "../lib/quiz-helpers";
-import { useQuizStore } from "../stores/quizzes";
-import { useToast } from "../composables/useToast";
-import { isAppError } from "../lib/api/errors";
-import { fetchQuizResultDetail } from "../services/quiz-api";
+} from "../../components/my-quizzes/types";
+import { getQuizIcon, mapQuizStatus } from "../../lib/quiz-helpers";
+import { useQuizStore } from "../../stores/quizzes";
+import { useToast } from "../../composables/useToast";
+import { isAppError } from "../../lib/api/errors";
+import { fetchQuizResultDetail } from "../../services/quiz-api";
 
 const router = useRouter();
 const quizStore = useQuizStore();

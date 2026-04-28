@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import { RouterLink, useRouter } from "vue-router";
-import { validatePrivateQuizCode } from "../services/publicQuizApi";
+import { validatePrivateQuizCode } from "../../services/publicQuizApi";
 
 const router = useRouter();
 

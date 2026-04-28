@@ -6,10 +6,10 @@ import {
   submitQuizAttempt,
   type PublicQuizInfo,
   type PublicQuizQuestion
-} from "../services/publicQuizApi";
-import QuestionNavigator from "../components/create-quiz/QuestionNavigator.vue";
-import type { CreateQuizQuestion } from "../components/create-quiz/types";
-import { useQuizAttemptStore } from "../stores/quizAttempt";
+} from "../../services/publicQuizApi";
+import QuestionNavigator from "../../components/create-quiz/QuestionNavigator.vue";
+import type { CreateQuizQuestion } from "../../components/create-quiz/types";
+import { useQuizAttemptStore } from "../../stores/quizAttempt";
 
 type AnswerMap = Record<string, number>;
 

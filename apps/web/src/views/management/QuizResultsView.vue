@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
-import AppStatsBar from "../components/AppStatsBar.vue";
-import AppToolbar, { type ToolbarFilter } from "../components/AppToolbar.vue";
-import QuizPerformanceTable from "../components/results/QuizPerformanceTable.vue";
-import RecentSubmissionsCard from "../components/results/RecentSubmissionsCard.vue";
+import AppStatsBar from "../../components/AppStatsBar.vue";
+import AppToolbar, { type ToolbarFilter } from "../../components/AppToolbar.vue";
+import QuizPerformanceTable from "../../components/results/QuizPerformanceTable.vue";
+import RecentSubmissionsCard from "../../components/results/RecentSubmissionsCard.vue";
 import {
   fetchQuizPerformance,
   fetchRecentSubmissions,
@@ -12,9 +12,10 @@ import {
   type QuizPerformanceItem,
   type RecentSubmissionItem,
   type ResultsSummary
-} from "../services/quiz-api";
-import type { QuizPerformanceResult, RecentSubmissionResult } from "../data/quiz-results";
-import PageHeader from "../components/PageHeader.vue";
+} from "../../services/quiz-api";
+import type { QuizPerformanceResult, RecentSubmissionResult } from "../../data/quiz-results";
+import PageHeader from "../../components/PageHeader.vue";
+import { stableAccent } from "../../lib/accent";
 
 const router = useRouter();
 
@@ -46,13 +47,6 @@ const SUBJECT_ICON_MAP: Record<string, string> = {
   history: "history",
   chemistry: "chemistry"
 };
-
-const ACCENT_CYCLE = ["green", "red", "blue", "purple", "orange"] as const;
-
-function stableAccent(name: string): typeof ACCENT_CYCLE[number] {
-  const hash = [...name].reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
-  return ACCENT_CYCLE[hash % ACCENT_CYCLE.length];
-}
 
 function formatTime(secs: number | null): string {
   if (secs == null) return "-";

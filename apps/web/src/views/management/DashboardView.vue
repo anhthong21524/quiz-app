@@ -2,14 +2,14 @@
 import { computed, onMounted, ref } from "vue";
 import { RouterLink } from "vue-router";
 import { QuizStatus, type Quiz } from "@quiz-app/shared";
-import AppTable from "../components/AppTable.vue";
-import StatCard from "../components/StatCard.vue";
-import QuizIconAvatar from "../components/my-quizzes/QuizIconAvatar.vue";
-import QuizStatusBadge from "../components/my-quizzes/QuizStatusBadge.vue";
-import type { MyQuizStatus } from "../components/my-quizzes/types";
-import { getQuizIcon, mapQuizStatus } from "../lib/quiz-helpers";
-import { useQuizStore } from "../stores/quizzes";
-import { fetchResultsSummary } from "../services/quiz-api";
+import AppTable from "../../components/AppTable.vue";
+import StatCard from "../../components/StatCard.vue";
+import QuizIconAvatar from "../../components/my-quizzes/QuizIconAvatar.vue";
+import QuizStatusBadge from "../../components/my-quizzes/QuizStatusBadge.vue";
+import type { MyQuizStatus } from "../../components/my-quizzes/types";
+import { getQuizIcon, mapQuizStatus } from "../../lib/quiz-helpers";
+import { useQuizStore } from "../../stores/quizzes";
+import { fetchResultsSummary } from "../../services/quiz-api";
 
 const quizStore = useQuizStore();
 const RECENT_QUIZZES_LIMIT = 5;

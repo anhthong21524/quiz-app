@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { SUBJECT_DOMAIN_MAX_LENGTH } from "@quiz-app/shared";
-import ConfirmModal from "../components/ConfirmModal.vue";
-import LoadingButton from "../components/LoadingButton.vue";
-import SettingsPageLayout from "../components/settings/SettingsPageLayout.vue";
-import { useToast } from "../composables/useToast";
-import { useConfigurationStore } from "../stores/configuration";
+import ConfirmModal from "../../components/ConfirmModal.vue";
+import LoadingButton from "../../components/LoadingButton.vue";
+import SettingsPageLayout from "../../components/settings/SettingsPageLayout.vue";
+import { useToast } from "../../composables/useToast";
+import { useConfigurationStore } from "../../stores/configuration";
 
 const configurationStore = useConfigurationStore();
 const { show: showToast } = useToast();

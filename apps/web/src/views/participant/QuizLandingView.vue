@@ -5,8 +5,8 @@ import {
   createQuizAttempt,
   getPublicQuizBySlug,
   type PublicQuizInfo
-} from "../services/publicQuizApi";
-import { useQuizAttemptStore } from "../stores/quizAttempt";
+} from "../../services/publicQuizApi";
+import { useQuizAttemptStore } from "../../stores/quizAttempt";
 
 const route = useRoute();
 const router = useRouter();
