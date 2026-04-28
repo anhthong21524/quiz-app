@@ -201,14 +201,14 @@ All routes are served under the API base URL `http://localhost:3001/api`.
 | `/management/quizzes` | My Quizzes | Yes |
 | `/management/create-quiz` | Create quiz | Yes |
 | `/management/quizzes/:id/questions` | Edit quiz questions | Yes |
-| `/management/results` | All quiz results | Yes |
-| `/management/results/:quizId` | Single quiz submissions | Yes |
-| `/management/profile` | Profile settings | Yes |
-| `/management/configuration` | Subject/domain configuration | Yes |
-| `/management/account` | Alias for configuration | Yes |
-| `/management/password` | Password settings | Yes |
+| `/management/quizzes/results` | All quiz results | Yes |
+| `/management/quizzes/results/:quizId` | Single quiz submissions | Yes |
+| `/management/me/profile` | Profile settings | Yes |
+| `/management/me/configuration` | Subject/domain configuration | Yes |
+| `/management/me/account` | Alias for configuration | Yes |
+| `/management/me/password` | Password settings | Yes |
 
-Legacy paths such as `/profile`, `/account`, `/create-quiz`, `/editor`, `/results`, and `/results/:quizId` redirect to their current `/management/...` routes.
+Legacy paths `/profile`, `/account`, `/create-quiz`, `/editor`, `/results`, `/results/:quizId`, `/management/results`, `/management/results/:quizId`, `/management/profile`, `/management/configuration`, `/management/account`, and `/management/password` all redirect to their current routes.
 
 ## Architecture Notes
 
