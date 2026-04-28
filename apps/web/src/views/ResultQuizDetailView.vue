@@ -6,8 +6,7 @@ import ResultTabs from "../components/results/ResultTabs.vue";
 import SubmissionDetailPanel from "../components/results/SubmissionDetailPanel.vue";
 import SubmissionTable from "../components/results/SubmissionTable.vue";
 import {
-  quizResultDetails,
-  type QuizResultDetail as MockQuizResultDetail,
+  type QuizResultDetail as DisplayQuizResultDetail,
   type QuizSubmission,
   type QuizSubmissionAnswer
 } from "../data/quiz-submissions";
@@ -27,7 +26,8 @@ const currentPage = ref(1);
 const selectedSubmissionId = ref<string | null>(null);
 const activeTab = ref<"submissions" | "submission-detail">("submissions");
 const isLoading = ref(false);
-const quizDetail = ref<MockQuizResultDetail | null>(null);
+const loadError = ref(false);
+const quizDetail = ref<DisplayQuizResultDetail | null>(null);
 
 const pageSize = 6;
 const scoreOptions = ["All scores", "80% and above", "70% - 79%", "Below 70%"];
@@ -105,7 +105,7 @@ function toPublishedOrDraft(status: string): QuizResultSummary["status"] {
   return status === "published" ? "published" : "draft";
 }
 
-function toDisplayDetail(detail: ApiQuizResultDetail): MockQuizResultDetail {
+function toDisplayDetail(detail: ApiQuizResultDetail): DisplayQuizResultDetail {
   const totalQuestions = detail.questionCount;
   const totalSubmissions = detail.totalSubmissions;
   const completedCount = detail.completedSubmissions;
@@ -136,11 +136,6 @@ function toDisplayDetail(detail: ApiQuizResultDetail): MockQuizResultDetail {
       toQuizSubmission(attempt, index, totalQuestions)
     )
   };
-}
-
-function mockDetailForRoute(): MockQuizResultDetail | null {
-  const quizId = route.params.quizId as string;
-  return quizResultDetails.find((item) => item.id === quizId) ?? null;
 }
 
 const summary = computed(() => quizDetail.value?.summary ?? null);
@@ -284,10 +279,11 @@ function downloadCsv() {
 onMounted(async () => {
   const quizId = route.params.quizId as string;
   isLoading.value = true;
+  loadError.value = false;
   try {
     quizDetail.value = toDisplayDetail(await fetchQuizResultDetail(quizId));
   } catch {
-    quizDetail.value = mockDetailForRoute();
+    loadError.value = true;
   } finally {
     isLoading.value = false;
   }
@@ -297,6 +293,12 @@ onMounted(async () => {
 <template>
   <section v-if="isLoading" class="result-not-found-card">
     <p>Loading...</p>
+  </section>
+
+  <section v-else-if="loadError" class="result-not-found-card">
+    <RouterLink class="back-link" :to="{ name: 'results' }">Back to Quiz Results</RouterLink>
+    <h1>Could not load quiz results</h1>
+    <p>Something went wrong while fetching this quiz. Please try again later.</p>
   </section>
 
   <section v-else-if="quizDetail && summary" class="result-detail-page">

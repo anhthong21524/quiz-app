@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ref } from "vue";
-import { RouterLink } from "vue-router";
 
 type TabId = "getting-started" | "quiz-creator" | "participant";
 
@@ -74,34 +73,27 @@ const tabs: { id: TabId; label: string }[] = [
             </div>
             <h2 class="text-2xl font-extrabold text-slate-950 dark:text-white">Quick Start</h2>
           </div>
-          <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">Get the app running and sign in for the first time in four steps.</p>
+          <p class="mb-4 text-sm text-slate-500 dark:text-slate-400">Open the app and sign in for the first time in three easy steps.</p>
           <ul class="grid gap-4">
             <li class="flex items-start gap-3 text-slate-700 dark:text-slate-300">
               <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700 dark:bg-emerald-900 dark:text-emerald-400">1</span>
               <div>
-                <p class="font-semibold">Open the web app</p>
-                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Navigate to <code class="rounded bg-slate-100 px-1.5 py-0.5 text-sm font-mono text-emerald-700 dark:bg-slate-700 dark:text-emerald-400">http://localhost:5173</code> in your browser. The home page loads without requiring an account — you can browse public quizzes right away.</p>
+                <p class="font-semibold">Open the app</p>
+                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Open the app in your browser. The home page is visible to everyone — no account needed to browse public quizzes.</p>
               </div>
             </li>
             <li class="flex items-start gap-3 text-slate-700 dark:text-slate-300">
               <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700 dark:bg-emerald-900 dark:text-emerald-400">2</span>
               <div>
-                <p class="font-semibold">The API runs separately</p>
-                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">The backend API is at <code class="rounded bg-slate-100 px-1.5 py-0.5 text-sm font-mono text-emerald-700 dark:bg-slate-700 dark:text-emerald-400">http://localhost:3000/api</code>. Regular users never need to open it directly; the web app communicates with it automatically.</p>
+                <p class="font-semibold">Sign in to create and manage quizzes</p>
+                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Select <strong>Sign in</strong> from the navigation bar and enter your email and password. A default account is ready to use when the app is first set up.</p>
               </div>
             </li>
             <li class="flex items-start gap-3 text-slate-700 dark:text-slate-300">
               <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700 dark:bg-emerald-900 dark:text-emerald-400">3</span>
               <div>
-                <p class="font-semibold">Sign in with the default admin account</p>
-                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">For local testing, use email <code class="rounded bg-slate-100 px-1.5 py-0.5 text-sm font-mono text-emerald-700 dark:bg-slate-700 dark:text-emerald-400">admin@quiz.app</code> and password <code class="rounded bg-slate-100 px-1.5 py-0.5 text-sm font-mono text-emerald-700 dark:bg-slate-700 dark:text-emerald-400">admin1234</code>. This account is seeded automatically when the API starts.</p>
-              </div>
-            </li>
-            <li class="flex items-start gap-3 text-slate-700 dark:text-slate-300">
-              <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700 dark:bg-emerald-900 dark:text-emerald-400">4</span>
-              <div>
-                <p class="font-semibold">Protected pages require a session</p>
-                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Any management page (dashboard, quiz editor, results) redirects to <strong>/login</strong> if you are not signed in. After a successful sign-in the app returns you to the page you tried to open.</p>
+                <p class="font-semibold">Some pages are only available when signed in</p>
+                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">If you try to open a page that requires sign-in — such as the dashboard, quiz editor, or results — the app takes you to the sign-in page first. Once signed in, you are brought back to where you wanted to go.</p>
               </div>
             </li>
           </ul>
@@ -116,7 +108,7 @@ const tabs: { id: TabId; label: string }[] = [
               class="w-full object-cover"
             />
             <div class="bg-slate-50 px-5 py-3 text-sm text-slate-500 dark:bg-slate-800 dark:text-slate-400">
-              Sign in with email/password or Google OAuth.
+              Sign in with your email and password, or with your Google account.
             </div>
           </div>
 
@@ -133,7 +125,7 @@ const tabs: { id: TabId; label: string }[] = [
                 <h3 class="text-lg font-extrabold text-slate-950 dark:text-white">Sign in with email</h3>
               </div>
               <ol class="grid gap-2 text-sm text-slate-600 dark:text-slate-400">
-                <li class="flex gap-2"><span class="font-bold text-emerald-600">1.</span> Open <strong>/login</strong>.</li>
+                <li class="flex gap-2"><span class="font-bold text-emerald-600">1.</span> Select <strong>Sign in</strong> from the navigation bar to open the sign-in page.</li>
                 <li class="flex gap-2"><span class="font-bold text-emerald-600">2.</span> Enter your registered email address.</li>
                 <li class="flex gap-2"><span class="font-bold text-emerald-600">3.</span> Enter your password.</li>
                 <li class="flex gap-2"><span class="font-bold text-emerald-600">4.</span> Select <strong>Sign in</strong>. Inline error messages appear if credentials are incorrect.</li>
@@ -153,13 +145,13 @@ const tabs: { id: TabId; label: string }[] = [
                 <h3 class="text-lg font-extrabold text-slate-950 dark:text-white">Sign in with Google</h3>
               </div>
               <ol class="grid gap-2 text-sm text-slate-600 dark:text-slate-400">
-                <li class="flex gap-2"><span class="font-bold text-emerald-600">1.</span> Open <strong>/login</strong>.</li>
+                <li class="flex gap-2"><span class="font-bold text-emerald-600">1.</span> Select <strong>Sign in</strong> from the navigation bar to open the sign-in page.</li>
                 <li class="flex gap-2"><span class="font-bold text-emerald-600">2.</span> Select <strong>Continue with Google</strong>.</li>
                 <li class="flex gap-2"><span class="font-bold text-emerald-600">3.</span> Choose or confirm your Google account in the pop-up.</li>
                 <li class="flex gap-2"><span class="font-bold text-emerald-600">4.</span> Grant the requested permissions.</li>
                 <li class="flex gap-2"><span class="font-bold text-emerald-600">5.</span> The app redirects back and opens the management dashboard.</li>
               </ol>
-              <p class="mt-3 text-xs text-slate-400 dark:text-slate-500">If the Google button is not visible, Google OAuth is not configured in this environment. Use email sign-in instead.</p>
+              <p class="mt-3 text-xs text-slate-400 dark:text-slate-500">If the Google option is not shown, it is not available for this app. Sign in with your email and password instead.</p>
             </div>
           </div>
         </div>
@@ -181,8 +173,8 @@ const tabs: { id: TabId; label: string }[] = [
             <li class="flex items-start gap-3 text-slate-700 dark:text-slate-300">
               <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700 dark:bg-emerald-900 dark:text-emerald-400">1</span>
               <div>
-                <p class="font-semibold">Open the login page</p>
-                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Navigate to <strong>/login</strong>. The sign-in form is shown by default.</p>
+                <p class="font-semibold">Open the sign-in page</p>
+                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Select <strong>Sign in</strong> from the navigation bar. The sign-in form is shown by default.</p>
               </div>
             </li>
             <li class="flex items-start gap-3 text-slate-700 dark:text-slate-300">
@@ -196,7 +188,7 @@ const tabs: { id: TabId; label: string }[] = [
               <span class="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-full bg-emerald-100 text-xs font-bold text-emerald-700 dark:bg-emerald-900 dark:text-emerald-400">3</span>
               <div>
                 <p class="font-semibold">Fill in the required fields</p>
-                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Enter a display name, a valid email address, and a password. Inline validation messages appear immediately when a field value is missing or invalid.</p>
+                <p class="mt-0.5 text-sm text-slate-500 dark:text-slate-400">Enter a display name, a valid email address, and a password. Error messages appear next to each field if something is missing or incorrect.</p>
               </div>
             </li>
             <li class="flex items-start gap-3 text-slate-700 dark:text-slate-300">
@@ -228,38 +220,26 @@ const tabs: { id: TabId; label: string }[] = [
           </div>
           <div class="grid gap-3 sm:grid-cols-2">
             <div class="rounded-xl border border-slate-100 p-4 dark:border-slate-700">
-              <p class="mb-2 font-bold text-slate-800 dark:text-slate-200">Public pages (no account needed)</p>
-              <ul class="grid gap-1 text-sm text-slate-600 dark:text-slate-400">
-                <li class="flex gap-2"><code class="text-emerald-600 dark:text-emerald-400">/</code> Home landing page</li>
-                <li class="flex gap-2"><code class="text-emerald-600 dark:text-emerald-400">/about</code> About the app</li>
-                <li class="flex gap-2"><code class="text-emerald-600 dark:text-emerald-400">/quizzes</code> Browse public quizzes</li>
-                <li class="flex gap-2"><code class="text-emerald-600 dark:text-emerald-400">/login</code> Sign in or register</li>
-                <li class="flex gap-2"><code class="text-emerald-600 dark:text-emerald-400">/guide</code> This guideline page</li>
+              <p class="mb-2 font-bold text-slate-800 dark:text-slate-200">Public pages — no account needed</p>
+              <ul class="grid gap-2 text-sm text-slate-600 dark:text-slate-400">
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"></span> <strong>Home</strong> — landing page with a quick overview of the app</li>
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"></span> <strong>About</strong> — information about the project</li>
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"></span> <strong>Public Quizzes</strong> — browse and take published quizzes</li>
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"></span> <strong>Sign in</strong> — sign in or create a new account</li>
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"></span> <strong>Guide</strong> — this guideline page</li>
               </ul>
             </div>
             <div class="rounded-xl border border-slate-100 p-4 dark:border-slate-700">
-              <p class="mb-2 font-bold text-slate-800 dark:text-slate-200">Management pages (sign in required)</p>
-              <ul class="grid gap-1 text-sm text-slate-600 dark:text-slate-400">
-                <li class="flex gap-2"><code class="text-emerald-600 dark:text-emerald-400">/management</code> Dashboard overview</li>
-                <li class="flex gap-2"><code class="text-emerald-600 dark:text-emerald-400">/management/quizzes</code> My Quizzes list</li>
-                <li class="flex gap-2"><code class="text-emerald-600 dark:text-emerald-400">/management/create-quiz</code> Create a new quiz</li>
-                <li class="flex gap-2"><code class="text-emerald-600 dark:text-emerald-400">/results</code> Quiz results &amp; analytics</li>
-                <li class="flex gap-2"><code class="text-emerald-600 dark:text-emerald-400">/management/profile</code> Your profile &amp; settings</li>
+              <p class="mb-2 font-bold text-slate-800 dark:text-slate-200">Management pages — sign in required</p>
+              <ul class="grid gap-2 text-sm text-slate-600 dark:text-slate-400">
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400"></span> <strong>Dashboard</strong> — overview of quiz activity and stats</li>
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400"></span> <strong>My Quizzes</strong> — list, search, filter, and manage all your quizzes</li>
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400"></span> <strong>Create Quiz</strong> — build a new quiz from scratch</li>
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400"></span> <strong>Quiz Results</strong> — view submissions, scores, and analytics</li>
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400"></span> <strong>Profile &amp; Settings</strong> — manage your account, subjects, and password</li>
               </ul>
             </div>
           </div>
-        </div>
-
-        <div class="flex justify-end">
-          <RouterLink
-            class="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200"
-            :to="{ name: 'login' }"
-          >
-            Sign in now
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </RouterLink>
         </div>
       </div>
 
@@ -307,7 +287,7 @@ const tabs: { id: TabId; label: string }[] = [
               <ul class="grid gap-1.5 text-sm text-slate-600 dark:text-slate-400">
                 <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"></span> <strong>Create Quiz</strong> button — jump directly to the quiz builder</li>
                 <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"></span> Recent quizzes table — open, edit, or continue where you left off</li>
-                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"></span> Hero section — context-aware prompts to help first-time creators</li>
+                <li class="flex items-center gap-2"><span class="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500"></span> Welcome message with helpful tips for first-time creators</li>
               </ul>
             </div>
           </div>
@@ -535,7 +515,7 @@ const tabs: { id: TabId; label: string }[] = [
               <p class="mb-3 font-bold text-slate-800 dark:text-slate-200">How to share</p>
               <ol class="grid gap-2 text-sm text-slate-600 dark:text-slate-400">
                 <li class="flex gap-2"><span class="font-bold text-emerald-600">1.</span> With a published quiz, select the <strong>Share</strong> action.</li>
-                <li class="flex gap-2"><span class="font-bold text-emerald-600">2.</span> Copy the shareable link. Sending this URL lets anyone open the quiz landing page directly.</li>
+                <li class="flex gap-2"><span class="font-bold text-emerald-600">2.</span> Copy the shareable link and send it to participants. Anyone with the link can open the quiz directly.</li>
                 <li class="flex gap-2"><span class="font-bold text-emerald-600">3.</span> For <strong>private quizzes</strong>, also copy and share the 6-character access code. Participants must enter this code before they can start.</li>
                 <li class="flex gap-2"><span class="font-bold text-emerald-600">4.</span> To revoke access, select <strong>Unpublish</strong> from the action menu. The quiz link stops working immediately.</li>
               </ol>
@@ -690,7 +670,7 @@ const tabs: { id: TabId; label: string }[] = [
               </li>
             </ol>
             <div class="mt-5 rounded-xl bg-emerald-50 p-4 text-sm text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300">
-              <strong>Timed quizzes:</strong> the countdown is shown in the header. If you navigate away the app warns you that your progress may be lost.
+              <strong>Timed quizzes:</strong> the countdown is shown at the top of the screen. If you try to leave the quiz, the app warns you that your progress may be lost.
             </div>
           </div>
 
@@ -859,17 +839,6 @@ const tabs: { id: TabId; label: string }[] = [
           </div>
         </div>
 
-        <div class="flex justify-start">
-          <RouterLink
-            class="inline-flex min-h-11 items-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200"
-            :to="{ name: 'public-quizzes' }"
-          >
-            Browse quizzes
-            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M5 12h14M12 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </RouterLink>
-        </div>
       </div>
 
     </div>

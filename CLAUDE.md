@@ -122,24 +122,24 @@ SEO metadata (title, description, canonical, breadcrumbs) is applied per-route v
 |-------|------|---------------|
 | `/` | `HomeView` (public landing) | No |
 | `/about` | `AboutView` | No |
+| `/guide` | `UserGuidelineView` | No |
 | `/quizzes` | `PublicQuizzesView` (browse published quizzes) | No |
+| `/quizzes/private` | `PrivateQuizEntryView` (access-code entry) | No |
 | `/login` | `LoginView` | No |
 | `/auth/callback` | `AuthCallbackView` (Google OAuth) | No (bare layout) |
-| `/q/:slug` | `PublicQuizLandingPage` | No (bare layout) |
-| `/q/:slug/take` | `PublicQuizTakeView` | No (bare layout) |
+| `/q/:slug` | `PublicQuizLandingPage` | No |
+| `/q/:slug/take` | `PublicQuizTakeView` | No |
 | `/management` | `ManagementView` (dashboard) | Yes |
 | `/management/quizzes` | `MyQuizzesView` | Yes |
-| `/management/profile` | `ProfileView` | Yes |
-| `/management/account` | `AccountSettingsView` | Yes |
-| `/management/password` | `PasswordSettingsView` | Yes |
+| `/management/me/profile` | `ProfileView` | Yes |
+| `/management/me/configuration` | `ConfigurationSettingsView` (alias: `/management/me/account`) | Yes |
+| `/management/me/password` | `PasswordSettingsView` | Yes |
 | `/management/create-quiz` | `CreateQuizView` (new quiz) | Yes |
 | `/management/quizzes/:id/questions` | `CreateQuizView` (edit questions) | Yes |
-| `/management/editor` | `QuizEditorView` (new quiz) | Yes |
-| `/management/editor/:id` | `QuizEditorView` (edit quiz) | Yes |
-| `/results` | `ResultQuizPage` (all quiz results) | Yes |
-| `/results/:quizId` | `ResultQuizDetailView` (single quiz submissions) | Yes |
+| `/management/quizzes/results` | `ResultQuizPage` (all quiz results) | Yes |
+| `/management/quizzes/results/:quizId` | `ResultQuizDetailView` (single quiz submissions) | Yes |
 
-Legacy paths (`/quizzes`, `/editor`, `/editor/:id`, etc.) redirect to their `/management/*` equivalents.
+Legacy redirects: `/home` → `/`, `/profile` → `/management/me/profile`, `/account` → `/management/me/configuration`, `/configuration` → `/management/me/configuration`, `/password` → `/management/me/password`, `/create-quiz` → `/management/create-quiz`, `/editor` → `/management/create-quiz`, `/editor/:id` → `/management/quizzes/:id/questions`, `/results` → `/management/quizzes/results`, `/results/:quizId` → `/management/quizzes/results/:quizId`, `/management/results` → `/management/quizzes/results`, `/management/results/:quizId` → `/management/quizzes/results/:quizId`, `/management/profile` → `/management/me/profile`, `/management/configuration` → `/management/me/configuration`, `/management/account` → `/management/me/configuration`, `/management/password` → `/management/me/password`, `/management/editor` → `/management/create-quiz`, `/management/editor/:id` → `/management/quizzes/:id/questions`.
 
 ### API Endpoints
 

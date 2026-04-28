@@ -242,7 +242,6 @@ const handleGoogleSignIn = async () => {
 
 const handleForgotPassword = () => {
   // TODO: Route to the password recovery flow when it exists.
-  console.info("Forgot password clicked");
 };
 
 onMounted(() => {

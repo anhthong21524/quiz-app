@@ -6,7 +6,7 @@ defineProps<{
 }>();
 
 function handleUpgrade() {
-  console.info("Upgrade to Pro clicked");
+  // TODO: Route to the upgrade/pricing flow when it exists.
 }
 </script>
 

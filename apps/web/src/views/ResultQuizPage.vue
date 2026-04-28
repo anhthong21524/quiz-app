@@ -23,6 +23,7 @@ const selectedSubject = ref("All subjects");
 const selectedDateRange = ref("All time");
 const viewMode = ref<"list" | "grid">("list");
 const isLoading = ref(false);
+const loadError = ref(false);
 const currentPage = ref(1);
 const sortKey = ref("submissions");
 const sortDir = ref<"asc" | "desc">("desc");
@@ -293,6 +294,7 @@ function setSort(key: string, dir: "asc" | "desc") {
 
 onMounted(async () => {
   isLoading.value = true;
+  loadError.value = false;
   try {
     const [s, p, r] = await Promise.all([
       fetchResultsSummary(),
@@ -302,6 +304,8 @@ onMounted(async () => {
     summary.value = s;
     performanceData.value = p;
     recentData.value = r;
+  } catch {
+    loadError.value = true;
   } finally {
     isLoading.value = false;
   }
@@ -311,6 +315,10 @@ onMounted(async () => {
 <template>
   <section class="result-quiz-page" :aria-busy="isLoading">
     <PageHeader title="Quiz Results" description="View and analyze results for all quizzes." />
+
+    <div v-if="loadError" class="load-error-banner" role="alert">
+      Could not load results. Please refresh the page or try again later.
+    </div>
 
     <AppStatsBar
       :items="resultOverviewItems"
@@ -363,6 +371,16 @@ onMounted(async () => {
 .result-quiz-page {
   display: grid;
   gap: 14px;
+}
+
+.load-error-banner {
+  padding: 12px 16px;
+  border-radius: 10px;
+  background: #fff5f5;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  font-weight: 600;
 }
 
 .result-quiz-layout {

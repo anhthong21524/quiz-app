@@ -166,6 +166,22 @@ export const router = createRouter({
       redirect: { name: "password" }
     },
     {
+      path: managementPath("/profile"),
+      redirect: { name: "profile" }
+    },
+    {
+      path: managementPath("/configuration"),
+      redirect: { name: "configuration" }
+    },
+    {
+      path: managementPath("/account"),
+      redirect: { name: "configuration" }
+    },
+    {
+      path: managementPath("/password"),
+      redirect: { name: "password" }
+    },
+    {
       path: "/create-quiz",
       redirect: { name: "create-quiz" }
     },
@@ -187,6 +203,14 @@ export const router = createRouter({
     },
     {
       path: managementPath("/results"),
+      redirect: { name: "results" }
+    },
+    {
+      path: managementPath("/results/:quizId"),
+      redirect: (to) => ({ name: "result-quiz-detail", params: to.params })
+    },
+    {
+      path: managementPath("/quizzes/results"),
       name: "results",
       component: () => import("../views/ResultQuizPage.vue"),
       meta: {
@@ -194,12 +218,12 @@ export const router = createRouter({
         seo: {
           title: "Quiz Results",
           description: "View and analyze results for all quizzes in Quiz App.",
-          canonicalPath: managementPath("/results")
+          canonicalPath: managementPath("/quizzes/results")
         }
       }
     },
     {
-      path: managementPath("/results/:quizId"),
+      path: managementPath("/quizzes/results/:quizId"),
       name: "result-quiz-detail",
       component: () => import("../views/ResultQuizDetailView.vue"),
       meta: {
@@ -207,7 +231,7 @@ export const router = createRouter({
         seo: {
           title: "Quiz Results",
           description: "View submissions and analytics for a single quiz.",
-          canonicalPath: managementPath("/results")
+          canonicalPath: managementPath("/quizzes/results")
         }
       }
     },
@@ -229,7 +253,7 @@ export const router = createRouter({
       }
     },
     {
-      path: managementPath("/profile"),
+      path: managementPath("/me/profile"),
       name: "profile",
       component: () => import("../views/ProfileView.vue"),
       meta: {
@@ -238,17 +262,17 @@ export const router = createRouter({
           title: "Profile",
           description:
             "Manage your personal information and profile settings in Quiz App.",
-          canonicalPath: managementPath("/profile"),
+          canonicalPath: managementPath("/me/profile"),
           breadcrumbs: [
             { name: "Management", path: "/management" },
-            { name: "Profile", path: managementPath("/profile") }
+            { name: "Profile", path: managementPath("/me/profile") }
           ]
         }
       }
     },
     {
-      path: managementPath("/configuration"),
-      alias: [managementPath("/account")],
+      path: managementPath("/me/configuration"),
+      alias: [managementPath("/me/account")],
       name: "configuration",
       component: () => import("../views/ConfigurationSettingsView.vue"),
       meta: {
@@ -257,16 +281,16 @@ export const router = createRouter({
           title: "Configuration",
           description:
             "Configure quiz setup defaults and Subject / Domain choices in Quiz App.",
-          canonicalPath: managementPath("/configuration"),
+          canonicalPath: managementPath("/me/configuration"),
           breadcrumbs: [
             { name: "Management", path: "/management" },
-            { name: "Configuration", path: managementPath("/configuration") }
+            { name: "Configuration", path: managementPath("/me/configuration") }
           ]
         }
       }
     },
     {
-      path: managementPath("/password"),
+      path: managementPath("/me/password"),
       name: "password",
       component: () => import("../views/PasswordSettingsView.vue"),
       meta: {
@@ -274,10 +298,10 @@ export const router = createRouter({
         seo: {
           title: "Password",
           description: "Manage password settings for your Quiz App account.",
-          canonicalPath: managementPath("/password"),
+          canonicalPath: managementPath("/me/password"),
           breadcrumbs: [
             { name: "Management", path: "/management" },
-            { name: "Password", path: managementPath("/password") }
+            { name: "Password", path: managementPath("/me/password") }
           ]
         }
       }

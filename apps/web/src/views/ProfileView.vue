@@ -55,7 +55,7 @@ const profileDetails = computed<ProfileDetail[]>(() => [
 ]);
 
 function editProfile() {
-  console.info("Edit profile clicked");
+  // TODO: Open profile edit flow when it exists.
 }
 
 function openAvatarPicker() {

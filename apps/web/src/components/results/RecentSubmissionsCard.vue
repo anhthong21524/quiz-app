@@ -1,13 +1,10 @@
 <script setup lang="ts">
-import { useRouter } from "vue-router";
 import AppDateTime from "../AppDateTime.vue";
 import type { RecentSubmissionResult } from "../../data/quiz-results";
 
 defineProps<{
   submissions: RecentSubmissionResult[];
 }>();
-
-const router = useRouter();
 
 function scoreClass(pct: number | null) {
   if (pct == null) return "";
