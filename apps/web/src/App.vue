@@ -11,6 +11,7 @@ const usePublicLayout = computed(() =>
   route.name === "home" ||
   route.name === "public-quizzes" ||
   route.name === "about" ||
+  route.name === "user-guideline" ||
   route.name === "login" ||
   route.name === "public-quiz" ||
   route.name === "public-quiz-take" ||

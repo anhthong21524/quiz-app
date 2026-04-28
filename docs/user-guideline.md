@@ -2,31 +2,57 @@
 
 This guide explains how to use Quiz App as a quiz creator, administrator, or learner. It assumes the app is running locally with the default development URLs.
 
-## Access the App
+## Quick Start
 
 - Open the web app at `http://localhost:3000`.
-- The API runs behind the app at `http://localhost:3001/api`; regular users do not need to open the API directly.
+- The app uses the API at `http://localhost:3001/api`; regular users do not need to open the API directly.
 - For local testing, sign in with:
   - Email: `admin@quiz.app`
   - Password: `admin1234`
-- If Google sign-in is configured, use the Google sign-in button on the login page.
-
-## Navigation Overview
-
-- Public users can open the home page, browse public quizzes, enter a private quiz code, and take published quizzes.
-- Signed-in users can open the management dashboard, create quizzes, manage existing quizzes, review results, update profile details, configure quiz subjects, and change passwords.
 - Protected pages redirect to the login page when the current session is not signed in.
 
 ## Sign In or Create an Account
+
+### Sign in with email and password
 
 1. Open `http://localhost:3000/login`.
 2. Enter your email and password.
 3. Select **Sign in**.
 4. After a successful sign-in, the app opens the quiz management area.
 
-To create an account, switch to the create-account form on the login page, enter the required details, and submit the form. Password and email validation messages appear beside the fields when values are missing or invalid.
+### Sign in with Google
 
-## Create a Quiz
+1. Open `http://localhost:3000/login`.
+2. Select **Sign in with Google**.
+3. Complete the Google account approval flow.
+4. After a successful sign-in, the app returns to the quiz management area.
+
+If Google sign-in is not configured for the current environment, continue with email and password instead.
+
+### Create an account
+
+1. Open `http://localhost:3000/login`.
+2. Switch to the create-account form.
+3. Enter the required details.
+4. Submit the form.
+
+Password and email validation messages appear beside the fields when values are missing or invalid.
+
+## For Quiz Creators and Administrators
+
+Signed-in users can open the management dashboard, create quizzes, manage existing quizzes, review results, update profile details, configure quiz subjects, and change passwords.
+
+### Open the Management Dashboard
+
+Open **Management** to see an overview of your quiz activity.
+
+- A hero section helps you create your first quiz or continue editing recent work.
+- Summary cards show total quizzes, in-progress quizzes, published quizzes, and total submissions.
+- A recent quizzes table helps you jump back into editing or review recent activity.
+
+Use the dashboard as the main starting point after signing in when you want a quick overview before opening a specific page.
+
+### Create a Quiz
 
 1. Sign in.
 2. Open **Create Quiz** from the header or management dashboard.
@@ -51,7 +77,7 @@ To create an account, switch to the create-account form on the login page, enter
 7. Use the question navigator to move between questions and track completion.
 8. Select **Save quiz** after the final question.
 
-## Edit a Quiz
+### Edit a Quiz
 
 1. Open **My Quizzes**.
 2. Select the edit icon for the quiz.
@@ -60,7 +86,7 @@ To create an account, switch to the create-account form on the login page, enter
 
 Published quizzes open in view-only mode. To change a published quiz, return to **My Quizzes**, unpublish it, edit the quiz, and publish it again when ready.
 
-## Manage Quizzes
+### Manage Quizzes
 
 Open **My Quizzes** to search, filter, sort, and manage quizzes.
 
@@ -79,7 +105,7 @@ Quiz statuses:
 
 Deleting a quiz is permanent and requires confirmation.
 
-## Publish and Share a Quiz
+### Publish and Share a Quiz
 
 1. Open **My Quizzes**.
 2. Use the quiz action menu.
@@ -94,7 +120,24 @@ After publishing:
 
 To remove participant access, use **Unpublish** from the quiz action menu. The quiz can be published again later.
 
-## Take a Public Quiz
+### Review Results
+
+Open **Quiz Results** to analyze submissions.
+
+- Summary cards show total quizzes, submissions, and average score.
+- The performance table lists quizzes with submissions and average scores.
+- Search and filter results by quiz, subject, and date range.
+- Export the result list as CSV.
+- Open a quiz result detail page to review participant submissions.
+- On the detail page, select a submission to view score, time spent, selected answers, correct answers, and explanations.
+
+The result detail page can also export submissions as CSV.
+
+## For Learners
+
+Public users can open the home page, browse public quizzes, enter a private quiz code, and take published quizzes.
+
+### Take a Public Quiz
 
 1. Open **Public Quizzes**.
 2. Search or sort the available quizzes if needed.
@@ -108,7 +151,7 @@ Timed quizzes show a countdown. If the timer reaches zero, the attempt is submit
 
 After submission, the participant may see a summary, answer review, or retake option depending on the quiz settings.
 
-## Take a Private Quiz
+### Take a Private Quiz
 
 1. Open **Public Quizzes**.
 2. Select **Enter code**.
@@ -116,19 +159,6 @@ After submission, the participant may see a summary, answer review, or retake op
 4. After the code is accepted, enter your name and start the quiz.
 
 If a private quiz link already includes an access code, the app opens the quiz landing page directly.
-
-## Review Results
-
-Signed-in users can open **Quiz Results** to analyze submissions.
-
-- Summary cards show total quizzes, submissions, and average score.
-- The performance table lists quizzes with submissions and average scores.
-- Search and filter results by quiz, subject, and date range.
-- Export the result list as CSV.
-- Open a quiz result detail page to review participant submissions.
-- On the detail page, select a submission to view score, time spent, selected answers, correct answers, and explanations.
-
-The result detail page can also export submissions as CSV.
 
 ## Manage Settings
 

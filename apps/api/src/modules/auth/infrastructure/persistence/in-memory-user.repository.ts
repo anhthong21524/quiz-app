@@ -34,4 +34,9 @@ export class InMemoryUserRepository implements UserRepository {
     const user = this.users.get(id);
     if (user) this.users.set(id, { ...user, avatarUrl });
   }
+
+  async updatePassword(id: string, passwordHash: string, passwordSalt: string): Promise<void> {
+    const user = this.users.get(id);
+    if (user) this.users.set(id, { ...user, passwordHash, passwordSalt });
+  }
 }

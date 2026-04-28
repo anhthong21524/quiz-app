@@ -1,22 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
 import { useAuthStore } from "../stores/auth";
 import { useGlobalLoading } from "../composables/useGlobalLoading";
-import HomeView from "../views/HomeView.vue";
-import AboutView from "../views/AboutView.vue";
-import LoginView from "../views/LoginView.vue";
-import ManagementView from "../views/ManagementView.vue";
-import PublicQuizzesView from "../views/PublicQuizzesView.vue";
-import MyQuizzesView from "../views/MyQuizzesView.vue";
-import ResultQuizPage from "../views/ResultQuizPage.vue";
-import ResultQuizDetailView from "../views/ResultQuizDetailView.vue";
-import CreateQuizView from "../views/CreateQuizView.vue";
-import ProfileView from "../views/ProfileView.vue";
-import ConfigurationSettingsView from "../views/ConfigurationSettingsView.vue";
-import PasswordSettingsView from "../views/PasswordSettingsView.vue";
-import PublicQuizLandingPage from "../views/PublicQuizLandingPage.vue";
-import PublicQuizTakeView from "../views/PublicQuizTakeView.vue";
-import PrivateQuizEntryView from "../views/PrivateQuizEntryView.vue";
-import AuthCallbackView from "../views/AuthCallbackView.vue";
 import { applySeo } from "../services/seo";
 
 const managementPath = (path: string) => `/management${path}`;
@@ -27,7 +11,7 @@ export const router = createRouter({
     {
       path: "/",
       name: "home",
-      component: HomeView,
+      component: () => import("../views/HomeView.vue"),
       meta: {
         seo: {
           title: "Home",
@@ -42,13 +26,31 @@ export const router = createRouter({
       redirect: { name: "home" }
     },
     {
+      path: "/guide",
+      name: "user-guideline",
+      component: () => import("../views/UserGuidelineView.vue"),
+      meta: {
+        seo: {
+          title: "User Guideline",
+          description:
+            "Learn how to use Quiz App — getting started, creating quizzes, and taking quizzes as a participant.",
+          canonicalPath: "/guide",
+          breadcrumbs: [
+            { name: "Home", path: "/" },
+            { name: "User Guideline", path: "/guide" }
+          ]
+        }
+      }
+    },
+    {
       path: "/about",
       name: "about",
-      component: AboutView,
+      component: () => import("../views/AboutView.vue"),
       meta: {
         seo: {
           title: "About",
-          description: "Learn how Quiz App helps learners practice, improve, and build knowledge with simple quizzes.",
+          description:
+            "Learn how Quiz App helps learners practice, improve, and build knowledge with simple quizzes.",
           canonicalPath: "/about",
           breadcrumbs: [
             { name: "Home", path: "/" },
@@ -60,7 +62,7 @@ export const router = createRouter({
     {
       path: "/quizzes",
       name: "public-quizzes",
-      component: PublicQuizzesView,
+      component: () => import("../views/PublicQuizzesView.vue"),
       meta: {
         seo: {
           title: "Public Quizzes",
@@ -76,7 +78,7 @@ export const router = createRouter({
     {
       path: "/login",
       name: "login",
-      component: LoginView,
+      component: () => import("../views/LoginView.vue"),
       meta: {
         seo: {
           title: "Sign in",
@@ -89,13 +91,13 @@ export const router = createRouter({
     {
       path: "/auth/callback",
       name: "auth-callback",
-      component: AuthCallbackView,
+      component: () => import("../views/AuthCallbackView.vue"),
       meta: { bareLayout: true }
     },
     {
       path: "/quizzes/private",
       name: "private-quiz-entry",
-      component: PrivateQuizEntryView,
+      component: () => import("../views/PrivateQuizEntryView.vue"),
       meta: {
         seo: {
           title: "Private Quiz",
@@ -111,7 +113,7 @@ export const router = createRouter({
     {
       path: "/q/:slug",
       name: "public-quiz",
-      component: PublicQuizLandingPage,
+      component: () => import("../views/PublicQuizLandingPage.vue"),
       meta: {
         seo: {
           title: "Public Quiz",
@@ -123,7 +125,7 @@ export const router = createRouter({
     {
       path: "/q/:slug/take",
       name: "public-quiz-take",
-      component: PublicQuizTakeView,
+      component: () => import("../views/PublicQuizTakeView.vue"),
       meta: {
         seo: {
           title: "Take Quiz",
@@ -135,12 +137,13 @@ export const router = createRouter({
     {
       path: "/management",
       name: "management",
-      component: ManagementView,
+      component: () => import("../views/ManagementView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
           title: "Management",
-          description: "Your Quiz App management dashboard — stats, recent quizzes, and quick actions.",
+          description:
+            "Your Quiz App management dashboard — stats, recent quizzes, and quick actions.",
           canonicalPath: "/management",
           breadcrumbs: [{ name: "Management", path: "/management" }]
         }
@@ -185,7 +188,7 @@ export const router = createRouter({
     {
       path: managementPath("/results"),
       name: "results",
-      component: ResultQuizPage,
+      component: () => import("../views/ResultQuizPage.vue"),
       meta: {
         requiresAuth: true,
         seo: {
@@ -198,7 +201,7 @@ export const router = createRouter({
     {
       path: managementPath("/results/:quizId"),
       name: "result-quiz-detail",
-      component: ResultQuizDetailView,
+      component: () => import("../views/ResultQuizDetailView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
@@ -211,7 +214,7 @@ export const router = createRouter({
     {
       path: managementPath("/quizzes"),
       name: "quizzes",
-      component: MyQuizzesView,
+      component: () => import("../views/MyQuizzesView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
@@ -228,12 +231,13 @@ export const router = createRouter({
     {
       path: managementPath("/profile"),
       name: "profile",
-      component: ProfileView,
+      component: () => import("../views/ProfileView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
           title: "Profile",
-          description: "Manage your personal information and profile settings in Quiz App.",
+          description:
+            "Manage your personal information and profile settings in Quiz App.",
           canonicalPath: managementPath("/profile"),
           breadcrumbs: [
             { name: "Management", path: "/management" },
@@ -246,12 +250,13 @@ export const router = createRouter({
       path: managementPath("/configuration"),
       alias: [managementPath("/account")],
       name: "configuration",
-      component: ConfigurationSettingsView,
+      component: () => import("../views/ConfigurationSettingsView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
           title: "Configuration",
-          description: "Configure quiz setup defaults and Subject / Domain choices in Quiz App.",
+          description:
+            "Configure quiz setup defaults and Subject / Domain choices in Quiz App.",
           canonicalPath: managementPath("/configuration"),
           breadcrumbs: [
             { name: "Management", path: "/management" },
@@ -263,7 +268,7 @@ export const router = createRouter({
     {
       path: managementPath("/password"),
       name: "password",
-      component: PasswordSettingsView,
+      component: () => import("../views/PasswordSettingsView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
@@ -280,12 +285,13 @@ export const router = createRouter({
     {
       path: managementPath("/create-quiz"),
       name: "create-quiz",
-      component: CreateQuizView,
+      component: () => import("../views/CreateQuizView.vue"),
       meta: {
         requiresAuth: true,
         seo: {
           title: "Create Quiz",
-          description: "Build a new quiz with setup details, guided question entry, and answer options.",
+          description:
+            "Build a new quiz with setup details, guided question entry, and answer options.",
           canonicalPath: managementPath("/create-quiz"),
           breadcrumbs: [
             { name: "Management", path: "/management" },
@@ -297,7 +303,7 @@ export const router = createRouter({
     {
       path: managementPath("/quizzes/:id/questions"),
       name: "edit-quiz-questions",
-      component: CreateQuizView,
+      component: () => import("../views/CreateQuizView.vue"),
       props: true,
       meta: {
         requiresAuth: true,
@@ -319,6 +325,18 @@ export const router = createRouter({
     {
       path: managementPath("/editor/:id"),
       redirect: (to) => ({ name: "edit-quiz-questions", params: to.params })
+    },
+    {
+      path: "/:pathMatch(.*)*",
+      name: "not-found",
+      component: () => import("../views/NotFoundView.vue"),
+      meta: {
+        seo: {
+          title: "Page Not Found",
+          description: "The page you are looking for does not exist.",
+          breadcrumbs: [{ name: "Home", path: "/" }, { name: "Not Found", path: "" }]
+        }
+      }
     }
   ]
 });

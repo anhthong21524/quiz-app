@@ -76,6 +76,10 @@ export class MongoUserRepository implements UserRepository, OnModuleDestroy {
     await this.getModel().findByIdAndUpdate(id, { avatarUrl });
   }
 
+  async updatePassword(id: string, passwordHash: string, passwordSalt: string): Promise<void> {
+    await this.getModel().findByIdAndUpdate(id, { passwordHash, passwordSalt });
+  }
+
   private toUser(doc: MongoUserRecord): User {
     return {
       id: String(doc._id),

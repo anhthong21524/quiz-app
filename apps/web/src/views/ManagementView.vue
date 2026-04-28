@@ -6,7 +6,8 @@ import AppTable from "../components/AppTable.vue";
 import StatCard from "../components/StatCard.vue";
 import QuizIconAvatar from "../components/my-quizzes/QuizIconAvatar.vue";
 import QuizStatusBadge from "../components/my-quizzes/QuizStatusBadge.vue";
-import type { MyQuizIcon, MyQuizStatus } from "../components/my-quizzes/types";
+import type { MyQuizStatus } from "../components/my-quizzes/types";
+import { getQuizIcon, mapQuizStatus } from "../lib/quiz-helpers";
 import { useQuizStore } from "../stores/quizzes";
 import { fetchResultsSummary } from "../services/quiz-api";
 
@@ -22,23 +23,6 @@ onMounted(async () => {
   totalSubmissions.value = summary.totalSubmissions;
 });
 
-// ── Icon helper (mirrors MyQuizzesView) ───────────────────────
-function getQuizIcon(subject?: string): MyQuizIcon {
-  const s = subject?.trim().toLowerCase() ?? "";
-  if (s.includes("math")) return "mathematics";
-  if (s.includes("science") || s.includes("chem")) return "science";
-  if (s.includes("geo")) return "geography";
-  if (s.includes("english") || s.includes("grammar")) return "english";
-  if (s.includes("physics")) return "physics";
-  if (s.includes("history")) return "history";
-  return "knowledge";
-}
-
-function mapStatus(status: QuizStatus): MyQuizStatus {
-  if (status === QuizStatus.PUBLISHED) return "Published";
-  if (status === QuizStatus.IN_PROGRESS) return "In progress";
-  return "Unpublished";
-}
 
 function formatDateTime(value?: string) {
   if (!value) return "—";
@@ -193,7 +177,7 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
           <p class="hero-meta">
             <span>{{ heroQuiz.questions.length }} question{{ heroQuiz.questions.length !== 1 ? "s" : "" }}</span>
             <span class="hero-dot" aria-hidden="true">•</span>
-            <QuizStatusBadge :status="mapStatus(heroQuiz.status)" />
+            <QuizStatusBadge :status="mapQuizStatus(heroQuiz.status)" />
           </p>
 
           <RouterLink
@@ -342,7 +326,7 @@ const isLoading = computed(() => quizStore.isLoading && !quizStore.items.length)
             </td>
             <td class="cell-muted">{{ quiz.subject ?? "Custom" }}</td>
             <td class="cell-muted">{{ quiz.questions.length }}</td>
-            <td><QuizStatusBadge :status="mapStatus(quiz.status)" /></td>
+            <td><QuizStatusBadge :status="mapQuizStatus(quiz.status)" /></td>
             <td class="cell-muted">{{ formatDateTime(quiz.updatedAt ?? quiz.createdAt) }}</td>
           </template>
           <template v-else>

@@ -142,6 +142,32 @@ export class AuthService implements OnModuleInit {
     return { avatarUrl };
   }
 
+  async updatePassword(
+    sub: string,
+    currentPassword: string,
+    newPassword: string
+  ): Promise<{ message: string; passwordLastChangedAt: string }> {
+    const user = await this.userRepository.findById(sub);
+    if (!user || !user.passwordHash || !user.passwordSalt) {
+      throw new UnauthorizedException("Password sign-in is not enabled for this account.");
+    }
+
+    const valid = await this.verifyPassword(this.normalizePassword(currentPassword), user);
+    if (!valid) {
+      throw new UnauthorizedException("Current password is incorrect.");
+    }
+
+    const { passwordHash, passwordSalt } = await this.hashPassword(
+      this.normalizePassword(newPassword)
+    );
+    await this.userRepository.updatePassword(sub, passwordHash, passwordSalt);
+
+    return {
+      message: "Password updated successfully.",
+      passwordLastChangedAt: new Date().toISOString()
+    };
+  }
+
   logout(refreshToken: string) {
     this.validRefreshTokens.delete(refreshToken);
     return { message: "Signed out successfully." };

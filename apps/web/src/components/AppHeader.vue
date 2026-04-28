@@ -11,6 +11,7 @@ const isPublicPage = computed(() =>
   route.name === "home" ||
   route.name === "public-quizzes" ||
   route.name === "about" ||
+  route.name === "user-guideline" ||
   route.name === "login" ||
   route.name === "public-quiz" ||
   route.name === "public-quiz-take" ||
@@ -51,6 +52,10 @@ const activeNav = computed(() => {
 
   if (route.name === "about") {
     return "about";
+  }
+
+  if (route.name === "user-guideline") {
+    return "user-guideline";
   }
 
   return "";
@@ -135,6 +140,13 @@ watch(() => route.fullPath, closeMenus);
         >
           About
         </RouterLink>
+        <RouterLink
+          class="public-nav-link"
+          :class="{ 'is-active': activeNav === 'user-guideline' }"
+          :to="{ name: 'user-guideline' }"
+        >
+          Guide
+        </RouterLink>
       </nav>
 
       <div class="public-header-actions">
@@ -181,6 +193,14 @@ watch(() => route.fullPath, closeMenus);
           @click="closeMenus"
         >
           About
+        </RouterLink>
+        <RouterLink
+          class="public-mobile-nav-link"
+          :class="{ 'is-active': activeNav === 'user-guideline' }"
+          :to="{ name: 'user-guideline' }"
+          @click="closeMenus"
+        >
+          Guide
         </RouterLink>
       </nav>
     </div>

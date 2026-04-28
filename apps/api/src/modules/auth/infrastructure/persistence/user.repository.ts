@@ -20,6 +20,7 @@ export interface UserRepository {
   findByGoogleSub(googleSub: string): Promise<User | null>;
   create(data: CreateUserData): Promise<User>;
   updateAvatar(id: string, avatarUrl: string): Promise<void>;
+  updatePassword(id: string, passwordHash: string, passwordSalt: string): Promise<void>;
 }
 
 export const USER_REPOSITORY = Symbol("USER_REPOSITORY");

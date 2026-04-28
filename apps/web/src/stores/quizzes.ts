@@ -36,6 +36,12 @@ function toAppError(error: unknown, context: MessageContext): AppError {
   return { ...appError, userMessage: getUserMessage(appError, context) };
 }
 
+// Module-level counters guard against stale responses when the user navigates
+// away and back before a load completes. Each new call increments the counter;
+// the response is discarded if the counter has moved on by the time it settles.
+let loadQuizzesGen = 0;
+let loadQuizGen = 0;
+
 export const useQuizStore = defineStore("quizzes", {
   state: (): QuizState => ({
     items: [],
@@ -47,28 +53,40 @@ export const useQuizStore = defineStore("quizzes", {
 
   actions: {
     async loadQuizzes() {
+      const gen = ++loadQuizzesGen;
       this.isLoading = true;
       this.error = null;
       try {
-        this.items = await fetchQuizzes();
+        const items = await fetchQuizzes();
+        if (gen !== loadQuizzesGen) return;
+        this.items = items;
       } catch (error) {
+        if (gen !== loadQuizzesGen) return;
         this.error = toAppError(error, "quiz_list_load");
       } finally {
-        this.isLoading = false;
+        if (gen === loadQuizzesGen) {
+          this.isLoading = false;
+        }
       }
     },
 
     async loadQuiz(id: string) {
+      const gen = ++loadQuizGen;
       this.isLoading = true;
       this.error = null;
       try {
-        this.activeQuiz = await fetchQuiz(id);
+        const quiz = await fetchQuiz(id);
+        if (gen !== loadQuizGen) return;
+        this.activeQuiz = quiz;
         return this.activeQuiz;
       } catch (error) {
+        if (gen !== loadQuizGen) return;
         this.error = toAppError(error, "quiz_load");
         throw this.error;
       } finally {
-        this.isLoading = false;
+        if (gen === loadQuizGen) {
+          this.isLoading = false;
+        }
       }
     },
 

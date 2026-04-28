@@ -19,6 +19,7 @@ import { LoginDto } from "./dto/login.dto";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { UpdateAvatarDto } from "./dto/update-avatar.dto";
+import { UpdatePasswordDto } from "./dto/update-password.dto";
 import { getGoogleOAuthConfig } from "./google-oauth.config";
 import { GoogleAuthGuard } from "./guards/google-auth.guard";
 
@@ -68,6 +69,19 @@ export class AuthController {
     @Body() payload: UpdateAvatarDto
   ) {
     return this.authService.updateAvatar(req.user.id, payload.avatarUrl);
+  }
+
+  @Patch("me/password")
+  @HttpCode(HttpStatus.OK)
+  updatePassword(
+    @Req() req: Request & { user: { id: string; email: string } },
+    @Body() payload: UpdatePasswordDto
+  ) {
+    return this.authService.updatePassword(
+      req.user.id,
+      payload.currentPassword,
+      payload.newPassword
+    );
   }
 
   @Get("google/status")

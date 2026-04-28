@@ -2,7 +2,43 @@ import axios from "axios";
 import { env } from "../config/env";
 import { normalizeApiError } from "../lib/api/errors";
 
-const STORAGE_KEY = "quiz_app_auth";
+type AuthCallbacks = {
+  getTokens: () => { accessToken: string | null; refreshToken: string | null };
+  onTokenRefreshed: (
+    accessToken: string,
+    refreshToken: string,
+    user: { email: string; avatarUrl?: string }
+  ) => void;
+  onAuthFailure: () => void;
+};
+
+// Safe defaults before main.ts wires up the auth store.
+// Falls back to direct localStorage so bootstrap (token injection on first request)
+// works before configureAuthCallbacks() is called.
+let authCallbacks: AuthCallbacks = {
+  getTokens: () => {
+    try {
+      const raw = localStorage.getItem("quiz_app_auth");
+      if (!raw) return { accessToken: null, refreshToken: null };
+      return JSON.parse(raw) as { accessToken: string | null; refreshToken: string | null };
+    } catch {
+      return { accessToken: null, refreshToken: null };
+    }
+  },
+  onTokenRefreshed: () => {},
+  onAuthFailure: () => {
+    if (import.meta.env.DEV) {
+      console.error(
+        "[http] onAuthFailure fired before configureAuthCallbacks() was called. " +
+        "Ensure configureAuthCallbacks() is called in main.ts before the app mounts."
+      );
+    }
+  }
+};
+
+export function configureAuthCallbacks(callbacks: AuthCallbacks) {
+  authCallbacks = callbacks;
+}
 
 export const httpClient = axios.create({
   baseURL: env.apiBaseUrl,
@@ -24,18 +60,8 @@ function notifySubscribers(token: string) {
   refreshSubscribers = [];
 }
 
-function getStoredAuth(): { accessToken: string | null; refreshToken: string | null } {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return { accessToken: null, refreshToken: null };
-    return JSON.parse(raw);
-  } catch {
-    return { accessToken: null, refreshToken: null };
-  }
-}
-
 httpClient.interceptors.request.use((config) => {
-  const { accessToken } = getStoredAuth();
+  const { accessToken } = authCallbacks.getTokens();
   if (accessToken) {
     config.headers.Authorization = `Bearer ${accessToken}`;
   }
@@ -64,7 +90,7 @@ httpClient.interceptors.response.use(
     isRefreshing = true;
 
     try {
-      const { refreshToken } = getStoredAuth();
+      const { refreshToken } = authCallbacks.getTokens();
       if (!refreshToken) throw new Error("No refresh token.");
 
       const response = await refreshClient.post<{
@@ -75,23 +101,12 @@ httpClient.interceptors.response.use(
 
       const { accessToken, refreshToken: newRefreshToken, user } = response.data;
 
-      try {
-        const existing = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "{}");
-        const nextUser = { ...(existing.user ?? {}), ...user };
-        localStorage.setItem(
-          STORAGE_KEY,
-          JSON.stringify({ ...existing, accessToken, refreshToken: newRefreshToken, user: nextUser })
-        );
-      } catch {
-        // storage unavailable
-      }
-
+      authCallbacks.onTokenRefreshed(accessToken, newRefreshToken, user);
       notifySubscribers(accessToken);
       originalRequest.headers.Authorization = `Bearer ${accessToken}`;
       return httpClient(originalRequest);
     } catch {
-      localStorage.removeItem(STORAGE_KEY);
-      window.location.href = "/login";
+      authCallbacks.onAuthFailure();
       return Promise.reject(error);
     } finally {
       isRefreshing = false;

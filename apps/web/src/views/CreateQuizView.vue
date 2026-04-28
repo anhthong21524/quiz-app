@@ -359,6 +359,7 @@ function populateEditFlow(quiz: Quiz) {
 async function loadQuizForEditing(id: string) {
   try {
     const quiz = await quizStore.loadQuiz(id);
+    if (!quiz) return;
     populateEditFlow(quiz);
   } catch {
     // quizStore.error is shown by loadError.

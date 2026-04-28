@@ -48,10 +48,6 @@ export async function uploadAvatar(avatarUrl: string): Promise<{ avatarUrl: stri
 export async function updatePassword(
   payload: UpdatePasswordPayload
 ): Promise<UpdatePasswordResponse> {
-  // TODO: Replace with a real API call when the backend exposes a password update endpoint.
-  await Promise.resolve(payload);
-  return {
-    message: "Password updated successfully.",
-    passwordLastChangedAt: new Date().toISOString()
-  };
+  const response = await httpClient.patch<UpdatePasswordResponse>("/auth/me/password", payload);
+  return response.data;
 }

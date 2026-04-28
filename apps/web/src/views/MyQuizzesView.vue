@@ -16,11 +16,11 @@ import SectionErrorState from "../components/feedback/SectionErrorState.vue";
 import QuizListSkeleton from "../components/loading/QuizListSkeleton.vue";
 import PageHeader from "../components/PageHeader.vue";
 import type {
-  MyQuizIcon,
   MyQuizStatus,
   QuizListItem,
   ViewMode
 } from "../components/my-quizzes/types";
+import { getQuizIcon, mapQuizStatus } from "../lib/quiz-helpers";
 import { useQuizStore } from "../stores/quizzes";
 import { useToast } from "../composables/useToast";
 import { isAppError } from "../lib/api/errors";
@@ -265,23 +265,6 @@ function formatLastUpdated(value?: string) {
   }).format(new Date(value));
 }
 
-function mapQuizStatus(status: QuizStatus): MyQuizStatus {
-  if (status === QuizStatus.PUBLISHED) return "Published";
-  if (status === QuizStatus.IN_PROGRESS) return "In progress";
-  return "Unpublished";
-}
-
-function getQuizIcon(subject?: string): MyQuizIcon {
-  const normalizedSubject = subject?.trim().toLowerCase() ?? "";
-
-  if (normalizedSubject.includes("math")) return "mathematics";
-  if (normalizedSubject.includes("science") || normalizedSubject.includes("chem")) return "science";
-  if (normalizedSubject.includes("geo")) return "geography";
-  if (normalizedSubject.includes("english") || normalizedSubject.includes("grammar")) return "english";
-  if (normalizedSubject.includes("physics")) return "physics";
-  if (normalizedSubject.includes("history")) return "history";
-  return "knowledge";
-}
 
 function mapApiQuiz(quiz: Quiz): QuizListItem {
   const id = quiz.id ?? quiz.title;
