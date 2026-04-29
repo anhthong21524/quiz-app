@@ -36,7 +36,7 @@ const currentYear = new Date().getFullYear();
     class="app-shell"
     :class="{
       'public-shell': usePublicLayout,
-      'public-theme-dark': usePublicLayout && theme === 'dark',
+      'public-theme-dark': theme === 'dark',
       'quiz-taking-shell': useQuizTakingLayout
     }"
   >

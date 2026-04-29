@@ -970,6 +970,147 @@ button {
   outline-offset: 2px;
 }
 
+.dashboard-icon-button {
+  width: 40px;
+  height: 40px;
+  border: 1px solid rgba(210, 223, 216, 0.96);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  background: #ffffff;
+  color: #445064;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.dashboard-icon-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.dashboard-icon-button:hover,
+.dashboard-icon-button.is-active {
+  border-color: #a7f3d0;
+  background: #ecfdf5;
+  color: #059669;
+}
+
+/* Management (non-public) dark theme */
+body:has(.app-shell.public-theme-dark:not(.public-shell)) {
+  background: #020617;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) {
+  background:
+    radial-gradient(circle at top center, rgba(15, 23, 42, 0.35), transparent 42%),
+    linear-gradient(180deg, #020617 0%, #0f172a 100%);
+  color: #e2e8f0;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .dashboard-header {
+  border-color: #1e293b;
+  background: rgba(15, 23, 42, 0.95);
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.3);
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .brand-name {
+  color: #f8fafc;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .nav-link {
+  color: #94a3b8;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .nav-link:hover,
+.app-shell.public-theme-dark:not(.public-shell) .nav-link.is-active {
+  color: #10b981;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .header-locale-select {
+  border-color: #334155;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .dashboard-icon-button {
+  border-color: #334155;
+  background: #0f172a;
+  color: #94a3b8;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .dashboard-icon-button:hover,
+.app-shell.public-theme-dark:not(.public-shell) .dashboard-icon-button.is-active {
+  border-color: #059669;
+  background: #052e2b;
+  color: #6ee7b7;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .user-profile-button {
+  border-left-color: #1e293b;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .user-avatar {
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  color: #475569;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .user-greeting {
+  color: #e2e8f0;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .header-signout-button {
+  border-color: #334155;
+  background: #0f172a;
+  color: #f87171;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .header-signout-button:hover {
+  border-color: rgba(220, 38, 38, 0.4);
+  background: #1a0a0a;
+  color: #dc2626;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .mobile-menu-button {
+  background: #1e293b;
+  color: #94a3b8;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .mobile-menu-button:hover {
+  background: #052e2b;
+  color: #10b981;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .mobile-nav-panel {
+  border-top-color: #1e293b;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .mobile-nav-link {
+  color: #94a3b8;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .mobile-nav-link.is-active {
+  background: #052e2b;
+  color: #10b981;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .app-footer {
+  border-top-color: #1e293b;
+  background: rgba(2, 6, 23, 0.96);
+  color: #94a3b8;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .app-footer-copy {
+  color: #94a3b8;
+}
+
+.app-shell.public-theme-dark:not(.public-shell) .card {
+  background: rgba(15, 23, 42, 0.8);
+  border-color: #1e293b;
+  color: #e2e8f0;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

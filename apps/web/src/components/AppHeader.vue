@@ -355,6 +355,44 @@ watch(() => route.fullPath, closeMenus);
       </label>
 
       <button
+        class="dashboard-icon-button"
+        :class="{ 'is-active': isDark }"
+        type="button"
+        :aria-label="themeToggleLabel"
+        :title="themeToggleLabel"
+        @click="toggleTheme"
+      >
+        <svg
+          v-if="isDark"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.9"
+          aria-hidden="true"
+        >
+          <circle cx="12" cy="12" r="4.5" />
+          <path
+            d="M12 2.75v2.5M12 18.75v2.5M5.46 5.46l1.76 1.76M16.78 16.78l1.76 1.76M2.75 12h2.5M18.75 12h2.5M5.46 18.54l1.76-1.76M16.78 7.22l1.76-1.76"
+            stroke-linecap="round"
+          />
+        </svg>
+        <svg
+          v-else
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.9"
+          aria-hidden="true"
+        >
+          <path
+            d="M20 15.2A7.9 7.9 0 0 1 8.8 4a8.5 8.5 0 1 0 11.2 11.2Z"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+      </button>
+
+      <button
         class="user-profile-button"
         type="button"
         :aria-label="t('header.openAccountMenu')"
