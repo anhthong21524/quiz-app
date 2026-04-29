@@ -5,10 +5,12 @@ import ConfirmModal from "../../components/ConfirmModal.vue";
 import LoadingButton from "../../components/LoadingButton.vue";
 import SettingsPageLayout from "../../components/settings/SettingsPageLayout.vue";
 import { useToast } from "../../composables/useToast";
+import { useI18n } from "../../i18n";
 import { useConfigurationStore } from "../../stores/configuration";
 
 const configurationStore = useConfigurationStore();
 const { show: showToast } = useToast();
+const { t } = useI18n();
 
 const newSubjectDomain = ref("");
 const addFormError = ref("");
@@ -36,7 +38,7 @@ onMounted(() => {
 async function addSubjectDomain() {
   const error = await configurationStore.addSubjectDomain(newSubjectDomain.value);
   if (error) { addFormError.value = error; return; }
-  showToast("Subject / Domain added");
+  showToast(t("settings.configuration.toasts.added"));
   newSubjectDomain.value = "";
   addFormError.value = "";
 }
@@ -57,7 +59,7 @@ function cancelEditing() {
 async function saveSubjectDomain(index: number) {
   const error = await configurationStore.updateSubjectDomain(index, editingSubjectDomain.value);
   if (error) { rowError.value = error; return; }
-  showToast("Subject / Domain updated");
+  showToast(t("settings.configuration.toasts.updated"));
   cancelEditing();
 }
 
@@ -75,7 +77,7 @@ async function confirmDelete(index: number) {
   const error = await configurationStore.removeSubjectDomain(index);
   pendingDeleteIndex.value = null;
   if (error) { addFormError.value = error; return; }
-  showToast(`"${subjectDomain}" removed`);
+  showToast(t("settings.configuration.toasts.removed", { name: subjectDomain ?? "" }));
 }
 
 async function resetSubjectDomains() {
@@ -83,7 +85,7 @@ async function resetSubjectDomains() {
   const error = await configurationStore.resetSubjectDomains();
   if (error) { addFormError.value = error; return; }
   cancelEditing();
-  showToast("Subject / Domain defaults restored");
+  showToast(t("settings.configuration.toasts.restored"));
 }
 
 function onDragStart(index: number, event: DragEvent) {
@@ -120,16 +122,16 @@ function onDragEnd() {
 <template>
   <SettingsPageLayout
     active-section="configuration"
-    title="Configuration"
-    subtitle="Configure quiz setup defaults and Subject / Domain choices."
+    :title="t('settings.configuration.title')"
+    :subtitle="t('settings.configuration.subtitle')"
     title-id="configuration-title"
   >
     <section class="configuration-panel" aria-labelledby="subject-domain-title">
       <div class="configuration-panel-header">
         <div class="configuration-heading-copy">
-          <p>Quiz setup</p>
-          <h2 id="subject-domain-title">Subject / Domain</h2>
-          <span>These choices appear in the quiz creation dropdown.</span>
+          <p>{{ t("settings.configuration.setupEyebrow") }}</p>
+          <h2 id="subject-domain-title">{{ t("settings.configuration.subjectDomainTitle") }}</h2>
+          <span>{{ t("settings.configuration.subjectDomainDescription") }}</span>
         </div>
 
         <button
@@ -144,18 +146,18 @@ function onDragEnd() {
             <path d="M15.5 10a5.5 5.5 0 0 1-9.25 4.03" stroke-linecap="round" />
             <path d="M6.25 16.5v-2.47h2.47" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          <span>Reset defaults</span>
+          <span>{{ t("settings.configuration.resetDefaults") }}</span>
         </button>
       </div>
 
       <form class="subject-domain-form" @submit.prevent="addSubjectDomain">
         <div class="field-wrap">
           <label>
-            <span>Subject / Domain name</span>
+            <span>{{ t("settings.configuration.fieldLabel") }}</span>
             <input
               v-model="newSubjectDomain"
               type="text"
-              placeholder="Example: Literature"
+              :placeholder="t('settings.configuration.fieldPlaceholder')"
               :maxlength="SUBJECT_DOMAIN_MAX_LENGTH"
               @input="addFormError = ''"
             />
@@ -170,25 +172,25 @@ function onDragEnd() {
           variant="primary"
           class="add-btn"
           :loading="configurationStore.isSaving"
-          loading-label="Adding…"
+          :loading-label="t('settings.configuration.adding')"
         >
           <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M10 4v12M4 10h12" stroke-linecap="round" />
           </svg>
-          <span>Add</span>
+          <span>{{ t("settings.configuration.add") }}</span>
         </LoadingButton>
       </form>
 
       <p v-if="addFormError" class="form-error">{{ addFormError }}</p>
 
       <p v-if="configurationStore.isLoading" class="configuration-summary">
-        Loading Subject / Domain configuration...
+        {{ t("settings.configuration.loading") }}
       </p>
 
       <div v-else class="list-scroll-wrap">
       <ul
         class="subject-domain-list"
-        aria-label="Configured Subject / Domain values"
+        :aria-label="t('settings.configuration.configuredAria')"
         @dragover.prevent
         @dragleave="dragOverIndex = null"
       >
@@ -209,20 +211,20 @@ function onDragEnd() {
           <!-- Delete confirmation state -->
           <template v-if="pendingDeleteIndex === index">
             <p class="delete-confirm-text">
-              Remove <strong>{{ subjectDomain }}</strong>?
+              {{ t("settings.configuration.removePrompt", { name: subjectDomain }) }}
             </p>
             <div class="row-actions">
               <LoadingButton
                 variant="danger"
                 class="compact"
                 :loading="configurationStore.isSaving"
-                loading-label="Removing…"
+                :loading-label="t('settings.configuration.removing')"
                 @click="confirmDelete(index)"
               >
-                Remove
+                {{ t("settings.configuration.remove") }}
               </LoadingButton>
               <button class="secondary-action compact" type="button" @click="cancelDelete">
-                Cancel
+                {{ t("common.cancel") }}
               </button>
             </div>
           </template>
@@ -231,7 +233,7 @@ function onDragEnd() {
           <template v-else-if="editingIndex === index">
             <div class="edit-field-wrap">
               <label class="edit-field">
-                <span class="sr-only">Edit Subject / Domain name</span>
+                <span class="sr-only">{{ t("settings.configuration.editField") }}</span>
                 <input
                   v-model="editingSubjectDomain"
                   type="text"
@@ -252,13 +254,13 @@ function onDragEnd() {
                 variant="primary"
                 class="compact"
                 :loading="configurationStore.isSaving"
-                loading-label="Saving…"
+                :loading-label="t('settings.configuration.saving')"
                 @click="saveSubjectDomain(index)"
               >
-                Save
+                {{ t("settings.configuration.save") }}
               </LoadingButton>
               <button class="secondary-action compact" type="button" @click="cancelEditing">
-                Cancel
+                {{ t("common.cancel") }}
               </button>
             </div>
           </template>
@@ -269,7 +271,7 @@ function onDragEnd() {
               <span
                 class="drag-handle"
                 aria-hidden="true"
-                title="Drag to reorder"
+                :title="t('settings.configuration.dragToReorder')"
               >
                 <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8">
                   <path d="M7 5h1M12 5h1M7 10h1M12 10h1M7 15h1M12 15h1" stroke-linecap="round" />
@@ -282,7 +284,7 @@ function onDragEnd() {
               <button
                 class="icon-action"
                 type="button"
-                :aria-label="`Edit ${subjectDomain}`"
+                :aria-label="t('settings.configuration.editAction', { name: subjectDomain })"
                 :disabled="configurationStore.isSaving"
                 @click="startEditing(index)"
               >
@@ -294,7 +296,7 @@ function onDragEnd() {
               <button
                 class="icon-action danger"
                 type="button"
-                :aria-label="`Remove ${subjectDomain}`"
+                :aria-label="t('settings.configuration.removeAction', { name: subjectDomain })"
                 :disabled="configurationStore.isSaving"
                 @click="promptDelete(index)"
               >
@@ -309,16 +311,23 @@ function onDragEnd() {
       </div>
 
       <p class="configuration-summary">
-        {{ configuredCount }} Subject / Domain {{ configuredCount === 1 ? "choice" : "choices" }} configured.
+        {{
+          t(
+            configuredCount === 1
+              ? "settings.configuration.summaryOne"
+              : "settings.configuration.summaryOther",
+            { count: configuredCount }
+          )
+        }}
       </p>
     </section>
   </SettingsPageLayout>
 
   <ConfirmModal
     v-if="showResetConfirm"
-    title="Reset to defaults?"
-    message="This will replace your current Subject / Domain list with the original defaults. This cannot be undone."
-    confirm-label="Reset defaults"
+    :title="t('settings.configuration.resetConfirmTitle')"
+    :message="t('settings.configuration.resetConfirmMessage')"
+    :confirm-label="t('settings.configuration.resetConfirmLabel')"
     :danger="true"
     @confirm="resetSubjectDomains"
     @cancel="showResetConfirm = false"

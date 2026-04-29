@@ -2,6 +2,7 @@
 import { computed, ref, watch } from "vue";
 import AppPagination from "../AppPagination.vue";
 import type { QuizSubmissionAnswer } from "../../data/quiz-submissions";
+import { useI18n } from "../../i18n";
 
 const props = withDefaults(defineProps<{
   answers: QuizSubmissionAnswer[];
@@ -12,6 +13,7 @@ const props = withDefaults(defineProps<{
 
 const currentPage = ref(1);
 const expandedIds = ref<Set<string>>(new Set());
+const { t } = useI18n();
 
 const pageCount = computed(() => Math.max(1, Math.ceil(props.answers.length / props.pageSize)));
 
@@ -30,7 +32,11 @@ const paginatedAnswers = computed(() => {
 });
 
 const showingCopy = computed(() =>
-  `Showing ${showingStart.value} to ${showingEnd.value} of ${props.answers.length} answers`
+  t("results.detail.answerPagination", {
+    start: showingStart.value,
+    end: showingEnd.value,
+    total: props.answers.length
+  })
 );
 
 watch(() => props.answers, () => {
@@ -64,9 +70,9 @@ function optionLabel(index: number) {
 function getOptionTag(answer: QuizSubmissionAnswer, optionIndex: number): string {
   const isCorrect = optionIndex === answer.correctIndex;
   const isSelected = optionIndex === answer.selectedIndex;
-  if (isCorrect && isSelected) return "Your correct answer";
-  if (isCorrect) return "Correct answer";
-  if (isSelected) return "Your answer";
+  if (isCorrect && isSelected) return t("participant.take.yourCorrectAnswer");
+  if (isCorrect) return t("participant.take.correctAnswer");
+  if (isSelected) return t("participant.take.yourAnswer");
   return "";
 }
 
@@ -84,28 +90,38 @@ function getOptionLetterClass(answer: QuizSubmissionAnswer, optionIndex: number)
 
 interface OptionEntry { text: string; index: number }
 
-function visibleOptions(answer: QuizSubmissionAnswer): OptionEntry[] {
+function defaultVisibleOptions(answer: QuizSubmissionAnswer): OptionEntry[] {
   if (!answer.options?.length) return [];
 
   const all: OptionEntry[] = answer.options.map((text, index) => ({ text, index }));
 
-  if (isExpanded(answer.id) || answer.selectedIndex == null) return all;
+  if (answer.selectedIndex == null) {
+    return all.filter((entry) => entry.index === answer.correctIndex);
+  }
 
   if (answer.isCorrect) {
-    return all.filter(e => e.index === answer.correctIndex);
+    return all.filter((entry) => entry.index === answer.correctIndex);
   }
 
   // Incorrect: show wrong-selected first, then correct answer
   return [
-    ...all.filter(e => e.index === answer.selectedIndex),
-    ...all.filter(e => e.index === answer.correctIndex),
+    ...all.filter((entry) => entry.index === answer.selectedIndex),
+    ...all.filter((entry) => entry.index === answer.correctIndex),
   ];
+}
+
+function visibleOptions(answer: QuizSubmissionAnswer): OptionEntry[] {
+  if (!answer.options?.length) return [];
+  if (isExpanded(answer.id)) {
+    return answer.options.map((text, index) => ({ text, index }));
+  }
+
+  return defaultVisibleOptions(answer);
 }
 
 function hiddenCount(answer: QuizSubmissionAnswer): number {
   if (!answer.options) return 0;
-  const shown = answer.isCorrect ? 1 : 2;
-  return Math.max(0, answer.options.length - shown);
+  return Math.max(0, answer.options.length - defaultVisibleOptions(answer).length);
 }
 
 </script>
@@ -134,7 +150,7 @@ function hiddenCount(answer: QuizSubmissionAnswer): number {
           <svg v-else viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
             <path d="m8 8 8 8M16 8l-8 8" stroke-linecap="round" />
           </svg>
-          {{ answer.isCorrect ? "Correct" : "Incorrect" }}
+          {{ answer.isCorrect ? t("results.detail.answerCorrect") : t("results.detail.answerIncorrect") }}
         </span>
       </div>
 
@@ -167,8 +183,13 @@ function hiddenCount(answer: QuizSubmissionAnswer): number {
           @click="toggleExpand(answer.id)"
         >
           {{ isExpanded(answer.id)
-            ? "Hide options"
-            : `${hiddenCount(answer)} more option${hiddenCount(answer) !== 1 ? 's' : ''}` }}
+            ? t("results.detail.hideOptions")
+            : t(
+                hiddenCount(answer) === 1
+                  ? "results.detail.moreOptionsOne"
+                  : "results.detail.moreOptionsOther",
+                { count: hiddenCount(answer) }
+              ) }}
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path
               :d="isExpanded(answer.id) ? 'M18 15l-6-6-6 6' : 'M6 9l6 6 6-6'"
@@ -189,7 +210,7 @@ function hiddenCount(answer: QuizSubmissionAnswer): number {
       :current-page="currentPage"
       :total-pages="pageCount"
       :showing-copy="showingCopy"
-      aria-label="Answer review pagination"
+      :aria-label="t('results.detail.answerPaginationAria')"
       @update:current-page="setPage"
     />
   </div>

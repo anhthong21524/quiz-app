@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { QuizSubmission } from "../../data/quiz-submissions";
+import { useI18n } from "../../i18n";
 import SubmissionAnswerReview from "./SubmissionAnswerReview.vue";
 
 const props = defineProps<{
   submission: QuizSubmission;
 }>();
+
+const { t } = useI18n();
 
 const correctRate = computed(() => `${props.submission.scorePercent}%`);
 
@@ -31,7 +34,7 @@ const incorrectCount = computed(() => props.submission.answers.filter(a => !a.is
 </script>
 
 <template>
-  <aside class="submission-detail-panel" aria-label="Submission detail">
+  <aside class="submission-detail-panel" :aria-label="t('results.detail.submissionDetailAria')">
 
     <!-- Participant + stats header -->
     <div class="detail-header">
@@ -45,19 +48,19 @@ const incorrectCount = computed(() => props.submission.answers.filter(a => !a.is
         </div>
       </div>
 
-      <div class="submission-stat-grid" role="list" aria-label="Submission stats">
+      <div class="submission-stat-grid" role="list" :aria-label="t('results.detail.submissionStatsAria')">
         <div class="stat-item" role="listitem">
-          <span class="stat-label">Score</span>
+          <span class="stat-label">{{ t("results.detail.score") }}</span>
           <strong class="stat-value">{{ submission.score }} / {{ submission.totalScore }}</strong>
           <span class="stat-sub" :class="scoreColor">{{ correctRate }}</span>
         </div>
         <div class="stat-item" role="listitem">
-          <span class="stat-label">Time taken</span>
+          <span class="stat-label">{{ t("results.detail.timeTaken") }}</span>
           <strong class="stat-value">{{ submission.timeTaken }}</strong>
           <span class="stat-sub">mm:ss</span>
         </div>
         <div class="stat-item" role="listitem">
-          <span class="stat-label">Submitted at</span>
+          <span class="stat-label">{{ t("results.detail.submittedAt") }}</span>
           <strong class="stat-value">{{ submittedAtDate }}</strong>
           <span class="stat-sub">{{ submittedAtTime }}</span>
         </div>
@@ -67,20 +70,20 @@ const incorrectCount = computed(() => props.submission.answers.filter(a => !a.is
     <!-- Answers review -->
     <section class="answer-section" aria-labelledby="answer-review-title">
       <div class="answer-section-header">
-        <h2 id="answer-review-title">Answers review</h2>
+        <h2 id="answer-review-title">{{ t("results.detail.answersReview") }}</h2>
         <div class="answer-tally">
           <span class="tally-correct">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
               <path d="m7.5 12 3 3 6-6" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            {{ correctCount }} correct
+            {{ t("results.detail.correctCount", { count: correctCount }) }}
           </span>
           <span class="tally-sep" aria-hidden="true">·</span>
           <span class="tally-incorrect">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
               <path d="m8 8 8 8M16 8l-8 8" stroke-linecap="round" />
             </svg>
-            {{ incorrectCount }} incorrect
+            {{ t("results.detail.incorrectCount", { count: incorrectCount }) }}
           </span>
         </div>
       </div>

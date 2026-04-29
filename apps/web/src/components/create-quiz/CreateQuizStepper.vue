@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { computed } from "vue";
+import { useI18n } from "../../i18n";
 import type { CreateQuizStep } from "./types";
 
 interface StepDefinition {
@@ -15,10 +17,12 @@ const emit = defineEmits<{
   select: [step: CreateQuizStep];
 }>();
 
-const steps: StepDefinition[] = [
-  { step: 1, label: "Configuration" },
-  { step: 2, label: "Questions" }
-];
+const { t } = useI18n();
+
+const steps = computed<StepDefinition[]>(() => [
+  { step: 1, label: t("createQuiz.steps.configuration") },
+  { step: 2, label: t("createQuiz.steps.questions") }
+]);
 
 function isCompleted(step: CreateQuizStep) {
   return step < props.currentStep;

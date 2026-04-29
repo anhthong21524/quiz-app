@@ -14,14 +14,14 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
 </script>
 
 <template>
-  <section class="min-h-full bg-white text-slate-950">
+  <section class="min-h-full bg-white text-slate-950 dark:bg-slate-950 dark:text-white">
     <div class="mx-auto grid w-full max-w-[1180px] gap-14 px-4 pb-16 pt-10 sm:px-6 lg:px-8 lg:pt-14">
       <section
         class="grid items-center gap-10 lg:grid-cols-[minmax(0,0.95fr)_minmax(420px,1fr)] lg:gap-12"
         aria-labelledby="home-hero-title"
       >
         <div class="mx-auto grid max-w-2xl justify-items-center gap-6 text-center lg:mx-0 lg:justify-items-start lg:text-left">
-          <p class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700">
+          <p class="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-4 py-2 text-sm font-bold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400">
             <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9">
               <path d="m12 3 2.2 4.5 5 .7-3.6 3.5.9 5-4.5-2.4-4.5 2.4.9-5-3.6-3.5 5-.7L12 3Z" stroke-linejoin="round" />
             </svg>
@@ -31,12 +31,12 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
           <div class="grid gap-5">
             <h1
               id="home-hero-title"
-              class="max-w-[720px] text-5xl font-extrabold leading-[1.04] tracking-normal text-slate-950 sm:text-6xl lg:text-7xl"
+              class="max-w-[720px] text-5xl font-extrabold leading-[1.04] tracking-normal text-slate-950 dark:text-white sm:text-6xl lg:text-7xl"
             >
               {{ t("home.titleLine1") }}
-              <span class="block text-emerald-600">{{ t("home.titleLine2") }}</span>
+              <span class="block text-emerald-600 dark:text-emerald-400">{{ t("home.titleLine2") }}</span>
             </h1>
-            <p class="max-w-xl text-lg leading-8 text-slate-600 sm:text-xl">
+            <p class="max-w-xl text-lg leading-8 text-slate-600 dark:text-slate-300 sm:text-xl">
               {{ t("home.subtitle") }}
             </p>
           </div>
@@ -52,7 +52,7 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
               {{ t("home.primaryCta") }}
             </RouterLink>
             <RouterLink
-              class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-7 font-bold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100"
+              class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-7 font-bold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-emerald-700 dark:hover:bg-slate-700 dark:focus-visible:ring-emerald-900"
               :to="{ name: 'public-quizzes' }"
             >
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
@@ -62,34 +62,34 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
             </RouterLink>
           </div>
 
-          <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-semibold text-slate-600 lg:justify-start">
+          <div class="flex flex-wrap items-center justify-center gap-3 text-sm font-semibold text-slate-600 dark:text-slate-300 lg:justify-start">
             <div class="flex -space-x-2" aria-hidden="true">
-              <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-emerald-100 text-sm font-extrabold text-emerald-700">A</span>
-              <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-amber-100 text-sm font-extrabold text-amber-700">B</span>
-              <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-sky-100 text-sm font-extrabold text-sky-700">C</span>
-              <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-rose-100 text-sm font-extrabold text-rose-700">D</span>
+              <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-emerald-100 text-sm font-extrabold text-emerald-700 dark:border-slate-900 dark:bg-emerald-950 dark:text-emerald-300">A</span>
+              <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-amber-100 text-sm font-extrabold text-amber-700 dark:border-slate-900 dark:bg-amber-950 dark:text-amber-300">B</span>
+              <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-sky-100 text-sm font-extrabold text-sky-700 dark:border-slate-900 dark:bg-sky-950 dark:text-sky-300">C</span>
+              <span class="grid h-9 w-9 place-items-center rounded-full border-2 border-white bg-rose-100 text-sm font-extrabold text-rose-700 dark:border-slate-900 dark:bg-rose-950 dark:text-rose-300">D</span>
             </div>
             <p>{{ t("home.community") }}</p>
           </div>
         </div>
 
         <div class="relative mx-auto h-[330px] w-full max-w-[560px] sm:h-[420px]" aria-hidden="true">
-          <div class="absolute inset-6 rounded-full bg-emerald-50"></div>
-          <div class="absolute left-4 top-20 h-3 w-3 rounded-full bg-emerald-200"></div>
+          <div class="absolute inset-6 rounded-full bg-emerald-50 dark:bg-emerald-950/40"></div>
+          <div class="absolute left-4 top-20 h-3 w-3 rounded-full bg-emerald-200 dark:bg-emerald-700"></div>
           <div class="absolute right-10 top-28 h-5 w-5 text-amber-300">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
               <path d="M12 5v14M5 12h14" stroke-linecap="round" />
             </svg>
           </div>
 
-          <div class="absolute left-[8%] top-[14%] h-[74%] w-[52%] rounded-[28px] border-[12px] border-emerald-900/45 bg-white shadow-[0_20px_45px_rgba(15,23,42,0.16)]">
-            <div class="absolute -top-10 left-1/2 h-12 w-28 -translate-x-1/2 rounded-lg bg-slate-700 shadow-lg">
-              <span class="absolute left-1/2 top-3 h-3 w-3 -translate-x-1/2 rounded-full bg-white"></span>
+          <div class="absolute left-[8%] top-[14%] h-[74%] w-[52%] rounded-[28px] border-[12px] border-emerald-900/45 bg-white shadow-[0_20px_45px_rgba(15,23,42,0.16)] dark:border-emerald-300/15 dark:bg-slate-800 dark:shadow-[0_22px_48px_rgba(2,6,23,0.45)]">
+            <div class="absolute -top-10 left-1/2 h-12 w-28 -translate-x-1/2 rounded-lg bg-slate-700 shadow-lg dark:bg-slate-950">
+              <span class="absolute left-1/2 top-3 h-3 w-3 -translate-x-1/2 rounded-full bg-white dark:bg-slate-300"></span>
             </div>
             <div class="grid gap-5 p-6 pt-12">
               <div class="grid gap-1.5">
-                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400">{{ t("home.questionProgress") }}</span>
-                <span class="text-xs font-semibold leading-snug text-slate-700">{{ t("home.questionPrompt") }}</span>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-slate-400 dark:text-slate-500">{{ t("home.questionProgress") }}</span>
+                <span class="text-xs font-semibold leading-snug text-slate-700 dark:text-slate-100">{{ t("home.questionPrompt") }}</span>
               </div>
               <div class="flex items-center gap-3">
                 <span class="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-emerald-600 text-white">
@@ -100,21 +100,21 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
                 <span class="h-2 w-20 rounded-full bg-emerald-500"></span>
               </div>
               <div class="flex items-center gap-3">
-                <span class="h-8 w-8 shrink-0 rounded-full border-[3px] border-slate-200"></span>
-                <span class="h-2 w-28 rounded-full bg-slate-200"></span>
+                <span class="h-8 w-8 shrink-0 rounded-full border-[3px] border-slate-200 dark:border-slate-600"></span>
+                <span class="h-2 w-28 rounded-full bg-slate-200 dark:bg-slate-600"></span>
               </div>
               <div class="flex items-center gap-3">
-                <span class="h-8 w-8 shrink-0 rounded-full border-[3px] border-slate-200"></span>
-                <span class="h-2 w-24 rounded-full bg-slate-100"></span>
+                <span class="h-8 w-8 shrink-0 rounded-full border-[3px] border-slate-200 dark:border-slate-600"></span>
+                <span class="h-2 w-24 rounded-full bg-slate-100 dark:bg-slate-700"></span>
               </div>
             </div>
           </div>
 
-          <div class="absolute right-[14%] top-[12%] flex items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_24px_rgba(15,23,42,0.12)]">
+          <div class="absolute right-[14%] top-[12%] flex items-center gap-2 rounded-2xl bg-white px-4 py-3 shadow-[0_8px_24px_rgba(15,23,42,0.12)] dark:bg-slate-800 dark:shadow-[0_12px_28px_rgba(2,6,23,0.4)]">
             <span class="text-2xl font-extrabold text-emerald-600">92%</span>
             <div class="grid gap-0.5">
-              <span class="text-[10px] font-bold text-slate-800">{{ t("home.scoreTitle") }}</span>
-              <span class="text-[10px] text-slate-400">{{ t("home.scoreRank") }}</span>
+              <span class="text-[10px] font-bold text-slate-800 dark:text-slate-100">{{ t("home.scoreTitle") }}</span>
+              <span class="text-[10px] text-slate-400 dark:text-slate-500">{{ t("home.scoreRank") }}</span>
             </div>
           </div>
 
@@ -137,9 +137,9 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
           <article
             v-for="feature in featureCards"
             :key="feature.title"
-            class="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:-translate-y-1 hover:border-emerald-100 hover:shadow-[0_16px_32px_rgba(15,23,42,0.08)]"
+            class="grid gap-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_10px_24px_rgba(15,23,42,0.04)] transition hover:-translate-y-1 hover:border-emerald-100 hover:shadow-[0_16px_32px_rgba(15,23,42,0.08)] dark:border-slate-800 dark:bg-slate-900 dark:shadow-[0_16px_34px_rgba(2,6,23,0.28)] dark:hover:border-emerald-900"
           >
-            <div class="grid h-12 w-12 place-items-center rounded-full bg-emerald-50 text-emerald-600">
+            <div class="grid h-12 w-12 place-items-center rounded-full bg-emerald-50 text-emerald-600 dark:bg-emerald-950 dark:text-emerald-400">
               <svg v-if="feature.icon === 'book'" class="h-7 w-7" viewBox="0 0 24 24" fill="currentColor">
                 <path d="M5.5 4A3.5 3.5 0 0 1 9 7.5V20a3.5 3.5 0 0 0-3.5-3.5H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h1.5ZM18.5 4H20a1 1 0 0 1 1 1v10.5a1 1 0 0 1-1 1h-1.5A3.5 3.5 0 0 0 15 20V7.5A3.5 3.5 0 0 1 18.5 4Z" />
               </svg>
@@ -155,14 +155,14 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
               </svg>
             </div>
             <div class="grid gap-1.5">
-              <h3 class="text-base font-extrabold text-slate-950">{{ feature.title }}</h3>
-              <p class="text-sm leading-6 text-slate-600">{{ feature.description }}</p>
+              <h3 class="text-base font-extrabold text-slate-950 dark:text-white">{{ feature.title }}</h3>
+              <p class="text-sm leading-6 text-slate-600 dark:text-slate-400">{{ feature.description }}</p>
             </div>
           </article>
         </div>
       </section>
 
-      <section class="rounded-3xl bg-emerald-600 px-8 py-12 text-center" aria-labelledby="cta-title">
+      <section class="rounded-3xl bg-emerald-600 px-8 py-12 text-center dark:bg-emerald-700" aria-labelledby="cta-title">
         <div class="mx-auto grid max-w-lg gap-6">
           <div class="grid gap-3">
             <h2 id="cta-title" class="text-3xl font-extrabold text-white sm:text-4xl">
@@ -183,7 +183,7 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
               {{ t("home.ctaBrowse") }}
             </RouterLink>
             <RouterLink
-              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-emerald-400 px-7 font-bold text-white transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300"
+              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-emerald-400 px-7 font-bold text-white transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 dark:border-emerald-300/40 dark:hover:bg-emerald-600"
               :to="{ name: 'login' }"
             >
               {{ t("home.ctaRegister") }}

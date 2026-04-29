@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
+import { useI18n } from "../../i18n";
 import {
   createQuizAttempt,
   getPublicQuizBySlug,
@@ -11,6 +12,7 @@ import { useQuizAttemptStore } from "../../stores/quizAttempt";
 const route = useRoute();
 const router = useRouter();
 const attemptStore = useQuizAttemptStore();
+const { t } = useI18n();
 
 const quiz = ref<PublicQuizInfo | null>(null);
 const takerName = ref("");
@@ -22,8 +24,19 @@ const isStarting = ref(false);
 const slug = computed(() => String(route.params.slug ?? ""));
 const accessCode = computed(() => String(route.query.accessCode ?? "").toUpperCase() || undefined);
 const timeLimitLabel = computed(() =>
-  quiz.value?.timeLimit ? `${quiz.value.timeLimit} Minutes` : "Unlimited"
+  quiz.value?.timeLimit
+    ? t("participant.landing.minutes", { count: quiz.value.timeLimit })
+    : t("participant.landing.unlimited")
 );
+const questionTypeLabel = computed(() => {
+  const normalized = quiz.value?.questionType.trim().toLowerCase();
+
+  if (!normalized || normalized === "multiple choice") {
+    return t("participant.landing.questionType");
+  }
+
+  return quiz.value?.questionType ?? t("participant.landing.questionType");
+});
 
 async function loadQuiz() {
   isLoading.value = true;
@@ -32,15 +45,15 @@ async function loadQuiz() {
   try {
     quiz.value = await getPublicQuizBySlug(slug.value, accessCode.value);
     if (!quiz.value) {
-      pageError.value = "We could not find this quiz. Please check the link and try again.";
+      pageError.value = t("participant.landing.loadNotFound");
       return;
     }
 
     if (!quiz.value.isPublished) {
-      pageError.value = "This quiz is not available yet. Please contact the quiz creator.";
+      pageError.value = t("participant.landing.loadUnavailable");
     }
   } catch {
-    pageError.value = "Something went wrong while loading this quiz. Please try again soon.";
+    pageError.value = t("participant.landing.loadFailed");
   } finally {
     isLoading.value = false;
   }
@@ -49,7 +62,7 @@ async function loadQuiz() {
 function validateName() {
   const trimmedName = takerName.value.trim();
   if (!trimmedName) {
-    nameError.value = "Please enter your name before starting the quiz.";
+    nameError.value = t("participant.landing.nameRequired");
     return null;
   }
 
@@ -107,7 +120,7 @@ onMounted(loadQuiz);
                 class="mx-auto mb-5 h-14 w-14 animate-spin rounded-full border-4 border-emerald-100 border-t-emerald-600"
                 aria-hidden="true"
               ></div>
-              <p class="text-lg font-bold text-slate-700">Loading quiz...</p>
+              <p class="text-lg font-bold text-slate-700">{{ t("participant.landing.loading") }}</p>
             </div>
           </div>
 
@@ -122,7 +135,7 @@ onMounted(loadQuiz);
                   <path d="M10.3 4.3 2.8 17.2A2 2 0 0 0 4.5 20h15a2 2 0 0 0 1.7-2.8L13.7 4.3a2 2 0 0 0-3.4 0Z" stroke-linejoin="round" />
                 </svg>
               </div>
-              <h1 class="text-3xl font-extrabold tracking-normal">Quiz unavailable</h1>
+              <h1 class="text-3xl font-extrabold tracking-normal">{{ t("participant.landing.unavailableTitle") }}</h1>
               <p class="mt-3 text-base leading-7 text-slate-600">{{ pageError }}</p>
             </div>
           </div>
@@ -152,8 +165,8 @@ onMounted(loadQuiz);
                   </svg>
                 </span>
                 <div>
-                  <p class="font-extrabold">{{ quiz.questionCount }} Questions</p>
-                  <p class="text-sm font-medium text-slate-500">Multiple choice</p>
+                  <p class="font-extrabold">{{ t("participant.landing.questions", { count: quiz.questionCount }) }}</p>
+                  <p class="text-sm font-medium text-slate-500">{{ t("participant.landing.questionType") }}</p>
                 </div>
               </div>
 
@@ -166,7 +179,7 @@ onMounted(loadQuiz);
                 </span>
                 <div>
                   <p class="font-extrabold">{{ timeLimitLabel }}</p>
-                  <p class="text-sm font-medium text-slate-500">Estimated time</p>
+                  <p class="text-sm font-medium text-slate-500">{{ t("participant.landing.estimatedTime") }}</p>
                 </div>
               </div>
 
@@ -179,18 +192,18 @@ onMounted(loadQuiz);
                   </svg>
                 </span>
                 <div>
-                  <p class="font-extrabold">{{ quiz.questionType }}</p>
-                  <p class="text-sm font-medium text-slate-500">One correct answer</p>
+                  <p class="font-extrabold">{{ questionTypeLabel }}</p>
+                  <p class="text-sm font-medium text-slate-500">{{ t("participant.landing.answerType") }}</p>
                 </div>
               </div>
             </div>
 
             <div class="grid gap-3">
               <label class="text-lg font-extrabold" for="taker-name">
-                Your name <span class="text-red-500">*</span>
+                {{ t("participant.landing.yourName") }} <span class="text-red-500">*</span>
               </label>
               <p class="text-sm font-medium text-slate-600">
-                Please enter your name. It will be shown on your result.
+                {{ t("participant.landing.yourNameHint") }}
               </p>
               <div
                 class="flex min-h-16 items-center gap-3 rounded-2xl border bg-white px-4 transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100"
@@ -206,7 +219,7 @@ onMounted(loadQuiz);
                   class="min-w-0 flex-1 border-0 bg-transparent text-base font-semibold text-slate-900 outline-none placeholder:text-slate-400"
                   type="text"
                   autocomplete="name"
-                  placeholder="Enter your full name"
+                  :placeholder="t('participant.landing.yourNamePlaceholder')"
                   :aria-invalid="nameError ? 'true' : 'false'"
                   aria-describedby="taker-name-error"
                   @blur="takerName.trim() ? validateName() : undefined"
@@ -222,7 +235,7 @@ onMounted(loadQuiz);
               type="submit"
               :disabled="isStarting"
             >
-              <span>{{ isStarting ? "Starting..." : "Start quiz" }}</span>
+              <span>{{ isStarting ? t("participant.landing.starting") : t("participant.landing.startQuiz") }}</span>
               <svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                 <path d="M5 12h14m0 0-5-5m5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>

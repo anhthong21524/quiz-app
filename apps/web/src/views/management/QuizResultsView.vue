@@ -15,13 +15,15 @@ import {
 } from "../../services/quiz-api";
 import type { QuizPerformanceResult, RecentSubmissionResult } from "../../data/quiz-results";
 import PageHeader from "../../components/PageHeader.vue";
+import { useI18n } from "../../i18n";
 import { stableAccent } from "../../lib/accent";
 
 const router = useRouter();
+const { t, formatDateTime } = useI18n();
 
 const searchQuery = ref("");
-const selectedSubject = ref("All subjects");
-const selectedDateRange = ref("All time");
+const selectedSubject = ref("all");
+const selectedDateRange = ref("all");
 const viewMode = ref<"list" | "grid">("list");
 const isLoading = ref(false);
 const loadError = ref(false);
@@ -33,7 +35,12 @@ const summary = ref<ResultsSummary | null>(null);
 const performanceData = ref<QuizPerformanceItem[]>([]);
 const recentData = ref<RecentSubmissionItem[]>([]);
 
-const dateRangeOptions = ["All time", "Today", "Last 7 days", "Last 30 days"];
+const dateRangeOptions = computed(() => [
+  { label: t("results.overview.allTime"), value: "all" },
+  { label: t("results.overview.today"), value: "today" },
+  { label: t("results.overview.last7Days"), value: "last7" },
+  { label: t("results.overview.last30Days"), value: "last30" }
+]);
 const pageSize = 5;
 
 const SUBJECT_ICON_MAP: Record<string, string> = {
@@ -56,13 +63,13 @@ function formatTime(secs: number | null): string {
 }
 
 function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-US", {
+  return formatDateTime(iso, {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit"
-  }).format(new Date(iso));
+  });
 }
 
 function initials(name: string): string {
@@ -88,18 +95,18 @@ const resultOverviewItems = computed(() => {
   return [
     {
       id: "total-quizzes",
-      label: "Total quizzes",
+      label: t("results.overview.totalQuizzes"),
       value: s.totalQuizzes
     },
     {
       id: "total-submissions",
-      label: "Submissions",
+      label: t("results.overview.submissions"),
       value: s.totalSubmissions,
       tone: "teal" as const
     },
     {
       id: "average-score",
-      label: "Avg score",
+      label: t("results.overview.averageScore"),
       value: s.averageScorePercent != null ? `${s.averageScorePercent}%` : "-",
       tone: "amber" as const
     }
@@ -131,14 +138,10 @@ const quizPerformanceResults = computed<QuizPerformanceResult[]>(() =>
       lastUpdate: item.lastSubmittedAt ? formatDate(item.lastSubmittedAt) : "-",
       lastUpdateIso: lastIso,
       lastUpdateDate: item.lastSubmittedAt
-        ? new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", year: "numeric" }).format(
-            new Date(item.lastSubmittedAt)
-          )
+        ? formatDateTime(item.lastSubmittedAt, { month: "short", day: "numeric", year: "numeric" })
         : "-",
       lastUpdateTime: item.lastSubmittedAt
-        ? new Intl.DateTimeFormat("en-US", { hour: "numeric", minute: "2-digit" }).format(
-            new Date(item.lastSubmittedAt)
-          )
+        ? formatDateTime(item.lastSubmittedAt, { hour: "numeric", minute: "2-digit" })
         : "-",
       icon: subjectIcon(item.subject) as QuizPerformanceResult["icon"]
     };
@@ -159,13 +162,15 @@ const recentSubmissionResults = computed<RecentSubmissionResult[]>(() =>
 );
 
 const subjectOptions = computed(() => [
-  "All subjects",
-  ...Array.from(new Set(quizPerformanceResults.value.map((q) => q.subject))).sort()
+  { label: t("results.overview.allSubjects"), value: "all" },
+  ...Array.from(new Set(quizPerformanceResults.value.map((q) => q.subject)))
+    .sort()
+    .map((subject) => ({ label: subject, value: subject }))
 ]);
 
 const toolbarFilters = computed<ToolbarFilter[]>(() => [
-  { label: "Filter by subject", options: subjectOptions.value, value: selectedSubject.value },
-  { label: "Filter by date range", options: dateRangeOptions, value: selectedDateRange.value },
+  { label: t("results.overview.filterBySubject"), options: subjectOptions.value, value: selectedSubject.value },
+  { label: t("results.overview.filterByDate"), options: dateRangeOptions.value, value: selectedDateRange.value },
 ]);
 
 function onToolbarFiltersChange(filters: ToolbarFilter[]) {
@@ -182,7 +187,7 @@ const filteredQuizzes = computed(() => {
       quiz.title.toLowerCase().includes(normalizedSearch) ||
       quiz.subject.toLowerCase().includes(normalizedSearch);
     const matchesSubject =
-      selectedSubject.value === "All subjects" || quiz.subject === selectedSubject.value;
+      selectedSubject.value === "all" || quiz.subject === selectedSubject.value;
     const matchesDate = isInSelectedDateRange(quiz.lastUpdateIso);
 
     return matchesSearch && matchesSubject && matchesDate;
@@ -233,7 +238,7 @@ watch([searchQuery, selectedSubject, selectedDateRange], () => {
 });
 
 function isInSelectedDateRange(value: string) {
-  if (selectedDateRange.value === "All time") return true;
+  if (selectedDateRange.value === "all") return true;
 
   const updatedAt = new Date(value);
   if (isNaN(updatedAt.getTime())) return false;
@@ -241,15 +246,15 @@ function isInSelectedDateRange(value: string) {
   const now = new Date();
   const daysDifference = Math.floor((now.getTime() - updatedAt.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (selectedDateRange.value === "Today") return daysDifference === 0;
-  if (selectedDateRange.value === "Last 7 days") return daysDifference <= 7;
+  if (selectedDateRange.value === "today") return daysDifference === 0;
+  if (selectedDateRange.value === "last7") return daysDifference <= 7;
   return daysDifference <= 30;
 }
 
 function clearFilters() {
   searchQuery.value = "";
-  selectedSubject.value = "All subjects";
-  selectedDateRange.value = "All time";
+  selectedSubject.value = "all";
+  selectedDateRange.value = "all";
   currentPage.value = 1;
 }
 
@@ -258,7 +263,13 @@ function openQuizSubmissions(quiz: QuizPerformanceResult) {
 }
 
 function exportCSV() {
-  const headers = ["#", "Quiz", "Subject", "Submissions", "Average Score"];
+  const headers = [
+    "#",
+    t("results.overview.quiz"),
+    t("results.overview.subject"),
+    t("results.overview.submissions"),
+    t("results.overview.averageScoreLabel")
+  ];
   const rows = sortedQuizzes.value.map((q, i) => [
     i + 1,
     `"${q.title.replace(/"/g, '""')}"`,
@@ -271,7 +282,7 @@ function exportCSV() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;
-  a.download = "quiz-results.csv";
+  a.download = t("results.overview.defaultCsvName");
   a.click();
   URL.revokeObjectURL(url);
 }
@@ -308,10 +319,10 @@ onMounted(async () => {
 
 <template>
   <section class="result-quiz-page" :aria-busy="isLoading">
-    <PageHeader title="Quiz Results" description="View and analyze results for all quizzes." />
+    <PageHeader :title="t('results.overview.pageTitle')" :description="t('results.overview.pageDescription')" />
 
     <div v-if="loadError" class="load-error-banner" role="alert">
-      Could not load results. Please refresh the page or try again later.
+      {{ t("results.overview.loadError") }}
     </div>
 
     <AppStatsBar
@@ -319,8 +330,8 @@ onMounted(async () => {
       height="56px"
       :loading="isLoading"
       :loading-item-count="3"
-      aria-label="Result summary"
-      loading-label="Loading result summary"
+      :aria-label="t('results.overview.resultSummary')"
+      :loading-label="t('results.overview.loadingSummary')"
     />
 
     <div class="result-quiz-layout">
@@ -344,7 +355,7 @@ onMounted(async () => {
           <template #toolbar>
             <AppToolbar
               v-model:search="searchQuery"
-              search-placeholder="Search quizzes..."
+              :search-placeholder="t('results.overview.searchPlaceholder')"
               :filters="toolbarFilters"
               :view-mode="viewMode"
               @update:filters="onToolbarFiltersChange"

@@ -10,6 +10,7 @@ import FullPageErrorState from "../../components/feedback/FullPageErrorState.vue
 import EditorFormSkeleton from "../../components/loading/EditorFormSkeleton.vue";
 import PageHeader from "../../components/PageHeader.vue";
 import { useToast } from "../../composables/useToast";
+import { useI18n } from "../../i18n";
 import { useConfigurationStore } from "../../stores/configuration";
 import { useQuizStore } from "../../stores/quizzes";
 import type {
@@ -46,6 +47,7 @@ const router = useRouter();
 const quizStore = useQuizStore();
 const configurationStore = useConfigurationStore();
 const { show: showToast } = useToast();
+const { t } = useI18n();
 
 const difficultyOptions: DifficultyLevel[] = ["Easy", "Medium", "Hard"];
 const maxQuestions = 50;
@@ -67,7 +69,7 @@ const originalDescription = ref("");
 const validationErrors = reactive<ValidationErrors>({});
 
 const configuration = reactive<ConfigurationForm>({
-  title: "Quiz 1",
+  title: t("createQuiz.defaults.title"),
   description: "",
   subject: configurationStore.primarySubjectDomain,
   numberOfQuestions: 1,
@@ -103,23 +105,23 @@ const loadError = computed(() =>
   quizStore.error && !quizStore.isLoading ? quizStore.error : null
 );
 const pageTitle = computed(() => {
-  if (isReadOnly.value) return "View quiz";
-  return isEditing.value ? "Edit quiz" : "Create new quiz";
+  if (isReadOnly.value) return t("createQuiz.titles.view");
+  return isEditing.value ? t("createQuiz.titles.edit") : t("createQuiz.titles.create");
 });
 const stepIntro = computed(() => {
   if (isReadOnly.value) {
     return currentStep.value === 1
-      ? "This quiz is published. Configuration is view-only."
-      : "This quiz is published. Questions are view-only.";
+      ? t("createQuiz.intros.readOnlyConfiguration")
+      : t("createQuiz.intros.readOnlyQuestions");
   }
   if (currentStep.value === 1) {
     return isEditing.value
-      ? "Review the quiz details before updating questions."
-      : "Set up the basic details for your quiz before adding questions.";
+      ? t("createQuiz.intros.editConfiguration")
+      : t("createQuiz.intros.createConfiguration");
   }
   return isEditing.value
-    ? "Update and organize your questions before saving changes."
-    : "Write and organize your questions before saving the quiz.";
+    ? t("createQuiz.intros.editQuestions")
+    : t("createQuiz.intros.createQuestions");
 });
 const subjectOptions = computed(() => {
   const currentSubject = configuration.subject.trim();
@@ -205,7 +207,7 @@ function resetValidationErrors() {
 }
 
 function resetFlow() {
-  configuration.title = "Quiz 1";
+  configuration.title = t("createQuiz.defaults.title");
   configuration.description = "";
   configuration.subject = configurationStore.primarySubjectDomain;
   configuration.numberOfQuestions = 1;
@@ -253,17 +255,23 @@ function isQuestionComplete(question: CreateQuizQuestion) {
 }
 
 function validateConfiguration() {
-  validationErrors.title = configuration.title.trim() ? undefined : "Quiz title is required.";
+  validationErrors.title = configuration.title.trim()
+    ? undefined
+    : t("createQuiz.validation.titleRequired");
   validationErrors.description =
-    configuration.description.length <= 500 ? undefined : "Description must be 500 characters or fewer.";
-  validationErrors.subject = configuration.subject ? undefined : "Subject is required.";
+    configuration.description.length <= 500
+      ? undefined
+      : t("createQuiz.validation.descriptionMax");
+  validationErrors.subject = configuration.subject
+    ? undefined
+    : t("createQuiz.validation.subjectRequired");
 
   if (
     Number.isNaN(configuration.numberOfQuestions) ||
     configuration.numberOfQuestions < minQuestions ||
     configuration.numberOfQuestions > maxQuestions
   ) {
-    validationErrors.numberOfQuestions = "Number of questions must be between 1 and 50.";
+    validationErrors.numberOfQuestions = t("createQuiz.validation.questionCountRange");
   } else {
     validationErrors.numberOfQuestions = undefined;
   }
@@ -276,7 +284,7 @@ function validateConfiguration() {
       timeLimitMinutes >= 1 &&
       timeLimitMinutes <= maxTimeLimitMinutes
         ? undefined
-        : "Time limit must be between 1 and 180 minutes.";
+        : t("createQuiz.validation.timeLimitRange");
   } else {
     validationErrors.timeLimitMinutes = undefined;
   }
@@ -448,7 +456,7 @@ async function saveConfigOnly() {
     if (savedQuiz?.accessCode) {
       activeQuizAccessCode.value = savedQuiz.accessCode;
     }
-    showToast("Configuration saved");
+    showToast(t("createQuiz.toasts.configurationSaved"));
   } catch {
     const message = quizStore.error?.userMessage ?? "Failed to save configuration. Please try again.";
     showToast(message, "error");
@@ -644,7 +652,7 @@ function selectQuestion(index: number) {
 }
 
 function getQuestionValidationMessage() {
-  return "Add question text, at least two answer options, and at least one correct answer before continuing.";
+  return t("createQuiz.validation.questionIncomplete");
 }
 
 function validateCurrentQuestion() {
@@ -734,7 +742,7 @@ async function submitQuiz() {
       activeQuizAccessCode.value = savedQuiz.accessCode;
     }
 
-    showToast(isEditing.value ? "Quiz updated successfully" : "Quiz saved successfully");
+    showToast(isEditing.value ? t("createQuiz.toasts.quizUpdated") : t("createQuiz.toasts.quizSaved"));
     await router.push({ name: "quizzes" });
   } catch {
     const message = quizStore.error?.userMessage ?? "Failed to save quiz. Please try again.";
@@ -782,6 +790,12 @@ function copyAccessCode() {
   setTimeout(() => { accessCodeCopied.value = false; }, 2000);
 }
 
+function difficultyLabel(value: DifficultyLevel) {
+  if (value === "Easy") return t("createQuiz.difficulty.easy");
+  if (value === "Medium") return t("createQuiz.difficulty.medium");
+  return t("createQuiz.difficulty.hard");
+}
+
 function generateAccessCode(): string {
   return Array.from(crypto.getRandomValues(new Uint8Array(3)))
     .map((b) => b.toString(16).padStart(2, "0"))
@@ -812,8 +826,8 @@ function togglePrivate() {
     :message="loadError.userMessage"
     :retryable="loadError.isRetryable"
     :loading="quizStore.isLoading"
-    retry-label="Reload quiz"
-    action-label="Back to My Quizzes"
+    :retry-label="t('createQuiz.readOnly.reloadQuiz')"
+    :action-label="t('createQuiz.readOnly.backToMyQuizzes')"
     action-href="/quizzes"
     @retry="loadQuizForEditing(quizId!)"
   />
@@ -840,7 +854,7 @@ function togglePrivate() {
             <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
               <path d="M12 5 7 10l5 5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            Back to configuration
+            {{ t("createQuiz.actions.backToConfiguration") }}
           </button>
         </div>
 
@@ -852,7 +866,7 @@ function togglePrivate() {
             <rect x="5" y="9" width="10" height="8" rx="1.5" />
             <path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke-linecap="round" />
           </svg>
-          <span>This quiz is published and is in view-only mode. Unpublish it from My Quizzes to make changes.</span>
+          <span>{{ t("createQuiz.readOnly.banner") }}</span>
         </div>
       </div>
 
@@ -863,20 +877,20 @@ function togglePrivate() {
             <div class="grid gap-4 lg:grid-cols-[1fr_312px]">
               <!-- Left: Basic information — flex so description fills remaining height -->
               <section class="flex flex-col gap-3">
-                <h2 class="text-base font-bold text-slate-900">Basic information</h2>
+                <h2 class="text-base font-bold text-slate-900">{{ t("createQuiz.fields.basicInformation") }}</h2>
 
                 <div class="flex flex-1 flex-col gap-3">
                   <!-- Quiz title -->
                   <div v-if="isReadOnly" class="space-y-1">
-                    <span class="text-sm font-semibold text-slate-700">Quiz title</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.title") }}</span>
                     <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">{{ configuration.title }}</p>
                   </div>
                   <label v-else class="block space-y-1">
-                    <span class="text-sm font-semibold text-slate-700">Quiz title</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.title") }}</span>
                     <input
                       v-model="configuration.title"
                       type="text"
-                      placeholder="e.g. Mathematics Quiz #1"
+                      :placeholder="t('createQuiz.fields.titlePlaceholder')"
                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                     />
                     <p v-if="validationErrors.title" class="text-sm font-medium text-red-500">{{ validationErrors.title }}</p>
@@ -884,20 +898,20 @@ function togglePrivate() {
 
                   <!-- Quiz description — flex-1 so it fills all remaining height -->
                   <div v-if="isReadOnly" class="flex flex-1 flex-col space-y-1">
-                    <span class="text-sm font-semibold text-slate-700">Quiz description</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.description") }}</span>
                     <p class="flex-1 rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-500 italic">
-                      {{ configuration.description || 'No description.' }}
+                      {{ configuration.description || t("createQuiz.fields.noDescription") }}
                     </p>
                   </div>
                   <label v-else class="flex flex-1 flex-col gap-1">
                     <div class="flex items-center justify-between gap-3">
-                      <span class="text-sm font-semibold text-slate-700">Quiz description</span>
+                      <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.description") }}</span>
                       <span class="text-xs text-slate-400">{{ configuration.description.length }} / 500</span>
                     </div>
                     <textarea
                       v-model="configuration.description"
                       maxlength="500"
-                      placeholder="Describe what learners will practice in this quiz."
+                      :placeholder="t('createQuiz.fields.descriptionPlaceholder')"
                       class="min-h-0 flex-1 resize-none rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                     ></textarea>
                     <p v-if="validationErrors.description" class="text-sm font-medium text-red-500">{{ validationErrors.description }}</p>
@@ -905,16 +919,16 @@ function togglePrivate() {
 
                   <!-- Subject / Domain -->
                   <div v-if="isReadOnly" class="space-y-1">
-                    <span class="text-sm font-semibold text-slate-700">Subject / Domain</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.subject") }}</span>
                     <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">{{ configuration.subject }}</p>
                   </div>
                   <label v-else class="block space-y-1">
-                    <span class="text-sm font-semibold text-slate-700">Subject / Domain</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.subject") }}</span>
                     <select
                       v-model="configuration.subject"
                       class="w-full rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                     >
-                      <option disabled value="">Select a subject</option>
+                      <option disabled value="">{{ t("createQuiz.fields.subjectPlaceholder") }}</option>
                       <option v-for="subject in subjectOptions" :key="subject" :value="subject">{{ subject }}</option>
                     </select>
                     <p v-if="validationErrors.subject" class="text-sm font-medium text-red-500">{{ validationErrors.subject }}</p>
@@ -924,16 +938,16 @@ function togglePrivate() {
 
               <!-- Right: Quiz setup -->
               <section class="flex flex-col gap-2 border-t border-gray-100 pt-4 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
-                <h2 class="text-base font-bold text-slate-900">Quiz setup</h2>
+                <h2 class="text-base font-bold text-slate-900">{{ t("createQuiz.fields.setup") }}</h2>
 
                   <!-- Number of questions -->
                   <div v-if="isReadOnly" class="space-y-1">
-                    <span class="text-sm font-semibold text-slate-700">Number of questions</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.numberOfQuestions") }}</span>
                     <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">{{ configuration.numberOfQuestions }}</p>
                   </div>
                   <div v-else class="space-y-1">
                     <div class="flex items-center justify-between gap-3">
-                      <span class="text-sm font-semibold text-slate-700">Number of questions</span>
+                      <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.numberOfQuestions") }}</span>
                       <span class="text-xs text-slate-400">1 – 50</span>
                     </div>
                     <div class="flex h-9 overflow-hidden rounded-xl border border-gray-200 bg-white transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100">
@@ -964,13 +978,17 @@ function togglePrivate() {
 
                   <!-- Time limit -->
                   <div v-if="isReadOnly" class="space-y-1">
-                    <span class="text-sm font-semibold text-slate-700">Time limit</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.timeLimit") }}</span>
                     <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">
-                      {{ configuration.timeLimitEnabled ? `${configuration.timeLimitMinutes} minutes` : 'Unlimited' }}
+                      {{
+                        configuration.timeLimitEnabled
+                          ? `${configuration.timeLimitMinutes} ${t("createQuiz.fields.minutes")}`
+                          : t("createQuiz.fields.unlimited")
+                      }}
                     </p>
                   </div>
                   <div v-else class="space-y-1">
-                    <span class="text-sm font-semibold text-slate-700">Time limit</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.timeLimit") }}</span>
                     <div class="flex flex-wrap gap-x-4 gap-y-1.5">
                       <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
                         <input type="radio" name="time-limit-mode" class="sr-only" :checked="!configuration.timeLimitEnabled" @change="setUnlimitedTimeLimit" />
@@ -982,7 +1000,7 @@ function togglePrivate() {
                             <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
                           </svg>
                         </span>
-                        <span>Unlimited</span>
+                        <span>{{ t("createQuiz.fields.unlimited") }}</span>
                       </label>
                       <label class="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-slate-700">
                         <input type="radio" name="time-limit-mode" class="sr-only" :checked="configuration.timeLimitEnabled" @change="setTimedTimeLimit" />
@@ -994,14 +1012,14 @@ function togglePrivate() {
                             <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
                           </svg>
                         </span>
-                        <span>Set time limit</span>
+                        <span>{{ t("createQuiz.fields.setTimeLimit") }}</span>
                       </label>
                     </div>
                     <label
                       class="flex h-9 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100"
                       :class="!configuration.timeLimitEnabled ? 'pointer-events-none opacity-50' : ''"
                     >
-                      <span class="sr-only">Time limit minutes</span>
+                      <span class="sr-only">{{ t("createQuiz.fields.timeLimitMinutes") }}</span>
                       <input
                         v-model.number="configuration.timeLimitMinutes"
                         type="number"
@@ -1012,7 +1030,7 @@ function togglePrivate() {
                         @click="setTimedTimeLimit"
                         @focus="setTimedTimeLimit"
                       />
-                      <span class="grid min-w-20 place-items-center border-l border-gray-200 bg-gray-50 px-3 text-xs font-medium text-slate-600">minutes</span>
+                      <span class="grid min-w-20 place-items-center border-l border-gray-200 bg-gray-50 px-3 text-xs font-medium text-slate-600">{{ t("createQuiz.fields.minutes") }}</span>
                     </label>
                     <p v-if="validationErrors.timeLimitMinutes" class="text-sm font-medium text-red-500">
                       {{ validationErrors.timeLimitMinutes }}
@@ -1021,11 +1039,11 @@ function togglePrivate() {
 
                   <!-- Difficulty -->
                   <div v-if="isReadOnly" class="space-y-1">
-                    <span class="text-sm font-semibold text-slate-700">Difficulty level</span>
-                    <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">{{ configuration.difficulty }}</p>
+                    <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.difficulty") }}</span>
+                    <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">{{ difficultyLabel(configuration.difficulty) }}</p>
                   </div>
                   <div v-else class="space-y-1">
-                    <span class="text-sm font-semibold text-slate-700">Difficulty level</span>
+                    <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.difficulty") }}</span>
                     <div class="grid grid-cols-3 gap-1.5">
                       <button
                         v-for="difficulty in difficultyOptions"
@@ -1045,7 +1063,7 @@ function togglePrivate() {
                             <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
                           </svg>
                         </span>
-                        <span>{{ difficulty }}</span>
+                        <span>{{ difficultyLabel(difficulty) }}</span>
                       </button>
                     </div>
                   </div>
@@ -1056,14 +1074,14 @@ function togglePrivate() {
                     <div class="bg-gray-50 px-3 py-2.5">
                       <div class="flex items-center justify-between gap-2">
                         <div class="min-w-0">
-                          <p class="text-sm font-semibold text-slate-700">Private quiz</p>
-                          <p class="text-xs text-slate-500">Hidden. Requires an access code.</p>
+                          <p class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.privateQuiz") }}</p>
+                          <p class="text-xs text-slate-500">{{ t("createQuiz.fields.privateHint") }}</p>
                         </div>
                         <span
                           v-if="isReadOnly"
                           class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
                           :class="configuration.isPrivate ? 'bg-amber-100 text-amber-700' : 'bg-gray-200 text-slate-500'"
-                        >{{ configuration.isPrivate ? 'On' : 'Off' }}</span>
+                        >{{ configuration.isPrivate ? t("createQuiz.states.on") : t("createQuiz.states.off") }}</span>
                         <button
                           v-else
                           type="button"
@@ -1077,7 +1095,7 @@ function togglePrivate() {
                         </button>
                       </div>
                       <div class="mt-1.5 flex h-4 items-center gap-2" :class="!(configuration.isPrivate && activeQuizAccessCode) && 'invisible'">
-                        <span class="text-xs font-bold text-amber-800">Code:</span>
+                        <span class="text-xs font-bold text-amber-800">{{ t("createQuiz.fields.accessCode") }}</span>
                         <span class="font-mono text-sm font-extrabold tracking-[0.18em] text-amber-900">{{ activeQuizAccessCode }}</span>
                         <button
                           type="button"
@@ -1094,7 +1112,7 @@ function togglePrivate() {
                           <svg v-else viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-3 w-3">
                             <path d="m4 10 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
                           </svg>
-                          <span>{{ accessCodeCopied ? 'Copied!' : 'Copy' }}</span>
+                          <span>{{ accessCodeCopied ? t("common.copied") : t("common.copy") }}</span>
                         </button>
                       </div>
                     </div>
@@ -1103,12 +1121,12 @@ function togglePrivate() {
                     <div class="divide-y divide-gray-100 border-t border-gray-200 bg-white">
                       <!-- Show summary -->
                       <div class="flex items-center justify-between gap-2 px-3 py-2">
-                        <p class="text-sm font-medium text-slate-700">Show summary</p>
+                        <p class="text-sm font-medium text-slate-700">{{ t("createQuiz.fields.showSummary") }}</p>
                         <span
                           v-if="isReadOnly"
                           class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
                           :class="configuration.allowSummary ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-slate-500'"
-                        >{{ configuration.allowSummary ? 'On' : 'Off' }}</span>
+                        >{{ configuration.allowSummary ? t("createQuiz.states.on") : t("createQuiz.states.off") }}</span>
                         <button
                           v-else
                           type="button"
@@ -1123,12 +1141,12 @@ function togglePrivate() {
                       </div>
                       <!-- Allow answer review -->
                       <div class="flex items-center justify-between gap-2 px-3 py-2">
-                        <p class="text-sm font-medium text-slate-700">Allow answer review</p>
+                        <p class="text-sm font-medium text-slate-700">{{ t("createQuiz.fields.allowAnswerReview") }}</p>
                         <span
                           v-if="isReadOnly"
                           class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
                           :class="configuration.allowReviewAnswers ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-slate-500'"
-                        >{{ configuration.allowReviewAnswers ? 'On' : 'Off' }}</span>
+                        >{{ configuration.allowReviewAnswers ? t("createQuiz.states.on") : t("createQuiz.states.off") }}</span>
                         <button
                           v-else
                           type="button"
@@ -1143,12 +1161,12 @@ function togglePrivate() {
                       </div>
                       <!-- Allow retake -->
                       <div class="flex items-center justify-between gap-2 px-3 py-2">
-                        <p class="text-sm font-medium text-slate-700">Allow retake</p>
+                        <p class="text-sm font-medium text-slate-700">{{ t("createQuiz.fields.allowRetake") }}</p>
                         <span
                           v-if="isReadOnly"
                           class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
                           :class="configuration.allowRetake ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-slate-500'"
-                        >{{ configuration.allowRetake ? 'On' : 'Off' }}</span>
+                        >{{ configuration.allowRetake ? t("createQuiz.states.on") : t("createQuiz.states.off") }}</span>
                         <button
                           v-else
                           type="button"
@@ -1170,13 +1188,13 @@ function togglePrivate() {
             <div class="flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
               <!-- Read-only footer -->
               <template v-if="isReadOnly">
-                <p class="text-sm text-slate-500">Unpublish this quiz to make configuration changes.</p>
+                <p class="text-sm text-slate-500">{{ t("createQuiz.readOnly.unpublishToEdit") }}</p>
                 <button
                   type="button"
                   class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 sm:min-w-[180px]"
                   @click="currentStep = 2"
                 >
-                  <span>View questions</span>
+                  <span>{{ t("createQuiz.readOnly.viewQuestions") }}</span>
                   <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                     <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
@@ -1185,8 +1203,8 @@ function togglePrivate() {
               <!-- Editable footer -->
               <template v-else>
                 <p class="text-sm text-emerald-700">
-                  <span class="mr-1 inline-block rounded-lg bg-emerald-50 px-2 py-0.5 font-medium">Tip</span>
-                  {{ isEditing ? "Save configuration to apply changes without editing questions." : "Settings are saved automatically when you proceed." }}
+                  <span class="mr-1 inline-block rounded-lg bg-emerald-50 px-2 py-0.5 font-medium">{{ t("createQuiz.helper.tip") }}</span>
+                  {{ isEditing ? t("createQuiz.helper.editTip") : t("createQuiz.helper.createTip") }}
                 </p>
                 <div class="flex items-center gap-2">
                   <button
@@ -1196,7 +1214,7 @@ function togglePrivate() {
                     :disabled="isSaving"
                     @click="saveConfigOnly"
                   >
-                    <span>{{ isSaving ? "Saving..." : "Save configuration" }}</span>
+                    <span>{{ isSaving ? t("createQuiz.actions.saving") : t("createQuiz.actions.saveConfiguration") }}</span>
                   </button>
                   <button
                     type="button"
@@ -1204,7 +1222,7 @@ function togglePrivate() {
                     :disabled="isSaving"
                     @click="goToQuestionsStep"
                   >
-                    <span>{{ isSaving ? "Saving..." : isEditing ? "Save & continue" : "Save & continue" }}</span>
+                    <span>{{ isSaving ? t("createQuiz.actions.saving") : t("createQuiz.actions.saveContinue") }}</span>
                     <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                       <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -1222,26 +1240,26 @@ function togglePrivate() {
             <div v-if="currentQuestion" class="space-y-3">
               <!-- Question text -->
               <div v-if="isReadOnly" class="space-y-1.5">
-                <span class="text-sm font-semibold text-slate-700">Question</span>
+                <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.question") }}</span>
                 <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">{{ currentQuestion.questionText }}</p>
               </div>
               <label v-else class="block space-y-1.5">
-                <span class="text-sm font-semibold text-slate-700">Question</span>
+                <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.question") }}</span>
                 <textarea
                   :value="currentQuestion.questionText"
                   rows="2"
                   class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                  placeholder="Write your question here..."
+                  :placeholder="t('createQuiz.fields.questionPlaceholder')"
                   @input="updateQuestionText(($event.target as HTMLTextAreaElement).value)"
                 ></textarea>
               </label>
 
               <section class="space-y-2">
                 <div class="flex items-center justify-between gap-2">
-                  <span class="text-sm font-semibold text-slate-700">Answer options</span>
+                  <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.answerOptions") }}</span>
 
                   <!-- Read-only: multiple correct indicator -->
-                  <span v-if="isReadOnly && currentQuestion.multipleCorrect" class="text-xs text-slate-500">Multiple correct answers</span>
+                  <span v-if="isReadOnly && currentQuestion.multipleCorrect" class="text-xs text-slate-500">{{ t("createQuiz.fields.multipleCorrectAnswers") }}</span>
 
                   <!-- Editable: multiple correct toggle -->
                   <button
@@ -1260,7 +1278,7 @@ function togglePrivate() {
                         :class="currentQuestion.multipleCorrect ? 'translate-x-6' : 'translate-x-1'"
                       ></span>
                     </span>
-                    <span>Multiple correct answers</span>
+                    <span>{{ t("createQuiz.fields.multipleCorrectAnswers") }}</span>
                   </button>
                 </div>
 
@@ -1292,25 +1310,25 @@ function togglePrivate() {
                   :disabled="currentQuestion.options.length >= maxOptions"
                   @click="addOption"
                 >
-                  + Add option
+                  + {{ t("createQuiz.fields.addOption") }}
                 </button>
               </section>
 
               <!-- Explanation -->
               <div v-if="isReadOnly" class="space-y-1.5">
-                <span class="text-sm font-semibold text-slate-700">Explanation</span>
+                <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.explanation") }}</span>
                 <p
                   class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-sm"
                   :class="currentQuestion.explanation ? 'text-slate-900' : 'italic text-slate-400'"
-                >{{ currentQuestion.explanation || 'No explanation provided.' }}</p>
+                >{{ currentQuestion.explanation || t("createQuiz.fields.noExplanation") }}</p>
               </div>
               <label v-else class="block space-y-1.5">
-                <span class="text-sm font-semibold text-slate-700">Explanation <span class="font-normal text-slate-400">(optional)</span></span>
+                <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.explanation") }} <span class="font-normal text-slate-400">{{ t("createQuiz.fields.explanationOptional") }}</span></span>
                 <textarea
                   :value="currentQuestion.explanation"
                   rows="1"
                   class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
-                  placeholder="Explain why the correct answer is right..."
+                  :placeholder="t('createQuiz.fields.explanationPlaceholder')"
                   @input="updateExplanation(($event.target as HTMLTextAreaElement).value)"
                 ></textarea>
               </label>
@@ -1342,7 +1360,7 @@ function togglePrivate() {
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                 <path d="M12 5 7 10l5 5" stroke-linecap="round" stroke-linejoin="round" />
               </svg>
-              <span>Back to My Quizzes</span>
+              <span>{{ t("createQuiz.readOnly.backToMyQuizzes") }}</span>
             </button>
 
             <!-- Editable: save / next -->
@@ -1355,10 +1373,10 @@ function togglePrivate() {
               @click="saveAndNext"
             >
               <span>{{
-                isSaving ? "Saving..." :
-                currentQuestionIndex < questions.length - 1 ? "Next question" :
-                isEditing ? "Update quiz" :
-                "Save quiz"
+                isSaving ? t("createQuiz.actions.saving") :
+                currentQuestionIndex < questions.length - 1 ? t("createQuiz.actions.nextQuestion") :
+                isEditing ? t("createQuiz.actions.updateQuiz") :
+                t("createQuiz.actions.saveQuiz")
               }}</span>
               <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
                 <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />

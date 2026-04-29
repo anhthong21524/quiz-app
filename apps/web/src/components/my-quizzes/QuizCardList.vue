@@ -3,6 +3,7 @@ import QuizIconAvatar from "./QuizIconAvatar.vue";
 import QuizRowActions from "./QuizRowActions.vue";
 import QuizStatusBadge from "./QuizStatusBadge.vue";
 import type { QuizListItem } from "./types";
+import { useI18n } from "../../i18n";
 
 defineProps<{
   quizzes: QuizListItem[];
@@ -18,6 +19,8 @@ const emit = defineEmits<{
   share: [quiz: QuizListItem];
   copyCode: [quiz: QuizListItem];
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
@@ -37,15 +40,15 @@ const emit = defineEmits<{
 
       <dl class="mobile-card-meta">
         <div>
-          <dt>Subject</dt>
+          <dt>{{ t("dashboard.recent.columns.subject") }}</dt>
           <dd>{{ quiz.subject }}</dd>
         </div>
         <div>
-          <dt>Questions</dt>
+          <dt>{{ t("dashboard.recent.columns.questions") }}</dt>
           <dd>{{ quiz.questions }}</dd>
         </div>
         <div>
-          <dt>Last updated</dt>
+          <dt>{{ t("dashboard.recent.columns.lastUpdated") }}</dt>
           <dd>{{ quiz.lastUpdatedLabel }}</dd>
         </div>
       </dl>

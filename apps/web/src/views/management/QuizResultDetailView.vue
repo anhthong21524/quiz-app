@@ -17,13 +17,15 @@ import {
   type SubmissionResult
 } from "../../services/quiz-api";
 import { ACCENT_CYCLE } from "../../lib/accent";
+import { useI18n } from "../../i18n";
 
 const route = useRoute();
 const router = useRouter();
+const { t, formatDateTime } = useI18n();
 
 const searchQuery = ref("");
-const scoreFilter = ref("All scores");
-const dateFilter = ref("All time");
+const scoreFilter = ref("all");
+const dateFilter = ref("all");
 const currentPage = ref(1);
 const selectedSubmissionId = ref<string | null>(null);
 const activeTab = ref<"submissions" | "submission-detail">("submissions");
@@ -32,12 +34,21 @@ const loadError = ref(false);
 const quizDetail = ref<DisplayQuizResultDetail | null>(null);
 
 const pageSize = 6;
-const scoreOptions = ["All scores", "80% and above", "70% - 79%", "Below 70%"];
-const dateOptions = ["All time", "Today", "Last 7 days"];
-const tabs = [
-  { id: "submissions", label: "Submissions" },
-  { id: "submission-detail", label: "Submission detail", disabled: true }
-];
+const tabs = computed(() => [
+  { id: "submissions", label: t("results.detail.submissionsTab") },
+  { id: "submission-detail", label: t("results.detail.submissionDetailTab"), disabled: true }
+]);
+const scoreOptions = computed(() => [
+  { label: t("results.detail.allScores"), value: "all" },
+  { label: "80%+", value: "gte80" },
+  { label: "70% - 79%", value: "gte70" },
+  { label: "< 70%", value: "lt70" }
+]);
+const dateOptions = computed(() => [
+  { label: t("results.overview.allTime"), value: "all" },
+  { label: t("results.overview.today"), value: "today" },
+  { label: t("results.overview.last7Days"), value: "last7" }
+]);
 
 function formatTime(secs: number | null): string {
   if (secs == null) return "-";
@@ -47,13 +58,13 @@ function formatTime(secs: number | null): string {
 }
 
 function formatDate(iso: string): string {
-  return new Intl.DateTimeFormat("en-US", {
+  return formatDateTime(iso, {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit"
-  }).format(new Date(iso));
+  });
 }
 
 function initials(name: string): string {
@@ -122,7 +133,7 @@ function toDisplayDetail(detail: ApiQuizResultDetail): DisplayQuizResultDetail {
       quizId: detail.id,
       quizTitle: detail.title,
       status: toPublishedOrDraft(detail.status),
-      category: detail.subject || "General",
+      category: detail.subject || t("results.overview.allSubjects"),
       totalQuestions,
       totalSubmissions,
       uniqueParticipants: totalSubmissions,
@@ -194,14 +205,14 @@ watch([searchQuery, scoreFilter, dateFilter], () => {
 });
 
 function isInSelectedScoreRange(submission: QuizSubmission) {
-  if (scoreFilter.value === "All scores") return true;
-  if (scoreFilter.value === "80% and above") return submission.scorePercent >= 80;
-  if (scoreFilter.value === "70% - 79%") return submission.scorePercent >= 70 && submission.scorePercent < 80;
+  if (scoreFilter.value === "all") return true;
+  if (scoreFilter.value === "gte80") return submission.scorePercent >= 80;
+  if (scoreFilter.value === "gte70") return submission.scorePercent >= 70 && submission.scorePercent < 80;
   return submission.scorePercent < 70;
 }
 
 function isInSelectedDateRange(value: string) {
-  if (dateFilter.value === "All time") return true;
+  if (dateFilter.value === "all") return true;
 
   const submittedAt = new Date(value);
   if (isNaN(submittedAt.getTime())) return false;
@@ -209,7 +220,7 @@ function isInSelectedDateRange(value: string) {
   const now = new Date();
   const daysDifference = Math.floor((now.getTime() - submittedAt.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (dateFilter.value === "Today") return daysDifference === 0;
+  if (dateFilter.value === "today") return daysDifference === 0;
   return daysDifference <= 7;
 }
 
@@ -233,7 +244,15 @@ function setPage(page: number) {
 function downloadCsv() {
   if (!quizDetail.value || !summary.value) return;
 
-  const header = ["#", "Participant", "Email", "Submitted at", "Score", "Time taken", "Status"];
+  const header = [
+    "#",
+    t("results.detail.participant"),
+    "Email",
+    t("results.detail.submittedAt"),
+    t("results.detail.score"),
+    t("results.detail.timeTaken"),
+    "Status"
+  ];
   const rows = submissions.value.map((submission, index) => [
     String(index + 1),
     submission.participantName,
@@ -279,20 +298,20 @@ onMounted(async () => {
 
 <template>
   <section v-if="isLoading" class="result-not-found-card">
-    <p>Loading...</p>
+    <p>{{ t("results.detail.loading") }}</p>
   </section>
 
   <section v-else-if="loadError" class="result-not-found-card">
-    <RouterLink class="back-link" :to="{ name: 'results' }">Back to Quiz Results</RouterLink>
-    <h1>Could not load quiz results</h1>
-    <p>Something went wrong while fetching this quiz. Please try again later.</p>
+    <RouterLink class="back-link" :to="{ name: 'results' }">{{ t("results.detail.backToResults") }}</RouterLink>
+    <h1>{{ t("results.detail.loadErrorTitle") }}</h1>
+    <p>{{ t("results.detail.loadErrorDescription") }}</p>
   </section>
 
   <section v-else-if="quizDetail && summary" class="result-detail-page">
     <div class="result-detail-topbar">
-      <nav class="result-breadcrumb" aria-label="Breadcrumb">
+      <nav class="result-breadcrumb" :aria-label="t('results.detail.breadcrumb')">
         <RouterLink :to="{ name: 'results' }">
-          Quiz Results
+          {{ t("results.overview.pageTitle") }}
         </RouterLink>
         <span aria-hidden="true">></span>
         <span>{{ summary.quizTitle }}</span>
@@ -302,24 +321,24 @@ onMounted(async () => {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
           <path d="M12 4v10M8 10l4 4 4-4M5 20h14" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        Export CSV
+        {{ t("results.detail.exportCsv") }}
       </button>
     </div>
 
-    <section class="summary-grid" aria-label="Result summary">
-      <StatCard :value="String(summary.totalSubmissions)" label="Total submissions" hint="" color="teal">
+    <section class="summary-grid" :aria-label="t('results.detail.resultSummary')">
+      <StatCard :value="String(summary.totalSubmissions)" :label="t('results.detail.totalSubmissions')" hint="" color="teal">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="M16 19v-1.4a3.6 3.6 0 0 0-3.6-3.6H7.6A3.6 3.6 0 0 0 4 17.6V19" stroke-linecap="round" />
           <circle cx="10" cy="8" r="3" />
           <path d="M20 19v-1.3a3.6 3.6 0 0 0-2.7-3.5M15.5 5.2a3 3 0 0 1 0 5.6" stroke-linecap="round" />
         </svg>
       </StatCard>
-      <StatCard :value="`${summary.averageScorePercent}%`" label="Average score" hint="" :color="summary.averageScorePercent >= 70 ? 'green' : 'amber'">
+      <StatCard :value="`${summary.averageScorePercent}%`" :label="t('results.detail.averageScore')" hint="" :color="summary.averageScorePercent >= 70 ? 'green' : 'amber'">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <path d="m12 3.7 2.5 5.1 5.6.8-4 3.9.9 5.5-5-2.6L7 19l.9-5.5-4-3.9 5.6-.8L12 3.7Z" stroke-linejoin="round" />
         </svg>
       </StatCard>
-      <StatCard :value="summary.averageTime" label="Average time" hint="" color="gray">
+      <StatCard :value="summary.averageTime" :label="t('results.detail.averageTime')" hint="" color="gray">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
           <circle cx="12" cy="12" r="8.5" />
           <path d="M12 7.5V12l3 2" stroke-linecap="round" stroke-linejoin="round" />
@@ -331,7 +350,7 @@ onMounted(async () => {
       <ResultTabs :tabs="tabs" :active-tab="activeTab" @select="selectTab" />
 
       <div v-if="activeTab === 'submissions'">
-        <h2 id="result-detail-table-title" class="sr-only">Quiz submissions</h2>
+        <h2 id="result-detail-table-title" class="sr-only">{{ t("results.detail.submissionsTitle") }}</h2>
 
         <SubmissionTable
           v-model:search-query="searchQuery"
@@ -363,16 +382,16 @@ onMounted(async () => {
             <circle cx="12" cy="12" r="2.5" />
           </svg>
         </span>
-        <h2>Select a submission</h2>
-        <p>Open the submissions tab to review participant details.</p>
+        <h2>{{ t("results.detail.selectSubmissionTitle") }}</h2>
+        <p>{{ t("results.detail.selectSubmissionDescription") }}</p>
       </div>
     </section>
   </section>
 
   <section v-else class="result-not-found-card">
-    <RouterLink class="back-link" :to="{ name: 'results' }">Back to Quiz Results</RouterLink>
-    <h1>Quiz result not found</h1>
-    <p>This quiz does not exist or you do not have access to it.</p>
+    <RouterLink class="back-link" :to="{ name: 'results' }">{{ t("results.detail.backToResults") }}</RouterLink>
+    <h1>{{ t("results.detail.notFoundTitle") }}</h1>
+    <p>{{ t("results.detail.notFoundDescription") }}</p>
   </section>
 </template>
 

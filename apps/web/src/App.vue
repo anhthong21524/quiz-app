@@ -4,10 +4,12 @@ import { useRoute } from "vue-router";
 import AppHeader from "./components/AppHeader.vue";
 import AppToastList from "./components/AppToastList.vue";
 import GlobalLoadingBar from "./components/GlobalLoadingBar.vue";
+import { useTheme } from "./composables/useTheme";
 import { useI18n } from "./i18n";
 
 const route = useRoute();
 const { t } = useI18n();
+const { theme } = useTheme();
 const useBareLayout = computed(() => route.meta.bareLayout === true);
 const usePublicLayout = computed(() =>
   route.name === "home" ||
@@ -32,7 +34,11 @@ const currentYear = new Date().getFullYear();
   <div
     v-else
     class="app-shell"
-    :class="{ 'public-shell': usePublicLayout, 'quiz-taking-shell': useQuizTakingLayout }"
+    :class="{
+      'public-shell': usePublicLayout,
+      'public-theme-dark': usePublicLayout && theme === 'dark',
+      'quiz-taking-shell': useQuizTakingLayout
+    }"
   >
     <AppHeader />
 

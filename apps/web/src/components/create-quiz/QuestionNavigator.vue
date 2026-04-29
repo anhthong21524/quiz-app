@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "../../i18n";
 import type { CreateQuizQuestion } from "./types";
 
 const props = defineProps<{
@@ -12,6 +13,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   select: [index: number];
 }>();
+
+const { t } = useI18n();
 
 const completedCount = computed(
   () => props.questions.filter((question) => question.status === "completed").length
@@ -72,22 +75,22 @@ function getStatusLabel(
   reviewStatus?: CreateQuizQuestion["reviewStatus"]
 ) {
   if (reviewStatus === "correct") {
-    return "correct";
+    return t("results.detail.answerCorrect").toLowerCase();
   }
 
   if (reviewStatus === "incorrect") {
-    return "incorrect";
+    return t("results.detail.answerIncorrect").toLowerCase();
   }
 
   if (status === "completed") {
-    return "completed";
+    return t("createQuiz.navigator.statusCompleted");
   }
 
   if (status === "in_progress") {
-    return "in progress";
+    return t("createQuiz.navigator.statusInProgress");
   }
 
-  return "empty";
+  return t("createQuiz.navigator.statusEmpty");
 }
 </script>
 
@@ -95,9 +98,19 @@ function getStatusLabel(
   <aside class="flex h-full flex-col rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-4 shadow-[0_10px_26px_rgba(46,35,20,0.06)] xl:sticky xl:top-6">
     <div class="flex items-start justify-between gap-3">
       <div>
-        <h2 class="text-base font-bold text-gray-900">Questions</h2>
+        <h2 class="text-base font-bold text-gray-900">{{ t("createQuiz.steps.questions") }}</h2>
         <p class="mt-0.5 text-xs text-gray-500">
-          {{ isReviewMode ? `${correctReviewCount} of ${questions.length} correct` : `${completedCount} of ${questions.length} complete` }}
+          {{
+            isReviewMode
+              ? t("participant.take.reviewProgress", {
+                  score: correctReviewCount,
+                  total: questions.length
+                })
+              : t("createQuiz.navigator.completeSummary", {
+                  completed: completedCount,
+                  total: questions.length
+                })
+          }}
         </p>
       </div>
       <span
@@ -134,8 +147,8 @@ function getStatusLabel(
             usesCompactLayout ? 'h-9 text-[13px]' : 'h-10 text-sm',
             getButtonClasses(question.status, currentQuestionIndex === index, getReviewStatus(question))
           ]"
-          :aria-label="`Question ${index + 1}: ${getStatusLabel(question.status, getReviewStatus(question))}${currentQuestionIndex === index ? ', selected' : ''}`"
-          :title="`Question ${index + 1}: ${getStatusLabel(question.status, getReviewStatus(question))}`"
+          :aria-label="`${t('participant.take.questionProgress', { current: index + 1, total: questions.length })}: ${getStatusLabel(question.status, getReviewStatus(question))}${currentQuestionIndex === index ? ', selected' : ''}`"
+          :title="`${t('participant.take.questionProgress', { current: index + 1, total: questions.length })}: ${getStatusLabel(question.status, getReviewStatus(question))}`"
           @click="emit('select', index)"
         >
           <span class="relative z-10 inline-flex items-center justify-center gap-1">
@@ -169,14 +182,20 @@ function getStatusLabel(
 
       <div class="mt-auto space-y-3">
         <div v-if="isReviewMode" class="rounded-xl bg-rose-50 px-3 py-2.5 text-xs font-medium text-rose-700">
-          Red questions need review. Green questions were answered correctly.
+          {{ t("participant.take.resultsMessageNeedsReview") }}
         </div>
         <div v-else-if="completedCount < questions.length" class="rounded-xl bg-slate-50 px-3 py-2.5 text-xs text-slate-500">
-          <span class="font-semibold text-slate-600">{{ questions.length - completedCount }}</span>
-          {{ questions.length - completedCount === 1 ? "question" : "questions" }} left to complete.
+          {{
+            t(
+              questions.length - completedCount === 1
+                ? "createQuiz.navigator.remainingOne"
+                : "createQuiz.navigator.remainingOther",
+              { count: questions.length - completedCount }
+            )
+          }}
         </div>
         <div v-else class="rounded-xl bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-700">
-          All questions complete - ready to save!
+          {{ t("createQuiz.navigator.allComplete") }}
         </div>
         <slot />
       </div>

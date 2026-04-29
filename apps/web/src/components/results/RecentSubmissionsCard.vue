@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import AppDateTime from "../AppDateTime.vue";
 import type { RecentSubmissionResult } from "../../data/quiz-results";
+import { useI18n } from "../../i18n";
 
 defineProps<{
   submissions: RecentSubmissionResult[];
 }>();
+
+const { t } = useI18n();
 
 function scoreClass(pct: number | null) {
   if (pct == null) return "";
@@ -17,8 +20,8 @@ function scoreClass(pct: number | null) {
 <template>
   <section class="sidebar-card" aria-labelledby="recent-submissions-title">
     <div class="sidebar-card-header">
-      <h2 id="recent-submissions-title">Recent submissions</h2>
-      <RouterLink class="view-all-link" :to="{ name: 'results' }">View all</RouterLink>
+      <h2 id="recent-submissions-title">{{ t("results.overview.recentSubmissions") }}</h2>
+      <RouterLink class="view-all-link" :to="{ name: 'results' }">{{ t("results.overview.viewAll") }}</RouterLink>
     </div>
 
     <ul class="submission-list">

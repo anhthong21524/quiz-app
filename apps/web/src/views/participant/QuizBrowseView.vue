@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
 import { RouterLink } from "vue-router";
+import { useI18n } from "../../i18n";
 import {
   getPublicQuizzes,
   type PublicQuizInfo
 } from "../../services/publicQuizApi";
 
+const { t } = useI18n();
 const quizzes = ref<PublicQuizInfo[]>([]);
 const searchTerm = ref("");
 const sortKey = ref("");
@@ -17,7 +19,10 @@ const visibleCount = ref(PAGE_SIZE);
 const normalizedSearchTerm = computed(() => searchTerm.value.trim().toLowerCase());
 
 const quizCountLabel = computed(() =>
-  quizzes.value.length === 1 ? "1 public quiz" : `${quizzes.value.length} public quizzes`
+  t(
+    quizzes.value.length === 1 ? "participant.browse.countOne" : "participant.browse.countOther",
+    { count: quizzes.value.length }
+  )
 );
 
 const filteredQuizzes = computed(() => {
@@ -67,20 +72,22 @@ const hasMore = computed(
 const resultsSummary = computed(() => {
   if (normalizedSearchTerm.value) {
     const n = filteredQuizzes.value.length;
-    return n === 1 ? "1 match" : `${n} matches`;
+    return t(n === 1 ? "participant.browse.matchOne" : "participant.browse.matchOther", { count: n });
   }
   const shown = Math.min(visibleCount.value, quizzes.value.length);
-  return `Showing ${shown} of ${quizzes.value.length}`;
+  return t("participant.browse.showing", { shown, total: quizzes.value.length });
 });
 
 const emptyTitle = computed(() =>
-  normalizedSearchTerm.value ? "No quizzes match your search" : "No public quizzes yet"
+  normalizedSearchTerm.value
+    ? t("participant.browse.emptySearchTitle")
+    : t("participant.browse.emptyTitle")
 );
 
 const emptyDescription = computed(() =>
   normalizedSearchTerm.value
-    ? "Try another title, topic, or question count."
-    : "Published quizzes will appear here when they are available."
+    ? t("participant.browse.emptySearchDescription")
+    : t("participant.browse.emptyDescription")
 );
 
 watch(normalizedSearchTerm, () => {
@@ -88,7 +95,9 @@ watch(normalizedSearchTerm, () => {
 });
 
 function formatTimeLimit(timeLimit: number | null) {
-  return timeLimit ? `${timeLimit} min` : "Untimed";
+  return timeLimit
+    ? t("participant.browse.timeMinutes", { count: timeLimit })
+    : t("participant.browse.untimed");
 }
 
 function loadMore() {
@@ -110,7 +119,7 @@ async function loadPublicQuizzes() {
   try {
     quizzes.value = await getPublicQuizzes();
   } catch {
-    pageError.value = "We could not load public quizzes. Please try again soon.";
+    pageError.value = t("participant.browse.loadError");
   } finally {
     isLoading.value = false;
   }
@@ -126,15 +135,15 @@ onMounted(loadPublicQuizzes);
       <!-- Header -->
       <div class="grid gap-4">
         <p class="text-sm font-extrabold uppercase tracking-[0.08em] text-emerald-600 dark:text-emerald-400">
-          Public quizzes
+          {{ t("participant.browse.headerEyebrow") }}
         </p>
         <div class="grid gap-4 md:grid-cols-[minmax(0,1fr)_auto] md:items-end">
           <div class="grid gap-3">
             <h1 class="text-4xl font-extrabold tracking-normal text-slate-950 dark:text-white sm:text-5xl">
-              Choose a quiz to start
+              {{ t("participant.browse.headerTitle") }}
             </h1>
             <p class="max-w-2xl text-base leading-7 text-slate-600 dark:text-slate-400 sm:text-lg">
-              Browse available quizzes that are open to everyone. Pick one, enter your name, and begin.
+              {{ t("participant.browse.headerDescription") }}
             </p>
           </div>
         </div>
@@ -150,15 +159,15 @@ onMounted(loadPublicQuizzes);
             </svg>
           </span>
           <div>
-            <p class="text-sm font-bold text-amber-900 dark:text-amber-300">Have a private quiz code?</p>
-            <p class="text-xs text-amber-700 dark:text-amber-400">Enter your access code to unlock a private quiz.</p>
+            <p class="text-sm font-bold text-amber-900 dark:text-amber-300">{{ t("participant.browse.privateTitle") }}</p>
+            <p class="text-xs text-amber-700 dark:text-amber-400">{{ t("participant.browse.privateDescription") }}</p>
           </div>
         </div>
         <RouterLink
           :to="{ name: 'private-quiz-entry' }"
           class="shrink-0 inline-flex h-9 items-center gap-2 rounded-xl bg-amber-600 px-4 text-sm font-bold text-white shadow transition hover:bg-amber-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-amber-200 dark:focus-visible:ring-amber-800"
         >
-          Enter code
+          {{ t("participant.browse.enterCode") }}
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M5 12h14m0 0-5-5m5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
@@ -171,7 +180,7 @@ onMounted(loadPublicQuizzes);
         class="grid gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 p-4 sm:grid-cols-[minmax(0,1fr)_auto_auto] sm:items-end"
       >
         <label class="grid gap-2" for="public-quiz-search">
-          <span class="text-sm font-extrabold text-slate-700 dark:text-slate-300">Search quizzes</span>
+          <span class="text-sm font-extrabold text-slate-700 dark:text-slate-300">{{ t("participant.browse.searchLabel") }}</span>
           <span class="flex min-h-12 items-center gap-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100 dark:focus-within:ring-emerald-900">
             <svg class="h-5 w-5 shrink-0 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
               <circle cx="11" cy="11" r="7" />
@@ -182,23 +191,23 @@ onMounted(loadPublicQuizzes);
               v-model="searchTerm"
               class="min-w-0 flex-1 border-0 bg-transparent text-base font-semibold text-slate-900 dark:text-white outline-none placeholder:text-slate-400 dark:placeholder:text-slate-500"
               type="search"
-              placeholder="Search by title, topic, or question count"
+              :placeholder="t('participant.browse.searchPlaceholder')"
             />
           </span>
         </label>
 
         <!-- Sort dropdown -->
         <label class="grid gap-2">
-          <span class="text-sm font-extrabold text-slate-700 dark:text-slate-300">Sort by</span>
+          <span class="text-sm font-extrabold text-slate-700 dark:text-slate-300">{{ t("participant.browse.sortLabel") }}</span>
           <select
             v-model="sortKey"
             class="min-h-12 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 text-sm font-semibold text-slate-900 dark:text-white outline-none focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100 dark:focus:ring-emerald-900 transition cursor-pointer"
           >
-            <option value="">Default</option>
-            <option value="title-asc">Title A → Z</option>
-            <option value="title-desc">Title Z → A</option>
-            <option value="questions-desc">Most questions</option>
-            <option value="questions-asc">Fewest questions</option>
+            <option value="">{{ t("participant.browse.sortDefault") }}</option>
+            <option value="title-asc">{{ t("participant.browse.sortTitleAsc") }}</option>
+            <option value="title-desc">{{ t("participant.browse.sortTitleDesc") }}</option>
+            <option value="questions-desc">{{ t("participant.browse.sortQuestionsDesc") }}</option>
+            <option value="questions-asc">{{ t("participant.browse.sortQuestionsAsc") }}</option>
           </select>
         </label>
 
@@ -214,7 +223,7 @@ onMounted(loadPublicQuizzes);
             class="h-12 w-12 animate-spin rounded-full border-4 border-emerald-100 dark:border-emerald-900 border-t-emerald-600"
             aria-hidden="true"
           ></div>
-          <p class="font-bold text-slate-700 dark:text-slate-300">Loading public quizzes...</p>
+          <p class="font-bold text-slate-700 dark:text-slate-300">{{ t("participant.browse.loading") }}</p>
         </div>
       </div>
 
@@ -228,7 +237,7 @@ onMounted(loadPublicQuizzes);
           class="w-fit rounded-xl border border-red-300 dark:border-red-700 bg-white dark:bg-slate-900 px-5 py-2.5 text-sm font-bold text-red-700 dark:text-red-400 transition hover:bg-red-50 dark:hover:bg-red-950 focus:outline-none focus-visible:ring-4 focus-visible:ring-red-200 dark:focus-visible:ring-red-900"
           @click="loadPublicQuizzes"
         >
-          Try again
+          {{ t("participant.browse.retry") }}
         </button>
       </div>
 
@@ -236,7 +245,7 @@ onMounted(loadPublicQuizzes);
       <div
         v-else-if="visibleQuizzes.length"
         class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3"
-        aria-label="Public quizzes"
+        :aria-label="t('participant.browse.gridAria')"
       >
         <RouterLink
           v-for="quiz in visibleQuizzes"
@@ -266,17 +275,17 @@ onMounted(loadPublicQuizzes);
 
           <!-- Description -->
           <p class="line-clamp-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
-            {{ quiz.description || "A public Quiz App quiz ready to take." }}
+            {{ quiz.description || t("participant.browse.defaultDescription") }}
           </p>
 
           <!-- Stats row -->
           <dl class="grid grid-cols-2 gap-2 text-sm">
             <div class="rounded-xl bg-slate-50 dark:bg-slate-800 p-3">
-              <dt class="text-xs font-bold text-slate-500 dark:text-slate-400">Questions</dt>
+              <dt class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ t("participant.browse.questions") }}</dt>
               <dd class="mt-1 font-extrabold text-slate-950 dark:text-white">{{ quiz.questionCount }}</dd>
             </div>
             <div class="rounded-xl bg-slate-50 dark:bg-slate-800 p-3">
-              <dt class="text-xs font-bold text-slate-500 dark:text-slate-400">Time</dt>
+              <dt class="text-xs font-bold text-slate-500 dark:text-slate-400">{{ t("participant.browse.time") }}</dt>
               <dd class="mt-1 font-extrabold text-slate-950 dark:text-white">{{ formatTimeLimit(quiz.timeLimit) }}</dd>
             </div>
           </dl>
@@ -298,7 +307,7 @@ onMounted(loadPublicQuizzes);
           <div
             class="mt-auto inline-flex min-h-11 items-center justify-center gap-3 rounded-xl bg-emerald-600 px-5 font-bold text-white shadow-[0_8px_20px_rgba(5,150,105,0.18)]"
           >
-            Start quiz
+            {{ t("participant.browse.startQuiz") }}
             <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
               <path d="M5 12h14m0 0-5-5m5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
@@ -323,7 +332,7 @@ onMounted(loadPublicQuizzes);
           class="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 px-6 text-sm font-bold text-slate-700 dark:text-slate-300 shadow-sm transition hover:border-emerald-300 dark:hover:border-emerald-700 hover:text-emerald-700 dark:hover:text-emerald-400 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200 dark:focus-visible:ring-emerald-800"
           @click="loadMore"
         >
-          Load more
+          {{ t("participant.browse.loadMore") }}
           <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
             <path d="M12 5v14m0 0-5-5m5 5 5-5" stroke-linecap="round" stroke-linejoin="round" />
           </svg>

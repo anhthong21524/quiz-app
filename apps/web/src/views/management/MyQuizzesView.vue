@@ -25,10 +25,12 @@ import { useQuizStore } from "../../stores/quizzes";
 import { useToast } from "../../composables/useToast";
 import { isAppError } from "../../lib/api/errors";
 import { fetchQuizResultDetail } from "../../services/quiz-api";
+import { useI18n } from "../../i18n";
 
 const router = useRouter();
 const quizStore = useQuizStore();
 const { show: showToast } = useToast();
+const { t } = useI18n();
 
 const PAGE_SIZE = 6;
 
@@ -58,7 +60,7 @@ const confirmState = ref<ConfirmState>({
   open: false,
   title: "",
   message: "",
-  confirmLabel: "Confirm",
+  confirmLabel: "",
   danger: false,
   onConfirm: async () => {}
 });
@@ -75,21 +77,52 @@ const privateCodeState = ref<{ open: boolean; title: string; code: string }>({
   code: ""
 });
 
-const statusOptions: Array<MyQuizStatus | "All status"> = [
-  "All status",
-  "Published",
-  "In progress",
-  "Unpublished"
-];
+const localizedStatusOptions = computed(() => [
+  t("myQuizzes.toolbar.allStatuses"),
+  t("myQuizzes.status.published"),
+  t("myQuizzes.status.inProgress"),
+  t("myQuizzes.status.unpublished")
+]);
+
+const localizedStatusValue = computed(() => {
+  if (selectedStatus.value === "Published") return t("myQuizzes.status.published");
+  if (selectedStatus.value === "In progress") return t("myQuizzes.status.inProgress");
+  if (selectedStatus.value === "Unpublished") return t("myQuizzes.status.unpublished");
+  return t("myQuizzes.toolbar.allStatuses");
+});
+
+const localizedSubjectValue = computed(() =>
+  selectedSubject.value === "All subjects" ? t("myQuizzes.toolbar.allSubjects") : selectedSubject.value
+);
 
 const toolbarFilters = computed<ToolbarFilter[]>(() => [
-  { label: "Filter by status", options: statusOptions as string[], value: selectedStatus.value },
-  { label: "Filter by subject", options: subjectOptions.value, value: selectedSubject.value },
+  {
+    label: t("myQuizzes.toolbar.filterByStatus"),
+    options: localizedStatusOptions.value,
+    value: localizedStatusValue.value
+  },
+  {
+    label: t("myQuizzes.toolbar.filterBySubject"),
+    options: subjectOptions.value,
+    value: localizedSubjectValue.value
+  },
 ]);
 
 function onToolbarFiltersChange(filters: ToolbarFilter[]) {
-  selectedStatus.value = filters[0].value as MyQuizStatus | "All status";
-  selectedSubject.value = filters[1].value;
+  const [statusFilter, subjectFilter] = filters;
+
+  if (statusFilter.value === t("myQuizzes.status.published")) {
+    selectedStatus.value = "Published";
+  } else if (statusFilter.value === t("myQuizzes.status.inProgress")) {
+    selectedStatus.value = "In progress";
+  } else if (statusFilter.value === t("myQuizzes.status.unpublished")) {
+    selectedStatus.value = "Unpublished";
+  } else {
+    selectedStatus.value = "All status";
+  }
+
+  selectedSubject.value =
+    subjectFilter.value === t("myQuizzes.toolbar.allSubjects") ? "All subjects" : subjectFilter.value;
 }
 
 // True only on first load when there are no items yet — shows skeleton instead of blank.
@@ -111,7 +144,7 @@ async function retryLoadQuizzes() {
 const apiQuizzes = computed<QuizListItem[]>(() => quizStore.items.map(mapApiQuiz));
 
 const subjectOptions = computed(() => [
-  "All subjects",
+  t("myQuizzes.toolbar.allSubjects"),
   ...Array.from(new Set(apiQuizzes.value.map((quiz) => quiz.subject))).sort()
 ]);
 
@@ -169,10 +202,10 @@ const pagedQuizzes = computed(() =>
 
 const showingCopy = computed(() => {
   const total = sortedFilteredQuizzes.value.length;
-  if (!total) return "Showing 0 to 0 of 0 quizzes";
+  if (!total) return t("myQuizzes.pagination.empty");
   const from = pageOffset.value + 1;
   const to = Math.min(pageOffset.value + PAGE_SIZE, total);
-  return `Showing ${from} to ${to} of ${total} quizzes`;
+  return t("myQuizzes.pagination.showing", { from, to, total });
 });
 
 function setPage(page: number) {
@@ -204,24 +237,24 @@ const unpublishedCount = computed(
 const quizStatsItems = computed(() => [
   {
     id: "total",
-    label: "Total",
+    label: t("myQuizzes.stats.total"),
     value: apiQuizzes.value.length
   },
   {
     id: "published",
-    label: "Published",
+    label: t("myQuizzes.stats.published"),
     value: publishedCount.value,
     tone: "green" as const
   },
   {
     id: "in-progress",
-    label: "In progress",
+    label: t("myQuizzes.stats.inProgress"),
     value: inProgressCount.value,
     tone: "amber" as const
   },
   {
     id: "unpublished",
-    label: "Unpublished",
+    label: t("myQuizzes.stats.unpublished"),
     value: unpublishedCount.value,
     tone: "gray" as const
   }
@@ -253,7 +286,7 @@ function createQuiz() {
 
 function formatLastUpdated(value?: string) {
   if (!value) {
-    return "Not saved yet";
+    return t("myQuizzes.table.notSavedYet");
   }
 
   return new Intl.DateTimeFormat(undefined, {
@@ -268,7 +301,7 @@ function formatLastUpdated(value?: string) {
 
 function mapApiQuiz(quiz: Quiz): QuizListItem {
   const id = quiz.id ?? quiz.title;
-  const subject = quiz.subject ?? "Custom";
+  const subject = quiz.subject ?? t("dashboard.recent.customSubject");
 
   return {
     id,
@@ -319,16 +352,16 @@ function publishQuiz(quiz: QuizListItem) {
   if (!quiz.apiId) return;
 
   openConfirm({
-    title: "Publish quiz",
-    message: `"${quiz.title}" will become publicly visible. Are you sure you want to publish?`,
-    confirmLabel: "Publish",
+    title: t("myQuizzes.actions.publishTitle"),
+    message: t("myQuizzes.actions.publishMessage", { title: quiz.title }),
+    confirmLabel: t("myQuizzes.actions.publishConfirm"),
     danger: false,
     onConfirm: async () => {
       try {
         await quizStore.setQuizPublished(quiz.apiId!, true);
-        showToast("Quiz published successfully");
+        showToast(t("myQuizzes.toasts.quizPublished"));
       } catch {
-        showToast("Failed to publish quiz", "error");
+        showToast(t("myQuizzes.toasts.publishFailed"), "error");
       }
     }
   });
@@ -338,18 +371,18 @@ function unpublishQuiz(quiz: QuizListItem) {
   if (!quiz.apiId) return;
 
   openConfirm({
-    title: "Unpublish quiz",
-    message: `"${quiz.title}" will no longer be visible to users. You can re-publish at any time.`,
-    confirmLabel: "Unpublish",
+    title: t("myQuizzes.actions.unpublishTitle"),
+    message: t("myQuizzes.actions.unpublishMessage", { title: quiz.title }),
+    confirmLabel: t("myQuizzes.actions.unpublishConfirm"),
     danger: false,
     onConfirm: async () => {
       try {
         await quizStore.setQuizPublished(quiz.apiId!, false);
-        showToast("Quiz unpublished successfully");
+        showToast(t("myQuizzes.toasts.quizUnpublished"));
       } catch (error) {
         const message = isAppError(error) && error.userMessage
           ? error.userMessage
-          : "Failed to unpublish quiz";
+          : t("myQuizzes.toasts.unpublishFailed");
         showToast(message, "error");
       }
     }
@@ -361,9 +394,9 @@ async function duplicateQuiz(quiz: QuizListItem) {
 
   try {
     await quizStore.duplicateQuiz(quiz.apiId);
-    showToast(`"${quiz.title}" duplicated successfully`);
+    showToast(t("myQuizzes.toasts.duplicated", { title: quiz.title }));
   } catch {
-    showToast("Failed to duplicate quiz", "error");
+    showToast(t("myQuizzes.toasts.duplicateFailed"), "error");
   }
 }
 
@@ -371,16 +404,16 @@ function deleteQuiz(quiz: QuizListItem) {
   if (!quiz.apiId) return;
 
   openConfirm({
-    title: "Delete quiz",
-    message: `"${quiz.title}" will be permanently deleted. This action cannot be undone.`,
-    confirmLabel: "Delete",
+    title: t("myQuizzes.actions.deleteTitle"),
+    message: t("myQuizzes.actions.deleteMessage", { title: quiz.title }),
+    confirmLabel: t("myQuizzes.actions.deleteConfirm"),
     danger: true,
     onConfirm: async () => {
       try {
         await quizStore.deleteQuiz(quiz.apiId!);
-        showToast("Quiz deleted successfully");
+        showToast(t("myQuizzes.toasts.deleted"));
       } catch {
-        showToast("Failed to delete quiz", "error");
+        showToast(t("myQuizzes.toasts.deleteFailed"), "error");
       }
     }
   });
@@ -392,7 +425,7 @@ async function viewResults(quiz: QuizListItem) {
   try {
     const results = await fetchQuizResultDetail(quiz.apiId);
     if (results.totalSubmissions === 0) {
-      showToast("No submissions yet for this quiz.", "info");
+      showToast(t("myQuizzes.toasts.noSubmissions"), "info");
       return;
     }
   } catch {
@@ -428,8 +461,8 @@ function copyPrivateCode(quiz: QuizListItem) {
 <template>
   <section class="my-quizzes-page">
     <PageHeader
-      title="My Quizzes"
-      description="Manage, publish, and share all your quizzes."
+      :title="t('myQuizzes.title')"
+      :description="t('myQuizzes.description')"
     />
 
     <!-- UX-5: Dashboard stats / empty-dashboard state.
@@ -441,37 +474,19 @@ function copyPrivateCode(quiz: QuizListItem) {
       :loading="isInitialLoad"
       :empty="false"
       :clickable="apiQuizzes.length > 0"
-      aria-label="Quiz dashboard stats"
-      loading-label="Loading dashboard stats"
-      empty-title="Welcome to your quiz dashboard"
-      empty-description="Your stats, including total quizzes, published count, and recent activity, will appear here once you create your first quiz."
+      :aria-label="t('myQuizzes.stats.aria')"
+      :loading-label="t('myQuizzes.stats.loading')"
+      :empty-title="t('myQuizzes.stats.emptyTitle')"
+      :empty-description="t('myQuizzes.stats.emptyDescription')"
       @item-click="handleStatClick"
     />
-
-    <div
-      v-if="!isInitialLoad && inProgressCount > 0"
-      class="publish-prompt-banner"
-      role="status"
-    >
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
-        <circle cx="12" cy="12" r="9" />
-        <path d="M12 8v8M8 12l4-4 4 4" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-      <span>
-        You have <strong>{{ inProgressCount }} {{ inProgressCount === 1 ? "quiz" : "quizzes" }}</strong> saved but not yet published.
-        Publish {{ inProgressCount === 1 ? "it" : "them" }} to make {{ inProgressCount === 1 ? "it" : "them" }} available to participants.
-      </span>
-      <button type="button" class="publish-prompt-action" @click="handleStatClick('in-progress')">
-        Review
-      </button>
-    </div>
 
     <section
       class="quiz-manager-card"
       aria-labelledby="my-quizzes-list-title"
       :aria-busy="isInitialLoad"
     >
-      <h2 id="my-quizzes-list-title" class="sr-only">My quizzes list</h2>
+      <h2 id="my-quizzes-list-title" class="sr-only">{{ t("myQuizzes.listTitle") }}</h2>
 
       <!-- Initial load: show skeleton instead of blank card area.
            Transition requires exactly one root child per branch, so each branch
@@ -481,13 +496,13 @@ function copyPrivateCode(quiz: QuizListItem) {
           v-if="isInitialLoad"
           key="skeleton"
           :count="5"
-          aria-label="Loading quizzes"
+          :aria-label="t('myQuizzes.loading')"
         />
 
         <div v-else key="content" class="quiz-manager-content">
           <AppToolbar
             v-model:search="searchQuery"
-            search-placeholder="Search quizzes..."
+            :search-placeholder="t('myQuizzes.toolbar.searchPlaceholder')"
             :filters="toolbarFilters"
             :view-mode="viewMode"
             @update:filters="onToolbarFiltersChange"
@@ -499,7 +514,7 @@ function copyPrivateCode(quiz: QuizListItem) {
             :message="quizStore.error.userMessage"
             :retryable="quizStore.error.isRetryable"
             :loading="quizStore.isLoading"
-            retry-label="Reload quizzes"
+            :retry-label="t('myQuizzes.retry')"
             @retry="retryLoadQuizzes"
           />
 
@@ -811,46 +826,6 @@ function copyPrivateCode(quiz: QuizListItem) {
   box-shadow: inset 0 0 0 1px #86e3bf;
 }
 
-
-.publish-prompt-banner {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  border-radius: 12px;
-  background: #fffbeb;
-  border: 1px solid #fcd34d;
-  color: #92400e;
-  font-size: 0.875rem;
-}
-
-.publish-prompt-banner svg {
-  width: 18px;
-  height: 18px;
-  flex-shrink: 0;
-  color: #d97706;
-}
-
-.publish-prompt-banner span {
-  flex: 1;
-}
-
-.publish-prompt-action {
-  flex-shrink: 0;
-  border: 1px solid #d97706;
-  border-radius: 8px;
-  padding: 4px 12px;
-  background: transparent;
-  color: #b45309;
-  font-size: 0.8125rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: background-color 0.15s;
-}
-
-.publish-prompt-action:hover {
-  background: #fef3c7;
-}
 
 .quiz-card-list,
 .quiz-grid {

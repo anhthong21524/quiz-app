@@ -9,6 +9,7 @@ import {
 } from "../../services/publicQuizApi";
 import QuestionNavigator from "../../components/create-quiz/QuestionNavigator.vue";
 import type { CreateQuizQuestion } from "../../components/create-quiz/types";
+import { useI18n } from "../../i18n";
 import { useQuizAttemptStore } from "../../stores/quizAttempt";
 
 type AnswerMap = Record<string, number>;
@@ -16,6 +17,7 @@ type AnswerMap = Record<string, number>;
 const route = useRoute();
 const router = useRouter();
 const attemptStore = useQuizAttemptStore();
+const { t } = useI18n();
 
 const quiz = ref<PublicQuizInfo | null>(null);
 const answers = ref<AnswerMap>({});
@@ -98,7 +100,7 @@ const remainingSeconds = computed(() => {
   return Math.max(durationSeconds - elapsedSeconds, 0);
 });
 const timeRemainingLabel = computed(() => {
-  if (remainingSeconds.value === null) return "Untimed";
+  if (remainingSeconds.value === null) return t("participant.browse.untimed");
   const minutes = Math.floor(remainingSeconds.value / 60);
   const seconds = remainingSeconds.value % 60;
   return `${minutes}:${String(seconds).padStart(2, "0")}`;
@@ -134,9 +136,9 @@ const activeProgressWidth = computed(() => `${activeProgressPercent.value}%`);
 const resultTone = computed(() => {
   if (scorePercent.value === null) {
     return {
-      label: "Submission saved",
-      title: "Submission recorded",
-      message: "Your answers have been saved. Results will be available soon.",
+      label: t("participant.take.resultsTitleSaved"),
+      title: t("participant.take.resultsTitleSaved"),
+      message: t("participant.take.resultsMessageSaved"),
       panelClass: "border-slate-200 bg-slate-50/80",
       iconClass: "bg-slate-100 text-slate-600",
       textClass: "text-slate-700",
@@ -147,9 +149,9 @@ const resultTone = computed(() => {
 
   if (scorePercent.value >= 80) {
     return {
-      label: "Excellent",
-      title: "Excellent work!",
-      message: "Review the details to reinforce what you know.",
+      label: t("participant.take.resultsLabelExcellent"),
+      title: t("participant.take.resultsTitleExcellent"),
+      message: t("participant.take.resultsMessageExcellent"),
       panelClass: "border-emerald-200 bg-emerald-50/80",
       iconClass: "bg-emerald-100 text-emerald-600",
       textClass: "text-emerald-800",
@@ -160,9 +162,9 @@ const resultTone = computed(() => {
 
   if (scorePercent.value >= 60) {
     return {
-      label: "Good progress",
-      title: "Good progress",
-      message: "Review the missed answers below to sharpen the remaining gaps.",
+      label: t("participant.take.resultsLabelGood"),
+      title: t("participant.take.resultsTitleGood"),
+      message: t("participant.take.resultsMessageGood"),
       panelClass: "border-sky-200 bg-sky-50/80",
       iconClass: "bg-sky-100 text-sky-600",
       textClass: "text-sky-800",
@@ -172,9 +174,9 @@ const resultTone = computed(() => {
   }
 
   return {
-    label: "Needs review",
+    label: t("participant.take.resultsLabelNeedsReview"),
     title: "",
-    message: "Review missed answers, then retake when you are ready.",
+    message: t("participant.take.resultsMessageNeedsReview"),
     panelClass: "border-amber-200 bg-amber-50/80",
     iconClass: "bg-amber-100 text-amber-600",
     textClass: "text-amber-800",
@@ -238,15 +240,15 @@ function getReviewOptionLabel(optionIndex: number) {
   if (!isReviewMode.value) return "";
 
   if (isCorrectOption(optionIndex) && isOptionSelected(optionIndex)) {
-    return "Your correct answer";
+    return t("participant.take.yourCorrectAnswer");
   }
 
   if (isCorrectOption(optionIndex)) {
-    return "Correct answer";
+    return t("participant.take.correctAnswer");
   }
 
   if (isOptionSelected(optionIndex)) {
-    return "Your answer";
+    return t("participant.take.yourAnswer");
   }
 
   return "";
@@ -383,24 +385,24 @@ async function loadQuiz() {
   try {
     quiz.value = await getPublicQuizBySlug(slug.value, attempt.value?.accessCode);
     if (!quiz.value) {
-      pageError.value = "We could not find this quiz. Please check the link and try again.";
+      pageError.value = t("participant.take.loadNotFound");
       return;
     }
     if (!quiz.value.isPublished) {
-      pageError.value = "This quiz is not available yet. Please contact the quiz creator.";
+      pageError.value = t("participant.take.loadUnavailable");
       return;
     }
     if (!hasActiveAttempt.value) {
-      pageError.value = "This quiz attempt has not started or has expired. Start from the quiz landing page to begin again.";
+      pageError.value = t("participant.take.attemptExpired");
       return;
     }
     if (!questions.value.length) {
-      pageError.value = "This quiz does not have any questions yet.";
+      pageError.value = t("participant.take.noQuestions");
       return;
     }
     loadSavedAnswers();
   } catch {
-    pageError.value = "Something went wrong while loading this quiz. Please try again soon.";
+    pageError.value = t("participant.take.loadFailed");
   } finally {
     isLoading.value = false;
   }
@@ -444,7 +446,11 @@ onBeforeUnmount(() => {
         <div class="min-w-0">
           <p class="truncate text-lg font-extrabold text-slate-900">{{ quiz.title }}</p>
           <p class="mt-1 text-sm font-semibold text-slate-500">
-            {{ isReviewMode ? "Review mode" : `${totalQuestions || quiz.questionCount} questions` }}
+            {{
+              isReviewMode
+                ? t("participant.take.reviewMode")
+                : t("participant.take.questionsCount", { count: totalQuestions || quiz.questionCount })
+            }}
           </p>
         </div>
 
@@ -467,7 +473,13 @@ onBeforeUnmount(() => {
             </svg>
             <div>
               <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">
-                {{ isReviewMode ? "Score" : remainingSeconds === null ? "Time limit" : "Time remaining" }}
+                {{
+                  isReviewMode
+                    ? t("participant.take.score")
+                    : remainingSeconds === null
+                      ? t("participant.take.timeLimit")
+                      : t("participant.take.timeRemaining")
+                }}
               </p>
               <p
                 class="tabular-nums leading-tight transition-colors"
@@ -478,7 +490,7 @@ onBeforeUnmount(() => {
               >
                 {{ isReviewMode
                   ? `${score !== null ? score : "-"} / ${submittedTotalQuestions}`
-                  : remainingSeconds === null ? "No time limit" : timeRemainingLabel }}
+                  : remainingSeconds === null ? t("participant.take.noTimeLimit") : timeRemainingLabel }}
               </p>
             </div>
           </div>
@@ -492,7 +504,7 @@ onBeforeUnmount(() => {
               <path d="M15 17l5-5-5-5M20 12H9" stroke-linecap="round" stroke-linejoin="round" />
               <path d="M11 19H5V5h6" stroke-linecap="round" />
             </svg>
-            {{ isReviewMode ? "Back to results" : "Exit quiz" }}
+            {{ isReviewMode ? t("participant.take.backToResults") : t("participant.take.exitQuiz") }}
           </button>
         </div>
       </header>
@@ -507,7 +519,7 @@ onBeforeUnmount(() => {
               class="h-14 w-14 animate-spin rounded-full border-4 border-emerald-100 border-t-emerald-600"
               aria-hidden="true"
             ></div>
-            <p class="text-lg font-extrabold text-slate-700">Loading quiz…</p>
+            <p class="text-lg font-extrabold text-slate-700">{{ t("participant.take.loading") }}</p>
           </div>
         </section>
 
@@ -526,14 +538,14 @@ onBeforeUnmount(() => {
                 <path d="M10.3 4.3 2.8 17.2A2 2 0 0 0 4.5 20h15a2 2 0 0 0 1.7-2.8L13.7 4.3a2 2 0 0 0-3.4 0Z" stroke-linejoin="round" />
               </svg>
             </div>
-            <h1 class="text-3xl font-extrabold tracking-normal">Quiz unavailable</h1>
+            <h1 class="text-3xl font-extrabold tracking-normal">{{ t("participant.landing.unavailableTitle") }}</h1>
             <p class="mt-3 text-base leading-7 text-slate-600">{{ pageError }}</p>
             <button
               class="mt-8 inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-600 px-6 font-bold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700"
               type="button"
               @click="exitQuiz"
             >
-              Back to quiz landing
+              {{ t("participant.browse.startQuiz") }}
             </button>
           </div>
         </section>
@@ -553,7 +565,7 @@ onBeforeUnmount(() => {
               </svg>
             </div>
             <h1 class="mt-4 text-4xl font-extrabold tracking-normal text-slate-950 sm:text-[2.65rem]">
-              Quiz submitted!
+              {{ t("participant.take.submitQuiz") }}
             </h1>
             <p class="mt-3 max-w-full whitespace-nowrap text-base font-semibold leading-6 text-slate-500 max-sm:whitespace-normal">
               {{ attempt?.takerName ? `${attempt.takerName}, your` : "Your" }} answers have been submitted successfully.
@@ -565,7 +577,7 @@ onBeforeUnmount(() => {
               aria-labelledby="submission-summary-title"
             >
               <div class="flex flex-wrap items-center justify-between gap-3">
-                <h2 id="submission-summary-title" class="text-xl font-extrabold text-slate-900">Summary</h2>
+                <h2 id="submission-summary-title" class="text-xl font-extrabold text-slate-900">{{ t("participant.take.score") }}</h2>
                 <span
                   class="inline-flex min-h-8 items-center rounded-full px-3 text-sm font-extrabold"
                   :class="resultTone.badgeClass"
@@ -582,7 +594,7 @@ onBeforeUnmount(() => {
                     </svg>
                   </span>
                   <p class="text-3xl font-extrabold leading-none text-emerald-600">{{ totalQuestions }}</p>
-                  <p class="-mt-2 text-sm font-semibold text-slate-500">Questions</p>
+                  <p class="-mt-2 text-sm font-semibold text-slate-500">{{ t("participant.browse.questions") }}</p>
                 </div>
 
                 <div class="grid justify-items-center gap-2 px-2 text-center">
@@ -593,7 +605,7 @@ onBeforeUnmount(() => {
                     </svg>
                   </span>
                   <p class="text-3xl font-extrabold leading-none text-sky-600 tabular-nums">{{ timeTakenLabel }}</p>
-                  <p class="-mt-2 text-sm font-semibold text-slate-500">Time taken</p>
+                  <p class="-mt-2 text-sm font-semibold text-slate-500">{{ t("results.detail.timeTaken") }}</p>
                 </div>
 
                 <div class="grid justify-items-center gap-2 px-2 text-center">
@@ -630,7 +642,7 @@ onBeforeUnmount(() => {
                 </h2>
                 <p class="text-sm font-semibold leading-5" :class="resultTone.textClass">
                   <span v-if="score !== null">
-                    You answered {{ score }} out of {{ submittedTotalQuestions }} questions correctly. {{ resultTone.message }}
+                    {{ t("participant.take.resultsAnsweredSummary", { score, total: submittedTotalQuestions, message: resultTone.message }) }}
                   </span>
                   <span v-else>{{ resultTone.message }}</span>
                 </p>
@@ -654,7 +666,7 @@ onBeforeUnmount(() => {
                   <path d="M9 11l2 2 4-4" stroke-linecap="round" stroke-linejoin="round" />
                   <path d="M7 4h10a2 2 0 0 1 2 2v14l-4-2-3 2-3-2-4 2V6a2 2 0 0 1 2-2Z" stroke-linejoin="round" />
                 </svg>
-                Review answers
+                {{ t("participant.take.reviewAnswers") }}
               </button>
 
               <button
@@ -666,7 +678,7 @@ onBeforeUnmount(() => {
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <path d="M4 12a8 8 0 1 0 2.3-5.7M4 4v6h6" stroke-linecap="round" stroke-linejoin="round" />
                 </svg>
-                Retake quiz
+                {{ t("participant.take.retakeQuiz") }}
               </button>
 
               <button
@@ -677,7 +689,7 @@ onBeforeUnmount(() => {
                 <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" stroke-linejoin="round" />
                 </svg>
-                Back to quizzes
+                {{ t("participant.take.backToQuizzes") }}
               </button>
             </div>
           </div>
@@ -688,11 +700,22 @@ onBeforeUnmount(() => {
           <!-- Progress bar -->
           <div class="grid gap-2">
             <div class="flex items-center justify-between gap-4 text-xs font-bold text-slate-600 sm:text-sm">
-              <span>{{ isReviewMode ? "Reviewing" : "Question" }} {{ currentQuestionIndex + 1 }} of {{ totalQuestions }}</span>
+              <span>{{
+                t("participant.take.questionProgress", {
+                  current: currentQuestionIndex + 1,
+                  total: totalQuestions
+                })
+              }}</span>
               <span>
                 {{ isReviewMode
-                  ? `${score !== null ? score : "-"} of ${submittedTotalQuestions} correct`
-                  : `${answeredCount} of ${totalQuestions} answered` }}
+                  ? t("participant.take.reviewProgress", {
+                      score: score !== null ? score : "-",
+                      total: submittedTotalQuestions
+                    })
+                  : t("participant.take.answeredProgress", {
+                      answered: answeredCount,
+                      total: totalQuestions
+                    }) }}
               </span>
             </div>
             <div
@@ -702,8 +725,14 @@ onBeforeUnmount(() => {
               aria-valuemin="0"
               aria-valuemax="100"
               :aria-label="isReviewMode
-                ? `Reviewing question ${currentQuestionIndex + 1} of ${totalQuestions}`
-                : `${answeredCount} of ${totalQuestions} questions answered`"
+                ? t('participant.take.reviewProgressAria', {
+                    current: currentQuestionIndex + 1,
+                    total: totalQuestions
+                  })
+                : t('participant.take.answeredProgressAria', {
+                    answered: answeredCount,
+                    total: totalQuestions
+                  })"
             >
               <div
                 class="h-full rounded-full bg-emerald-600 transition-all duration-300"
@@ -721,20 +750,25 @@ onBeforeUnmount(() => {
             <!-- Question card -->
             <article class="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/80 bg-white p-4 shadow-lg shadow-slate-900/8 sm:p-5 lg:p-6">
               <p class="text-sm font-extrabold uppercase tracking-widest text-emerald-600">
-                {{ isReviewMode ? "Review question" : "Question" }} {{ currentQuestionIndex + 1 }}
+                {{
+                  isReviewMode
+                    ? t("participant.take.reviewQuestion")
+                    : t("createQuiz.fields.question")
+                }}
+                {{ currentQuestionIndex + 1 }}
               </p>
               <h2 class="mt-3 text-2xl font-extrabold leading-snug tracking-normal text-slate-900">
                 {{ currentQuestion.prompt }}
               </h2>
               <p class="mt-2 text-sm text-slate-500 sm:text-base">
-                {{ isReviewMode ? "Compare your answer with the correct answer." : "Choose the correct answer." }}
+                {{ isReviewMode ? t("participant.take.compareAnswer") : t("participant.take.chooseCorrectAnswer") }}
               </p>
 
               <!-- Answer options -->
               <div
                 class="mt-4 grid gap-2.5"
                 role="radiogroup"
-                :aria-label="`Question ${currentQuestionIndex + 1} answers`"
+                :aria-label="t('participant.take.answersAria', { number: currentQuestionIndex + 1 })"
               >
                 <button
                   v-for="(option, optionIndex) in currentQuestion.options"
@@ -748,7 +782,7 @@ onBeforeUnmount(() => {
                   role="radio"
                   :disabled="isReviewMode"
                   :aria-checked="selectedOptionIndex === optionIndex"
-                  :aria-label="`Option ${optionLabel(optionIndex)}: ${option}`"
+                  :aria-label="t('participant.take.optionAria', { label: optionLabel(optionIndex), option })"
                   @click="selectAnswer(optionIndex)"
                 >
                   <span
@@ -772,7 +806,7 @@ onBeforeUnmount(() => {
               <section
                 v-if="isReviewMode && currentQuestionExplanation"
                 class="mt-4 rounded-2xl border border-sky-200 bg-sky-50/70 p-4 text-left"
-                aria-label="Answer explanation"
+                :aria-label="t('participant.take.explanationAria')"
               >
                 <div class="flex items-start gap-3">
                   <span class="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-sky-100 text-sky-700" aria-hidden="true">
@@ -783,7 +817,7 @@ onBeforeUnmount(() => {
                     </svg>
                   </span>
                   <div class="min-w-0">
-                    <h3 class="text-sm font-extrabold text-slate-900">Explanation</h3>
+                    <h3 class="text-sm font-extrabold text-slate-900">{{ t("participant.take.explanationTitle") }}</h3>
                     <p class="mt-1 text-sm font-semibold leading-6 text-slate-600">
                       {{ currentQuestionExplanation }}
                     </p>
@@ -798,13 +832,13 @@ onBeforeUnmount(() => {
                   class="inline-flex min-h-12 items-center justify-self-start gap-2 rounded-xl border border-slate-200 bg-white px-5 text-base font-extrabold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:text-slate-400 disabled:opacity-60 disabled:hover:border-slate-200 disabled:hover:bg-white"
                   type="button"
                   :disabled="answeredCount === 0"
-                  :title="answeredCount === 0 ? 'No answers to clear' : 'Clear answers'"
+                  :title="answeredCount === 0 ? t('participant.take.noAnswersToClear') : t('participant.take.clearAnswers')"
                   @click="requestClearAnswers"
                 >
                   <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                     <path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" stroke-linecap="round" stroke-linejoin="round" />
                   </svg>
-                  Clear answers
+                  {{ t("participant.take.clearAnswers") }}
                 </button>
                 <div v-else class="min-h-12" aria-hidden="true"></div>
 
@@ -818,7 +852,7 @@ onBeforeUnmount(() => {
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <path d="M19 12H5m0 0 5-5m-5 5 5 5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
-                    Previous
+                    {{ t("participant.take.previous") }}
                   </button>
 
                   <button
@@ -827,7 +861,7 @@ onBeforeUnmount(() => {
                     :disabled="currentQuestionIndex === totalQuestions - 1"
                     @click="goToNextQuestion"
                   >
-                    Next
+                    {{ t("participant.take.next") }}
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <path d="M5 12h14m0 0-5-5m5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -839,10 +873,17 @@ onBeforeUnmount(() => {
                     class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-7 text-base font-extrabold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
                     type="button"
                     :disabled="!canSubmitQuiz"
-                    :title="canSubmitQuiz ? 'Submit quiz' : `Answer ${unansweredCount} more ${unansweredCount === 1 ? 'question' : 'questions'} to submit`"
+                    :title="canSubmitQuiz
+                      ? t('participant.take.submitQuiz')
+                      : t(
+                          unansweredCount === 1
+                            ? 'participant.take.submitMoreOne'
+                            : 'participant.take.submitMoreOther',
+                          { count: unansweredCount }
+                        )"
                     @click="submitQuiz()"
                   >
-                    Submit quiz
+                    {{ t("participant.take.submitQuiz") }}
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <path d="m5 13 4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -854,7 +895,7 @@ onBeforeUnmount(() => {
                     type="button"
                     @click="returnToResults"
                   >
-                    Done reviewing
+                    {{ t("participant.take.doneReviewing") }}
                     <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                       <path d="m5 13 4 4L19 7" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
@@ -865,7 +906,14 @@ onBeforeUnmount(() => {
                 v-if="!isReviewMode && currentQuestionIndex === totalQuestions - 1 && !canSubmitQuiz"
                 class="mt-3 text-right text-sm font-semibold text-slate-500"
               >
-                Answer {{ unansweredCount }} more {{ unansweredCount === 1 ? "question" : "questions" }} to submit.
+                {{
+                  t(
+                    unansweredCount === 1
+                      ? "participant.take.submitMoreOne"
+                      : "participant.take.submitMoreOther",
+                    { count: unansweredCount }
+                  )
+                }}
               </p>
             </article>
 
@@ -909,10 +957,10 @@ onBeforeUnmount(() => {
             </span>
             <div class="min-w-0">
               <h2 id="leave-quiz-title" class="text-xl font-extrabold tracking-normal text-slate-950">
-                Leave quiz?
+                {{ t("participant.take.leaveQuizTitle") }}
               </h2>
               <p id="leave-quiz-description" class="mt-2 text-sm font-semibold leading-6 text-slate-600">
-                Your quiz has not been submitted yet. If you leave now, your current attempt may not count.
+                {{ t("participant.take.leaveQuizDescription") }}
               </p>
             </div>
           </div>
@@ -923,14 +971,14 @@ onBeforeUnmount(() => {
               type="button"
               @click="cancelLeaveQuiz"
             >
-              Stay here
+              {{ t("participant.take.stayHere") }}
             </button>
             <button
               class="inline-flex min-h-12 items-center justify-center rounded-xl bg-emerald-600 px-5 text-sm font-extrabold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2"
               type="button"
               @click="confirmLeaveQuiz"
             >
-              Leave quiz
+              {{ t("participant.take.leaveQuiz") }}
             </button>
           </div>
         </section>
@@ -962,10 +1010,10 @@ onBeforeUnmount(() => {
             </span>
             <div class="min-w-0">
               <h2 id="clear-answers-title" class="text-xl font-extrabold tracking-normal text-slate-950">
-                Clear all answers?
+                {{ t("participant.take.clearAnswersTitle") }}
               </h2>
               <p id="clear-answers-description" class="mt-2 text-sm font-semibold leading-6 text-slate-600">
-                This will remove all selected answers for this attempt. You can answer the questions again before submitting.
+                {{ t("participant.take.clearAnswersDescription") }}
               </p>
             </div>
           </div>
@@ -976,14 +1024,14 @@ onBeforeUnmount(() => {
               type="button"
               @click="cancelClearAnswers"
             >
-              Keep answers
+              {{ t("participant.take.keepAnswers") }}
             </button>
             <button
               class="inline-flex min-h-12 items-center justify-center rounded-xl bg-red-600 px-5 text-sm font-extrabold text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:ring-offset-2"
               type="button"
               @click="confirmClearAnswers"
             >
-              Clear answers
+              {{ t("participant.take.clearAnswers") }}
             </button>
           </div>
         </section>

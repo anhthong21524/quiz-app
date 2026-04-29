@@ -1,7 +1,14 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import AppPagination from "../AppPagination.vue";
 import AppTable from "../AppTable.vue";
 import type { QuizSubmission } from "../../data/quiz-submissions";
+import { useI18n } from "../../i18n";
+
+interface SelectOption {
+  label: string;
+  value: string;
+}
 
 defineProps<{
   submissions: QuizSubmission[];
@@ -14,8 +21,8 @@ defineProps<{
   showingStart: number;
   showingEnd: number;
   totalSubmissions: number;
-  scoreOptions: string[];
-  dateOptions: string[];
+  scoreOptions: Array<string | SelectOption>;
+  dateOptions: Array<string | SelectOption>;
 }>();
 
 const emit = defineEmits<{
@@ -26,13 +33,21 @@ const emit = defineEmits<{
   select: [submission: QuizSubmission];
 }>();
 
-const columns = [
+const { t } = useI18n();
+
+function normalizeOptions(options: Array<string | SelectOption>): SelectOption[] {
+  return options.map((option) =>
+    typeof option === "string" ? { label: option, value: option } : option
+  );
+}
+
+const columns = computed(() => [
   { label: "#" },
-  { label: "Participant" },
-  { label: "Score" },
-  { label: "Time taken" },
-  { label: "Submitted at" },
-];
+  { label: t("results.detail.participant") },
+  { label: t("results.detail.score") },
+  { label: t("results.detail.timeTaken") },
+  { label: t("results.detail.submittedAt") },
+]);
 
 function scoreClass(submission: QuizSubmission) {
   if (submission.scorePercent >= 80) {
@@ -55,7 +70,7 @@ function handlePageChange(page: number) {
   <div class="submission-table-wrap">
     <div class="submission-toolbar">
       <label class="toolbar-search">
-        <span class="sr-only">Search submissions</span>
+        <span class="sr-only">{{ t("results.detail.searchSubmissions") }}</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
           <circle cx="11" cy="11" r="6" />
           <path d="m16 16 4 4" stroke-linecap="round" />
@@ -63,20 +78,20 @@ function handlePageChange(page: number) {
         <input
           :value="searchQuery"
           type="search"
-          placeholder="Search by name or email..."
+          :placeholder="t('results.detail.searchSubmissionsPlaceholder')"
           @input="emit('update:searchQuery', ($event.target as HTMLInputElement).value)"
         />
       </label>
 
       <div class="toolbar-filters">
         <label class="toolbar-select">
-          <span class="sr-only">Score</span>
+          <span class="sr-only">{{ t("results.detail.scoreFilter") }}</span>
           <select
             :value="scoreFilter"
             @change="emit('update:scoreFilter', ($event.target as HTMLSelectElement).value)"
           >
-            <option v-for="option in scoreOptions" :key="option" :value="option">
-              {{ option }}
+            <option v-for="option in normalizeOptions(scoreOptions)" :key="option.value" :value="option.value">
+              {{ option.label }}
             </option>
           </select>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -85,13 +100,13 @@ function handlePageChange(page: number) {
         </label>
 
         <label class="toolbar-select">
-          <span class="sr-only">Date range</span>
+          <span class="sr-only">{{ t("results.detail.dateRange") }}</span>
           <select
             :value="dateFilter"
             @change="emit('update:dateFilter', ($event.target as HTMLSelectElement).value)"
           >
-            <option v-for="option in dateOptions" :key="option" :value="option">
-              {{ option }}
+            <option v-for="option in normalizeOptions(dateOptions)" :key="option.value" :value="option.value">
+              {{ option.label }}
             </option>
           </select>
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
@@ -108,7 +123,7 @@ function handlePageChange(page: number) {
         :class="{ 'is-selected': submission.id === selectedSubmissionId }"
         tabindex="0"
         role="button"
-        :aria-label="`View ${submission.participantName} submission detail`"
+        :aria-label="`${t('results.detail.submissionDetailTab')}: ${submission.participantName}`"
         @click="emit('select', submission)"
         @keydown.enter.prevent="emit('select', submission)"
         @keydown.space.prevent="emit('select', submission)"
@@ -146,15 +161,15 @@ function handlePageChange(page: number) {
           <path d="M5 19V5M5 19h14M9 16v-5M13 16V8M17 16v-3" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </span>
-      <h3>No submissions match these filters</h3>
-      <p>Adjust the search, score, or date filter to find participants.</p>
+      <h3>{{ t("results.detail.emptySubmissionsTitle") }}</h3>
+      <p>{{ t("results.detail.emptySubmissionsDescription") }}</p>
     </div>
 
     <AppPagination
       :current-page="currentPage"
       :total-pages="pageCount"
-      :showing-copy="`Showing ${showingStart} to ${showingEnd} of ${totalSubmissions} submissions`"
-      aria-label="Submission pagination"
+      :showing-copy="t('results.detail.submissionPagination', { start: showingStart, end: showingEnd, total: totalSubmissions })"
+      :aria-label="t('results.detail.submissionPaginationAria')"
       @update:current-page="handlePageChange"
     />
   </div>

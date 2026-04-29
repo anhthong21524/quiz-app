@@ -84,10 +84,10 @@ export class MongoUserRepository implements UserRepository, OnModuleDestroy {
     return {
       id: String(doc._id),
       email: doc.email,
-      passwordHash: doc.passwordHash,
-      passwordSalt: doc.passwordSalt,
-      googleSub: doc.googleSub,
-      avatarUrl: doc.avatarUrl
+      passwordHash: doc.passwordHash ?? undefined,
+      passwordSalt: doc.passwordSalt ?? undefined,
+      googleSub: doc.googleSub ?? undefined,
+      avatarUrl: doc.avatarUrl ?? undefined
     };
   }
 }

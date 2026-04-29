@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "../i18n";
 
 const props = withDefaults(defineProps<{
   value?: string | null;
@@ -8,6 +9,8 @@ const props = withDefaults(defineProps<{
   value: "",
   fallback: "-"
 });
+
+const { formatDateTime } = useI18n();
 
 const formattedValue = computed(() => {
   if (!props.value) {
@@ -19,13 +22,13 @@ const formattedValue = computed(() => {
     return props.fallback;
   }
 
-  return new Intl.DateTimeFormat(undefined, {
+  return formatDateTime(date, {
     month: "short",
     day: "numeric",
     year: "numeric",
     hour: "numeric",
     minute: "2-digit"
-  }).format(date);
+  });
 });
 
 const machineValue = computed(() => {

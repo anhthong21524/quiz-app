@@ -5,6 +5,7 @@ import QuizIconAvatar from "./QuizIconAvatar.vue";
 import QuizRowActions from "./QuizRowActions.vue";
 import QuizStatusBadge from "./QuizStatusBadge.vue";
 import type { QuizListItem } from "./types";
+import { useI18n } from "../../i18n";
 
 const props = withDefaults(defineProps<{
   quizzes: QuizListItem[];
@@ -32,15 +33,17 @@ const emit = defineEmits<{
   "row-click": [quiz: QuizListItem];
 }>();
 
-const COLUMNS = [
-  { label: "#",            class: "col-num" },
-  { label: "Quiz title",   key: "title" },
-  { label: "Subject",      key: "subject" },
-  { label: "Questions",    key: "questions" },
-  { label: "Status",       key: "status" },
-  { label: "Last updated", key: "lastUpdated" },
-  { label: "Actions",      class: "col-actions" },
-];
+const { t } = useI18n();
+
+const columns = computed(() => [
+  { label: "#", class: "col-num" },
+  { label: t("dashboard.recent.columns.quizTitle"), key: "title" },
+  { label: t("dashboard.recent.columns.subject"), key: "subject" },
+  { label: t("dashboard.recent.columns.questions"), key: "questions" },
+  { label: t("dashboard.recent.columns.status"), key: "status" },
+  { label: t("dashboard.recent.columns.lastUpdated"), key: "lastUpdated" },
+  { label: t("myQuizzes.table.actions"), class: "col-actions" }
+]);
 
 const paddedRows = computed<(QuizListItem | null)[]>(() => {
   const rows: (QuizListItem | null)[] = [...props.quizzes.slice(0, props.pageSize)];
@@ -52,7 +55,7 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
 <template>
   <div class="quiz-table-shell">
     <AppTable
-      :columns="COLUMNS"
+      :columns="columns"
       min-width="1100px"
       first-column-variant="index"
       sorting-enabled
@@ -75,13 +78,13 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
               <span
                 v-if="quiz.isPrivate"
                 class="ml-1 inline-flex items-center gap-1 rounded-full bg-amber-100 px-2 py-0.5 text-xs font-bold text-amber-700"
-                title="Private quiz â€” requires access code"
+                :title="t('myQuizzes.table.privateQuizHint')"
               >
                 <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
                   <rect x="3" y="11" width="18" height="11" rx="2" stroke-linejoin="round" />
                   <path d="M7 11V7a5 5 0 0 1 10 0v4" stroke-linecap="round" />
                 </svg>
-                Private
+                {{ t("createQuiz.fields.privateQuiz") }}
               </span>
             </div>
           </td>

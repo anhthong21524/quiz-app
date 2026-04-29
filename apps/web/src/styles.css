@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@custom-variant dark (&:where(.public-theme-dark, .public-theme-dark *));
 
 :root {
   --page-max-width: 1180px;
@@ -94,6 +95,12 @@ button {
   background: #ffffff;
 }
 
+.app-shell.public-shell.public-theme-dark {
+  background:
+    radial-gradient(circle at top center, rgba(15, 23, 42, 0.35), transparent 42%),
+    linear-gradient(180deg, #020617 0%, #0f172a 100%);
+}
+
 .app-shell.quiz-taking-shell {
   height: 100vh;
   min-height: 100vh;
@@ -114,6 +121,12 @@ button {
   max-width: none;
 }
 
+.app-shell.public-shell.public-theme-dark .app-footer.public-footer {
+  border-top-color: #1e293b;
+  background: rgba(2, 6, 23, 0.96);
+  color: #94a3b8;
+}
+
 .app-footer.quiz-taking-footer {
   font-size: 0.8rem;
   line-height: 1;
@@ -128,6 +141,11 @@ button {
   border-bottom: 1px solid #eef2f7;
   background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(14px);
+}
+
+.app-shell.public-shell.public-theme-dark .public-header {
+  border-bottom-color: #1e293b;
+  background: rgba(2, 6, 23, 0.9);
 }
 
 .public-header-inner {
@@ -170,6 +188,10 @@ button {
   white-space: nowrap;
 }
 
+.app-shell.public-shell.public-theme-dark .public-brand-name {
+  color: #f8fafc;
+}
+
 .public-nav {
   display: flex;
   justify-content: center;
@@ -184,6 +206,10 @@ button {
   color: #0f172a;
   font-weight: 700;
   transition: color 0.2s ease;
+}
+
+.app-shell.public-shell.public-theme-dark .public-nav-link {
+  color: #cbd5e1;
 }
 
 .public-nav-link:hover,
@@ -249,6 +275,24 @@ button {
   background: #ecfdf5;
   color: #059669;
   transform: translateY(-1px);
+}
+
+.app-shell.public-shell.public-theme-dark .public-icon-button,
+.app-shell.public-shell.public-theme-dark .public-login-button,
+.app-shell.public-shell.public-theme-dark .public-mobile-menu-button,
+.app-shell.public-shell.public-theme-dark .header-locale-select {
+  border-color: #334155;
+  background: #0f172a;
+  color: #e2e8f0;
+}
+
+.app-shell.public-shell.public-theme-dark .public-icon-button:hover,
+.app-shell.public-shell.public-theme-dark .public-login-button:hover,
+.app-shell.public-shell.public-theme-dark .public-mobile-menu-button:hover,
+.app-shell.public-shell.public-theme-dark .public-icon-button.is-active {
+  border-color: #059669;
+  background: #052e2b;
+  color: #6ee7b7;
 }
 
 .public-icon-button svg,
@@ -583,6 +627,10 @@ button {
   color: #667287;
 }
 
+.app-shell.public-shell.public-theme-dark .app-footer-copy {
+  color: #94a3b8;
+}
+
 
 .section-title,
 .eyebrow {
@@ -901,6 +949,20 @@ button {
   color: #20324a;
   font-size: 0.82rem;
   font-weight: 700;
+}
+
+.app-shell.public-shell.public-theme-dark .public-mobile-nav-panel {
+  border-top-color: #1e293b;
+}
+
+.app-shell.public-shell.public-theme-dark .public-mobile-nav-link {
+  color: #cbd5e1;
+}
+
+.app-shell.public-shell.public-theme-dark .public-mobile-nav-link:hover,
+.app-shell.public-shell.public-theme-dark .public-mobile-nav-link.is-active {
+  background: #052e2b;
+  color: #6ee7b7;
 }
 
 .header-locale-select:focus-visible {

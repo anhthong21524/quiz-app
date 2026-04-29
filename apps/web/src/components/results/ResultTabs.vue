@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from "../../i18n";
+
 interface ResultTabItem {
   id: string;
   label: string;
@@ -14,10 +16,12 @@ defineProps<{
 const emit = defineEmits<{
   select: [tabId: string];
 }>();
+
+const { t } = useI18n();
 </script>
 
 <template>
-  <div class="result-tabs" role="tablist" aria-label="Result views">
+  <div class="result-tabs" role="tablist" :aria-label="t('results.overview.resultSummary')">
     <button
       v-for="tab in tabs"
       :key="tab.id"

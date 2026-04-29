@@ -1,7 +1,9 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import AppPagination from "../AppPagination.vue";
 import AppTable from "../AppTable.vue";
 import type { QuizPerformanceResult } from "../../data/quiz-results";
+import { useI18n } from "../../i18n";
 import ResultQuizIcon from "./ResultQuizIcon.vue";
 import QuizPerformanceGrid from "./QuizPerformanceGrid.vue";
 
@@ -25,14 +27,16 @@ const emit = defineEmits<{
   export: [];
 }>();
 
-const columns = [
-  { label: "No.", class: "col-num" },
-  { label: "Quiz", class: "col-quiz", key: "title" },
-  { label: "Subject", class: "col-subject", key: "subject" },
-  { label: "Submissions", class: "col-submissions", key: "submissions" },
-  { label: "Average score", class: "col-score", key: "averageScore" },
+const { t } = useI18n();
+
+const columns = computed(() => [
+  { label: t("results.overview.no"), class: "col-num" },
+  { label: t("results.overview.quiz"), class: "col-quiz", key: "title" },
+  { label: t("results.overview.subject"), class: "col-subject", key: "subject" },
+  { label: t("results.overview.submissions"), class: "col-submissions", key: "submissions" },
+  { label: t("results.overview.averageScoreLabel"), class: "col-score", key: "averageScore" },
   { label: "", class: "col-arrow" },
-];
+]);
 
 const SKELETON_COUNT = 6;
 
@@ -70,13 +74,13 @@ function handlePageChange(page: number) {
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
           <path d="M12 4v10M8 10l4 4 4-4M5 20h14" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        Export CSV
+        {{ t("results.overview.exportCsv") }}
       </button>
     </header>
 
     <slot name="toolbar" />
 
-    <div v-if="loading" class="table-skeleton" aria-busy="true" aria-label="Loading quiz results">
+    <div v-if="loading" class="table-skeleton" aria-busy="true" :aria-label="t('results.overview.loadingTable')">
       <div v-for="i in SKELETON_COUNT" :key="i" class="skeleton-row">
         <div class="skeleton-cell skeleton-cell--narrow" />
         <div class="skeleton-cell skeleton-cell--wide" />
@@ -103,7 +107,7 @@ function handlePageChange(page: number) {
           :key="quiz.id"
           class="clickable-row"
           tabindex="0"
-          :aria-label="`View submissions for ${quiz.title}`"
+          :aria-label="t('results.overview.rowAria', { title: quiz.title })"
           @click="emit('view', quiz)"
           @keydown.enter.prevent="emit('view', quiz)"
           @keydown.space.prevent="emit('view', quiz)"
@@ -135,9 +139,9 @@ function handlePageChange(page: number) {
       />
 
       <div v-if="viewMode === 'list'" class="score-legend">
-        <span class="legend-dot legend-dot--high" />≥ 80%
-        <span class="legend-dot legend-dot--mid" />70–79%
-        <span class="legend-dot legend-dot--low" />&lt; 70%
+        <span class="legend-dot legend-dot--high" />{{ t("results.overview.scoreLegendHigh") }}
+        <span class="legend-dot legend-dot--mid" />{{ t("results.overview.scoreLegendMid") }}
+        <span class="legend-dot legend-dot--low" />{{ t("results.overview.scoreLegendLow") }}
       </div>
     </template>
 
@@ -147,15 +151,15 @@ function handlePageChange(page: number) {
           <path d="M5 19V5M5 19h14M9 16v-5M13 16V8M17 16v-3" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
       </span>
-      <h3>No quizzes match these filters</h3>
-      <p>Adjust the search, subject, or date filter to see quiz performance.</p>
+      <h3>{{ t("results.overview.emptyTitle") }}</h3>
+      <p>{{ t("results.overview.emptyDescription") }}</p>
     </div>
 
     <AppPagination
       :current-page="currentPage"
       :total-pages="pageCount"
-      :showing-copy="`Showing ${showingStart} to ${showingEnd} of ${totalQuizzes} quizzes`"
-      aria-label="Quiz performance pagination"
+      :showing-copy="t('results.overview.pagination', { start: showingStart, end: showingEnd, total: totalQuizzes })"
+      :aria-label="t('results.overview.paginationAria')"
       @update:current-page="handlePageChange"
     />
   </section>

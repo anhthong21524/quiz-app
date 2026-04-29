@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
 import type { MyQuizStatus } from "./types";
+import { useI18n } from "../../i18n";
 
 const props = defineProps<{
   title: string;
@@ -19,6 +20,8 @@ const emit = defineEmits<{
   share: [];
   copyCode: [];
 }>();
+
+const { t } = useI18n();
 
 const menuOpen = ref(false);
 const menuRef = ref<HTMLElement | null>(null);
@@ -76,14 +79,20 @@ onBeforeUnmount(() => {
 
 <template>
   <div class="row-actions">
-    <button v-if="status !== 'In progress'" class="icon-button" type="button" :aria-label="isPublished() ? `Preview ${title}` : `View ${title}`" @click="emit('view')">
+    <button
+      v-if="status !== 'In progress'"
+      class="icon-button"
+      type="button"
+      :aria-label="isPublished() ? t('myQuizzes.rowActions.previewQuiz', { title }) : t('myQuizzes.rowActions.viewQuiz', { title })"
+      @click="emit('view')"
+    >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" stroke-linejoin="round" />
         <circle cx="12" cy="12" r="2.5" />
       </svg>
     </button>
 
-    <button class="icon-button" type="button" :aria-label="`Edit ${title}`" @click="emit('edit')">
+    <button class="icon-button" type="button" :aria-label="t('myQuizzes.rowActions.editQuiz', { title })" @click="emit('edit')">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
         <path d="m5 19 3.8-.8 9-9a2.1 2.1 0 0 0-3-3l-9 9L5 19Z" stroke-linejoin="round" />
         <path d="m13.5 7.5 3 3" stroke-linecap="round" />
@@ -95,7 +104,7 @@ onBeforeUnmount(() => {
       v-if="isApiQuiz && isPublished() && !isPrivate"
       class="icon-button"
       type="button"
-      :aria-label="`Share ${title}`"
+      :aria-label="t('myQuizzes.rowActions.shareQuiz', { title })"
       @click="emit('share')"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -111,7 +120,7 @@ onBeforeUnmount(() => {
       v-if="isApiQuiz && isPublished() && isPrivate"
       class="icon-button icon-button--amber"
       type="button"
-      :aria-label="`Copy access code for ${title}`"
+      :aria-label="t('myQuizzes.rowActions.copyAccessCode', { title })"
       @click="emit('copyCode')"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -125,7 +134,7 @@ onBeforeUnmount(() => {
         ref="triggerRef"
         class="icon-button"
         type="button"
-        :aria-label="`More options for ${title}`"
+        :aria-label="t('myQuizzes.rowActions.moreOptions', { title })"
         :aria-expanded="menuOpen"
         @click="toggleMenu"
       >
@@ -149,7 +158,7 @@ onBeforeUnmount(() => {
               <circle cx="12" cy="12" r="9" />
               <path d="M9 12h6" stroke-linecap="round" />
             </svg>
-            Unpublish
+            {{ t("myQuizzes.actions.unpublishConfirm") }}
           </button>
         </template>
 
@@ -160,7 +169,7 @@ onBeforeUnmount(() => {
               <circle cx="12" cy="12" r="9" />
               <path d="M12 8v8M8 12l4-4 4 4" stroke-linecap="round" stroke-linejoin="round" />
             </svg>
-            Publish
+            {{ t("myQuizzes.actions.publishConfirm") }}
           </button>
         </template>
 
@@ -171,14 +180,14 @@ onBeforeUnmount(() => {
             <rect x="9" y="9" width="13" height="13" rx="2" />
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
           </svg>
-          Duplicate
+          {{ t("myQuizzes.rowActions.duplicateQuiz") }}
         </button>
 
         <button class="menu-item menu-item--red" type="button" role="menuitem" @click="action(() => emit('delete'))">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
             <path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
-          Delete
+          {{ t("myQuizzes.actions.deleteConfirm") }}
         </button>
       </div>
     </div>

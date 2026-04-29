@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
+import { useTheme } from "../../composables/useTheme";
 import SettingsPageLayout from "../../components/settings/SettingsPageLayout.vue";
 import { useI18n } from "../../i18n";
 import { useAuthStore } from "../../stores/auth";
@@ -12,6 +13,7 @@ type ProfileDetail = {
 
 const authStore = useAuthStore();
 const { locale, t } = useI18n();
+const { theme } = useTheme();
 const avatarInput = ref<HTMLInputElement | null>(null);
 const avatarError = ref("");
 const avatarUploading = ref(false);
@@ -35,7 +37,7 @@ const profile = computed(() => ({
   email: authStore.user?.email?.trim() || t("settings.profile.notAvailable"),
   language: locale.value === "vi" ? t("common.locale.vi") : t("common.locale.en"),
   timezone: t("settings.profile.timezoneValue"),
-  preferredTheme: t("common.theme.light")
+  preferredTheme: theme.value === "dark" ? t("common.theme.dark") : t("common.theme.light")
 }));
 
 const profileDetails = computed<ProfileDetail[]>(() => [

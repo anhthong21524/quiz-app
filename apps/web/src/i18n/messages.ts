@@ -17,7 +17,8 @@ export const messages = {
         vi: "Vietnamese"
       },
       theme: {
-        light: "Light"
+        light: "Light",
+        dark: "Dark"
       }
     },
     footer: {
@@ -45,7 +46,9 @@ export const messages = {
       managementHomeTitle: "Go to management home",
       managementHomeAria: "Quiz App go to management home",
       openAccountMenu: "Open account menu",
-      greeting: "Hi {name}"
+      greeting: "Hi {name}",
+      switchToDarkTheme: "Switch to dark theme",
+      switchToLightTheme: "Switch to light theme"
     },
     seo: {
       defaults: {
@@ -429,6 +432,23 @@ export const messages = {
         inProgress: "In progress",
         unpublished: "Unpublished"
       },
+      table: {
+        actions: "Actions",
+        privateQuizHint: "Private quiz - requires access code",
+        notSavedYet: "Not saved yet"
+      },
+      grid: {
+        summary: "{subject} - {count} questions"
+      },
+      rowActions: {
+        previewQuiz: "Preview {title}",
+        viewQuiz: "View {title}",
+        editQuiz: "Edit {title}",
+        shareQuiz: "Share {title}",
+        copyAccessCode: "Copy access code for {title}",
+        moreOptions: "More options for {title}",
+        duplicateQuiz: "Duplicate"
+      },
       actions: {
         publishTitle: "Publish quiz",
         publishMessage: "\"{title}\" will become publicly visible. Are you sure you want to publish?",
@@ -578,6 +598,320 @@ export const messages = {
           "We could not update your password. Please check your current password and try again."
       }
     },
+    createQuiz: {
+      steps: {
+        configuration: "Configuration",
+        questions: "Questions"
+      },
+      titles: {
+        view: "View quiz",
+        edit: "Edit quiz",
+        create: "Create new quiz"
+      },
+      intros: {
+        readOnlyConfiguration: "This quiz is published. Configuration is view-only.",
+        readOnlyQuestions: "This quiz is published. Questions are view-only.",
+        editConfiguration: "Review the quiz details before updating questions.",
+        createConfiguration: "Set up the basic details for your quiz before adding questions.",
+        editQuestions: "Update and organize your questions before saving changes.",
+        createQuestions: "Write and organize your questions before saving the quiz."
+      },
+      readOnly: {
+        reloadQuiz: "Reload quiz",
+        backToMyQuizzes: "Back to My Quizzes",
+        banner:
+          "This quiz is published and is in view-only mode. Unpublish it from My Quizzes to make changes.",
+        unpublishToEdit: "Unpublish this quiz to make configuration changes.",
+        viewQuestions: "View questions"
+      },
+      validation: {
+        titleRequired: "Quiz title is required.",
+        descriptionMax: "Description must be 500 characters or fewer.",
+        subjectRequired: "Subject is required.",
+        questionCountRange: "Number of questions must be between 1 and 50.",
+        timeLimitRange: "Time limit must be between 1 and 180 minutes.",
+        questionIncomplete:
+          "Add question text, at least two answer options, and at least one correct answer before continuing."
+      },
+      toasts: {
+        configurationSaved: "Configuration saved",
+        quizUpdated: "Quiz updated successfully",
+        quizSaved: "Quiz saved successfully"
+      },
+      fields: {
+        basicInformation: "Basic information",
+        title: "Quiz title",
+        titlePlaceholder: "e.g. Mathematics Quiz #1",
+        description: "Quiz description",
+        descriptionPlaceholder: "Describe what learners will practice in this quiz.",
+        noDescription: "No description.",
+        subject: "Subject / Domain",
+        subjectPlaceholder: "Select a subject",
+        setup: "Quiz setup",
+        numberOfQuestions: "Number of questions",
+        timeLimit: "Time limit",
+        unlimited: "Unlimited",
+        setTimeLimit: "Set time limit",
+        timeLimitMinutes: "Time limit minutes",
+        minutes: "minutes",
+        difficulty: "Difficulty level",
+        privateQuiz: "Private quiz",
+        privateHint: "Hidden. Requires an access code.",
+        accessCode: "Code:",
+        showSummary: "Show summary",
+        allowAnswerReview: "Allow answer review",
+        allowRetake: "Allow retake",
+        question: "Question",
+        questionPlaceholder: "Write your question here...",
+        answerOptions: "Answer options",
+        multipleCorrectAnswers: "Multiple correct answers",
+        addOption: "Add option",
+        explanation: "Explanation",
+        explanationOptional: "(optional)",
+        explanationPlaceholder: "Explain why the correct answer is right...",
+        noExplanation: "No explanation provided."
+      },
+      defaults: {
+        title: "Quiz 1"
+      },
+      difficulty: {
+        easy: "Easy",
+        medium: "Medium",
+        hard: "Hard"
+      },
+      states: {
+        on: "On",
+        off: "Off"
+      },
+      actions: {
+        backToConfiguration: "Back to configuration",
+        saveConfiguration: "Save configuration",
+        saveContinue: "Save & continue",
+        saving: "Saving...",
+        nextQuestion: "Next question",
+        updateQuiz: "Update quiz",
+        saveQuiz: "Save quiz"
+      },
+      helper: {
+        tip: "Tip",
+        editTip: "Save configuration to apply changes without editing questions.",
+        createTip: "Settings are saved automatically when you proceed."
+      },
+      navigator: {
+        completeSummary: "{completed} of {total} complete",
+        remainingOne: "1 question left to complete.",
+        remainingOther: "{count} questions left to complete.",
+        allComplete: "All questions complete - ready to save!",
+        statusCompleted: "completed",
+        statusInProgress: "in progress",
+        statusEmpty: "empty"
+      }
+    },
+    participant: {
+      browse: {
+        countOne: "1 public quiz",
+        countOther: "{count} public quizzes",
+        matchOne: "1 match",
+        matchOther: "{count} matches",
+        showing: "Showing {shown} of {total}",
+        emptySearchTitle: "No quizzes match your search",
+        emptySearchDescription: "Try another title, topic, or question count.",
+        emptyTitle: "No public quizzes yet",
+        emptyDescription: "Published quizzes will appear here when they are available.",
+        loadError: "We could not load public quizzes. Please try again soon.",
+        headerEyebrow: "Public quizzes",
+        headerTitle: "Choose a quiz to start",
+        headerDescription:
+          "Browse available quizzes that are open to everyone. Pick one, enter your name, and begin.",
+        privateTitle: "Have a private quiz code?",
+        privateDescription: "Enter your access code to unlock a private quiz.",
+        enterCode: "Enter code",
+        searchLabel: "Search quizzes",
+        searchPlaceholder: "Search by title, topic, or question count",
+        sortLabel: "Sort by",
+        sortDefault: "Default",
+        sortTitleAsc: "Title A to Z",
+        sortTitleDesc: "Title Z to A",
+        sortQuestionsDesc: "Most questions",
+        sortQuestionsAsc: "Fewest questions",
+        loading: "Loading public quizzes...",
+        retry: "Try again",
+        gridAria: "Public quizzes",
+        defaultDescription: "A public Quiz App quiz ready to take.",
+        questions: "Questions",
+        time: "Time",
+        untimed: "Untimed",
+        timeMinutes: "{count} min",
+        startQuiz: "Start quiz",
+        loadMore: "Load more"
+      },
+      landing: {
+        loadNotFound: "We could not find this quiz. Please check the link and try again.",
+        loadUnavailable: "This quiz is not available yet. Please contact the quiz creator.",
+        loadFailed: "Something went wrong while loading this quiz. Please try again soon.",
+        nameRequired: "Please enter your name before starting the quiz.",
+        loading: "Loading quiz...",
+        unavailableTitle: "Quiz unavailable",
+        questions: "{count} Questions",
+        questionType: "Multiple choice",
+        estimatedTime: "Estimated time",
+        unlimited: "Unlimited",
+        minutes: "{count} Minutes",
+        answerType: "One correct answer",
+        yourName: "Your name",
+        yourNameHint: "Please enter your name. It will be shown on your result.",
+        yourNamePlaceholder: "Enter your full name",
+        starting: "Starting...",
+        startQuiz: "Start quiz"
+      },
+      take: {
+        loadNotFound: "We could not find this quiz. Please check the link and try again.",
+        loadUnavailable: "This quiz is not available yet. Please contact the quiz creator.",
+        attemptExpired:
+          "This quiz attempt has not started or has expired. Start from the quiz landing page to begin again.",
+        noQuestions: "This quiz does not have any questions yet.",
+        loadFailed: "Something went wrong while loading this quiz. Please try again soon.",
+        reviewMode: "Review mode",
+        questionsCount: "{count} questions",
+        score: "Score",
+        timeLimit: "Time limit",
+        timeRemaining: "Time remaining",
+        noTimeLimit: "No time limit",
+        exitQuiz: "Exit quiz",
+        backToResults: "Back to results",
+        loading: "Loading quiz...",
+        unavailableTitle: "Quiz unavailable",
+        resultsTitleSaved: "Submission recorded",
+        resultsMessageSaved: "Your answers have been saved. Results will be available soon.",
+        resultsLabelExcellent: "Excellent",
+        resultsTitleExcellent: "Excellent work!",
+        resultsMessageExcellent: "Review the details to reinforce what you know.",
+        resultsLabelGood: "Good progress",
+        resultsTitleGood: "Good progress",
+        resultsMessageGood: "Review the missed answers below to sharpen the remaining gaps.",
+        resultsLabelNeedsReview: "Needs review",
+        resultsMessageNeedsReview: "Review missed answers, then retake when you are ready.",
+        resultsAnsweredSummary:
+          "You answered {score} out of {total} questions correctly. {message}",
+        reviewAnswers: "Review answers",
+        retakeQuiz: "Retake quiz",
+        backToQuizzes: "Back to quizzes",
+        reviewing: "Reviewing",
+        questionProgress: "Question {current} of {total}",
+        reviewProgress: "{score} of {total} correct",
+        answeredProgress: "{answered} of {total} answered",
+        reviewProgressAria: "Reviewing question {current} of {total}",
+        answeredProgressAria: "{answered} of {total} questions answered",
+        reviewQuestion: "Review question",
+        chooseCorrectAnswer: "Choose the correct answer.",
+        compareAnswer: "Compare your answer with the correct answer.",
+        answersAria: "Question {number} answers",
+        optionAria: "Option {label}: {option}",
+        explanationTitle: "Explanation",
+        explanationAria: "Answer explanation",
+        clearAnswers: "Clear answers",
+        noAnswersToClear: "No answers to clear",
+        previous: "Previous",
+        next: "Next",
+        submitQuiz: "Submit quiz",
+        submitMoreOne: "Answer 1 more question to submit",
+        submitMoreOther: "Answer {count} more questions to submit",
+        doneReviewing: "Done reviewing",
+        leaveQuizTitle: "Leave quiz?",
+        leaveQuizDescription:
+          "Your quiz has not been submitted yet. If you leave now, your current attempt may not count.",
+        stayHere: "Stay here",
+        leaveQuiz: "Leave quiz",
+        clearAnswersTitle: "Clear all answers?",
+        clearAnswersDescription:
+          "This will remove all selected answers for this attempt. You can answer the questions again before submitting.",
+        keepAnswers: "Keep answers",
+        yourCorrectAnswer: "Your correct answer",
+        correctAnswer: "Correct answer",
+        yourAnswer: "Your answer"
+      }
+    },
+    results: {
+      overview: {
+        pageTitle: "Quiz Results",
+        pageDescription: "View and analyze results for all quizzes.",
+        loadError: "Could not load results. Please refresh the page or try again later.",
+        totalQuizzes: "Total quizzes",
+        submissions: "Submissions",
+        averageScore: "Avg score",
+        resultSummary: "Result summary",
+        loadingSummary: "Loading result summary",
+        filterBySubject: "Filter by subject",
+        filterByDate: "Filter by date range",
+        allSubjects: "All subjects",
+        allTime: "All time",
+        today: "Today",
+        last7Days: "Last 7 days",
+        last30Days: "Last 30 days",
+        exportCsv: "Export CSV",
+        emptyTitle: "No quizzes match these filters",
+        emptyDescription: "Adjust the search, subject, or date filter to see quiz performance.",
+        pagination: "Showing {start} to {end} of {total} quizzes",
+        paginationAria: "Quiz performance pagination",
+        loadingTable: "Loading quiz results",
+        rowAria: "View submissions for {title}",
+        recentSubmissions: "Recent submissions",
+        viewAll: "View all",
+        searchPlaceholder: "Search quizzes...",
+        defaultCsvName: "quiz-results.csv",
+        quiz: "Quiz",
+        subject: "Subject",
+        no: "No.",
+        averageScoreLabel: "Average score",
+        scoreLegendHigh: ">= 80%",
+        scoreLegendMid: "70-79%",
+        scoreLegendLow: "< 70%"
+      },
+      detail: {
+        submissionsTab: "Submissions",
+        submissionDetailTab: "Submission detail",
+        loading: "Loading...",
+        backToResults: "Back to Quiz Results",
+        loadErrorTitle: "Could not load quiz results",
+        loadErrorDescription: "Something went wrong while fetching this quiz. Please try again later.",
+        breadcrumb: "Breadcrumb",
+        exportCsv: "Export CSV",
+        resultSummary: "Result summary",
+        totalSubmissions: "Total submissions",
+        averageScore: "Average score",
+        averageTime: "Average time",
+        submissionsTitle: "Quiz submissions",
+        selectSubmissionTitle: "Select a submission",
+        selectSubmissionDescription: "Open the submissions tab to review participant details.",
+        notFoundTitle: "Quiz result not found",
+        notFoundDescription: "This quiz does not exist or you do not have access to it.",
+        participant: "Participant",
+        timeTaken: "Time taken",
+        submittedAt: "Submitted at",
+        score: "Score",
+        searchSubmissions: "Search submissions",
+        searchSubmissionsPlaceholder: "Search by name or email...",
+        allScores: "All scores",
+        scoreFilter: "Score",
+        dateRange: "Date range",
+        emptySubmissionsTitle: "No submissions match these filters",
+        emptySubmissionsDescription: "Adjust the search, score, or date filter to find participants.",
+        submissionPagination: "Showing {start} to {end} of {total} submissions",
+        submissionPaginationAria: "Submission pagination",
+        submissionDetailAria: "Submission detail",
+        submissionStatsAria: "Submission stats",
+        answersReview: "Answers review",
+        correctCount: "{count} correct",
+        incorrectCount: "{count} incorrect",
+        answerPagination: "Showing {start} to {end} of {total} answers",
+        answerPaginationAria: "Answer review pagination",
+        answerCorrect: "Correct",
+        answerIncorrect: "Incorrect",
+        hideOptions: "Hide options",
+        moreOptionsOne: "1 more option",
+        moreOptionsOther: "{count} more options"
+      }
+    },
     modals: {
       shareQuiz: "Share quiz",
       privateAccessCode: "Private access code",
@@ -606,7 +940,8 @@ export const messages = {
         vi: "Tiếng Việt"
       },
       theme: {
-        light: "Sáng"
+        light: "Sáng",
+        dark: "Tối"
       }
     },
     footer: {
@@ -634,7 +969,9 @@ export const messages = {
       managementHomeTitle: "Đi đến trang quản lý",
       managementHomeAria: "Quiz App đi đến trang quản lý",
       openAccountMenu: "Mở menu tài khoản",
-      greeting: "Xin chào {name}"
+      greeting: "Xin chào {name}",
+      switchToDarkTheme: "Chuyển sang giao diện tối",
+      switchToLightTheme: "Chuyển sang giao diện sáng"
     },
     seo: {
       defaults: {
@@ -1019,6 +1356,23 @@ export const messages = {
         inProgress: "Đang soạn",
         unpublished: "Chưa xuất bản"
       },
+      table: {
+        actions: "Thao tác",
+        privateQuizHint: "Quiz riêng tư - cần mã truy cập",
+        notSavedYet: "Chưa lưu"
+      },
+      grid: {
+        summary: "{subject} - {count} câu hỏi"
+      },
+      rowActions: {
+        previewQuiz: "Xem trước {title}",
+        viewQuiz: "Xem {title}",
+        editQuiz: "Sửa {title}",
+        shareQuiz: "Chia sẻ {title}",
+        copyAccessCode: "Sao chép mã truy cập cho {title}",
+        moreOptions: "Thêm tùy chọn cho {title}",
+        duplicateQuiz: "Nhân bản"
+      },
       actions: {
         publishTitle: "Xuất bản quiz",
         publishMessage:
@@ -1167,6 +1521,319 @@ export const messages = {
         updating: "Đang cập nhật...",
         updateFailed:
           "Chúng tôi không thể cập nhật mật khẩu. Vui lòng kiểm tra mật khẩu hiện tại và thử lại."
+      }
+    },
+    createQuiz: {
+      steps: {
+        configuration: "Cấu hình",
+        questions: "Câu hỏi"
+      },
+      titles: {
+        view: "Xem quiz",
+        edit: "Chỉnh sửa quiz",
+        create: "Tạo quiz mới"
+      },
+      intros: {
+        readOnlyConfiguration: "Quiz này đã được xuất bản. Phần cấu hình chỉ có thể xem.",
+        readOnlyQuestions: "Quiz này đã được xuất bản. Phần câu hỏi chỉ có thể xem.",
+        editConfiguration: "Xem lại thông tin quiz trước khi cập nhật câu hỏi.",
+        createConfiguration: "Thiết lập thông tin cơ bản cho quiz trước khi thêm câu hỏi.",
+        editQuestions: "Cập nhật và sắp xếp câu hỏi trước khi lưu thay đổi.",
+        createQuestions: "Soạn và sắp xếp câu hỏi trước khi lưu quiz."
+      },
+      readOnly: {
+        reloadQuiz: "Tải lại quiz",
+        backToMyQuizzes: "Quay lại Quiz của tôi",
+        banner:
+          "Quiz này đã được xuất bản và đang ở chế độ chỉ xem. Hãy hủy xuất bản từ Quiz của tôi để chỉnh sửa.",
+        unpublishToEdit: "Hủy xuất bản quiz này để chỉnh sửa cấu hình.",
+        viewQuestions: "Xem câu hỏi"
+      },
+      validation: {
+        titleRequired: "Tiêu đề quiz là bắt buộc.",
+        descriptionMax: "Mô tả không được vượt quá 500 ký tự.",
+        subjectRequired: "Môn học là bắt buộc.",
+        questionCountRange: "Số lượng câu hỏi phải nằm trong khoảng từ 1 đến 50.",
+        timeLimitRange: "Giới hạn thời gian phải nằm trong khoảng từ 1 đến 180 phút.",
+        questionIncomplete:
+          "Hãy thêm nội dung câu hỏi, ít nhất hai đáp án và ít nhất một đáp án đúng trước khi tiếp tục."
+      },
+      toasts: {
+        configurationSaved: "Đã lưu cấu hình",
+        quizUpdated: "Đã cập nhật quiz thành công",
+        quizSaved: "Đã lưu quiz thành công"
+      },
+      fields: {
+        basicInformation: "Thông tin cơ bản",
+        title: "Tiêu đề quiz",
+        titlePlaceholder: "ví dụ: Quiz Toán học #1",
+        description: "Mô tả quiz",
+        descriptionPlaceholder: "Mô tả nội dung người học sẽ luyện tập trong quiz này.",
+        noDescription: "Chưa có mô tả.",
+        subject: "Môn học / Lĩnh vực",
+        subjectPlaceholder: "Chọn một môn học",
+        setup: "Thiết lập quiz",
+        numberOfQuestions: "Số lượng câu hỏi",
+        timeLimit: "Giới hạn thời gian",
+        unlimited: "Không giới hạn",
+        setTimeLimit: "Đặt giới hạn thời gian",
+        timeLimitMinutes: "Số phút giới hạn thời gian",
+        minutes: "phút",
+        difficulty: "Mức độ khó",
+        privateQuiz: "Quiz riêng tư",
+        privateHint: "Ẩn. Yêu cầu mã truy cập.",
+        accessCode: "Mã:",
+        showSummary: "Hiển thị tổng kết",
+        allowAnswerReview: "Cho phép xem lại đáp án",
+        allowRetake: "Cho phép làm lại",
+        question: "Câu hỏi",
+        questionPlaceholder: "Nhập câu hỏi của bạn...",
+        answerOptions: "Các lựa chọn đáp án",
+        multipleCorrectAnswers: "Nhiều đáp án đúng",
+        addOption: "Thêm đáp án",
+        explanation: "Giải thích",
+        explanationOptional: "(không bắt buộc)",
+        explanationPlaceholder: "Giải thích vì sao đáp án đúng là đáp án này...",
+        noExplanation: "Chưa có giải thích."
+      },
+      defaults: {
+        title: "Quiz 1"
+      },
+      difficulty: {
+        easy: "Dễ",
+        medium: "Trung bình",
+        hard: "Khó"
+      },
+      states: {
+        on: "Bật",
+        off: "Tắt"
+      },
+      actions: {
+        backToConfiguration: "Quay lại cấu hình",
+        saveConfiguration: "Lưu cấu hình",
+        saveContinue: "Lưu và tiếp tục",
+        saving: "Đang lưu...",
+        nextQuestion: "Câu hỏi tiếp theo",
+        updateQuiz: "Cập nhật quiz",
+        saveQuiz: "Lưu quiz"
+      },
+      helper: {
+        tip: "Mẹo",
+        editTip: "Lưu cấu hình để áp dụng thay đổi mà không cần chỉnh sửa câu hỏi.",
+        createTip: "Thiết lập sẽ được lưu tự động khi bạn tiếp tục."
+      },
+      navigator: {
+        completeSummary: "Hoàn thành {completed} trên {total}",
+        remainingOne: "Còn 1 câu hỏi cần hoàn thành.",
+        remainingOther: "Còn {count} câu hỏi cần hoàn thành.",
+        allComplete: "Tất cả câu hỏi đã hoàn tất - sẵn sàng để lưu!",
+        statusCompleted: "hoàn thành",
+        statusInProgress: "đang làm",
+        statusEmpty: "trống"
+      }
+    },
+    participant: {
+      browse: {
+        countOne: "1 quiz công khai",
+        countOther: "{count} quiz công khai",
+        matchOne: "1 kết quả phù hợp",
+        matchOther: "{count} kết quả phù hợp",
+        showing: "Hiển thị {shown} trên {total}",
+        emptySearchTitle: "Không có quiz nào khớp với tìm kiếm của bạn",
+        emptySearchDescription: "Hãy thử tiêu đề, chủ đề hoặc số lượng câu hỏi khác.",
+        emptyTitle: "Chưa có quiz công khai",
+        emptyDescription: "Các quiz đã xuất bản sẽ xuất hiện ở đây khi sẵn sàng.",
+        loadError: "Chúng tôi không thể tải danh sách quiz công khai. Vui lòng thử lại sau.",
+        headerEyebrow: "Quiz công khai",
+        headerTitle: "Chọn một quiz để bắt đầu",
+        headerDescription:
+          "Duyệt các quiz có sẵn cho mọi người. Chọn một quiz, nhập tên của bạn và bắt đầu.",
+        privateTitle: "Bạn có mã quiz riêng tư?",
+        privateDescription: "Nhập mã truy cập để mở khóa một quiz riêng tư.",
+        enterCode: "Nhập mã",
+        searchLabel: "Tìm quiz",
+        searchPlaceholder: "Tìm theo tiêu đề, chủ đề hoặc số lượng câu hỏi",
+        sortLabel: "Sắp xếp theo",
+        sortDefault: "Mặc định",
+        sortTitleAsc: "Tiêu đề A đến Z",
+        sortTitleDesc: "Tiêu đề Z đến A",
+        sortQuestionsDesc: "Nhiều câu hỏi nhất",
+        sortQuestionsAsc: "Ít câu hỏi nhất",
+        loading: "Đang tải quiz công khai...",
+        retry: "Thử lại",
+        gridAria: "Quiz công khai",
+        defaultDescription: "Một quiz công khai trên Quiz App đã sẵn sàng để làm.",
+        questions: "Câu hỏi",
+        time: "Thời gian",
+        untimed: "Không giới hạn",
+        timeMinutes: "{count} phút",
+        startQuiz: "Bắt đầu quiz",
+        loadMore: "Xem thêm"
+      },
+      landing: {
+        loadNotFound: "Chúng tôi không thể tìm thấy quiz này. Vui lòng kiểm tra liên kết và thử lại.",
+        loadUnavailable: "Quiz này hiện chưa khả dụng. Vui lòng liên hệ người tạo quiz.",
+        loadFailed: "Đã xảy ra lỗi khi tải quiz này. Vui lòng thử lại sau.",
+        nameRequired: "Vui lòng nhập tên của bạn trước khi bắt đầu quiz.",
+        loading: "Đang tải quiz...",
+        unavailableTitle: "Quiz không khả dụng",
+        questions: "{count} câu hỏi",
+        questionType: "Trắc nghiệm",
+        estimatedTime: "Thời gian ước tính",
+        unlimited: "Không giới hạn",
+        minutes: "{count} phút",
+        answerType: "Một đáp án đúng",
+        yourName: "Tên của bạn",
+        yourNameHint: "Vui lòng nhập tên của bạn. Tên này sẽ hiển thị trên kết quả.",
+        yourNamePlaceholder: "Nhập họ và tên của bạn",
+        starting: "Đang bắt đầu...",
+        startQuiz: "Bắt đầu quiz"
+      },
+      take: {
+        loadNotFound: "Chúng tôi không thể tìm thấy quiz này. Vui lòng kiểm tra liên kết và thử lại.",
+        loadUnavailable: "Quiz này hiện chưa khả dụng. Vui lòng liên hệ người tạo quiz.",
+        attemptExpired:
+          "Lượt làm quiz này chưa được bắt đầu hoặc đã hết hạn. Hãy quay lại trang bắt đầu quiz để làm lại.",
+        noQuestions: "Quiz này chưa có câu hỏi nào.",
+        loadFailed: "Đã xảy ra lỗi khi tải quiz này. Vui lòng thử lại sau.",
+        reviewMode: "Chế độ xem lại",
+        questionsCount: "{count} câu hỏi",
+        score: "Điểm",
+        timeLimit: "Giới hạn thời gian",
+        timeRemaining: "Thời gian còn lại",
+        noTimeLimit: "Không giới hạn thời gian",
+        exitQuiz: "Thoát quiz",
+        backToResults: "Quay lại kết quả",
+        loading: "Đang tải quiz...",
+        unavailableTitle: "Quiz không khả dụng",
+        resultsTitleSaved: "Đã ghi nhận bài nộp",
+        resultsMessageSaved: "Các câu trả lời của bạn đã được lưu. Kết quả sẽ sớm hiển thị.",
+        resultsLabelExcellent: "Xuất sắc",
+        resultsTitleExcellent: "Làm rất tốt!",
+        resultsMessageExcellent: "Hãy xem lại chi tiết để củng cố kiến thức bạn đã nắm vững.",
+        resultsLabelGood: "Tiến bộ tốt",
+        resultsTitleGood: "Tiến bộ tốt",
+        resultsMessageGood: "Hãy xem lại các câu sai bên dưới để lấp đầy phần kiến thức còn thiếu.",
+        resultsLabelNeedsReview: "Cần xem lại",
+        resultsMessageNeedsReview: "Hãy xem lại các câu sai rồi làm lại khi bạn sẵn sàng.",
+        resultsAnsweredSummary: "Bạn đã trả lời đúng {score} trên {total} câu. {message}",
+        reviewAnswers: "Xem lại đáp án",
+        retakeQuiz: "Làm lại quiz",
+        backToQuizzes: "Quay lại danh sách quiz",
+        reviewing: "Đang xem lại",
+        questionProgress: "Câu hỏi {current} trên {total}",
+        reviewProgress: "{score} trên {total} câu đúng",
+        answeredProgress: "{answered} trên {total} câu đã trả lời",
+        reviewProgressAria: "Đang xem lại câu hỏi {current} trên {total}",
+        answeredProgressAria: "{answered} trên {total} câu đã được trả lời",
+        reviewQuestion: "Xem lại câu hỏi",
+        chooseCorrectAnswer: "Chọn đáp án đúng.",
+        compareAnswer: "So sánh câu trả lời của bạn với đáp án đúng.",
+        answersAria: "Đáp án cho câu hỏi {number}",
+        optionAria: "Lựa chọn {label}: {option}",
+        explanationTitle: "Giải thích",
+        explanationAria: "Giải thích đáp án",
+        clearAnswers: "Xóa câu trả lời",
+        noAnswersToClear: "Không có câu trả lời nào để xóa",
+        previous: "Trước",
+        next: "Tiếp",
+        submitQuiz: "Nộp bài",
+        submitMoreOne: "Trả lời thêm 1 câu hỏi để nộp bài",
+        submitMoreOther: "Trả lời thêm {count} câu hỏi để nộp bài",
+        doneReviewing: "Hoàn tất xem lại",
+        leaveQuizTitle: "Rời khỏi quiz?",
+        leaveQuizDescription:
+          "Bạn chưa nộp bài quiz này. Nếu rời đi bây giờ, lượt làm hiện tại có thể sẽ không được tính.",
+        stayHere: "Ở lại đây",
+        leaveQuiz: "Rời quiz",
+        clearAnswersTitle: "Xóa tất cả câu trả lời?",
+        clearAnswersDescription:
+          "Thao tác này sẽ xóa toàn bộ đáp án đã chọn của lượt làm này. Bạn vẫn có thể trả lời lại trước khi nộp bài.",
+        keepAnswers: "Giữ nguyên đáp án",
+        yourCorrectAnswer: "Câu trả lời đúng của bạn",
+        correctAnswer: "Đáp án đúng",
+        yourAnswer: "Câu trả lời của bạn"
+      }
+    },
+    results: {
+      overview: {
+        pageTitle: "Kết quả quiz",
+        pageDescription: "Xem và phân tích kết quả của tất cả quiz.",
+        loadError: "Không thể tải kết quả. Vui lòng tải lại trang hoặc thử lại sau.",
+        totalQuizzes: "Tổng quiz",
+        submissions: "Lượt nộp",
+        averageScore: "Điểm TB",
+        resultSummary: "Tổng quan kết quả",
+        loadingSummary: "Đang tải tổng quan kết quả",
+        filterBySubject: "Lọc theo môn học",
+        filterByDate: "Lọc theo khoảng thời gian",
+        allSubjects: "Tất cả môn học",
+        allTime: "Mọi thời điểm",
+        today: "Hôm nay",
+        last7Days: "7 ngày qua",
+        last30Days: "30 ngày qua",
+        exportCsv: "Xuất CSV",
+        emptyTitle: "Không có quiz nào khớp với bộ lọc này",
+        emptyDescription: "Hãy điều chỉnh tìm kiếm, môn học hoặc bộ lọc ngày để xem hiệu suất quiz.",
+        pagination: "Hiển thị {start} đến {end} trên tổng {total} quiz",
+        paginationAria: "Phân trang hiệu suất quiz",
+        loadingTable: "Đang tải kết quả quiz",
+        rowAria: "Xem bài nộp cho {title}",
+        recentSubmissions: "Bài nộp gần đây",
+        viewAll: "Xem tất cả",
+        searchPlaceholder: "Tìm quiz...",
+        defaultCsvName: "ket-qua-quiz.csv",
+        quiz: "Quiz",
+        subject: "Môn học",
+        no: "STT",
+        averageScoreLabel: "Điểm trung bình",
+        scoreLegendHigh: ">= 80%",
+        scoreLegendMid: "70-79%",
+        scoreLegendLow: "< 70%"
+      },
+      detail: {
+        submissionsTab: "Bài nộp",
+        submissionDetailTab: "Chi tiết bài nộp",
+        loading: "Đang tải...",
+        backToResults: "Quay lại Kết quả Quiz",
+        loadErrorTitle: "Không thể tải kết quả quiz",
+        loadErrorDescription: "Đã xảy ra lỗi khi lấy dữ liệu quiz này. Vui lòng thử lại sau.",
+        breadcrumb: "Đường dẫn",
+        exportCsv: "Xuất CSV",
+        resultSummary: "Tổng quan kết quả",
+        totalSubmissions: "Tổng lượt nộp",
+        averageScore: "Điểm trung bình",
+        averageTime: "Thời gian trung bình",
+        submissionsTitle: "Bài nộp của quiz",
+        selectSubmissionTitle: "Chọn một bài nộp",
+        selectSubmissionDescription: "Mở tab bài nộp để xem chi tiết người tham gia.",
+        notFoundTitle: "Không tìm thấy kết quả quiz",
+        notFoundDescription: "Quiz này không tồn tại hoặc bạn không có quyền truy cập.",
+        participant: "Người tham gia",
+        timeTaken: "Thời gian làm",
+        submittedAt: "Nộp lúc",
+        score: "Điểm",
+        searchSubmissions: "Tìm bài nộp",
+        searchSubmissionsPlaceholder: "Tìm theo tên hoặc email...",
+        allScores: "Tất cả mức điểm",
+        scoreFilter: "Điểm",
+        dateRange: "Khoảng ngày",
+        emptySubmissionsTitle: "Không có bài nộp nào khớp bộ lọc này",
+        emptySubmissionsDescription: "Hãy điều chỉnh tìm kiếm, điểm hoặc bộ lọc ngày để tìm người tham gia.",
+        submissionPagination: "Hiển thị {start} đến {end} trên tổng {total} bài nộp",
+        submissionPaginationAria: "Phân trang bài nộp",
+        submissionDetailAria: "Chi tiết bài nộp",
+        submissionStatsAria: "Thống kê bài nộp",
+        answersReview: "Xem lại đáp án",
+        correctCount: "{count} đúng",
+        incorrectCount: "{count} sai",
+        answerPagination: "Hiển thị {start} đến {end} trên tổng {total} đáp án",
+        answerPaginationAria: "Phân trang phần xem lại đáp án",
+        answerCorrect: "Đúng",
+        answerIncorrect: "Sai",
+        hideOptions: "Ẩn đáp án",
+        moreOptionsOne: "1 đáp án khác",
+        moreOptionsOther: "{count} đáp án khác"
       }
     },
     modals: {
