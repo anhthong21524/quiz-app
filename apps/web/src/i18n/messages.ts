@@ -814,6 +814,8 @@ export const messages = {
         previous: "Previous",
         next: "Next",
         submitQuiz: "Submit quiz",
+        submittedSuccessNamed: "{name}, your answers have been submitted successfully.",
+        submittedSuccessAnonymous: "Your answers have been submitted successfully.",
         submitMoreOne: "Answer 1 more question to submit",
         submitMoreOther: "Answer {count} more questions to submit",
         doneReviewing: "Done reviewing",
@@ -949,14 +951,14 @@ export const messages = {
     },
     navigation: {
       home: "Trang chủ",
-      quizzes: "Bài quiz",
+      quizzes: "Bài trắc nghiệm",
       about: "Giới thiệu",
       guide: "Hướng dẫn",
       login: "Đăng nhập",
-      myQuizzes: "Quiz của tôi",
-      quizResults: "Kết quả quiz",
+      myQuizzes: "Bài của tôi",
+      quizResults: "Kết quả",
       dashboard: "Bảng điều khiển",
-      createQuiz: "Tạo quiz",
+      createQuiz: "Tạo bài",
       signOut: "Đăng xuất",
       getStarted: "Bắt đầu"
     },
@@ -976,58 +978,58 @@ export const messages = {
     seo: {
       defaults: {
         description:
-          "Quiz App giúp giảng viên tạo, quản lý và xuất bản quiz trong một không gian làm việc web tập trung."
+          "Quiz App giúp giảng viên tạo, quản lý và xuất bản bài trắc nghiệm trong một không gian làm việc web tập trung."
       },
       home: {
         title: "Trang chủ",
-        description: "Làm quiz, khám phá chủ đề và tiến bộ mỗi ngày cùng Quiz App."
+        description: "Làm bài trắc nghiệm, khám phá chủ đề và tiến bộ mỗi ngày cùng Quiz App."
       },
       guide: {
         title: "Hướng dẫn sử dụng",
         description:
-          "Tìm hiểu cách dùng Quiz App: bắt đầu, tạo quiz và làm quiz với vai trò người tham gia."
+          "Tìm hiểu cách dùng Quiz App: bắt đầu, tạo bài trắc nghiệm và làm bài trắc nghiệm với vai trò người tham gia."
       },
       about: {
         title: "Giới thiệu",
         description:
-          "Tìm hiểu cách Quiz App giúp người học luyện tập, tiến bộ và xây dựng kiến thức qua những bài quiz đơn giản."
+          "Tìm hiểu cách Quiz App giúp người học luyện tập, tiến bộ và xây dựng kiến thức qua những bài trắc nghiệm đơn giản."
       },
       publicQuizzes: {
-        title: "Quiz công khai",
-        description: "Duyệt các quiz công khai đã xuất bản và bắt đầu mà không cần đăng nhập."
+        title: "Bài trắc nghiệm công khai",
+        description: "Duyệt các bài trắc nghiệm công khai đã xuất bản và bắt đầu mà không cần đăng nhập."
       },
       login: {
         title: "Đăng nhập",
-        description: "Đăng nhập vào Quiz App để tạo, quản lý và xuất bản quiz."
+        description: "Đăng nhập vào Quiz App để tạo, quản lý và xuất bản bài trắc nghiệm."
       },
       privateQuiz: {
-        title: "Quiz riêng tư",
-        description: "Nhập mã truy cập quiz riêng tư để mở khóa và bắt đầu quiz."
+        title: "Bài trắc nghiệm riêng tư",
+        description: "Nhập mã truy cập bài trắc nghiệm riêng tư để mở khóa và bắt đầu bài trắc nghiệm."
       },
       publicQuiz: {
-        title: "Quiz công khai",
-        description: "Nhập tên của bạn và bắt đầu một quiz công khai trên Quiz App."
+        title: "Bài trắc nghiệm công khai",
+        description: "Nhập tên của bạn và bắt đầu một bài trắc nghiệm công khai trên Quiz App."
       },
       takeQuiz: {
-        title: "Làm quiz",
-        description: "Trả lời câu hỏi trong một quiz công khai của Quiz App."
+        title: "Làm bài trắc nghiệm",
+        description: "Trả lời câu hỏi trong một bài trắc nghiệm công khai của Quiz App."
       },
       management: {
         title: "Quản lý",
         description:
-          "Bảng điều khiển quản lý Quiz App của bạn: thống kê, quiz gần đây và thao tác nhanh."
+          "Bảng điều khiển quản lý Quiz App của bạn: thống kê, bài trắc nghiệm gần đây và thao tác nhanh."
       },
       results: {
-        title: "Kết quả quiz",
-        description: "Xem và phân tích kết quả cho tất cả quiz trong Quiz App."
+        title: "Kết quả bài trắc nghiệm",
+        description: "Xem và phân tích kết quả cho tất cả bài trắc nghiệm trong Quiz App."
       },
       resultDetail: {
-        title: "Kết quả quiz",
-        description: "Xem bài nộp và phân tích cho một quiz cụ thể."
+        title: "Kết quả bài trắc nghiệm",
+        description: "Xem bài nộp và phân tích cho một bài trắc nghiệm cụ thể."
       },
       myQuizzes: {
-        title: "Quiz của tôi",
-        description: "Tìm kiếm, lọc, sắp xếp, xuất bản và chỉnh sửa quiz trong Quiz App."
+        title: "Bài trắc nghiệm của tôi",
+        description: "Tìm kiếm, lọc, sắp xếp, xuất bản và chỉnh sửa bài trắc nghiệm trong Quiz App."
       },
       profile: {
         title: "Hồ sơ",
@@ -1036,20 +1038,20 @@ export const messages = {
       configuration: {
         title: "Cấu hình",
         description:
-          "Thiết lập mặc định cho quiz và các lựa chọn Môn học / Lĩnh vực trong Quiz App."
+          "Thiết lập mặc định cho bài trắc nghiệm và các lựa chọn Môn học / Lĩnh vực trong Quiz App."
       },
       password: {
         title: "Mật khẩu",
         description: "Quản lý cài đặt mật khẩu cho tài khoản Quiz App của bạn."
       },
       createQuiz: {
-        title: "Tạo quiz",
+        title: "Tạo bài trắc nghiệm",
         description:
-          "Tạo quiz mới với thông tin thiết lập, quy trình nhập câu hỏi có hướng dẫn và các lựa chọn đáp án."
+          "Tạo bài trắc nghiệm mới với thông tin thiết lập, quy trình nhập câu hỏi có hướng dẫn và các lựa chọn đáp án."
       },
       editQuiz: {
-        title: "Chỉnh sửa quiz",
-        description: "Chỉnh sửa cấu hình và câu hỏi quiz trong trình tạo quiz có hướng dẫn."
+        title: "Chỉnh sửa bài trắc nghiệm",
+        description: "Chỉnh sửa cấu hình và câu hỏi bài trắc nghiệm trong trình tạo bài trắc nghiệm có hướng dẫn."
       },
       notFound: {
         title: "Không tìm thấy trang",
@@ -1061,9 +1063,9 @@ export const messages = {
       titleLine1: "Học hỏi. Thử thách.",
       titleLine2: "Phát triển.",
       subtitle:
-        "Làm quiz ở nhiều chủ đề khác nhau, theo dõi tiến độ và cải thiện bản thân mỗi ngày.",
-      primaryCta: "Bắt đầu quiz",
-      secondaryCta: "Duyệt quiz",
+        "Làm bài trắc nghiệm ở nhiều chủ đề khác nhau, theo dõi tiến độ và cải thiện bản thân mỗi ngày.",
+      primaryCta: "Bắt đầu bài trắc nghiệm",
+      secondaryCta: "Duyệt bài trắc nghiệm",
       community: "Tham gia cộng đồng người học ham khám phá đang ngày càng lớn mạnh",
       questionProgress: "Câu hỏi 2 trên 5",
       questionPrompt: "Thủ đô của nước Pháp là gì?",
@@ -1073,12 +1075,12 @@ export const messages = {
       featureCards: [
         {
           title: "Nhiều chủ đề",
-          description: "Khám phá quiz ở nhiều danh mục khác nhau.",
+          description: "Khám phá bài trắc nghiệm ở nhiều danh mục khác nhau.",
           icon: "book"
         },
         {
           title: "Thử thách có thời gian",
-          description: "Kiểm tra tốc độ và kiến thức của bạn với các quiz giới hạn thời gian.",
+          description: "Kiểm tra tốc độ và kiến thức của bạn với các bài trắc nghiệm giới hạn thời gian.",
           icon: "clock"
         },
         {
@@ -1088,14 +1090,14 @@ export const messages = {
         },
         {
           title: "Thi đấu và xếp hạng",
-          description: "Leo bảng xếp hạng và trở thành nhà vô địch quiz.",
+          description: "Leo bảng xếp hạng và trở thành nhà vô địch bài trắc nghiệm.",
           icon: "trophy"
         }
       ],
       ctaTitle: "Sẵn sàng thử thách bản thân?",
       ctaDescription:
-        "Duyệt hàng trăm quiz thuộc mọi chủ đề và bắt đầu cải thiện từ hôm nay.",
-      ctaBrowse: "Duyệt quiz",
+        "Duyệt hàng trăm bài trắc nghiệm thuộc mọi chủ đề và bắt đầu cải thiện từ hôm nay.",
+      ctaBrowse: "Duyệt bài trắc nghiệm",
       ctaRegister: "Tạo tài khoản - miễn phí"
     },
     login: {
@@ -1202,46 +1204,46 @@ export const messages = {
         },
         contexts: {
           quizListLoad: {
-            network: "Không thể tải danh sách quiz của bạn. Hãy kiểm tra mạng và thử lại.",
-            server: "Hiện tại chúng tôi chưa thể tải danh sách quiz. Vui lòng thử lại.",
-            notFound: "Không tìm thấy danh sách quiz của bạn."
+            network: "Không thể tải danh sách bài trắc nghiệm của bạn. Hãy kiểm tra mạng và thử lại.",
+            server: "Hiện tại chúng tôi chưa thể tải danh sách bài trắc nghiệm. Vui lòng thử lại.",
+            notFound: "Không tìm thấy danh sách bài trắc nghiệm của bạn."
           },
           quizLoad: {
-            notFound: "Quiz này không còn tồn tại. Có thể nó đã bị xóa.",
-            network: "Không thể tải quiz. Hãy kiểm tra mạng và thử lại.",
-            server: "Hiện tại chúng tôi chưa thể tải quiz này. Vui lòng thử lại.",
-            forbidden: "Bạn không có quyền xem quiz này."
+            notFound: "Bài trắc nghiệm này không còn tồn tại. Có thể nó đã bị xóa.",
+            network: "Không thể tải bài trắc nghiệm. Hãy kiểm tra mạng và thử lại.",
+            server: "Hiện tại chúng tôi chưa thể tải bài trắc nghiệm này. Vui lòng thử lại.",
+            forbidden: "Bạn không có quyền xem bài trắc nghiệm này."
           },
           quizSave: {
-            validation: "Vui lòng sửa lỗi trong quiz trước khi lưu.",
+            validation: "Vui lòng sửa lỗi trong bài trắc nghiệm trước khi lưu.",
             server:
-              "Hiện tại chúng tôi chưa thể lưu quiz. Các chỉnh sửa của bạn vẫn được giữ lại - hãy thử lại.",
+              "Hiện tại chúng tôi chưa thể lưu bài trắc nghiệm. Các chỉnh sửa của bạn vẫn được giữ lại - hãy thử lại.",
             conflict:
-              "Quiz này đã bị chỉnh sửa ở nơi khác. Hãy tải lại để lấy phiên bản mới nhất trước khi lưu.",
-            notFound: "Quiz này không còn tồn tại nên không thể lưu.",
+              "Bài trắc nghiệm này đã bị chỉnh sửa ở nơi khác. Hãy tải lại để lấy phiên bản mới nhất trước khi lưu.",
+            notFound: "Bài trắc nghiệm này không còn tồn tại nên không thể lưu.",
             network: "Không thể lưu. Hãy kiểm tra mạng và thử lại."
           },
           quizPublish: {
-            notFound: "Quiz này không còn tồn tại nên không thể xuất bản.",
-            server: "Hiện tại chúng tôi chưa thể xuất bản quiz. Vui lòng thử lại.",
-            forbidden: "Bạn không có quyền xuất bản quiz này.",
-            conflict: "Trạng thái quiz đã thay đổi ngoài dự kiến. Hãy tải lại và thử lại.",
-            validation: "Quiz chưa thể xuất bản ở trạng thái hiện tại."
+            notFound: "Bài trắc nghiệm này không còn tồn tại nên không thể xuất bản.",
+            server: "Hiện tại chúng tôi chưa thể xuất bản bài trắc nghiệm. Vui lòng thử lại.",
+            forbidden: "Bạn không có quyền xuất bản bài trắc nghiệm này.",
+            conflict: "Trạng thái bài trắc nghiệm đã thay đổi ngoài dự kiến. Hãy tải lại và thử lại.",
+            validation: "Bài trắc nghiệm chưa thể xuất bản ở trạng thái hiện tại."
           },
           quizUnpublish: {
-            notFound: "Quiz này không còn tồn tại nên không thể hủy xuất bản.",
-            server: "Hiện tại chúng tôi chưa thể hủy xuất bản quiz. Vui lòng thử lại.",
-            forbidden: "Bạn không có quyền hủy xuất bản quiz này.",
-            conflict: "Trạng thái quiz đã thay đổi ngoài dự kiến. Hãy tải lại và thử lại."
+            notFound: "Bài trắc nghiệm này không còn tồn tại nên không thể hủy xuất bản.",
+            server: "Hiện tại chúng tôi chưa thể hủy xuất bản bài trắc nghiệm. Vui lòng thử lại.",
+            forbidden: "Bạn không có quyền hủy xuất bản bài trắc nghiệm này.",
+            conflict: "Trạng thái bài trắc nghiệm đã thay đổi ngoài dự kiến. Hãy tải lại và thử lại."
           },
           quizDelete: {
-            notFound: "Quiz này đã bị xóa trước đó.",
-            server: "Hiện tại chúng tôi chưa thể xóa quiz. Vui lòng thử lại.",
-            forbidden: "Bạn không có quyền xóa quiz này."
+            notFound: "Bài trắc nghiệm này đã bị xóa trước đó.",
+            server: "Hiện tại chúng tôi chưa thể xóa bài trắc nghiệm. Vui lòng thử lại.",
+            forbidden: "Bạn không có quyền xóa bài trắc nghiệm này."
           },
           quizDuplicate: {
-            notFound: "Quiz gốc không còn tồn tại nên không thể nhân bản.",
-            server: "Hiện tại chúng tôi chưa thể nhân bản quiz. Vui lòng thử lại."
+            notFound: "Bài trắc nghiệm gốc không còn tồn tại nên không thể nhân bản.",
+            server: "Hiện tại chúng tôi chưa thể nhân bản bài trắc nghiệm. Vui lòng thử lại."
           },
           login: {
             unauthorized: "Email hoặc mật khẩu không đúng. Vui lòng thử lại.",
@@ -1265,32 +1267,32 @@ export const messages = {
         published: "Đã xuất bản",
         unpublished: "Chưa xuất bản",
         getStarted: "Bắt đầu",
-        createFirstQuiz: "Tạo quiz đầu tiên",
+        createFirstQuiz: "Tạo bài trắc nghiệm đầu tiên",
         createFirstQuizDescription:
-          "Tạo một quiz, thêm câu hỏi và xuất bản để người khác có thể tham gia.",
-        createQuiz: "Tạo quiz",
+          "Tạo một bài trắc nghiệm, thêm câu hỏi và xuất bản để người khác có thể tham gia.",
+        createQuiz: "Tạo bài trắc nghiệm",
         continue: "Tiếp tục",
         edit: "Chỉnh sửa",
         continueAria: "Tiếp tục chỉnh sửa",
         getStartedAria: "Bắt đầu"
       },
       stats: {
-        totalQuizzes: "Tổng quiz",
-        totalQuizzesHint: "Tất cả quiz bạn đã tạo",
+        totalQuizzes: "Tổng bài trắc nghiệm",
+        totalQuizzesHint: "Tất cả bài trắc nghiệm bạn đã tạo",
         inProgress: "Đang soạn",
         inProgressHint: "Đang được chỉnh sửa",
         published: "Đã xuất bản",
         publishedHint: "Có sẵn công khai",
         totalSubmissions: "Tổng lượt nộp",
-        totalSubmissionsHint: "Trên tất cả quiz đã xuất bản",
-        overviewAria: "Tổng quan thống kê quiz"
+        totalSubmissionsHint: "Trên tất cả bài trắc nghiệm đã xuất bản",
+        overviewAria: "Tổng quan thống kê bài trắc nghiệm"
       },
       recent: {
-        title: "Quiz gần đây",
+        title: "Bài trắc nghiệm gần đây",
         viewAll: "Xem tất cả",
         columns: {
           number: "#",
-          quizTitle: "Tiêu đề quiz",
+          quizTitle: "Tiêu đề bài trắc nghiệm",
           subject: "Môn học",
           questions: "Câu hỏi",
           status: "Trạng thái",
@@ -1304,51 +1306,51 @@ export const messages = {
       }
     },
     myQuizzes: {
-      title: "Quiz của tôi",
-      description: "Quản lý, xuất bản và chia sẻ tất cả quiz của bạn.",
+      title: "Bài trắc nghiệm của tôi",
+      description: "Quản lý, xuất bản và chia sẻ tất cả bài trắc nghiệm của bạn.",
       stats: {
         total: "Tổng",
         published: "Đã xuất bản",
         inProgress: "Đang soạn",
         unpublished: "Chưa xuất bản",
-        aria: "Thống kê bảng điều khiển quiz",
+        aria: "Thống kê bảng điều khiển bài trắc nghiệm",
         loading: "Đang tải thống kê bảng điều khiển",
-        emptyTitle: "Chào mừng đến với bảng điều khiển quiz",
+        emptyTitle: "Chào mừng đến với bảng điều khiển bài trắc nghiệm",
         emptyDescription:
-          "Thống kê của bạn, gồm tổng số quiz, số quiz đã xuất bản và hoạt động gần đây, sẽ xuất hiện ở đây sau khi bạn tạo quiz đầu tiên."
+          "Thống kê của bạn, gồm tổng số bài trắc nghiệm, số bài trắc nghiệm đã xuất bản và hoạt động gần đây, sẽ xuất hiện ở đây sau khi bạn tạo bài trắc nghiệm đầu tiên."
       },
       banner: {
         prefix: "Bạn có",
-        quiz: "quiz",
-        quizzes: "quiz",
+        quiz: "bài trắc nghiệm",
+        quizzes: "bài trắc nghiệm",
         savedNotPublished: "đã lưu nhưng chưa xuất bản.",
         publishSingular: "Hãy xuất bản để người tham gia có thể truy cập.",
         publishPlural: "Hãy xuất bản chúng để người tham gia có thể truy cập.",
         review: "Xem lại"
       },
-      listTitle: "Danh sách quiz của tôi",
-      loading: "Đang tải quiz",
+      listTitle: "Danh sách bài trắc nghiệm của tôi",
+      loading: "Đang tải bài trắc nghiệm",
       toolbar: {
-        searchPlaceholder: "Tìm quiz...",
+        searchPlaceholder: "Tìm bài trắc nghiệm...",
         filterByStatus: "Lọc theo trạng thái",
         filterBySubject: "Lọc theo môn học",
         allStatuses: "Tất cả trạng thái",
         allSubjects: "Tất cả môn học"
       },
-      retry: "Tải lại quiz",
+      retry: "Tải lại bài trắc nghiệm",
       pagination: {
-        showing: "Hiển thị {from} đến {to} trên tổng {total} quiz",
-        empty: "Hiển thị 0 đến 0 trên tổng 0 quiz"
+        showing: "Hiển thị {from} đến {to} trên tổng {total} bài trắc nghiệm",
+        empty: "Hiển thị 0 đến 0 trên tổng 0 bài trắc nghiệm"
       },
       empty: {
-        noQuizzesTitle: "Chưa có quiz nào",
+        noQuizzesTitle: "Chưa có bài trắc nghiệm nào",
         noQuizzesDescription:
-          "Tạo quiz đầu tiên để bắt đầu xây dựng thư viện câu hỏi và chia sẻ kiến thức với người khác.",
-        createQuiz: "Tạo quiz",
+          "Tạo bài trắc nghiệm đầu tiên để bắt đầu xây dựng thư viện câu hỏi và chia sẻ kiến thức với người khác.",
+        createQuiz: "Tạo bài trắc nghiệm",
         howItWorks: "Cách hoạt động",
-        noResultsTitle: "Không có quiz nào khớp bộ lọc",
+        noResultsTitle: "Không có bài trắc nghiệm nào khớp bộ lọc",
         noResultsDescription:
-          "Hãy thử điều chỉnh từ khóa tìm kiếm, trạng thái hoặc môn học - hoặc xóa toàn bộ bộ lọc để xem tất cả quiz.",
+          "Hãy thử điều chỉnh từ khóa tìm kiếm, trạng thái hoặc môn học - hoặc xóa toàn bộ bộ lọc để xem tất cả bài trắc nghiệm.",
         clearFilters: "Xóa bộ lọc"
       },
       status: {
@@ -1358,7 +1360,7 @@ export const messages = {
       },
       table: {
         actions: "Thao tác",
-        privateQuizHint: "Quiz riêng tư - cần mã truy cập",
+        privateQuizHint: "Bài trắc nghiệm riêng tư - cần mã truy cập",
         notSavedYet: "Chưa lưu"
       },
       grid: {
@@ -1374,37 +1376,37 @@ export const messages = {
         duplicateQuiz: "Nhân bản"
       },
       actions: {
-        publishTitle: "Xuất bản quiz",
+        publishTitle: "Xuất bản bài trắc nghiệm",
         publishMessage:
           "\"{title}\" sẽ hiển thị công khai. Bạn có chắc chắn muốn xuất bản không?",
         publishConfirm: "Xuất bản",
-        unpublishTitle: "Hủy xuất bản quiz",
+        unpublishTitle: "Hủy xuất bản bài trắc nghiệm",
         unpublishMessage:
           "\"{title}\" sẽ không còn hiển thị với người dùng. Bạn có thể xuất bản lại bất kỳ lúc nào.",
         unpublishConfirm: "Hủy xuất bản",
-        deleteTitle: "Xóa quiz",
+        deleteTitle: "Xóa bài trắc nghiệm",
         deleteMessage: "\"{title}\" sẽ bị xóa vĩnh viễn. Không thể hoàn tác thao tác này.",
         deleteConfirm: "Xóa"
       },
       toasts: {
-        quizPublished: "Đã xuất bản quiz thành công",
-        publishFailed: "Xuất bản quiz thất bại",
-        quizUnpublished: "Đã hủy xuất bản quiz thành công",
-        unpublishFailed: "Hủy xuất bản quiz thất bại",
+        quizPublished: "Đã xuất bản bài trắc nghiệm thành công",
+        publishFailed: "Xuất bản bài trắc nghiệm thất bại",
+        quizUnpublished: "Đã hủy xuất bản bài trắc nghiệm thành công",
+        unpublishFailed: "Hủy xuất bản bài trắc nghiệm thất bại",
         duplicated: "Đã nhân bản \"{title}\" thành công",
-        duplicateFailed: "Nhân bản quiz thất bại",
-        deleted: "Đã xóa quiz thành công",
-        deleteFailed: "Xóa quiz thất bại",
-        noSubmissions: "Quiz này chưa có bài nộp nào."
+        duplicateFailed: "Nhân bản bài trắc nghiệm thất bại",
+        deleted: "Đã xóa bài trắc nghiệm thành công",
+        deleteFailed: "Xóa bài trắc nghiệm thất bại",
+        noSubmissions: "Bài trắc nghiệm này chưa có bài nộp nào."
       },
       modals: {
-        shareTitle: "Chia sẻ quiz",
-        shareHint: "Chia sẻ liên kết này để mọi người có thể làm quiz.",
+        shareTitle: "Chia sẻ bài trắc nghiệm",
+        shareHint: "Chia sẻ liên kết này để mọi người có thể làm bài trắc nghiệm.",
         copyLinkSuccess: "Đã sao chép liên kết",
         copyLinkFailed: "Sao chép liên kết thất bại",
         privateAccessTitle: "Mã truy cập riêng tư",
         privateAccessHint:
-          "Chia sẻ mã này với những người bạn muốn cấp quyền truy cập quiz riêng tư.",
+          "Chia sẻ mã này với những người bạn muốn cấp quyền truy cập bài trắc nghiệm riêng tư.",
         copyCodeSuccess: "Đã sao chép mã truy cập",
         copyCodeFailed: "Sao chép mã truy cập thất bại"
       }
@@ -1447,10 +1449,10 @@ export const messages = {
       },
       configuration: {
         title: "Cấu hình",
-        subtitle: "Thiết lập mặc định cho quiz và các lựa chọn Môn học / Lĩnh vực.",
-        setupEyebrow: "Thiết lập quiz",
+        subtitle: "Thiết lập mặc định cho bài trắc nghiệm và các lựa chọn Môn học / Lĩnh vực.",
+        setupEyebrow: "Thiết lập bài trắc nghiệm",
         subjectDomainTitle: "Môn học / Lĩnh vực",
-        subjectDomainDescription: "Các lựa chọn này sẽ xuất hiện trong danh sách khi tạo quiz.",
+        subjectDomainDescription: "Các lựa chọn này sẽ xuất hiện trong danh sách khi tạo bài trắc nghiệm.",
         resetDefaults: "Khôi phục mặc định",
         fieldLabel: "Tên Môn học / Lĩnh vực",
         fieldPlaceholder: "Ví dụ: Văn học",
@@ -1529,28 +1531,28 @@ export const messages = {
         questions: "Câu hỏi"
       },
       titles: {
-        view: "Xem quiz",
-        edit: "Chỉnh sửa quiz",
-        create: "Tạo quiz mới"
+        view: "Xem bài trắc nghiệm",
+        edit: "Chỉnh sửa bài trắc nghiệm",
+        create: "Tạo bài trắc nghiệm mới"
       },
       intros: {
-        readOnlyConfiguration: "Quiz này đã được xuất bản. Phần cấu hình chỉ có thể xem.",
-        readOnlyQuestions: "Quiz này đã được xuất bản. Phần câu hỏi chỉ có thể xem.",
-        editConfiguration: "Xem lại thông tin quiz trước khi cập nhật câu hỏi.",
-        createConfiguration: "Thiết lập thông tin cơ bản cho quiz trước khi thêm câu hỏi.",
+        readOnlyConfiguration: "Bài trắc nghiệm này đã được xuất bản. Phần cấu hình chỉ có thể xem.",
+        readOnlyQuestions: "Bài trắc nghiệm này đã được xuất bản. Phần câu hỏi chỉ có thể xem.",
+        editConfiguration: "Xem lại thông tin bài trắc nghiệm trước khi cập nhật câu hỏi.",
+        createConfiguration: "Thiết lập thông tin cơ bản cho bài trắc nghiệm trước khi thêm câu hỏi.",
         editQuestions: "Cập nhật và sắp xếp câu hỏi trước khi lưu thay đổi.",
-        createQuestions: "Soạn và sắp xếp câu hỏi trước khi lưu quiz."
+        createQuestions: "Soạn và sắp xếp câu hỏi trước khi lưu bài trắc nghiệm."
       },
       readOnly: {
-        reloadQuiz: "Tải lại quiz",
-        backToMyQuizzes: "Quay lại Quiz của tôi",
+        reloadQuiz: "Tải lại bài trắc nghiệm",
+        backToMyQuizzes: "Quay lại Bài trắc nghiệm của tôi",
         banner:
-          "Quiz này đã được xuất bản và đang ở chế độ chỉ xem. Hãy hủy xuất bản từ Quiz của tôi để chỉnh sửa.",
-        unpublishToEdit: "Hủy xuất bản quiz này để chỉnh sửa cấu hình.",
+          "Bài trắc nghiệm này đã được xuất bản và đang ở chế độ chỉ xem. Hãy hủy xuất bản từ Bài trắc nghiệm của tôi để chỉnh sửa.",
+        unpublishToEdit: "Hủy xuất bản bài trắc nghiệm này để chỉnh sửa cấu hình.",
         viewQuestions: "Xem câu hỏi"
       },
       validation: {
-        titleRequired: "Tiêu đề quiz là bắt buộc.",
+        titleRequired: "Tiêu đề bài trắc nghiệm là bắt buộc.",
         descriptionMax: "Mô tả không được vượt quá 500 ký tự.",
         subjectRequired: "Môn học là bắt buộc.",
         questionCountRange: "Số lượng câu hỏi phải nằm trong khoảng từ 1 đến 50.",
@@ -1560,19 +1562,19 @@ export const messages = {
       },
       toasts: {
         configurationSaved: "Đã lưu cấu hình",
-        quizUpdated: "Đã cập nhật quiz thành công",
-        quizSaved: "Đã lưu quiz thành công"
+        quizUpdated: "Đã cập nhật bài trắc nghiệm thành công",
+        quizSaved: "Đã lưu bài trắc nghiệm thành công"
       },
       fields: {
         basicInformation: "Thông tin cơ bản",
-        title: "Tiêu đề quiz",
-        titlePlaceholder: "ví dụ: Quiz Toán học #1",
-        description: "Mô tả quiz",
-        descriptionPlaceholder: "Mô tả nội dung người học sẽ luyện tập trong quiz này.",
+        title: "Tiêu đề bài trắc nghiệm",
+        titlePlaceholder: "ví dụ: Bài trắc nghiệm Toán học #1",
+        description: "Mô tả bài trắc nghiệm",
+        descriptionPlaceholder: "Mô tả nội dung người học sẽ luyện tập trong bài trắc nghiệm này.",
         noDescription: "Chưa có mô tả.",
         subject: "Môn học / Lĩnh vực",
         subjectPlaceholder: "Chọn một môn học",
-        setup: "Thiết lập quiz",
+        setup: "Thiết lập bài trắc nghiệm",
         numberOfQuestions: "Số lượng câu hỏi",
         timeLimit: "Giới hạn thời gian",
         unlimited: "Không giới hạn",
@@ -1580,7 +1582,7 @@ export const messages = {
         timeLimitMinutes: "Số phút giới hạn thời gian",
         minutes: "phút",
         difficulty: "Mức độ khó",
-        privateQuiz: "Quiz riêng tư",
+        privateQuiz: "Bài trắc nghiệm riêng tư",
         privateHint: "Ẩn. Yêu cầu mã truy cập.",
         accessCode: "Mã:",
         showSummary: "Hiển thị tổng kết",
@@ -1597,7 +1599,7 @@ export const messages = {
         noExplanation: "Chưa có giải thích."
       },
       defaults: {
-        title: "Quiz 1"
+        title: "Bài trắc nghiệm 1"
       },
       difficulty: {
         easy: "Dễ",
@@ -1614,8 +1616,8 @@ export const messages = {
         saveContinue: "Lưu và tiếp tục",
         saving: "Đang lưu...",
         nextQuestion: "Câu hỏi tiếp theo",
-        updateQuiz: "Cập nhật quiz",
-        saveQuiz: "Lưu quiz"
+        updateQuiz: "Cập nhật bài trắc nghiệm",
+        saveQuiz: "Lưu bài trắc nghiệm"
       },
       helper: {
         tip: "Mẹo",
@@ -1634,24 +1636,24 @@ export const messages = {
     },
     participant: {
       browse: {
-        countOne: "1 quiz công khai",
-        countOther: "{count} quiz công khai",
+        countOne: "1 bài trắc nghiệm công khai",
+        countOther: "{count} bài trắc nghiệm công khai",
         matchOne: "1 kết quả phù hợp",
         matchOther: "{count} kết quả phù hợp",
         showing: "Hiển thị {shown} trên {total}",
-        emptySearchTitle: "Không có quiz nào khớp với tìm kiếm của bạn",
+        emptySearchTitle: "Không có bài trắc nghiệm nào khớp với tìm kiếm của bạn",
         emptySearchDescription: "Hãy thử tiêu đề, chủ đề hoặc số lượng câu hỏi khác.",
-        emptyTitle: "Chưa có quiz công khai",
-        emptyDescription: "Các quiz đã xuất bản sẽ xuất hiện ở đây khi sẵn sàng.",
-        loadError: "Chúng tôi không thể tải danh sách quiz công khai. Vui lòng thử lại sau.",
-        headerEyebrow: "Quiz công khai",
-        headerTitle: "Chọn một quiz để bắt đầu",
+        emptyTitle: "Chưa có bài trắc nghiệm công khai",
+        emptyDescription: "Các bài trắc nghiệm đã xuất bản sẽ xuất hiện ở đây khi sẵn sàng.",
+        loadError: "Chúng tôi không thể tải danh sách bài trắc nghiệm công khai. Vui lòng thử lại sau.",
+        headerEyebrow: "Bài trắc nghiệm công khai",
+        headerTitle: "Chọn một bài trắc nghiệm để bắt đầu",
         headerDescription:
-          "Duyệt các quiz có sẵn cho mọi người. Chọn một quiz, nhập tên của bạn và bắt đầu.",
-        privateTitle: "Bạn có mã quiz riêng tư?",
-        privateDescription: "Nhập mã truy cập để mở khóa một quiz riêng tư.",
+          "Duyệt các bài trắc nghiệm có sẵn cho mọi người. Chọn một bài trắc nghiệm, nhập tên của bạn và bắt đầu.",
+        privateTitle: "Bạn có mã bài trắc nghiệm riêng tư?",
+        privateDescription: "Nhập mã truy cập để mở khóa một bài trắc nghiệm riêng tư.",
         enterCode: "Nhập mã",
-        searchLabel: "Tìm quiz",
+        searchLabel: "Tìm bài trắc nghiệm",
         searchPlaceholder: "Tìm theo tiêu đề, chủ đề hoặc số lượng câu hỏi",
         sortLabel: "Sắp xếp theo",
         sortDefault: "Mặc định",
@@ -1659,24 +1661,24 @@ export const messages = {
         sortTitleDesc: "Tiêu đề Z đến A",
         sortQuestionsDesc: "Nhiều câu hỏi nhất",
         sortQuestionsAsc: "Ít câu hỏi nhất",
-        loading: "Đang tải quiz công khai...",
+        loading: "Đang tải bài trắc nghiệm công khai...",
         retry: "Thử lại",
-        gridAria: "Quiz công khai",
-        defaultDescription: "Một quiz công khai trên Quiz App đã sẵn sàng để làm.",
+        gridAria: "Bài trắc nghiệm công khai",
+        defaultDescription: "Một bài trắc nghiệm công khai trên Quiz App đã sẵn sàng để làm.",
         questions: "Câu hỏi",
         time: "Thời gian",
         untimed: "Không giới hạn",
         timeMinutes: "{count} phút",
-        startQuiz: "Bắt đầu quiz",
+        startQuiz: "Bắt đầu bài trắc nghiệm",
         loadMore: "Xem thêm"
       },
       landing: {
-        loadNotFound: "Chúng tôi không thể tìm thấy quiz này. Vui lòng kiểm tra liên kết và thử lại.",
-        loadUnavailable: "Quiz này hiện chưa khả dụng. Vui lòng liên hệ người tạo quiz.",
-        loadFailed: "Đã xảy ra lỗi khi tải quiz này. Vui lòng thử lại sau.",
-        nameRequired: "Vui lòng nhập tên của bạn trước khi bắt đầu quiz.",
-        loading: "Đang tải quiz...",
-        unavailableTitle: "Quiz không khả dụng",
+        loadNotFound: "Chúng tôi không thể tìm thấy bài trắc nghiệm này. Vui lòng kiểm tra liên kết và thử lại.",
+        loadUnavailable: "Bài trắc nghiệm này hiện chưa khả dụng. Vui lòng liên hệ người tạo bài trắc nghiệm.",
+        loadFailed: "Đã xảy ra lỗi khi tải bài trắc nghiệm này. Vui lòng thử lại sau.",
+        nameRequired: "Vui lòng nhập tên của bạn trước khi bắt đầu bài trắc nghiệm.",
+        loading: "Đang tải bài trắc nghiệm...",
+        unavailableTitle: "Bài trắc nghiệm không khả dụng",
         questions: "{count} câu hỏi",
         questionType: "Trắc nghiệm",
         estimatedTime: "Thời gian ước tính",
@@ -1687,25 +1689,25 @@ export const messages = {
         yourNameHint: "Vui lòng nhập tên của bạn. Tên này sẽ hiển thị trên kết quả.",
         yourNamePlaceholder: "Nhập họ và tên của bạn",
         starting: "Đang bắt đầu...",
-        startQuiz: "Bắt đầu quiz"
+        startQuiz: "Bắt đầu bài trắc nghiệm"
       },
       take: {
-        loadNotFound: "Chúng tôi không thể tìm thấy quiz này. Vui lòng kiểm tra liên kết và thử lại.",
-        loadUnavailable: "Quiz này hiện chưa khả dụng. Vui lòng liên hệ người tạo quiz.",
+        loadNotFound: "Chúng tôi không thể tìm thấy bài trắc nghiệm này. Vui lòng kiểm tra liên kết và thử lại.",
+        loadUnavailable: "Bài trắc nghiệm này hiện chưa khả dụng. Vui lòng liên hệ người tạo bài trắc nghiệm.",
         attemptExpired:
-          "Lượt làm quiz này chưa được bắt đầu hoặc đã hết hạn. Hãy quay lại trang bắt đầu quiz để làm lại.",
-        noQuestions: "Quiz này chưa có câu hỏi nào.",
-        loadFailed: "Đã xảy ra lỗi khi tải quiz này. Vui lòng thử lại sau.",
+          "Lượt làm bài trắc nghiệm này chưa được bắt đầu hoặc đã hết hạn. Hãy quay lại trang bắt đầu bài trắc nghiệm để làm lại.",
+        noQuestions: "Bài trắc nghiệm này chưa có câu hỏi nào.",
+        loadFailed: "Đã xảy ra lỗi khi tải bài trắc nghiệm này. Vui lòng thử lại sau.",
         reviewMode: "Chế độ xem lại",
         questionsCount: "{count} câu hỏi",
         score: "Điểm",
         timeLimit: "Giới hạn thời gian",
         timeRemaining: "Thời gian còn lại",
         noTimeLimit: "Không giới hạn thời gian",
-        exitQuiz: "Thoát quiz",
+        exitQuiz: "Thoát bài trắc nghiệm",
         backToResults: "Quay lại kết quả",
-        loading: "Đang tải quiz...",
-        unavailableTitle: "Quiz không khả dụng",
+        loading: "Đang tải bài trắc nghiệm...",
+        unavailableTitle: "Bài trắc nghiệm không khả dụng",
         resultsTitleSaved: "Đã ghi nhận bài nộp",
         resultsMessageSaved: "Các câu trả lời của bạn đã được lưu. Kết quả sẽ sớm hiển thị.",
         resultsLabelExcellent: "Xuất sắc",
@@ -1718,8 +1720,8 @@ export const messages = {
         resultsMessageNeedsReview: "Hãy xem lại các câu sai rồi làm lại khi bạn sẵn sàng.",
         resultsAnsweredSummary: "Bạn đã trả lời đúng {score} trên {total} câu. {message}",
         reviewAnswers: "Xem lại đáp án",
-        retakeQuiz: "Làm lại quiz",
-        backToQuizzes: "Quay lại danh sách quiz",
+        retakeQuiz: "Làm lại bài trắc nghiệm",
+        backToQuizzes: "Quay lại danh sách bài trắc nghiệm",
         reviewing: "Đang xem lại",
         questionProgress: "Câu hỏi {current} trên {total}",
         reviewProgress: "{score} trên {total} câu đúng",
@@ -1738,14 +1740,16 @@ export const messages = {
         previous: "Trước",
         next: "Tiếp",
         submitQuiz: "Nộp bài",
+        submittedSuccessNamed: "{name}, câu trả lời của bạn đã được nộp thành công.",
+        submittedSuccessAnonymous: "Câu trả lời của bạn đã được nộp thành công.",
         submitMoreOne: "Trả lời thêm 1 câu hỏi để nộp bài",
         submitMoreOther: "Trả lời thêm {count} câu hỏi để nộp bài",
         doneReviewing: "Hoàn tất xem lại",
-        leaveQuizTitle: "Rời khỏi quiz?",
+        leaveQuizTitle: "Rời khỏi bài trắc nghiệm?",
         leaveQuizDescription:
-          "Bạn chưa nộp bài quiz này. Nếu rời đi bây giờ, lượt làm hiện tại có thể sẽ không được tính.",
+          "Bạn chưa nộp bài trắc nghiệm này. Nếu rời đi bây giờ, lượt làm hiện tại có thể sẽ không được tính.",
         stayHere: "Ở lại đây",
-        leaveQuiz: "Rời quiz",
+        leaveQuiz: "Rời bài trắc nghiệm",
         clearAnswersTitle: "Xóa tất cả câu trả lời?",
         clearAnswersDescription:
           "Thao tác này sẽ xóa toàn bộ đáp án đã chọn của lượt làm này. Bạn vẫn có thể trả lời lại trước khi nộp bài.",
@@ -1757,10 +1761,10 @@ export const messages = {
     },
     results: {
       overview: {
-        pageTitle: "Kết quả quiz",
-        pageDescription: "Xem và phân tích kết quả của tất cả quiz.",
+        pageTitle: "Kết quả bài trắc nghiệm",
+        pageDescription: "Xem và phân tích kết quả của tất cả bài trắc nghiệm.",
         loadError: "Không thể tải kết quả. Vui lòng tải lại trang hoặc thử lại sau.",
-        totalQuizzes: "Tổng quiz",
+        totalQuizzes: "Tổng bài trắc nghiệm",
         submissions: "Lượt nộp",
         averageScore: "Điểm TB",
         resultSummary: "Tổng quan kết quả",
@@ -1773,17 +1777,17 @@ export const messages = {
         last7Days: "7 ngày qua",
         last30Days: "30 ngày qua",
         exportCsv: "Xuất CSV",
-        emptyTitle: "Không có quiz nào khớp với bộ lọc này",
-        emptyDescription: "Hãy điều chỉnh tìm kiếm, môn học hoặc bộ lọc ngày để xem hiệu suất quiz.",
-        pagination: "Hiển thị {start} đến {end} trên tổng {total} quiz",
-        paginationAria: "Phân trang hiệu suất quiz",
-        loadingTable: "Đang tải kết quả quiz",
+        emptyTitle: "Không có bài trắc nghiệm nào khớp với bộ lọc này",
+        emptyDescription: "Hãy điều chỉnh tìm kiếm, môn học hoặc bộ lọc ngày để xem hiệu suất bài trắc nghiệm.",
+        pagination: "Hiển thị {start} đến {end} trên tổng {total} bài trắc nghiệm",
+        paginationAria: "Phân trang hiệu suất bài trắc nghiệm",
+        loadingTable: "Đang tải kết quả bài trắc nghiệm",
         rowAria: "Xem bài nộp cho {title}",
         recentSubmissions: "Bài nộp gần đây",
         viewAll: "Xem tất cả",
-        searchPlaceholder: "Tìm quiz...",
-        defaultCsvName: "ket-qua-quiz.csv",
-        quiz: "Quiz",
+        searchPlaceholder: "Tìm bài trắc nghiệm...",
+        defaultCsvName: "ket-qua-bài trắc nghiệm.csv",
+        quiz: "Bài trắc nghiệm",
         subject: "Môn học",
         no: "STT",
         averageScoreLabel: "Điểm trung bình",
@@ -1795,20 +1799,20 @@ export const messages = {
         submissionsTab: "Bài nộp",
         submissionDetailTab: "Chi tiết bài nộp",
         loading: "Đang tải...",
-        backToResults: "Quay lại Kết quả Quiz",
-        loadErrorTitle: "Không thể tải kết quả quiz",
-        loadErrorDescription: "Đã xảy ra lỗi khi lấy dữ liệu quiz này. Vui lòng thử lại sau.",
+        backToResults: "Quay lại Kết quả Bài trắc nghiệm",
+        loadErrorTitle: "Không thể tải kết quả bài trắc nghiệm",
+        loadErrorDescription: "Đã xảy ra lỗi khi lấy dữ liệu bài trắc nghiệm này. Vui lòng thử lại sau.",
         breadcrumb: "Đường dẫn",
         exportCsv: "Xuất CSV",
         resultSummary: "Tổng quan kết quả",
         totalSubmissions: "Tổng lượt nộp",
         averageScore: "Điểm trung bình",
         averageTime: "Thời gian trung bình",
-        submissionsTitle: "Bài nộp của quiz",
+        submissionsTitle: "Bài nộp của bài trắc nghiệm",
         selectSubmissionTitle: "Chọn một bài nộp",
         selectSubmissionDescription: "Mở tab bài nộp để xem chi tiết người tham gia.",
-        notFoundTitle: "Không tìm thấy kết quả quiz",
-        notFoundDescription: "Quiz này không tồn tại hoặc bạn không có quyền truy cập.",
+        notFoundTitle: "Không tìm thấy kết quả bài trắc nghiệm",
+        notFoundDescription: "Bài trắc nghiệm này không tồn tại hoặc bạn không có quyền truy cập.",
         participant: "Người tham gia",
         timeTaken: "Thời gian làm",
         submittedAt: "Nộp lúc",
@@ -1837,7 +1841,7 @@ export const messages = {
       }
     },
     modals: {
-      shareQuiz: "Chia sẻ quiz",
+      shareQuiz: "Chia sẻ bài trắc nghiệm",
       privateAccessCode: "Mã truy cập riêng tư",
       clearSearch: "Xóa tìm kiếm",
       chooseView: "Chọn chế độ xem",

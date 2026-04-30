@@ -1,0 +1,479 @@
+[
+  {
+    "title": "Mathematics Fundamentals",
+    "description": "Test your knowledge of basic arithmetic, algebra, and geometry concepts.",
+    "subject": "Mathematics",
+    "difficulty": "Easy",
+    "timeLimit": null,
+    "isPrivate": false,
+    "allowSummary": true,
+    "allowReviewAnswers": true,
+    "allowRetake": true,
+    "questions": [
+      {
+        "prompt": "What is 15 × 8?",
+        "options": ["100", "110", "120", "130"],
+        "correctOptionIndex": 2,
+        "explanation": "15 × 8 = 120. You can compute this as 15 × 8 = (10 + 5) × 8 = 80 + 40 = 120."
+      },
+      {
+        "prompt": "Solve for x: 3x + 9 = 27",
+        "options": ["x = 4", "x = 6", "x = 8", "x = 9"],
+        "correctOptionIndex": 1,
+        "explanation": "3x + 9 = 27 → 3x = 18 → x = 6."
+      },
+      {
+        "prompt": "What is the area of a rectangle with width 7 and height 5?",
+        "options": ["24", "30", "35", "40"],
+        "correctOptionIndex": 2,
+        "explanation": "Area = width × height = 7 × 5 = 35."
+      },
+      {
+        "prompt": "What is the value of π (pi) to two decimal places?",
+        "options": ["3.12", "3.14", "3.16", "3.18"],
+        "correctOptionIndex": 1,
+        "explanation": "Pi (π) ≈ 3.14159…, which rounds to 3.14."
+      },
+      {
+        "prompt": "What is the square root of 144?",
+        "options": ["10", "11", "12", "13"],
+        "correctOptionIndex": 2,
+        "explanation": "√144 = 12, because 12 × 12 = 144."
+      }
+    ]
+  },
+  {
+    "title": "World History: Ancient Civilizations",
+    "description": "Explore the rise and fall of ancient civilizations from Egypt to Rome.",
+    "subject": "History",
+    "difficulty": "Medium",
+    "timeLimit": 20,
+    "isPrivate": false,
+    "allowSummary": true,
+    "allowReviewAnswers": true,
+    "allowRetake": true,
+    "questions": [
+      {
+        "prompt": "Which ancient wonder was located in Alexandria, Egypt?",
+        "options": ["The Colosseum", "The Lighthouse of Alexandria", "The Parthenon", "The Pantheon"],
+        "correctOptionIndex": 1,
+        "explanation": "The Lighthouse of Alexandria (Pharos of Alexandria) was one of the Seven Wonders of the Ancient World, located on the island of Pharos near Alexandria."
+      },
+      {
+        "prompt": "Who was the first emperor of Rome?",
+        "options": ["Julius Caesar", "Nero", "Augustus", "Caligula"],
+        "correctOptionIndex": 2,
+        "explanation": "Augustus (born Gaius Octavius) became the first Roman Emperor in 27 BC after defeating Mark Antony and Cleopatra."
+      },
+      {
+        "prompt": "The Great Wall of China was primarily built to protect against which group?",
+        "options": ["Mongols", "Persians", "Vikings", "Romans"],
+        "correctOptionIndex": 0,
+        "explanation": "The Great Wall was built over many centuries, primarily to defend against raids by nomadic peoples from the north, including the Mongols."
+      },
+      {
+        "prompt": "In which river valley did the Mesopotamian civilization develop?",
+        "options": ["Nile", "Indus", "Tigris and Euphrates", "Yellow River"],
+        "correctOptionIndex": 2,
+        "explanation": "Mesopotamia, meaning 'land between rivers' in Greek, developed in the valley of the Tigris and Euphrates rivers (modern-day Iraq)."
+      },
+      {
+        "prompt": "Which pharaoh is associated with the construction of the Great Pyramid of Giza?",
+        "options": ["Ramesses II", "Tutankhamun", "Cleopatra", "Khufu"],
+        "correctOptionIndex": 3,
+        "explanation": "The Great Pyramid of Giza was built as a tomb for Pharaoh Khufu (also known as Cheops) around 2560 BC."
+      }
+    ]
+  },
+  {
+    "title": "General Science: Earth & Space",
+    "description": "Questions about our planet, solar system, and the universe beyond.",
+    "subject": "Science",
+    "difficulty": "Easy",
+    "timeLimit": null,
+    "isPrivate": false,
+    "allowSummary": true,
+    "allowReviewAnswers": true,
+    "allowRetake": true,
+    "questions": [
+      {
+        "prompt": "How many planets are in our solar system?",
+        "options": ["7", "8", "9", "10"],
+        "correctOptionIndex": 1,
+        "explanation": "Since Pluto was reclassified as a dwarf planet in 2006, our solar system officially has 8 planets."
+      },
+      {
+        "prompt": "What is the closest star to Earth (other than the Sun)?",
+        "options": ["Betelgeuse", "Sirius", "Proxima Centauri", "Vega"],
+        "correctOptionIndex": 2,
+        "explanation": "Proxima Centauri is the nearest star to the Sun, about 4.24 light-years away. It is part of the Alpha Centauri star system."
+      },
+      {
+        "prompt": "What layer of the atmosphere do weather phenomena primarily occur in?",
+        "options": ["Stratosphere", "Mesosphere", "Thermosphere", "Troposphere"],
+        "correctOptionIndex": 3,
+        "explanation": "The troposphere is the lowest layer of Earth's atmosphere, extending to about 12 km altitude, where most weather occurs."
+      },
+      {
+        "prompt": "What causes the seasons on Earth?",
+        "options": [
+          "Earth's distance from the Sun",
+          "Earth's axial tilt",
+          "Solar flares",
+          "The Moon's gravitational pull"
+        ],
+        "correctOptionIndex": 1,
+        "explanation": "Earth's axial tilt of about 23.5° causes different hemispheres to receive more direct sunlight at different times of the year."
+      },
+      {
+        "prompt": "What is the chemical symbol for water?",
+        "options": ["WA", "W", "H2O", "HO2"],
+        "correctOptionIndex": 2,
+        "explanation": "Water is composed of two hydrogen atoms and one oxygen atom, giving it the chemical formula H₂O."
+      }
+    ]
+  },
+  {
+    "title": "English Literature Classics",
+    "description": "Test your knowledge of classic novels, poets, and literary concepts.",
+    "subject": "Literature",
+    "difficulty": "Medium",
+    "timeLimit": 15,
+    "isPrivate": false,
+    "allowSummary": true,
+    "allowReviewAnswers": true,
+    "allowRetake": false,
+    "questions": [
+      {
+        "prompt": "Who wrote 'Pride and Prejudice'?",
+        "options": ["Charlotte Brontë", "Mary Shelley", "Jane Austen", "Virginia Woolf"],
+        "correctOptionIndex": 2,
+        "explanation": "Jane Austen wrote 'Pride and Prejudice', published in 1813. It follows the romantic development of Elizabeth Bennet."
+      },
+      {
+        "prompt": "In Shakespeare's 'Hamlet', what is the name of Hamlet's father's ghost?",
+        "options": ["Horatio", "King Hamlet", "Claudius", "Polonius"],
+        "correctOptionIndex": 1,
+        "explanation": "The ghost is that of King Hamlet, Hamlet's father, who was murdered by Claudius."
+      },
+      {
+        "prompt": "Which novel begins with the line 'Call me Ishmael'?",
+        "options": ["The Old Man and the Sea", "Moby-Dick", "Billy Budd", "Lord Jim"],
+        "correctOptionIndex": 1,
+        "explanation": "'Call me Ishmael' is the opening line of Herman Melville's 'Moby-Dick' (1851)."
+      },
+      {
+        "prompt": "What is the narrative technique where the story is told from a first-person perspective called?",
+        "options": ["Third-person omniscient", "Stream of consciousness", "First-person narration", "Unreliable narrator"],
+        "correctOptionIndex": 2,
+        "explanation": "First-person narration uses 'I' or 'we' as the narrator is a character in the story sharing their personal perspective."
+      },
+      {
+        "prompt": "George Orwell's '1984' is set in which fictional superstate?",
+        "options": ["Eurasia", "Oceania", "Eastasia", "Airstrip One"],
+        "correctOptionIndex": 1,
+        "explanation": "The story is set in Oceania, one of three superstates in Orwell's dystopian world. The city of London (called Airstrip One) is where the protagonist Winston Smith lives."
+      }
+    ]
+  },
+  {
+    "title": "Computer Science Basics",
+    "description": "Fundamental concepts of computer science including algorithms, data structures, and programming.",
+    "subject": "Technology",
+    "difficulty": "Medium",
+    "timeLimit": 25,
+    "isPrivate": false,
+    "allowSummary": true,
+    "allowReviewAnswers": true,
+    "allowRetake": true,
+    "questions": [
+      {
+        "prompt": "What does CPU stand for?",
+        "options": [
+          "Central Processing Unit",
+          "Computer Personal Unit",
+          "Central Program Utility",
+          "Core Processing Utility"
+        ],
+        "correctOptionIndex": 0,
+        "explanation": "CPU stands for Central Processing Unit — the primary component of a computer that executes instructions."
+      },
+      {
+        "prompt": "What is the time complexity of binary search on a sorted array?",
+        "options": ["O(n)", "O(n²)", "O(log n)", "O(n log n)"],
+        "correctOptionIndex": 2,
+        "explanation": "Binary search repeatedly halves the search space, giving O(log n) time complexity."
+      },
+      {
+        "prompt": "Which data structure operates on a Last-In, First-Out (LIFO) principle?",
+        "options": ["Queue", "Stack", "Linked List", "Tree"],
+        "correctOptionIndex": 1,
+        "explanation": "A stack follows LIFO — the last element pushed is the first one popped, like a stack of plates."
+      },
+      {
+        "prompt": "In binary, what is the decimal value of 1010?",
+        "options": ["8", "9", "10", "12"],
+        "correctOptionIndex": 2,
+        "explanation": "1010 in binary = 1×8 + 0×4 + 1×2 + 0×1 = 8 + 2 = 10."
+      },
+      {
+        "prompt": "What does HTML stand for?",
+        "options": [
+          "HyperText Markup Language",
+          "High Transfer Markup Language",
+          "HyperText Management Language",
+          "Hyperlink Text Markup Logic"
+        ],
+        "correctOptionIndex": 0,
+        "explanation": "HTML stands for HyperText Markup Language — the standard language for creating web pages."
+      },
+      {
+        "prompt": "Which sorting algorithm has the best average-case time complexity?",
+        "options": ["Bubble Sort", "Insertion Sort", "Quick Sort", "Selection Sort"],
+        "correctOptionIndex": 2,
+        "explanation": "Quick Sort has an average-case time complexity of O(n log n), making it one of the fastest practical sorting algorithms."
+      }
+    ]
+  },
+  {
+    "title": "Geography: Countries & Capitals",
+    "description": "How well do you know the capitals and geography of countries around the world?",
+    "subject": "Geography",
+    "difficulty": "Easy",
+    "timeLimit": null,
+    "isPrivate": false,
+    "allowSummary": true,
+    "allowReviewAnswers": true,
+    "allowRetake": true,
+    "questions": [
+      {
+        "prompt": "What is the capital of Australia?",
+        "options": ["Sydney", "Melbourne", "Canberra", "Brisbane"],
+        "correctOptionIndex": 2,
+        "explanation": "Canberra is the capital of Australia. It was purpose-built as the capital in 1913 as a compromise between Sydney and Melbourne."
+      },
+      {
+        "prompt": "Which country has the largest land area in the world?",
+        "options": ["Canada", "China", "United States", "Russia"],
+        "correctOptionIndex": 3,
+        "explanation": "Russia is the largest country by land area, covering about 17.1 million km² — nearly twice the size of Canada."
+      },
+      {
+        "prompt": "What is the capital of Brazil?",
+        "options": ["São Paulo", "Rio de Janeiro", "Brasília", "Salvador"],
+        "correctOptionIndex": 2,
+        "explanation": "Brasília has been Brazil's capital since 1960, when it replaced Rio de Janeiro. It was planned and built from scratch."
+      },
+      {
+        "prompt": "On which continent is the Sahara Desert located?",
+        "options": ["Asia", "Australia", "South America", "Africa"],
+        "correctOptionIndex": 3,
+        "explanation": "The Sahara Desert is in North Africa, spanning over 9 million km² across multiple countries."
+      },
+      {
+        "prompt": "The Amazon River flows primarily through which country?",
+        "options": ["Colombia", "Peru", "Venezuela", "Brazil"],
+        "correctOptionIndex": 3,
+        "explanation": "About 60% of the Amazon Basin lies within Brazil. The river flows roughly 6,400 km before emptying into the Atlantic Ocean."
+      }
+    ]
+  },
+  {
+    "title": "Human Biology",
+    "description": "Explore the structure and function of the human body systems.",
+    "subject": "Science",
+    "difficulty": "Medium",
+    "timeLimit": 20,
+    "isPrivate": false,
+    "allowSummary": true,
+    "allowReviewAnswers": true,
+    "allowRetake": true,
+    "questions": [
+      {
+        "prompt": "How many bones are in the adult human body?",
+        "options": ["196", "206", "216", "226"],
+        "correctOptionIndex": 1,
+        "explanation": "An adult human body has 206 bones. Babies are born with around 270–300 bones, which fuse together as they grow."
+      },
+      {
+        "prompt": "Which organ is responsible for producing insulin?",
+        "options": ["Liver", "Kidney", "Pancreas", "Spleen"],
+        "correctOptionIndex": 2,
+        "explanation": "The pancreas produces insulin, a hormone that regulates blood glucose levels. Lack of insulin causes diabetes."
+      },
+      {
+        "prompt": "What is the largest organ in the human body?",
+        "options": ["Liver", "Brain", "Skin", "Lungs"],
+        "correctOptionIndex": 2,
+        "explanation": "The skin is the largest organ, covering about 1.7–2 m² in adults and serving as a protective barrier."
+      },
+      {
+        "prompt": "What type of blood cells are primarily responsible for fighting infections?",
+        "options": ["Red blood cells", "Platelets", "White blood cells", "Plasma cells"],
+        "correctOptionIndex": 2,
+        "explanation": "White blood cells (leukocytes) are part of the immune system and defend the body against infections and disease."
+      },
+      {
+        "prompt": "Which part of the brain controls balance and coordination?",
+        "options": ["Cerebrum", "Medulla oblongata", "Cerebellum", "Thalamus"],
+        "correctOptionIndex": 2,
+        "explanation": "The cerebellum, located at the back and bottom of the brain, controls balance, coordination, and fine motor movements."
+      }
+    ]
+  },
+  {
+    "title": "Advanced Mathematics: Calculus",
+    "description": "Challenging questions on derivatives, integrals, and limits.",
+    "subject": "Mathematics",
+    "difficulty": "Hard",
+    "timeLimit": 30,
+    "isPrivate": false,
+    "allowSummary": true,
+    "allowReviewAnswers": true,
+    "allowRetake": false,
+    "questions": [
+      {
+        "prompt": "What is the derivative of f(x) = x³ + 2x² − 5x + 3?",
+        "options": ["3x² + 4x − 5", "3x² + 2x − 5", "x² + 4x − 5", "3x³ + 4x − 5"],
+        "correctOptionIndex": 0,
+        "explanation": "Using the power rule: d/dx(x³) = 3x², d/dx(2x²) = 4x, d/dx(−5x) = −5, d/dx(3) = 0. Result: 3x² + 4x − 5."
+      },
+      {
+        "prompt": "What is the integral of f(x) = 2x?",
+        "options": ["2x² + C", "x² + C", "x + C", "2 + C"],
+        "correctOptionIndex": 1,
+        "explanation": "∫2x dx = 2 · (x²/2) + C = x² + C."
+      },
+      {
+        "prompt": "What is lim(x→0) [sin(x)/x]?",
+        "options": ["0", "∞", "undefined", "1"],
+        "correctOptionIndex": 3,
+        "explanation": "This is a classic limit. Using L'Hôpital's rule or the standard squeeze theorem: lim(x→0) sin(x)/x = 1."
+      },
+      {
+        "prompt": "What is the second derivative of f(x) = e^x?",
+        "options": ["0", "1", "x·e^x", "e^x"],
+        "correctOptionIndex": 3,
+        "explanation": "The derivative of e^x is e^x, and the derivative of e^x is still e^x. So the second derivative is also e^x."
+      },
+      {
+        "prompt": "Which rule is used to differentiate a product of two functions?",
+        "options": ["Chain Rule", "Product Rule", "Quotient Rule", "Power Rule"],
+        "correctOptionIndex": 1,
+        "explanation": "The Product Rule states: if h(x) = f(x)·g(x), then h'(x) = f'(x)·g(x) + f(x)·g'(x)."
+      }
+    ]
+  },
+  {
+    "title": "Music Theory Fundamentals",
+    "description": "Test your understanding of scales, chords, rhythm, and music notation.",
+    "subject": "Arts",
+    "difficulty": "Medium",
+    "timeLimit": null,
+    "isPrivate": false,
+    "allowSummary": true,
+    "allowReviewAnswers": true,
+    "allowRetake": true,
+    "questions": [
+      {
+        "prompt": "How many semitones are in an octave?",
+        "options": ["8", "10", "12", "14"],
+        "correctOptionIndex": 2,
+        "explanation": "An octave consists of 12 semitones in Western music (the chromatic scale)."
+      },
+      {
+        "prompt": "Which note is a perfect fifth above C?",
+        "options": ["F", "A", "G", "B"],
+        "correctOptionIndex": 2,
+        "explanation": "A perfect fifth above C is G. Counting 7 semitones up from C: C–C#–D–D#–E–F–F#–G."
+      },
+      {
+        "prompt": "What does 'forte' mean in music?",
+        "options": ["Slow", "Fast", "Loud", "Soft"],
+        "correctOptionIndex": 2,
+        "explanation": "Forte (f) is an Italian musical term meaning loud or strong."
+      },
+      {
+        "prompt": "A major chord is composed of which intervals?",
+        "options": [
+          "Root, minor third, perfect fifth",
+          "Root, major third, perfect fifth",
+          "Root, major third, minor sixth",
+          "Root, minor third, tritone"
+        ],
+        "correctOptionIndex": 1,
+        "explanation": "A major chord is built from a root, a major third (4 semitones up), and a perfect fifth (7 semitones up)."
+      },
+      {
+        "prompt": "What time signature has 3 beats per measure, each beat being a quarter note?",
+        "options": ["4/4", "2/4", "3/4", "6/8"],
+        "correctOptionIndex": 2,
+        "explanation": "3/4 time has 3 quarter-note beats per measure. It is commonly used for waltzes."
+      }
+    ]
+  },
+  {
+    "title": "Programming Languages Challenge",
+    "description": "Advanced questions covering multiple programming languages and paradigms.",
+    "subject": "Technology",
+    "difficulty": "Hard",
+    "timeLimit": 30,
+    "isPrivate": false,
+    "allowSummary": true,
+    "allowReviewAnswers": false,
+    "allowRetake": false,
+    "questions": [
+      {
+        "prompt": "In Python, what does the `*args` parameter in a function definition allow?",
+        "options": [
+          "Pass keyword arguments",
+          "Pass a variable number of positional arguments",
+          "Unpack a dictionary",
+          "Create a generator"
+        ],
+        "correctOptionIndex": 1,
+        "explanation": "`*args` collects any extra positional arguments into a tuple, allowing functions to accept a variable number of inputs."
+      },
+      {
+        "prompt": "Which of the following is NOT a valid JavaScript data type?",
+        "options": ["undefined", "symbol", "float", "bigint"],
+        "correctOptionIndex": 2,
+        "explanation": "JavaScript does not have a 'float' type. Numbers (integers and decimals) are all of type 'number'."
+      },
+      {
+        "prompt": "What is the output of `console.log(typeof null)` in JavaScript?",
+        "options": ["'null'", "'undefined'", "'object'", "'boolean'"],
+        "correctOptionIndex": 2,
+        "explanation": "This is a known JavaScript bug: `typeof null` returns 'object' due to a legacy implementation quirk in the original engine."
+      },
+      {
+        "prompt": "In Rust, what does 'ownership' primarily prevent?",
+        "options": ["Stack overflow", "Deadlocks", "Memory leaks and data races", "Integer overflow"],
+        "correctOptionIndex": 2,
+        "explanation": "Rust's ownership system guarantees memory safety without a garbage collector by preventing memory leaks, dangling pointers, and data races at compile time."
+      },
+      {
+        "prompt": "What does the SQL keyword `DISTINCT` do?",
+        "options": [
+          "Sorts the result set",
+          "Filters rows based on a condition",
+          "Returns only unique rows",
+          "Joins two tables"
+        ],
+        "correctOptionIndex": 2,
+        "explanation": "DISTINCT removes duplicate rows from the result set, returning only unique combinations of the selected columns."
+      },
+      {
+        "prompt": "In object-oriented programming, what is 'polymorphism'?",
+        "options": [
+          "The ability to inherit from multiple classes",
+          "The ability of objects of different types to be treated as a common type",
+          "Hiding internal implementation details",
+          "Bundling data and methods together"
+        ],
+        "correctOptionIndex": 1,
+        "explanation": "Polymorphism allows objects of different classes to be treated as instances of a shared base class, enabling flexible and reusable code."
+      }
+    ]
+  }
+]

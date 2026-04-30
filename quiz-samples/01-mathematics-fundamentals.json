@@ -1,0 +1,68 @@
+{
+  "title": "Mathematics Fundamentals",
+  "description": "Test your knowledge of basic arithmetic, algebra, and geometry concepts.",
+  "subject": "Mathematics",
+  "difficulty": "Easy",
+  "timeLimit": null,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": true,
+  "allowRetake": true,
+  "questions": [
+    {
+      "prompt": "What is 15 × 8?",
+      "options": [
+        "100",
+        "110",
+        "120",
+        "130"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "15 × 8 = 120. You can compute this as 15 × 8 = (10 + 5) × 8 = 80 + 40 = 120."
+    },
+    {
+      "prompt": "Solve for x: 3x + 9 = 27",
+      "options": [
+        "x = 4",
+        "x = 6",
+        "x = 8",
+        "x = 9"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "3x + 9 = 27 → 3x = 18 → x = 6."
+    },
+    {
+      "prompt": "What is the area of a rectangle with width 7 and height 5?",
+      "options": [
+        "24",
+        "30",
+        "35",
+        "40"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Area = width × height = 7 × 5 = 35."
+    },
+    {
+      "prompt": "What is the value of π (pi) to two decimal places?",
+      "options": [
+        "3.12",
+        "3.14",
+        "3.16",
+        "3.18"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "Pi (π) ≈ 3.14159…, which rounds to 3.14."
+    },
+    {
+      "prompt": "What is the square root of 144?",
+      "options": [
+        "10",
+        "11",
+        "12",
+        "13"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "√144 = 12, because 12 × 12 = 144."
+    }
+  ]
+}

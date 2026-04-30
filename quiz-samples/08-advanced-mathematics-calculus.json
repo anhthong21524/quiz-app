@@ -1,0 +1,68 @@
+{
+  "title": "Advanced Mathematics: Calculus",
+  "description": "Challenging questions on derivatives, integrals, and limits.",
+  "subject": "Mathematics",
+  "difficulty": "Hard",
+  "timeLimit": 30,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": true,
+  "allowRetake": false,
+  "questions": [
+    {
+      "prompt": "What is the derivative of f(x) = x³ + 2x² − 5x + 3?",
+      "options": [
+        "3x² + 4x − 5",
+        "3x² + 2x − 5",
+        "x² + 4x − 5",
+        "3x³ + 4x − 5"
+      ],
+      "correctOptionIndex": 0,
+      "explanation": "Using the power rule: d/dx(x³) = 3x², d/dx(2x²) = 4x, d/dx(−5x) = −5, d/dx(3) = 0. Result: 3x² + 4x − 5."
+    },
+    {
+      "prompt": "What is the integral of f(x) = 2x?",
+      "options": [
+        "2x² + C",
+        "x² + C",
+        "x + C",
+        "2 + C"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "∫2x dx = 2 · (x²/2) + C = x² + C."
+    },
+    {
+      "prompt": "What is lim(x→0) [sin(x)/x]?",
+      "options": [
+        "0",
+        "∞",
+        "undefined",
+        "1"
+      ],
+      "correctOptionIndex": 3,
+      "explanation": "This is a classic limit. Using L'Hôpital's rule or the standard squeeze theorem: lim(x→0) sin(x)/x = 1."
+    },
+    {
+      "prompt": "What is the second derivative of f(x) = e^x?",
+      "options": [
+        "0",
+        "1",
+        "x·e^x",
+        "e^x"
+      ],
+      "correctOptionIndex": 3,
+      "explanation": "The derivative of e^x is e^x, and the derivative of e^x is still e^x. So the second derivative is also e^x."
+    },
+    {
+      "prompt": "Which rule is used to differentiate a product of two functions?",
+      "options": [
+        "Chain Rule",
+        "Product Rule",
+        "Quotient Rule",
+        "Power Rule"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "The Product Rule states: if h(x) = f(x)·g(x), then h'(x) = f'(x)·g(x) + f(x)·g'(x)."
+    }
+  ]
+}

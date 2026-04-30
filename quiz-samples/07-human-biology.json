@@ -1,0 +1,68 @@
+{
+  "title": "Human Biology",
+  "description": "Explore the structure and function of the human body systems.",
+  "subject": "Science",
+  "difficulty": "Medium",
+  "timeLimit": 20,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": true,
+  "allowRetake": true,
+  "questions": [
+    {
+      "prompt": "How many bones are in the adult human body?",
+      "options": [
+        "196",
+        "206",
+        "216",
+        "226"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "An adult human body has 206 bones. Babies are born with around 270–300 bones, which fuse together as they grow."
+    },
+    {
+      "prompt": "Which organ is responsible for producing insulin?",
+      "options": [
+        "Liver",
+        "Kidney",
+        "Pancreas",
+        "Spleen"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "The pancreas produces insulin, a hormone that regulates blood glucose levels. Lack of insulin causes diabetes."
+    },
+    {
+      "prompt": "What is the largest organ in the human body?",
+      "options": [
+        "Liver",
+        "Brain",
+        "Skin",
+        "Lungs"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "The skin is the largest organ, covering about 1.7–2 m² in adults and serving as a protective barrier."
+    },
+    {
+      "prompt": "What type of blood cells are primarily responsible for fighting infections?",
+      "options": [
+        "Red blood cells",
+        "Platelets",
+        "White blood cells",
+        "Plasma cells"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "White blood cells (leukocytes) are part of the immune system and defend the body against infections and disease."
+    },
+    {
+      "prompt": "Which part of the brain controls balance and coordination?",
+      "options": [
+        "Cerebrum",
+        "Medulla oblongata",
+        "Cerebellum",
+        "Thalamus"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "The cerebellum, located at the back and bottom of the brain, controls balance, coordination, and fine motor movements."
+    }
+  ]
+}

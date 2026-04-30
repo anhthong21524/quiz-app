@@ -427,17 +427,17 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
     title: "Cách dùng",
     titleAccent: "Quiz App",
     intro:
-      "Mọi điều bạn cần biết - dù bạn đang tạo quiz đầu tiên hay tham gia làm quiz với vai trò người học.",
+      "Mọi điều bạn cần biết - dù bạn đang tạo bài trắc nghiệm đầu tiên hay tham gia làm bài trắc nghiệm với vai trò người học.",
     tabs: [
       { id: "getting-started", label: "Bắt đầu" },
-      { id: "quiz-creator", label: "Dành cho người tạo quiz" },
+      { id: "quiz-creator", label: "Dành cho người tạo bài trắc nghiệm" },
       { id: "participant", label: "Dành cho người tham gia" }
     ],
     gettingStarted: {
       hero: {
         src: "/guide-images/home.jpg",
         alt: "Trang chủ Quiz App",
-        caption: "Từ trang chủ, bạn có thể bắt đầu làm quiz hoặc duyệt quiz công khai mà không cần tài khoản."
+        caption: "Từ trang chủ, bạn có thể bắt đầu làm bài trắc nghiệm hoặc duyệt bài trắc nghiệm công khai mà không cần tài khoản."
       },
       quickStart: {
         title: "Bắt đầu nhanh",
@@ -445,17 +445,17 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
         steps: [
           {
             title: "Mở ứng dụng",
-            description: "Bắt đầu từ trang chủ công khai. Bất kỳ ai cũng có thể duyệt quiz công khai mà không cần đăng nhập."
+            description: "Bắt đầu từ trang chủ công khai. Bất kỳ ai cũng có thể duyệt bài trắc nghiệm công khai mà không cần đăng nhập."
           },
           {
-            title: "Đăng nhập để tạo và quản lý quiz",
+            title: "Đăng nhập để tạo và quản lý bài trắc nghiệm",
             description:
               "Dùng nút Đăng nhập trên thanh đầu trang, sau đó nhập email và mật khẩu để vào các trang quản lý."
           },
           {
             title: "Trang cần quyền truy cập sẽ chuyển sang đăng nhập",
             description:
-              "Nếu bạn mở bảng điều khiển, trình tạo quiz hoặc trang kết quả khi chưa đăng nhập, Quiz App sẽ đưa bạn tới trang đăng nhập trước."
+              "Nếu bạn mở bảng điều khiển, trình tạo bài trắc nghiệm hoặc trang kết quả khi chưa đăng nhập, Quiz App sẽ đưa bạn tới trang đăng nhập trước."
           }
         ]
       },
@@ -487,7 +487,7 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
       },
       createAccount: {
         title: "Tạo tài khoản",
-        intro: "Người dùng mới có thể tự đăng ký và bắt đầu tạo quiz ngay.",
+        intro: "Người dùng mới có thể tự đăng ký và bắt đầu tạo bài trắc nghiệm ngay.",
         steps: [
           {
             title: "Mở trang đăng nhập",
@@ -515,16 +515,16 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
         publicPages: [
           "Trang chủ - tổng quan nhanh về ứng dụng",
           "Giới thiệu - câu chuyện sản phẩm và các điểm nổi bật",
-          "Bài quiz - duyệt các quiz đã xuất bản",
+          "Bài trắc nghiệm - duyệt các bài trắc nghiệm đã xuất bản",
           "Hướng dẫn - trang hỗ trợ này",
           "Đăng nhập - đăng nhập hoặc tạo tài khoản"
         ],
         managementTitle: "Trang quản lý - cần đăng nhập",
         managementPages: [
           "Bảng điều khiển - hoạt động và số liệu tổng quan",
-          "Quiz của tôi - tìm kiếm, lọc, xuất bản và quản lý quiz",
-          "Tạo quiz - xây dựng một quiz mới từ đầu",
-          "Kết quả quiz - xem lượt nộp, điểm số và phân tích",
+          "Bài trắc nghiệm của tôi - tìm kiếm, lọc, xuất bản và quản lý bài trắc nghiệm",
+          "Tạo bài trắc nghiệm - xây dựng một bài trắc nghiệm mới từ đầu",
+          "Kết quả bài trắc nghiệm - xem lượt nộp, điểm số và phân tích",
           "Hồ sơ và Cài đặt - quản lý tài khoản, môn học và mật khẩu"
         ]
       }
@@ -533,49 +533,49 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
       dashboardShot: {
         src: "/guide-images/management-dashboard.jpg",
         alt: "Bảng điều khiển quản lý",
-        caption: "Bảng điều khiển giúp người tạo quiz theo dõi tổng quan, hoạt động gần đây và bước tiếp theo."
+        caption: "Bảng điều khiển giúp người tạo bài trắc nghiệm theo dõi tổng quan, hoạt động gần đây và bước tiếp theo."
       },
       dashboard: {
         title: "Bảng điều khiển quản lý",
-        intro: "Sau khi đăng nhập, đây là nơi chính để theo dõi và điều phối công việc tạo quiz.",
+        intro: "Sau khi đăng nhập, đây là nơi chính để theo dõi và điều phối công việc tạo bài trắc nghiệm.",
         cards: [
           {
             title: "Số liệu nhanh",
             items: [
-              "Xem tổng số quiz, số quiz đã xuất bản và lượt nộp gần đây trong một màn hình.",
+              "Xem tổng số bài trắc nghiệm, số bài trắc nghiệm đã xuất bản và lượt nộp gần đây trong một màn hình.",
               "Dùng các thẻ thống kê để biết việc gì cần ưu tiên tiếp theo."
             ]
           },
           {
-            title: "Quiz gần đây",
+            title: "Bài trắc nghiệm gần đây",
             items: [
-              "Tiếp tục chỉnh sửa những quiz còn dang dở ngay từ danh sách gần đây.",
-              "Mở nhanh một quiz đã xuất bản để xem hoặc quản lý."
+              "Tiếp tục chỉnh sửa những bài trắc nghiệm còn dang dở ngay từ danh sách gần đây.",
+              "Mở nhanh một bài trắc nghiệm đã xuất bản để xem hoặc quản lý."
             ]
           },
           {
             title: "Thao tác nhanh",
             items: [
-              "Tạo quiz mới từ nút hành động chính.",
+              "Tạo bài trắc nghiệm mới từ nút hành động chính.",
               "Đi từ màn hình tổng quan sang chỉnh sửa mà không phải qua nhiều bước."
             ]
           }
         ]
       },
       createShot: {
-        src: "/guide-images/create-quiz.jpg",
-        alt: "Trang tạo quiz",
-        caption: "Trình tạo quiz hướng dẫn bạn qua phần cấu hình, câu hỏi và phản hồi đáp án."
+        src: "/guide-images/create-bài trắc nghiệm.jpg",
+        alt: "Trang tạo bài trắc nghiệm",
+        caption: "Trình tạo bài trắc nghiệm hướng dẫn bạn qua phần cấu hình, câu hỏi và phản hồi đáp án."
       },
       createFlow: {
-        title: "Tạo và xuất bản quiz",
-        intro: "Trình tạo quiz được chia thành các bước rõ ràng để bạn đi từ ý tưởng tới quiz hoàn chỉnh nhanh hơn.",
+        title: "Tạo và xuất bản bài trắc nghiệm",
+        intro: "Trình tạo bài trắc nghiệm được chia thành các bước rõ ràng để bạn đi từ ý tưởng tới bài trắc nghiệm hoàn chỉnh nhanh hơn.",
         cards: [
           {
             title: "Cấu hình",
             items: [
               "Thiết lập tiêu đề, mô tả, môn học, số câu hỏi và mức độ khó.",
-              "Chọn quiz riêng tư, giới hạn thời gian, xem lại đáp án hoặc cho phép làm lại."
+              "Chọn bài trắc nghiệm riêng tư, giới hạn thời gian, xem lại đáp án hoặc cho phép làm lại."
             ]
           },
           {
@@ -588,16 +588,16 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
           {
             title: "Xuất bản",
             items: [
-              "Lưu quiz trước, sau đó xuất bản khi đã sẵn sàng cho người tham gia.",
-              "Quiz riêng tư sẽ có mã truy cập để bạn chia sẻ trực tiếp."
+              "Lưu bài trắc nghiệm trước, sau đó xuất bản khi đã sẵn sàng cho người tham gia.",
+              "Bài trắc nghiệm riêng tư sẽ có mã truy cập để bạn chia sẻ trực tiếp."
             ]
           }
         ]
       },
       resultsShot: {
-        src: "/guide-images/quiz-results.jpg",
-        alt: "Trang kết quả quiz",
-        caption: "Kết quả giúp người tạo quiz hiểu mức độ tham gia, điểm số và những phần người học còn vướng."
+        src: "/guide-images/bài trắc nghiệm-results.jpg",
+        alt: "Trang kết quả bài trắc nghiệm",
+        caption: "Kết quả giúp người tạo bài trắc nghiệm hiểu mức độ tham gia, điểm số và những phần người học còn vướng."
       },
       results: {
         title: "Xem kết quả và cải thiện",
@@ -606,14 +606,14 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
           {
             title: "Tổng quan",
             items: [
-              "So sánh các quiz theo số lượt nộp, điểm trung bình và hiệu suất gần đây.",
+              "So sánh các bài trắc nghiệm theo số lượt nộp, điểm trung bình và hiệu suất gần đây.",
               "Lọc kết quả theo môn học hoặc khoảng thời gian."
             ]
           },
           {
             title: "Chi tiết lượt nộp",
             items: [
-              "Mở từng quiz để xem các bài làm của người tham gia.",
+              "Mở từng bài trắc nghiệm để xem các bài làm của người tham gia.",
               "Xem hiệu suất theo từng câu trả lời để phát hiện lỗi lặp lại."
             ]
           },
@@ -621,7 +621,7 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
             title: "Bước tiếp theo",
             items: [
               "Cập nhật những câu hỏi gây nhầm lẫn dựa trên điểm thấp hoặc lỗi lặp lại.",
-              "Xuất bản lại quiz đã cải thiện để người học luyện tập thêm."
+              "Xuất bản lại bài trắc nghiệm đã cải thiện để người học luyện tập thêm."
             ]
           }
         ]
@@ -629,37 +629,37 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
     },
     participant: {
       publicShot: {
-        src: "/guide-images/public-quizzes.jpg",
-        alt: "Trang quiz công khai",
-        caption: "Duyệt tất cả quiz công khai đang khả dụng hoặc dùng mã truy cập để mở quiz riêng tư."
+        src: "/guide-images/public-bài trắc nghiệmzes.jpg",
+        alt: "Trang bài trắc nghiệm công khai",
+        caption: "Duyệt tất cả bài trắc nghiệm công khai đang khả dụng hoặc dùng mã truy cập để mở bài trắc nghiệm riêng tư."
       },
       publicQuiz: {
-        title: "Làm quiz công khai",
-        intro: "Người tham gia có thể bắt đầu một quiz công khai mà không cần tạo tài khoản.",
+        title: "Làm bài trắc nghiệm công khai",
+        intro: "Người tham gia có thể bắt đầu một bài trắc nghiệm công khai mà không cần tạo tài khoản.",
         steps: [
-          "Mở Bài quiz từ thanh điều hướng trên cùng.",
-          "Duyệt hoặc tìm kiếm quiz theo tiêu đề hay môn học.",
-          "Mở một thẻ quiz để xem chi tiết.",
-          "Nhập tên người tham gia trên trang bắt đầu quiz.",
-          "Chọn Bắt đầu quiz để tạo lượt làm.",
+          "Mở Bài trắc nghiệm từ thanh điều hướng trên cùng.",
+          "Duyệt hoặc tìm kiếm bài trắc nghiệm theo tiêu đề hay môn học.",
+          "Mở một thẻ bài trắc nghiệm để xem chi tiết.",
+          "Nhập tên người tham gia trên trang bắt đầu bài trắc nghiệm.",
+          "Chọn Bắt đầu bài trắc nghiệm để tạo lượt làm.",
           "Trả lời câu hỏi và nộp bài khi đã sẵn sàng."
         ],
-        noteTitle: "Quiz có hẹn giờ",
+        noteTitle: "Bài trắc nghiệm có hẹn giờ",
         noteBody:
-          "Nếu quiz có giới hạn thời gian, đồng hồ đếm ngược sẽ hiển thị trong lúc làm và hệ thống sẽ tự nộp khi hết giờ."
+          "Nếu bài trắc nghiệm có giới hạn thời gian, đồng hồ đếm ngược sẽ hiển thị trong lúc làm và hệ thống sẽ tự nộp khi hết giờ."
       },
       landingShot: {
-        src: "/guide-images/quiz-landing.jpg",
-        alt: "Trang bắt đầu quiz",
-        caption: "Trang bắt đầu hiển thị tiêu đề, mô tả, giới hạn và ô nhập tên trước khi quiz được mở."
+        src: "/guide-images/bài trắc nghiệm-landing.jpg",
+        alt: "Trang bắt đầu bài trắc nghiệm",
+        caption: "Trang bắt đầu hiển thị tiêu đề, mô tả, giới hạn và ô nhập tên trước khi bài trắc nghiệm được mở."
       },
       takeShot: {
-        src: "/guide-images/quiz-take.jpg",
-        alt: "Màn hình làm quiz",
+        src: "/guide-images/bài trắc nghiệm-take.jpg",
+        alt: "Màn hình làm bài trắc nghiệm",
         caption: "Trả lời từng câu hỏi, di chuyển bằng bộ điều hướng và nộp bài khi hoàn tất."
       },
       duringQuiz: {
-        title: "Trong lúc làm quiz",
+        title: "Trong lúc làm bài trắc nghiệm",
         cards: [
           {
             title: "Bộ điều hướng câu hỏi",
@@ -680,21 +680,21 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
         ]
       },
       privateQuiz: {
-        title: "Làm quiz riêng tư",
-        intro: "Quiz riêng tư không xuất hiện trong danh sách công khai và cần mã truy cập từ người tạo quiz.",
+        title: "Làm bài trắc nghiệm riêng tư",
+        intro: "Bài trắc nghiệm riêng tư không xuất hiện trong danh sách công khai và cần mã truy cập từ người tạo bài trắc nghiệm.",
         steps: [
-          "Mở Bài quiz từ thanh điều hướng.",
+          "Mở Bài trắc nghiệm từ thanh điều hướng.",
           "Chọn Nhập mã ở gần đầu trang.",
           "Nhập mã truy cập gồm 6 ký tự rồi gửi đi.",
-          "Nhập tên của bạn trên trang bắt đầu và mở quiz."
+          "Nhập tên của bạn trên trang bắt đầu và mở bài trắc nghiệm."
         ],
         noteTitle: "Liên kết trực tiếp",
         noteBody:
-          "Nếu người tạo chia sẻ liên kết đã chứa sẵn mã truy cập, trang bắt đầu quiz sẽ mở trực tiếp."
+          "Nếu người tạo chia sẻ liên kết đã chứa sẵn mã truy cập, trang bắt đầu bài trắc nghiệm sẽ mở trực tiếp."
       },
       afterSubmission: {
         title: "Sau khi nộp bài",
-        intro: "Những gì xuất hiện sau khi nộp phụ thuộc vào tùy chọn mà người tạo quiz đã bật.",
+        intro: "Những gì xuất hiện sau khi nộp phụ thuộc vào tùy chọn mà người tạo bài trắc nghiệm đã bật.",
         items: [
           {
             title: "Tổng kết kết quả",
@@ -715,12 +715,12 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
         title: "Khắc phục sự cố",
         items: [
           {
-            title: "Không thấy quiz trong danh sách công khai",
-            description: "Quiz có thể chưa xuất bản hoặc đang ở chế độ riêng tư. Hãy xin liên kết hoặc mã truy cập từ người tạo."
+            title: "Không thấy bài trắc nghiệm trong danh sách công khai",
+            description: "Bài trắc nghiệm có thể chưa xuất bản hoặc đang ở chế độ riêng tư. Hãy xin liên kết hoặc mã truy cập từ người tạo."
           },
           {
             title: "Mã truy cập bị từ chối",
-            description: "Mã có phân biệt chữ hoa chữ thường và chỉ hoạt động khi quiz vẫn đang được xuất bản."
+            description: "Mã có phân biệt chữ hoa chữ thường và chỉ hoạt động khi bài trắc nghiệm vẫn đang được xuất bản."
           },
           {
             title: "Hết giờ trước khi nộp",
@@ -728,7 +728,7 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
           },
           {
             title: "Không thấy điểm hoặc phần xem lại sau khi nộp",
-            description: "Người tạo quiz có thể đã tắt phần tổng kết và xem lại đáp án cho quiz đó."
+            description: "Người tạo bài trắc nghiệm có thể đã tắt phần tổng kết và xem lại đáp án cho bài trắc nghiệm đó."
           }
         ]
       }

@@ -568,7 +568,7 @@ onBeforeUnmount(() => {
               {{ t("participant.take.submitQuiz") }}
             </h1>
             <p class="mt-3 max-w-full whitespace-nowrap text-base font-semibold leading-6 text-slate-500 max-sm:whitespace-normal">
-              {{ attempt?.takerName ? `${attempt.takerName}, your` : "Your" }} answers have been submitted successfully.
+              {{ attempt?.takerName ? t("participant.take.submittedSuccessNamed", { name: attempt.takerName }) : t("participant.take.submittedSuccessAnonymous") }}
             </p>
 
             <section
@@ -620,7 +620,7 @@ onBeforeUnmount(() => {
                     {{ score !== null && totalQuestionsAtSubmit !== null ? `${score}/${totalQuestionsAtSubmit}` : '-' }}
                   </p>
                   <p class="-mt-2 text-sm font-semibold text-slate-500">
-                    Score<span v-if="scorePercent !== null"> - {{ scorePercent }}%</span>
+                    {{ t("participant.take.score") }}<span v-if="scorePercent !== null"> - {{ scorePercent }}%</span>
                   </p>
                 </div>
               </div>

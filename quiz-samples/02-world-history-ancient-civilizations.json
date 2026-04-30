@@ -1,0 +1,68 @@
+{
+  "title": "World History: Ancient Civilizations",
+  "description": "Explore the rise and fall of ancient civilizations from Egypt to Rome.",
+  "subject": "History",
+  "difficulty": "Medium",
+  "timeLimit": 20,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": true,
+  "allowRetake": true,
+  "questions": [
+    {
+      "prompt": "Which ancient wonder was located in Alexandria, Egypt?",
+      "options": [
+        "The Colosseum",
+        "The Lighthouse of Alexandria",
+        "The Parthenon",
+        "The Pantheon"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "The Lighthouse of Alexandria (Pharos of Alexandria) was one of the Seven Wonders of the Ancient World, located on the island of Pharos near Alexandria."
+    },
+    {
+      "prompt": "Who was the first emperor of Rome?",
+      "options": [
+        "Julius Caesar",
+        "Nero",
+        "Augustus",
+        "Caligula"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Augustus (born Gaius Octavius) became the first Roman Emperor in 27 BC after defeating Mark Antony and Cleopatra."
+    },
+    {
+      "prompt": "The Great Wall of China was primarily built to protect against which group?",
+      "options": [
+        "Mongols",
+        "Persians",
+        "Vikings",
+        "Romans"
+      ],
+      "correctOptionIndex": 0,
+      "explanation": "The Great Wall was built over many centuries, primarily to defend against raids by nomadic peoples from the north, including the Mongols."
+    },
+    {
+      "prompt": "In which river valley did the Mesopotamian civilization develop?",
+      "options": [
+        "Nile",
+        "Indus",
+        "Tigris and Euphrates",
+        "Yellow River"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Mesopotamia, meaning 'land between rivers' in Greek, developed in the valley of the Tigris and Euphrates rivers (modern-day Iraq)."
+    },
+    {
+      "prompt": "Which pharaoh is associated with the construction of the Great Pyramid of Giza?",
+      "options": [
+        "Ramesses II",
+        "Tutankhamun",
+        "Cleopatra",
+        "Khufu"
+      ],
+      "correctOptionIndex": 3,
+      "explanation": "The Great Pyramid of Giza was built as a tomb for Pharaoh Khufu (also known as Cheops) around 2560 BC."
+    }
+  ]
+}

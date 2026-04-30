@@ -426,6 +426,7 @@ button {
   color: #283141;
   border-radius: 0;
   font-weight: 600;
+  white-space: nowrap;
   transition:
     color 0.2s ease,
     background-color 0.2s ease;

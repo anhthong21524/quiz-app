@@ -9,6 +9,7 @@ import QuestionNavigator from "../../components/create-quiz/QuestionNavigator.vu
 import FullPageErrorState from "../../components/feedback/FullPageErrorState.vue";
 import EditorFormSkeleton from "../../components/loading/EditorFormSkeleton.vue";
 import PageHeader from "../../components/PageHeader.vue";
+import QuizEditorCard from "../../components/QuizEditorCard.vue";
 import { useToast } from "../../composables/useToast";
 import { useI18n } from "../../i18n";
 import { useConfigurationStore } from "../../stores/configuration";
@@ -65,6 +66,7 @@ const currentQuestionIndex = ref(0);
 const draggedOptionIndex = ref<number | null>(null);
 const dragTargetOptionIndex = ref<number | null>(null);
 const isSaving = ref(false);
+const importFileInputRef = ref<HTMLInputElement | null>(null);
 const originalDescription = ref("");
 const validationErrors = reactive<ValidationErrors>({});
 
@@ -774,9 +776,127 @@ function goBackToConfiguration() {
 function handleStepSelection(step: 1 | 2) {
   if (step === 1 && currentStep.value === 2) {
     goBackToConfiguration();
-  } else if (step === 2 && currentStep.value === 1 && isReadOnly.value) {
-    currentStep.value = 2;
+  } else if (step === 2 && currentStep.value === 1) {
+    if (isReadOnly.value) {
+      currentStep.value = 2;
+    } else {
+      goToQuestionsStep();
+    }
   }
+}
+
+function triggerImport() {
+  importFileInputRef.value?.click();
+}
+
+function applyImportedQuiz(raw: unknown) {
+  if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+    showToast(t("createQuiz.import.invalidFormat"), "error");
+    return;
+  }
+
+  const data = raw as Record<string, unknown>;
+
+  if (typeof data.title !== "string" || !data.title.trim()) {
+    showToast(t("createQuiz.import.missingTitle"), "error");
+    return;
+  }
+
+  if (!Array.isArray(data.questions) || data.questions.length === 0) {
+    showToast(t("createQuiz.import.missingQuestions"), "error");
+    return;
+  }
+
+  const rawQuestions = (data.questions as unknown[]).slice(0, maxQuestions);
+  const parsedQuestions: CreateQuizQuestion[] = [];
+
+  for (let i = 0; i < rawQuestions.length; i++) {
+    const q = rawQuestions[i];
+    if (!q || typeof q !== "object" || Array.isArray(q)) continue;
+
+    const qObj = q as Record<string, unknown>;
+    if (typeof qObj.prompt !== "string" || !qObj.prompt.trim()) continue;
+    if (!Array.isArray(qObj.options) || qObj.options.length < minimumOptionCount) continue;
+    if (typeof qObj.correctOptionIndex !== "number") continue;
+
+    const optionTexts = (qObj.options as unknown[])
+      .filter((o): o is string => typeof o === "string")
+      .slice(0, maxOptions);
+
+    if (optionTexts.length < minimumOptionCount) continue;
+
+    const correctIdx = Math.max(
+      0,
+      Math.min(Math.floor(qObj.correctOptionIndex as number), optionTexts.length - 1)
+    );
+
+    const draft: CreateQuizQuestion = {
+      id: createId(`question-${i + 1}`),
+      questionText: (qObj.prompt as string).trim(),
+      options: optionTexts.map((text, idx) => createOption(idx, text, idx === correctIdx)),
+      multipleCorrect: false,
+      explanation: typeof qObj.explanation === "string" ? qObj.explanation.trim() : "",
+      status: "empty"
+    };
+
+    draft.status = isQuestionComplete(draft) ? "completed" : getDraftStatus(draft);
+    parsedQuestions.push(draft);
+  }
+
+  if (parsedQuestions.length === 0) {
+    showToast(t("createQuiz.import.noValidQuestions"), "error");
+    return;
+  }
+
+  configuration.title = (data.title as string).trim();
+
+  if (typeof data.description === "string") {
+    configuration.description = data.description.slice(0, 500);
+  }
+  if (typeof data.subject === "string" && data.subject.trim()) {
+    configuration.subject = data.subject.trim();
+  }
+  if (data.difficulty === "Easy" || data.difficulty === "Medium" || data.difficulty === "Hard") {
+    configuration.difficulty = data.difficulty;
+  }
+  if (data.timeLimit === null || data.timeLimit === undefined) {
+    configuration.timeLimitEnabled = false;
+    configuration.timeLimitMinutes = null;
+  } else if (
+    typeof data.timeLimit === "number" &&
+    data.timeLimit >= 1 &&
+    data.timeLimit <= maxTimeLimitMinutes
+  ) {
+    configuration.timeLimitEnabled = true;
+    configuration.timeLimitMinutes = data.timeLimit;
+  }
+  if (typeof data.isPrivate === "boolean") configuration.isPrivate = data.isPrivate;
+  if (typeof data.allowSummary === "boolean") configuration.allowSummary = data.allowSummary;
+  if (typeof data.allowReviewAnswers === "boolean") configuration.allowReviewAnswers = data.allowReviewAnswers;
+  if (typeof data.allowRetake === "boolean") configuration.allowRetake = data.allowRetake;
+
+  configuration.numberOfQuestions = parsedQuestions.length;
+  questions.value = parsedQuestions;
+
+  showToast(t("createQuiz.import.success", { count: parsedQuestions.length }));
+}
+
+function handleImportFile(event: Event) {
+  const input = event.target as HTMLInputElement;
+  const file = input.files?.[0];
+  input.value = "";
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const parsed = JSON.parse(e.target?.result as string);
+      applyImportedQuiz(parsed);
+    } catch {
+      showToast(t("createQuiz.import.invalidJson"), "error");
+    }
+  };
+  reader.readAsText(file);
 }
 
 function exitFlow() {
@@ -839,42 +959,17 @@ function togglePrivate() {
       <div class="space-y-2">
         <PageHeader :title="pageTitle" :description="stepIntro" />
 
-        <div
-          class="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between"
-          :class="currentStep === 1 ? 'pt-1' : ''"
-        >
-          <CreateQuizStepper :current-step="currentStep" :all-clickable="isReadOnly" @select="handleStepSelection" />
-
-          <button
-            v-if="currentStep === 2"
-            type="button"
-            class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-700"
-            @click="goBackToConfiguration"
-          >
-            <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
-              <path d="M12 5 7 10l5 5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-            {{ t("createQuiz.actions.backToConfiguration") }}
-          </button>
+        <div>
+          <CreateQuizStepper :current-step="currentStep" :all-clickable="true" @select="handleStepSelection" />
         </div>
 
-        <div
-          v-if="isReadOnly"
-          class="flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-800"
-        >
-          <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0">
-            <rect x="5" y="9" width="10" height="8" rx="1.5" />
-            <path d="M7 9V6.5a3 3 0 0 1 6 0V9" stroke-linecap="round" />
-          </svg>
-          <span>{{ t("createQuiz.readOnly.banner") }}</span>
-        </div>
       </div>
 
-      <div v-if="currentStep === 1">
-        <div class="rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-4 shadow-[0_10px_26px_rgba(46,35,20,0.06)]">
-          <div class="space-y-3">
-            <!-- Two-column layout on large screens -->
-            <div class="grid gap-4 lg:grid-cols-[1fr_312px]">
+      <div class="grid">
+      <div class="col-start-1 row-start-1 h-full" :class="currentStep !== 1 ? 'invisible pointer-events-none' : ''">
+        <QuizEditorCard>
+          <!-- Two-column layout on large screens -->
+          <div class="grid gap-4 lg:grid-cols-[1fr_312px]">
               <!-- Left: Basic information — flex so description fills remaining height -->
               <section class="flex flex-col gap-3">
                 <h2 class="text-base font-bold text-slate-900">{{ t("createQuiz.fields.basicInformation") }}</h2>
@@ -1184,11 +1279,16 @@ function togglePrivate() {
               </section>
             </div>
 
-            <!-- Footer row -->
-            <div class="flex flex-col gap-3 border-t border-gray-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <template #footer>
               <!-- Read-only footer -->
               <template v-if="isReadOnly">
-                <p class="text-sm text-slate-500">{{ t("createQuiz.readOnly.unpublishToEdit") }}</p>
+                <div class="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                  <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0">
+                    <circle cx="10" cy="10" r="8" />
+                    <path d="M10 6v4M10 14h.01" stroke-linecap="round" stroke-linejoin="round" />
+                  </svg>
+                  {{ t("createQuiz.readOnly.unpublishToEdit") }}
+                </div>
                 <button
                   type="button"
                   class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 sm:min-w-[180px]"
@@ -1207,6 +1307,27 @@ function togglePrivate() {
                   {{ isEditing ? t("createQuiz.helper.editTip") : t("createQuiz.helper.createTip") }}
                 </p>
                 <div class="flex items-center gap-2">
+                  <!-- Import JSON (new quiz only) -->
+                  <template v-if="!isEditing">
+                    <input
+                      ref="importFileInputRef"
+                      type="file"
+                      accept=".json"
+                      class="sr-only"
+                      @change="handleImportFile"
+                    />
+                    <button
+                      type="button"
+                      class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700"
+                      @click="triggerImport"
+                    >
+                      <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4">
+                        <path d="M10 3v10M6 9l4 4 4-4" stroke-linecap="round" stroke-linejoin="round" />
+                        <path d="M3 15h14" stroke-linecap="round" />
+                      </svg>
+                      <span>{{ t("createQuiz.actions.importJson") }}</span>
+                    </button>
+                  </template>
                   <button
                     v-if="isEditing"
                     type="button"
@@ -1229,22 +1350,23 @@ function togglePrivate() {
                   </button>
                 </div>
               </template>
-            </div>
-          </div>
-        </div>
+          </template>
+        </QuizEditorCard>
       </div>
 
-      <div v-else>
-        <div class="items-stretch gap-4 xl:grid xl:grid-cols-[minmax(0,1.95fr)_252px]">
-          <div class="rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-4 shadow-[0_10px_26px_rgba(46,35,20,0.06)]">
-            <div v-if="currentQuestion" class="space-y-3">
+      <div class="col-start-1 row-start-1 h-full" :class="currentStep !== 2 ? 'invisible pointer-events-none' : ''">
+        <QuizEditorCard>
+          <div class="grid gap-4 lg:grid-cols-[1fr_312px]">
+
+            <!-- Left: Question editor -->
+            <section v-if="currentQuestion" class="flex flex-col gap-3">
+              <h2 class="text-base font-bold text-slate-900">{{ t("createQuiz.fields.question") }}</h2>
+
               <!-- Question text -->
               <div v-if="isReadOnly" class="space-y-1.5">
-                <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.question") }}</span>
                 <p class="rounded-xl border border-gray-200 bg-gray-50 px-4 py-2 text-slate-900">{{ currentQuestion.questionText }}</p>
               </div>
               <label v-else class="block space-y-1.5">
-                <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.question") }}</span>
                 <textarea
                   :value="currentQuestion.questionText"
                   rows="2"
@@ -1339,51 +1461,40 @@ function togglePrivate() {
               >
                 {{ validationErrors.question }}
               </p>
-            </div>
+            </section>
+
+            <!-- Right: Question navigator -->
+            <section class="flex flex-col gap-3 border-t border-gray-100 pt-4 lg:border-l lg:border-t-0 lg:pl-4 lg:pt-0">
+              <h2 class="text-base font-bold text-slate-900">{{ t("createQuiz.fields.questions") }}</h2>
+              <QuestionNavigator
+                :questions="questions"
+                :current-question-index="currentQuestionIndex"
+                class="flex-1"
+                @select="selectQuestion"
+              />
+              <button
+                v-if="!isReadOnly"
+                type="button"
+                class="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
+                :disabled="isSaving"
+                :class="{ 'cursor-not-allowed opacity-75': isSaving }"
+                @click="saveAndNext"
+              >
+                <span>{{
+                  isSaving ? t("createQuiz.actions.saving") :
+                  currentQuestionIndex < questions.length - 1 ? t("createQuiz.actions.nextQuestion") :
+                  isEditing ? t("createQuiz.actions.updateQuiz") :
+                  t("createQuiz.actions.saveQuiz")
+                }}</span>
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
+                  <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </button>
+            </section>
+
           </div>
-
-          <div class="mt-4 flex h-full flex-col gap-3 xl:mt-0">
-            <QuestionNavigator
-              :questions="questions"
-              :current-question-index="currentQuestionIndex"
-              class="flex-1"
-              @select="selectQuestion"
-            />
-
-            <!-- Read-only: back to quizzes -->
-            <button
-              v-if="isReadOnly"
-              type="button"
-              class="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl border border-gray-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700"
-              @click="exitFlow"
-            >
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
-                <path d="M12 5 7 10l5 5" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-              <span>{{ t("createQuiz.readOnly.backToMyQuizzes") }}</span>
-            </button>
-
-            <!-- Editable: save / next -->
-            <button
-              v-else
-              type="button"
-              class="inline-flex h-10 w-full items-center justify-center gap-2 whitespace-nowrap rounded-xl bg-emerald-600 px-5 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700"
-              :disabled="isSaving"
-              :class="{ 'cursor-not-allowed opacity-75': isSaving }"
-              @click="saveAndNext"
-            >
-              <span>{{
-                isSaving ? t("createQuiz.actions.saving") :
-                currentQuestionIndex < questions.length - 1 ? t("createQuiz.actions.nextQuestion") :
-                isEditing ? t("createQuiz.actions.updateQuiz") :
-                t("createQuiz.actions.saveQuiz")
-              }}</span>
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" class="h-4 w-4">
-                <path d="M4 10h12M11 5l5 5-5 5" stroke-linecap="round" stroke-linejoin="round" />
-              </svg>
-            </button>
-          </div>
-        </div>
+        </QuizEditorCard>
+      </div>
       </div>
     </div>
   </section>

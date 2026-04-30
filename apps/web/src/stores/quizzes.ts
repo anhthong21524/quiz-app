@@ -59,7 +59,7 @@ export const useQuizStore = defineStore("quizzes", {
       try {
         const items = await fetchQuizzes();
         if (gen !== loadQuizzesGen) return;
-        this.items = items;
+        this.items = Array.isArray(items) ? items : [];
       } catch (error) {
         if (gen !== loadQuizzesGen) return;
         this.error = toAppError(error, "quiz_list_load");

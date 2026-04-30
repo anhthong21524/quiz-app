@@ -1,0 +1,68 @@
+{
+  "title": "General Science: Earth & Space",
+  "description": "Questions about our planet, solar system, and the universe beyond.",
+  "subject": "Science",
+  "difficulty": "Easy",
+  "timeLimit": null,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": true,
+  "allowRetake": true,
+  "questions": [
+    {
+      "prompt": "How many planets are in our solar system?",
+      "options": [
+        "7",
+        "8",
+        "9",
+        "10"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "Since Pluto was reclassified as a dwarf planet in 2006, our solar system officially has 8 planets."
+    },
+    {
+      "prompt": "What is the closest star to Earth (other than the Sun)?",
+      "options": [
+        "Betelgeuse",
+        "Sirius",
+        "Proxima Centauri",
+        "Vega"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Proxima Centauri is the nearest star to the Sun, about 4.24 light-years away. It is part of the Alpha Centauri star system."
+    },
+    {
+      "prompt": "What layer of the atmosphere do weather phenomena primarily occur in?",
+      "options": [
+        "Stratosphere",
+        "Mesosphere",
+        "Thermosphere",
+        "Troposphere"
+      ],
+      "correctOptionIndex": 3,
+      "explanation": "The troposphere is the lowest layer of Earth's atmosphere, extending to about 12 km altitude, where most weather occurs."
+    },
+    {
+      "prompt": "What causes the seasons on Earth?",
+      "options": [
+        "Earth's distance from the Sun",
+        "Earth's axial tilt",
+        "Solar flares",
+        "The Moon's gravitational pull"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "Earth's axial tilt of about 23.5° causes different hemispheres to receive more direct sunlight at different times of the year."
+    },
+    {
+      "prompt": "What is the chemical symbol for water?",
+      "options": [
+        "WA",
+        "W",
+        "H2O",
+        "HO2"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Water is composed of two hydrogen atoms and one oxygen atom, giving it the chemical formula H₂O."
+    }
+  ]
+}

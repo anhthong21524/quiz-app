@@ -1,0 +1,79 @@
+{
+  "title": "Computer Science Basics",
+  "description": "Fundamental concepts of computer science including algorithms, data structures, and programming.",
+  "subject": "Technology",
+  "difficulty": "Medium",
+  "timeLimit": 25,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": true,
+  "allowRetake": true,
+  "questions": [
+    {
+      "prompt": "What does CPU stand for?",
+      "options": [
+        "Central Processing Unit",
+        "Computer Personal Unit",
+        "Central Program Utility",
+        "Core Processing Utility"
+      ],
+      "correctOptionIndex": 0,
+      "explanation": "CPU stands for Central Processing Unit — the primary component of a computer that executes instructions."
+    },
+    {
+      "prompt": "What is the time complexity of binary search on a sorted array?",
+      "options": [
+        "O(n)",
+        "O(n²)",
+        "O(log n)",
+        "O(n log n)"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Binary search repeatedly halves the search space, giving O(log n) time complexity."
+    },
+    {
+      "prompt": "Which data structure operates on a Last-In, First-Out (LIFO) principle?",
+      "options": [
+        "Queue",
+        "Stack",
+        "Linked List",
+        "Tree"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "A stack follows LIFO — the last element pushed is the first one popped, like a stack of plates."
+    },
+    {
+      "prompt": "In binary, what is the decimal value of 1010?",
+      "options": [
+        "8",
+        "9",
+        "10",
+        "12"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "1010 in binary = 1×8 + 0×4 + 1×2 + 0×1 = 8 + 2 = 10."
+    },
+    {
+      "prompt": "What does HTML stand for?",
+      "options": [
+        "HyperText Markup Language",
+        "High Transfer Markup Language",
+        "HyperText Management Language",
+        "Hyperlink Text Markup Logic"
+      ],
+      "correctOptionIndex": 0,
+      "explanation": "HTML stands for HyperText Markup Language — the standard language for creating web pages."
+    },
+    {
+      "prompt": "Which sorting algorithm has the best average-case time complexity?",
+      "options": [
+        "Bubble Sort",
+        "Insertion Sort",
+        "Quick Sort",
+        "Selection Sort"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Quick Sort has an average-case time complexity of O(n log n), making it one of the fastest practical sorting algorithms."
+    }
+  ]
+}

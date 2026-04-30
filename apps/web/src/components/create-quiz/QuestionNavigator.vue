@@ -32,7 +32,8 @@ const completionPercentage = computed(() => {
   return Math.round((count / props.questions.length) * 100);
 });
 
-const usesCompactLayout = computed(() => props.questions.length >= 41);
+const usesCompactLayout = computed(() => props.questions.length >= 26);
+const usesExtraCompactLayout = computed(() => props.questions.length >= 41);
 
 function getReviewStatus(question: CreateQuizQuestion) {
   return props.reviewStatuses?.[question.id] ?? question.reviewStatus;
@@ -95,11 +96,13 @@ function getStatusLabel(
 </script>
 
 <template>
-  <aside class="flex h-full flex-col rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white p-4 shadow-[0_10px_26px_rgba(46,35,20,0.06)] xl:sticky xl:top-6">
+  <aside
+    class="flex h-full flex-col rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white shadow-[0_10px_26px_rgba(46,35,20,0.06)] xl:sticky xl:top-6"
+    :class="usesExtraCompactLayout ? 'p-3' : 'p-4'"
+  >
     <div class="flex items-start justify-between gap-3">
       <div>
-        <h2 class="text-base font-bold text-gray-900">{{ t("createQuiz.steps.questions") }}</h2>
-        <p class="mt-0.5 text-xs text-gray-500">
+        <p class="text-xs text-gray-500">
           {{
             isReviewMode
               ? t("participant.take.reviewProgress", {
@@ -129,13 +132,15 @@ function getStatusLabel(
       ></div>
     </div>
 
-    <div class="mt-4 flex flex-1 flex-col space-y-3">
+    <div :class="usesExtraCompactLayout ? 'mt-2 space-y-2' : 'mt-4 space-y-3'" class="flex flex-1 flex-col">
       <div
         class="grid"
         :class="
-          usesCompactLayout
-            ? 'grid-cols-5 gap-1.5'
-            : 'grid-cols-4 gap-2 sm:grid-cols-5 lg:grid-cols-4'
+          usesExtraCompactLayout
+            ? 'grid-cols-6 gap-1'
+            : usesCompactLayout
+              ? 'grid-cols-5 gap-1.5'
+              : 'grid-cols-4 gap-2 sm:grid-cols-5 lg:grid-cols-4'
         "
       >
         <button
@@ -144,7 +149,7 @@ function getStatusLabel(
           type="button"
           class="relative flex items-center justify-center overflow-hidden rounded-xl border font-semibold transition focus:outline-none focus:ring-4 focus:ring-emerald-100"
           :class="[
-            usesCompactLayout ? 'h-9 text-[13px]' : 'h-10 text-sm',
+            usesExtraCompactLayout ? 'h-6 text-[11px]' : usesCompactLayout ? 'h-9 text-[13px]' : 'h-10 text-sm',
             getButtonClasses(question.status, currentQuestionIndex === index, getReviewStatus(question))
           ]"
           :aria-label="`${t('participant.take.questionProgress', { current: index + 1, total: questions.length })}: ${getStatusLabel(question.status, getReviewStatus(question))}${currentQuestionIndex === index ? ', selected' : ''}`"
@@ -161,7 +166,7 @@ function getStatusLabel(
               stroke-width="2.4"
               :class="[
                 getReviewStatus(question) ? 'text-current' : 'text-emerald-600',
-                usesCompactLayout ? 'h-2.5 w-2.5' : 'h-3 w-3'
+                usesExtraCompactLayout ? 'h-2 w-2' : usesCompactLayout ? 'h-2.5 w-2.5' : 'h-3 w-3'
               ]"
             >
               <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
@@ -172,7 +177,7 @@ function getStatusLabel(
               fill="none"
               stroke="currentColor"
               stroke-width="2.4"
-              :class="usesCompactLayout ? 'h-2.5 w-2.5' : 'h-3 w-3'"
+              :class="usesExtraCompactLayout ? 'h-2 w-2' : usesCompactLayout ? 'h-2.5 w-2.5' : 'h-3 w-3'"
             >
               <path d="M5 5l10 10M15 5 5 15" stroke-linecap="round" />
             </svg>
@@ -180,11 +185,19 @@ function getStatusLabel(
         </button>
       </div>
 
-      <div class="mt-auto space-y-3">
-        <div v-if="isReviewMode" class="rounded-xl bg-rose-50 px-3 py-2.5 text-xs font-medium text-rose-700">
+      <div class="mt-auto space-y-2">
+        <div
+          v-if="isReviewMode"
+          class="rounded-xl bg-rose-50 px-3 text-xs font-medium text-rose-700"
+          :class="usesExtraCompactLayout ? 'py-1.5' : 'py-2.5'"
+        >
           {{ t("participant.take.resultsMessageNeedsReview") }}
         </div>
-        <div v-else-if="completedCount < questions.length" class="rounded-xl bg-slate-50 px-3 py-2.5 text-xs text-slate-500">
+        <div
+          v-else-if="completedCount < questions.length"
+          class="rounded-xl bg-slate-50 px-3 text-xs text-slate-500"
+          :class="usesExtraCompactLayout ? 'py-1.5' : 'py-2.5'"
+        >
           {{
             t(
               questions.length - completedCount === 1
@@ -194,7 +207,11 @@ function getStatusLabel(
             )
           }}
         </div>
-        <div v-else class="rounded-xl bg-emerald-50 px-3 py-2.5 text-xs font-medium text-emerald-700">
+        <div
+          v-else
+          class="rounded-xl bg-emerald-50 px-3 text-xs font-medium text-emerald-700"
+          :class="usesExtraCompactLayout ? 'py-1.5' : 'py-2.5'"
+        >
           {{ t("createQuiz.navigator.allComplete") }}
         </div>
         <slot />

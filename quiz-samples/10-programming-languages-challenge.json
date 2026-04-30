@@ -1,0 +1,79 @@
+{
+  "title": "Programming Languages Challenge",
+  "description": "Advanced questions covering multiple programming languages and paradigms.",
+  "subject": "Technology",
+  "difficulty": "Hard",
+  "timeLimit": 30,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": false,
+  "allowRetake": false,
+  "questions": [
+    {
+      "prompt": "In Python, what does the `*args` parameter in a function definition allow?",
+      "options": [
+        "Pass keyword arguments",
+        "Pass a variable number of positional arguments",
+        "Unpack a dictionary",
+        "Create a generator"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "`*args` collects any extra positional arguments into a tuple, allowing functions to accept a variable number of inputs."
+    },
+    {
+      "prompt": "Which of the following is NOT a valid JavaScript data type?",
+      "options": [
+        "undefined",
+        "symbol",
+        "float",
+        "bigint"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "JavaScript does not have a 'float' type. Numbers (integers and decimals) are all of type 'number'."
+    },
+    {
+      "prompt": "What is the output of `console.log(typeof null)` in JavaScript?",
+      "options": [
+        "'null'",
+        "'undefined'",
+        "'object'",
+        "'boolean'"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "This is a known JavaScript bug: `typeof null` returns 'object' due to a legacy implementation quirk in the original engine."
+    },
+    {
+      "prompt": "In Rust, what does 'ownership' primarily prevent?",
+      "options": [
+        "Stack overflow",
+        "Deadlocks",
+        "Memory leaks and data races",
+        "Integer overflow"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Rust's ownership system guarantees memory safety without a garbage collector by preventing memory leaks, dangling pointers, and data races at compile time."
+    },
+    {
+      "prompt": "What does the SQL keyword `DISTINCT` do?",
+      "options": [
+        "Sorts the result set",
+        "Filters rows based on a condition",
+        "Returns only unique rows",
+        "Joins two tables"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "DISTINCT removes duplicate rows from the result set, returning only unique combinations of the selected columns."
+    },
+    {
+      "prompt": "In object-oriented programming, what is 'polymorphism'?",
+      "options": [
+        "The ability to inherit from multiple classes",
+        "The ability of objects of different types to be treated as a common type",
+        "Hiding internal implementation details",
+        "Bundling data and methods together"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "Polymorphism allows objects of different classes to be treated as instances of a shared base class, enabling flexible and reusable code."
+    }
+  ]
+}

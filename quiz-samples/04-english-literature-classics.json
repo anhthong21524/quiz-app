@@ -1,0 +1,68 @@
+{
+  "title": "English Literature Classics",
+  "description": "Test your knowledge of classic novels, poets, and literary concepts.",
+  "subject": "Literature",
+  "difficulty": "Medium",
+  "timeLimit": 15,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": true,
+  "allowRetake": false,
+  "questions": [
+    {
+      "prompt": "Who wrote 'Pride and Prejudice'?",
+      "options": [
+        "Charlotte Brontë",
+        "Mary Shelley",
+        "Jane Austen",
+        "Virginia Woolf"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Jane Austen wrote 'Pride and Prejudice', published in 1813. It follows the romantic development of Elizabeth Bennet."
+    },
+    {
+      "prompt": "In Shakespeare's 'Hamlet', what is the name of Hamlet's father's ghost?",
+      "options": [
+        "Horatio",
+        "King Hamlet",
+        "Claudius",
+        "Polonius"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "The ghost is that of King Hamlet, Hamlet's father, who was murdered by Claudius."
+    },
+    {
+      "prompt": "Which novel begins with the line 'Call me Ishmael'?",
+      "options": [
+        "The Old Man and the Sea",
+        "Moby-Dick",
+        "Billy Budd",
+        "Lord Jim"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "'Call me Ishmael' is the opening line of Herman Melville's 'Moby-Dick' (1851)."
+    },
+    {
+      "prompt": "What is the narrative technique where the story is told from a first-person perspective called?",
+      "options": [
+        "Third-person omniscient",
+        "Stream of consciousness",
+        "First-person narration",
+        "Unreliable narrator"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "First-person narration uses 'I' or 'we' as the narrator is a character in the story sharing their personal perspective."
+    },
+    {
+      "prompt": "George Orwell's '1984' is set in which fictional superstate?",
+      "options": [
+        "Eurasia",
+        "Oceania",
+        "Eastasia",
+        "Airstrip One"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "The story is set in Oceania, one of three superstates in Orwell's dystopian world. The city of London (called Airstrip One) is where the protagonist Winston Smith lives."
+    }
+  ]
+}

@@ -1,0 +1,68 @@
+{
+  "title": "Music Theory Fundamentals",
+  "description": "Test your understanding of scales, chords, rhythm, and music notation.",
+  "subject": "Arts",
+  "difficulty": "Medium",
+  "timeLimit": null,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": true,
+  "allowRetake": true,
+  "questions": [
+    {
+      "prompt": "How many semitones are in an octave?",
+      "options": [
+        "8",
+        "10",
+        "12",
+        "14"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "An octave consists of 12 semitones in Western music (the chromatic scale)."
+    },
+    {
+      "prompt": "Which note is a perfect fifth above C?",
+      "options": [
+        "F",
+        "A",
+        "G",
+        "B"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "A perfect fifth above C is G. Counting 7 semitones up from C: C–C#–D–D#–E–F–F#–G."
+    },
+    {
+      "prompt": "What does 'forte' mean in music?",
+      "options": [
+        "Slow",
+        "Fast",
+        "Loud",
+        "Soft"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Forte (f) is an Italian musical term meaning loud or strong."
+    },
+    {
+      "prompt": "A major chord is composed of which intervals?",
+      "options": [
+        "Root, minor third, perfect fifth",
+        "Root, major third, perfect fifth",
+        "Root, major third, minor sixth",
+        "Root, minor third, tritone"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "A major chord is built from a root, a major third (4 semitones up), and a perfect fifth (7 semitones up)."
+    },
+    {
+      "prompt": "What time signature has 3 beats per measure, each beat being a quarter note?",
+      "options": [
+        "4/4",
+        "2/4",
+        "3/4",
+        "6/8"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "3/4 time has 3 quarter-note beats per measure. It is commonly used for waltzes."
+    }
+  ]
+}

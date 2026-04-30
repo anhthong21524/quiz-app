@@ -1,0 +1,68 @@
+{
+  "title": "Geography: Countries & Capitals",
+  "description": "How well do you know the capitals and geography of countries around the world?",
+  "subject": "Geography",
+  "difficulty": "Easy",
+  "timeLimit": null,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": true,
+  "allowRetake": true,
+  "questions": [
+    {
+      "prompt": "What is the capital of Australia?",
+      "options": [
+        "Sydney",
+        "Melbourne",
+        "Canberra",
+        "Brisbane"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Canberra is the capital of Australia. It was purpose-built as the capital in 1913 as a compromise between Sydney and Melbourne."
+    },
+    {
+      "prompt": "Which country has the largest land area in the world?",
+      "options": [
+        "Canada",
+        "China",
+        "United States",
+        "Russia"
+      ],
+      "correctOptionIndex": 3,
+      "explanation": "Russia is the largest country by land area, covering about 17.1 million km² — nearly twice the size of Canada."
+    },
+    {
+      "prompt": "What is the capital of Brazil?",
+      "options": [
+        "São Paulo",
+        "Rio de Janeiro",
+        "Brasília",
+        "Salvador"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Brasília has been Brazil's capital since 1960, when it replaced Rio de Janeiro. It was planned and built from scratch."
+    },
+    {
+      "prompt": "On which continent is the Sahara Desert located?",
+      "options": [
+        "Asia",
+        "Australia",
+        "South America",
+        "Africa"
+      ],
+      "correctOptionIndex": 3,
+      "explanation": "The Sahara Desert is in North Africa, spanning over 9 million km² across multiple countries."
+    },
+    {
+      "prompt": "The Amazon River flows primarily through which country?",
+      "options": [
+        "Colombia",
+        "Peru",
+        "Venezuela",
+        "Brazil"
+      ],
+      "correctOptionIndex": 3,
+      "explanation": "About 60% of the Amazon Basin lies within Brazil. The river flows roughly 6,400 km before emptying into the Atlantic Ocean."
+    }
+  ]
+}
