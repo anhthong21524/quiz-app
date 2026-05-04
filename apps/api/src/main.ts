@@ -4,12 +4,13 @@ import { ExpressAdapter } from "@nestjs/platform-express";
 import express, { json } from "express";
 import { IncomingMessage, ServerResponse } from "node:http";
 import { AppModule } from "./app.module";
+import { createCorsOriginResolver } from "./frontend-origin";
 
 function configureApp(app: INestApplication) {
   app.use(json({ limit: "5mb" }));
   app.setGlobalPrefix("api");
   app.enableCors({
-    origin: process.env.FRONTEND_URL ?? "http://localhost:3000"
+    origin: createCorsOriginResolver(process.env.FRONTEND_URL)
   });
   app.useGlobalPipes(
     new ValidationPipe({

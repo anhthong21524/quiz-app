@@ -85,7 +85,7 @@ Key values in the root `.env.example`:
 | `MONGODB_URI` | Optional MongoDB connection string. Leave blank for in-memory repositories. | blank |
 | `DATABASE_NAME` | MongoDB database name. | `quiz_app` |
 | `PORT` | API port. | `3001` |
-| `FRONTEND_URL` | CORS origin and OAuth redirect target for the frontend. | `http://localhost:3000` |
+| `FRONTEND_URL` | Frontend origin list used for API CORS and the primary OAuth redirect target. Supports a comma-separated list such as `http://localhost:3000,https://quiz-app-web-ten.vercel.app`. | `http://localhost:3000` |
 | `VITE_API_BASE_URL` | API base URL used by the Vue client. | `http://localhost:3001/api` |
 | `VITE_SITE_URL` | Public web origin used for canonical URLs, sitemap, and metadata. | `http://localhost:3000` |
 | `JWT_SECRET` | Secret used to sign JWT access tokens. Set a strong value for shared environments. | development fallback |

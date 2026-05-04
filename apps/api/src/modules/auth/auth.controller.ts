@@ -13,6 +13,7 @@ import {
 import { ConfigService } from "@nestjs/config";
 import { GoogleAuthStatus } from "@quiz-app/shared";
 import { Request, Response } from "express";
+import { getPrimaryFrontendUrl } from "../../frontend-origin";
 import { AuthService } from "./auth.service";
 import { Public } from "./decorators/public.decorator";
 import { LoginDto } from "./dto/login.dto";
@@ -104,8 +105,9 @@ export class AuthController {
     const tokens = await this.authService.loginWithGoogle(
       req.user as { sub: string; email: string; name: string }
     );
-    const frontendUrl =
-      this.configService.get<string>("FRONTEND_URL") ?? "http://localhost:3000";
+    const frontendUrl = getPrimaryFrontendUrl(
+      this.configService.get<string>("FRONTEND_URL")
+    );
     const params = new URLSearchParams({
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
