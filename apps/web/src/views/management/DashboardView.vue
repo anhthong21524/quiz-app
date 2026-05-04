@@ -213,13 +213,12 @@ function questionCountLabel(count: number) {
           <div class="stat-card__body">
             <div class="skel skel--stat-num" />
             <div class="skel skel--stat-label" />
-            <div class="skel skel--stat-hint" />
           </div>
         </div>
       </template>
 
       <template v-else>
-        <StatCard :value="totalCount" :label="t('dashboard.stats.totalQuizzes')" :hint="t('dashboard.stats.totalQuizzesHint')" color="green">
+        <StatCard :value="totalCount" :label="t('dashboard.stats.totalQuizzes')" color="green">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
             <path d="M6 3h8l4 4v14H6z" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M14 3v4h4" stroke-linecap="round" stroke-linejoin="round" />
@@ -227,21 +226,21 @@ function questionCountLabel(count: number) {
           </svg>
         </StatCard>
 
-        <StatCard :value="inProgressCount" :label="t('dashboard.stats.inProgress')" :hint="t('dashboard.stats.inProgressHint')" color="amber">
+        <StatCard :value="inProgressCount" :label="t('dashboard.stats.inProgress')" color="amber">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
             <path d="M11 4H4v16h16v-7" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5Z" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </StatCard>
 
-        <StatCard :value="publishedCount" :label="t('dashboard.stats.published')" :hint="t('dashboard.stats.publishedHint')" color="green">
+        <StatCard :value="publishedCount" :label="t('dashboard.stats.published')" color="green">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
             <path d="M22 2 11 13" stroke-linecap="round" stroke-linejoin="round" />
             <path d="M22 2 15 22l-4-9-9-4 20-7Z" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
         </StatCard>
 
-        <StatCard :value="totalSubmissions ?? '—'" :label="t('dashboard.stats.totalSubmissions')" :hint="t('dashboard.stats.totalSubmissionsHint')" color="teal">
+        <StatCard :value="totalSubmissions ?? '—'" :label="t('dashboard.stats.totalSubmissions')" color="teal">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" stroke-linecap="round" stroke-linejoin="round" />
             <circle cx="9" cy="7" r="4" stroke-linecap="round" stroke-linejoin="round" />
@@ -333,17 +332,17 @@ function questionCountLabel(count: number) {
   border-radius: var(--surface-radius, 20px);
   background: linear-gradient(135deg, #e8fbf2 0%, #d1f5e4 100%);
   border: 1px solid #c3f0d8;
-  padding: 24px 40px;
-  min-height: 150px;
+  padding: 16px 32px;
+  min-height: 112px;
   display: flex;
   align-items: center;
 }
 
 .hero-body {
   display: grid;
-  gap: 12px;
+  gap: 10px;
   z-index: 1;
-  max-width: 420px;
+  max-width: 390px;
 }
 
 .hero-eyebrow {
@@ -366,7 +365,7 @@ function questionCountLabel(count: number) {
 
 .hero-title {
   margin: 0;
-  font-size: 2rem;
+  font-size: 1.85rem;
   font-weight: 800;
   color: #182033;
   line-height: 1.15;
@@ -388,9 +387,9 @@ function questionCountLabel(count: number) {
 .hero-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   margin: 0;
-  font-size: 0.93rem;
+  font-size: 0.9rem;
   color: #4b5563;
 }
 
@@ -400,12 +399,12 @@ function questionCountLabel(count: number) {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
-  padding: 11px 22px;
+  margin-top: 2px;
+  padding: 10px 20px;
   border-radius: 12px;
   background: #10b981;
   color: #ffffff;
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   font-weight: 700;
   text-decoration: none;
   width: fit-content;
@@ -421,7 +420,7 @@ function questionCountLabel(count: number) {
 
 .hero-mockup {
   position: absolute;
-  right: 48px;
+  right: 40px;
   top: 50%;
   transform: translateY(-50%);
   z-index: 0;
@@ -429,13 +428,13 @@ function questionCountLabel(count: number) {
 }
 
 .mockup-card {
-  width: 220px;
+  width: 192px;
   background: #ffffff;
-  border-radius: 14px;
-  box-shadow: 0 16px 40px rgba(16, 60, 40, 0.1);
-  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 12px 32px rgba(16, 60, 40, 0.1);
+  padding: 16px;
   display: grid;
-  gap: 10px;
+  gap: 8px;
 }
 
 .mockup-option {
@@ -555,7 +554,6 @@ function questionCountLabel(count: number) {
 .skel--stat-icon  { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; }
 .skel--stat-num   { height: 20px; width: 40px; margin-bottom: 2px; }
 .skel--stat-label { height: 11px; width: 80px; margin-bottom: 2px; }
-.skel--stat-hint  { height: 10px; width: 100px; }
 
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
@@ -567,8 +565,8 @@ function questionCountLabel(count: number) {
 }
 
 @media (max-width: 860px) {
-  .dash-hero { padding: 20px 24px; }
-  .hero-title { font-size: 1.6rem; }
+  .dash-hero { padding: 14px 22px; min-height: 100px; }
+  .hero-title { font-size: 1.5rem; }
   .hero-mockup { display: none; }
   .card-header { padding: 18px 20px 14px; }
 }

@@ -2,7 +2,7 @@
 withDefaults(defineProps<{
   value: string | number;
   label: string;
-  hint: string;
+  hint?: string;
   color?: "green" | "amber" | "teal" | "gray";
   width?: string;
   height?: string;
@@ -25,7 +25,7 @@ withDefaults(defineProps<{
     <div class="stat-card__body">
       <p class="stat-value" :class="`stat-value--${color}`">{{ value }}</p>
       <p class="stat-label">{{ label }}</p>
-      <p class="stat-hint">{{ hint }}</p>
+      <p v-if="hint" class="stat-hint">{{ hint }}</p>
     </div>
   </div>
 </template>

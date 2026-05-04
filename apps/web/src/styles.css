@@ -23,7 +23,7 @@
 html {
   min-width: 320px;
   min-height: 100%;
-  overflow-y: scroll;
+  overflow-y: auto;
   scrollbar-color: #94a3b8 #f8fafc;
   scrollbar-gutter: stable;
 }
