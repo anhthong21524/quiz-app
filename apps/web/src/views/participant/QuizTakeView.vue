@@ -435,9 +435,9 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="h-full overflow-hidden bg-[#fffdfa] text-slate-950">
+  <section class="min-h-full bg-[#fffdfa] text-slate-950 lg:h-full lg:overflow-hidden">
     <div
-      class="mx-auto grid h-full w-full max-w-[1180px] grid-rows-[auto_auto_minmax(0,1fr)] gap-3 px-4 py-3 sm:px-6 lg:px-8"
+      class="mx-auto grid min-h-full w-full max-w-[1180px] grid-rows-[auto_auto_auto] gap-3 px-4 py-3 sm:px-6 lg:h-full lg:grid-rows-[auto_auto_minmax(0,1fr)] lg:px-8"
     >
       <header
         v-if="quiz && !pageError && !isLoading && !isSubmitted"
@@ -743,12 +743,12 @@ onBeforeUnmount(() => {
 
           <!-- Two-column layout: question card + sidebar -->
           <div
-            class="grid min-h-0 items-stretch gap-3 overflow-hidden"
+            class="grid items-stretch gap-3 overflow-visible lg:min-h-0 lg:overflow-hidden"
             :class="showQuestionNavigator ? 'lg:grid-cols-[minmax(0,1fr)_260px]' : 'mx-auto w-full max-w-4xl lg:grid-cols-1'"
           >
 
             <!-- Question card -->
-            <article class="flex min-h-0 flex-col overflow-hidden rounded-2xl border border-white/80 bg-white p-4 shadow-lg shadow-slate-900/8 sm:p-5 lg:p-6">
+            <article class="flex flex-col rounded-2xl border border-white/80 bg-white p-4 shadow-lg shadow-slate-900/8 sm:p-5 lg:min-h-0 lg:overflow-hidden lg:p-6">
               <p class="text-sm font-extrabold uppercase tracking-widest text-emerald-600">
                 {{
                   isReviewMode
@@ -826,10 +826,10 @@ onBeforeUnmount(() => {
               </section>
 
               <!-- Navigation buttons -->
-              <div class="mt-4 grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center gap-3 border-t border-slate-100 pt-4">
+              <div class="mt-4 grid gap-3 border-t border-slate-100 pt-4 sm:grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] sm:items-center">
                 <button
                   v-if="!isReviewMode"
-                  class="inline-flex min-h-12 items-center justify-self-start gap-2 rounded-xl border border-slate-200 bg-white px-5 text-base font-extrabold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:text-slate-400 disabled:opacity-60 disabled:hover:border-slate-200 disabled:hover:bg-white"
+                  class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-base font-extrabold text-slate-600 transition hover:border-red-200 hover:bg-red-50 hover:text-red-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-red-300 disabled:cursor-not-allowed disabled:text-slate-400 disabled:opacity-60 disabled:hover:border-slate-200 disabled:hover:bg-white sm:w-auto sm:justify-self-start"
                   type="button"
                   :disabled="answeredCount === 0"
                   :title="answeredCount === 0 ? t('participant.take.noAnswersToClear') : t('participant.take.clearAnswers')"
@@ -840,11 +840,11 @@ onBeforeUnmount(() => {
                   </svg>
                   {{ t("participant.take.clearAnswers") }}
                 </button>
-                <div v-else class="min-h-12" aria-hidden="true"></div>
+                <div v-else class="hidden min-h-12 sm:block" aria-hidden="true"></div>
 
-                <div class="flex min-w-0 flex-wrap items-center justify-center gap-3">
+                <div class="grid min-w-0 grid-cols-2 gap-3 sm:flex sm:flex-wrap sm:items-center sm:justify-center">
                   <button
-                    class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-base font-extrabold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                    class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-base font-extrabold text-slate-800 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 sm:w-auto sm:px-5"
                     type="button"
                     :disabled="currentQuestionIndex === 0"
                     @click="goToPreviousQuestion"
@@ -856,7 +856,7 @@ onBeforeUnmount(() => {
                   </button>
 
                   <button
-                    class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-white px-6 text-base font-extrabold text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400 disabled:opacity-60 disabled:hover:bg-white"
+                    class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-emerald-200 bg-white px-4 text-base font-extrabold text-emerald-700 transition hover:bg-emerald-50 disabled:cursor-not-allowed disabled:border-slate-200 disabled:text-slate-400 disabled:opacity-60 disabled:hover:bg-white sm:w-auto sm:px-6"
                     type="button"
                     :disabled="currentQuestionIndex === totalQuestions - 1"
                     @click="goToNextQuestion"
@@ -868,9 +868,9 @@ onBeforeUnmount(() => {
                   </button>
                 </div>
 
-                <div v-if="!isReviewMode" class="flex min-w-0 justify-end">
+                <div v-if="!isReviewMode" class="flex min-w-0 justify-stretch sm:justify-end">
                   <button
-                    class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-7 text-base font-extrabold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none"
+                    class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-7 text-base font-extrabold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:text-slate-500 disabled:shadow-none sm:w-auto"
                     type="button"
                     :disabled="!canSubmitQuiz"
                     :title="canSubmitQuiz
@@ -889,9 +889,9 @@ onBeforeUnmount(() => {
                     </svg>
                   </button>
                 </div>
-                <div v-else class="flex min-w-0 justify-end">
+                <div v-else class="flex min-w-0 justify-stretch sm:justify-end">
                   <button
-                    class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-7 text-base font-extrabold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400"
+                    class="inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-7 text-base font-extrabold text-white shadow-lg shadow-emerald-600/20 transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 sm:w-auto"
                     type="button"
                     @click="returnToResults"
                   >
@@ -923,7 +923,7 @@ onBeforeUnmount(() => {
               :current-question-index="currentQuestionIndex"
               :is-review-mode="isReviewMode"
               :review-statuses="reviewStatuses"
-              class="h-full min-h-0 self-stretch lg:top-[5.5rem]"
+              class="self-stretch lg:h-full lg:min-h-0 lg:top-[5.5rem]"
               @select="goToQuestion"
             />
 

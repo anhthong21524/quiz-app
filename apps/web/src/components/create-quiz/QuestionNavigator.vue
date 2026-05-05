@@ -97,7 +97,7 @@ function getStatusLabel(
 
 <template>
   <aside
-    class="flex h-full flex-col rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white shadow-[0_10px_26px_rgba(46,35,20,0.06)] xl:sticky xl:top-6"
+    class="flex flex-col rounded-[20px] border border-[rgba(226,223,218,0.92)] bg-white shadow-[0_10px_26px_rgba(46,35,20,0.06)] xl:sticky xl:top-6"
     :class="usesExtraCompactLayout ? 'p-3' : 'p-4'"
   >
     <div class="flex items-start justify-between gap-3">
