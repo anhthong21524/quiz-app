@@ -1,0 +1,68 @@
+{
+  "title": "Khám phá thế giới quanh em",
+  "description": "Các câu hỏi nhẹ nhàng về con vật, đồ vật và thói quen hằng ngày cho bé.",
+  "subject": "Khám phá",
+  "difficulty": "Easy",
+  "timeLimit": null,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": true,
+  "allowRetake": true,
+  "questions": [
+    {
+      "prompt": "Con nào kêu 'meo meo'?",
+      "options": [
+        "Con chó",
+        "Con mèo",
+        "Con gà",
+        "Con vịt"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "Con mèo thường kêu 'meo meo'."
+    },
+    {
+      "prompt": "Bạn dùng gì để viết lên giấy?",
+      "options": [
+        "Cái mũ",
+        "Cây bút",
+        "Cái dép",
+        "Cái bát"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "Cây bút được dùng để viết và vẽ."
+    },
+    {
+      "prompt": "Bạn nên làm gì trước khi ăn?",
+      "options": [
+        "Rửa tay",
+        "Chạy nhanh",
+        "Đi ngủ",
+        "Xem tivi"
+      ],
+      "correctOptionIndex": 0,
+      "explanation": "Rửa tay sạch sẽ giúp giữ gìn sức khỏe."
+    },
+    {
+      "prompt": "Mặt trời xuất hiện vào lúc nào?",
+      "options": [
+        "Ban đêm",
+        "Buổi sáng",
+        "Giữa khuya",
+        "Lúc đi ngủ"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "Ban ngày, nhất là buổi sáng, chúng ta thường thấy mặt trời."
+    },
+    {
+      "prompt": "Con vật nào có thể bay trên trời?",
+      "options": [
+        "Con cá",
+        "Con chim",
+        "Con cá heo",
+        "Con chó"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "Con chim có cánh nên có thể bay."
+    }
+  ]
+}

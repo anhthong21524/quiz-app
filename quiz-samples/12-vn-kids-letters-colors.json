@@ -1,0 +1,68 @@
+{
+  "title": "Chữ cái và màu sắc",
+  "description": "Các câu hỏi giúp bé làm quen với chữ cái và màu sắc quen thuộc.",
+  "subject": "Tiếng Việt",
+  "difficulty": "Easy",
+  "timeLimit": null,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": true,
+  "allowRetake": true,
+  "questions": [
+    {
+      "prompt": "Chữ cái nào đứng đầu trong từ 'cá'?",
+      "options": [
+        "a",
+        "b",
+        "c",
+        "d"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Từ 'cá' bắt đầu bằng chữ c."
+    },
+    {
+      "prompt": "Quả chuối thường có màu gì?",
+      "options": [
+        "Màu vàng",
+        "Màu xanh dương",
+        "Màu đen",
+        "Màu tím"
+      ],
+      "correctOptionIndex": 0,
+      "explanation": "Quả chuối chín thường có màu vàng."
+    },
+    {
+      "prompt": "Chữ cái nào là nguyên âm?",
+      "options": [
+        "b",
+        "m",
+        "a",
+        "n"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Chữ a là một nguyên âm."
+    },
+    {
+      "prompt": "Lá cây thường có màu gì?",
+      "options": [
+        "Màu xanh lá",
+        "Màu hồng",
+        "Màu cam",
+        "Màu nâu"
+      ],
+      "correctOptionIndex": 0,
+      "explanation": "Nhiều lá cây có màu xanh lá."
+    },
+    {
+      "prompt": "Từ nào bắt đầu bằng chữ 'b'?",
+      "options": [
+        "mèo",
+        "bánh",
+        "cá",
+        "ong"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "Từ 'bánh' bắt đầu bằng chữ b."
+    }
+  ]
+}

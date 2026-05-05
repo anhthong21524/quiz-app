@@ -1,0 +1,68 @@
+{
+  "title": "Toán vui cho bé 6 tuổi",
+  "description": "Các câu hỏi toán đơn giản giúp bé tập đếm và nhận biết số.",
+  "subject": "Toán học",
+  "difficulty": "Easy",
+  "timeLimit": null,
+  "isPrivate": false,
+  "allowSummary": true,
+  "allowReviewAnswers": true,
+  "allowRetake": true,
+  "questions": [
+    {
+      "prompt": "2 + 3 bằng bao nhiêu?",
+      "options": [
+        "4",
+        "5",
+        "6",
+        "7"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "2 cộng 3 bằng 5."
+    },
+    {
+      "prompt": "Số nào lớn hơn 4?",
+      "options": [
+        "2",
+        "3",
+        "5",
+        "1"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Số 5 lớn hơn 4."
+    },
+    {
+      "prompt": "1 + 1 bằng bao nhiêu?",
+      "options": [
+        "1",
+        "2",
+        "3",
+        "4"
+      ],
+      "correctOptionIndex": 1,
+      "explanation": "1 cộng 1 bằng 2."
+    },
+    {
+      "prompt": "Hình nào có 3 cạnh?",
+      "options": [
+        "Hình tròn",
+        "Hình vuông",
+        "Hình tam giác",
+        "Hình chữ nhật"
+      ],
+      "correctOptionIndex": 2,
+      "explanation": "Hình tam giác có 3 cạnh."
+    },
+    {
+      "prompt": "Đếm tiếp nhé: 1, 2, 3, ...",
+      "options": [
+        "4",
+        "5",
+        "6",
+        "7"
+      ],
+      "correctOptionIndex": 0,
+      "explanation": "Sau 3 là 4."
+    }
+  ]
+}
