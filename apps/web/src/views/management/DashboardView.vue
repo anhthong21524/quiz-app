@@ -271,7 +271,7 @@ watch(guideSlides, (slides) => {
       <template v-else>
         <div class="hero-slider" @mouseenter="pauseAutoplay" @mouseleave="resumeAutoplay">
           <div class="hero-viewport">
-            <Transition name="hero-fade" mode="out-in">
+            <Transition name="hero-fade">
               <article :key="currentSlide.id" class="hero-slide">
                 <div class="hero-body">
                   <p class="hero-eyebrow">
@@ -562,7 +562,9 @@ watch(guideSlides, (slides) => {
 }
 
 .hero-viewport {
+  position: relative;
   min-height: 252px;
+  overflow: hidden;
 }
 
 .hero-slide {
@@ -571,6 +573,7 @@ watch(guideSlides, (slides) => {
   gap: 28px;
   align-items: center;
   width: 100%;
+  min-height: 252px;
 }
 
 .hero-slide--loading {
@@ -1115,6 +1118,11 @@ watch(guideSlides, (slides) => {
 .hero-fade-enter-active,
 .hero-fade-leave-active {
   transition: opacity 0.18s ease;
+}
+
+.hero-fade-leave-active {
+  position: absolute;
+  inset: 0;
 }
 
 .hero-fade-enter-from,
