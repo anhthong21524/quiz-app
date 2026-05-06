@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import { onBeforeRouteLeave, useRoute, useRouter } from "vue-router";
 import {
+  createQuizAttempt,
   getPublicQuizBySlug,
   submitQuizAttempt,
   type PublicQuizInfo,
@@ -90,7 +91,7 @@ const answerProgressPercent = computed(() => {
 const showQuestionNavigator = computed(() => totalQuestions.value > 1);
 const canSubmitQuiz = computed(() => unansweredCount.value === 0);
 const storageKey = computed(() =>
-  attempt.value ? `quiz-app-public-answers-${attempt.value.attemptId}` : ""
+  attempt.value ? `quiz-app-public-answers-${attempt.value.sessionId}` : ""
 );
 const remainingSeconds = computed(() => {
   if (!quiz.value?.timeLimit) return null;
@@ -190,6 +191,13 @@ function getQuestionKey(question: PublicQuizQuestion | null, index: number) {
 
 function optionLabel(index: number) {
   return String.fromCharCode(65 + index);
+}
+
+function calculateScore(quizInfo: PublicQuizInfo, selectedAnswers: AnswerMap) {
+  return quizInfo.questions.reduce((count, question, index) => {
+    const key = getQuestionKey(question, index);
+    return selectedAnswers[key] === question.correctOptionIndex ? count + 1 : count;
+  }, 0);
 }
 
 function isOptionSelected(optionIndex: number) {
@@ -299,9 +307,23 @@ async function submitQuiz(options: { force?: boolean } = {}) {
   if (!currentAttempt || !quiz.value) return;
 
   const timeTaken = Math.floor((Date.now() - new Date(currentAttempt.startedAt).getTime()) / 1000);
+  const trimmedName = currentAttempt.takerName?.trim();
+
+  if (!trimmedName) {
+    score.value = calculateScore(quiz.value, answers.value);
+    totalQuestionsAtSubmit.value = questions.value.length;
+    return;
+  }
+
+  const persistedAttempt = await createQuizAttempt({
+    quizId: currentAttempt.quizId,
+    takerName: trimmedName,
+    accessCode: currentAttempt.accessCode
+  });
+
   const result = await submitQuizAttempt({
     quizId: currentAttempt.quizId,
-    attemptId: currentAttempt.attemptId,
+    attemptId: persistedAttempt.id,
     answers: answers.value,
     timeTaken
   });
@@ -309,7 +331,11 @@ async function submitQuiz(options: { force?: boolean } = {}) {
   if (result) {
     score.value = result.score;
     totalQuestionsAtSubmit.value = questions.value.length;
+    return;
   }
+
+  score.value = calculateScore(quiz.value, answers.value);
+  totalQuestionsAtSubmit.value = questions.value.length;
 }
 
 function exitQuiz() {

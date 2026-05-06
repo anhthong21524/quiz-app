@@ -83,7 +83,7 @@ export const messages = {
       },
       publicQuiz: {
         title: "Public Quiz",
-        description: "Enter your name and start a public Quiz App quiz."
+        description: "Add your name if you want your result saved, then start a public Quiz App quiz."
       },
       takeQuiz: {
         title: "Take Quiz",
@@ -722,7 +722,7 @@ export const messages = {
         headerEyebrow: "Public quizzes",
         headerTitle: "Choose a quiz to start",
         headerDescription:
-          "Browse available quizzes that are open to everyone. Pick one, enter your name, and begin.",
+          "Browse available quizzes that are open to everyone. Pick one, add your name if you want your result saved, and begin.",
         privateTitle: "Have a private quiz code?",
         privateDescription: "Enter your access code to unlock a private quiz.",
         enterCode: "Enter code",
@@ -749,7 +749,6 @@ export const messages = {
         loadNotFound: "We could not find this quiz. Please check the link and try again.",
         loadUnavailable: "This quiz is not available yet. Please contact the quiz creator.",
         loadFailed: "Something went wrong while loading this quiz. Please try again soon.",
-        nameRequired: "Please enter your name before starting the quiz.",
         loading: "Loading quiz...",
         unavailableTitle: "Quiz unavailable",
         questions: "{count} Questions",
@@ -759,8 +758,8 @@ export const messages = {
         minutes: "{count} Minutes",
         answerType: "One correct answer",
         yourName: "Your name",
-        yourNameHint: "Please enter your name. It will be shown on your result.",
-        yourNamePlaceholder: "Enter your full name",
+        yourNameHint: "Optional. Enter your name if you want your result to be saved and shown in results.",
+        yourNamePlaceholder: "Enter your full name (optional)",
         starting: "Starting...",
         startQuiz: "Start quiz"
       },
@@ -1008,7 +1007,7 @@ export const messages = {
       },
       publicQuiz: {
         title: "Bài trắc nghiệm công khai",
-        description: "Nhập tên của bạn và bắt đầu một bài trắc nghiệm công khai trên Quiz App."
+        description: "Thêm tên nếu bạn muốn lưu kết quả, sau đó bắt đầu một bài trắc nghiệm công khai trên Quiz App."
       },
       takeQuiz: {
         title: "Làm bài trắc nghiệm",
@@ -1649,7 +1648,7 @@ export const messages = {
         headerEyebrow: "Bài trắc nghiệm công khai",
         headerTitle: "Chọn một bài trắc nghiệm để bắt đầu",
         headerDescription:
-          "Duyệt các bài trắc nghiệm có sẵn cho mọi người. Chọn một bài trắc nghiệm, nhập tên của bạn và bắt đầu.",
+          "Duyệt các bài trắc nghiệm có sẵn cho mọi người. Chọn một bài trắc nghiệm, thêm tên nếu bạn muốn lưu kết quả, rồi bắt đầu.",
         privateTitle: "Bạn có mã bài trắc nghiệm riêng tư?",
         privateDescription: "Nhập mã truy cập để mở khóa một bài trắc nghiệm riêng tư.",
         enterCode: "Nhập mã",
@@ -1676,7 +1675,6 @@ export const messages = {
         loadNotFound: "Chúng tôi không thể tìm thấy bài trắc nghiệm này. Vui lòng kiểm tra liên kết và thử lại.",
         loadUnavailable: "Bài trắc nghiệm này hiện chưa khả dụng. Vui lòng liên hệ người tạo bài trắc nghiệm.",
         loadFailed: "Đã xảy ra lỗi khi tải bài trắc nghiệm này. Vui lòng thử lại sau.",
-        nameRequired: "Vui lòng nhập tên của bạn trước khi bắt đầu bài trắc nghiệm.",
         loading: "Đang tải bài trắc nghiệm...",
         unavailableTitle: "Bài trắc nghiệm không khả dụng",
         questions: "{count} câu hỏi",
@@ -1686,7 +1684,7 @@ export const messages = {
         minutes: "{count} phút",
         answerType: "Một đáp án đúng",
         yourName: "Tên của bạn",
-        yourNameHint: "Vui lòng nhập tên của bạn. Tên này sẽ hiển thị trên kết quả.",
+        yourNameHint: "Không bắt buộc. Nhập tên nếu bạn muốn lưu và hiển thị kết quả trong phần kết quả.",
         yourNamePlaceholder: "Nhập họ và tên của bạn",
         starting: "Đang bắt đầu...",
         startQuiz: "Bắt đầu bài trắc nghiệm"

@@ -3,7 +3,6 @@ import { computed, onMounted, ref } from "vue";
 import { useRoute, useRouter } from "vue-router";
 import { useI18n } from "../../i18n";
 import {
-  createQuizAttempt,
   getPublicQuizBySlug,
   type PublicQuizInfo
 } from "../../services/publicQuizApi";
@@ -16,7 +15,6 @@ const { t } = useI18n();
 
 const quiz = ref<PublicQuizInfo | null>(null);
 const takerName = ref("");
-const nameError = ref("");
 const pageError = ref("");
 const isLoading = ref(true);
 const isStarting = ref(false);
@@ -59,16 +57,10 @@ async function loadQuiz() {
   }
 }
 
-function validateName() {
+function normalizeName() {
   const trimmedName = takerName.value.trim();
-  if (!trimmedName) {
-    nameError.value = t("participant.landing.nameRequired");
-    return null;
-  }
-
-  nameError.value = "";
   takerName.value = trimmedName;
-  return trimmedName;
+  return trimmedName || undefined;
 }
 
 async function startQuiz() {
@@ -76,25 +68,16 @@ async function startQuiz() {
     return;
   }
 
-  const trimmedName = validateName();
-  if (!trimmedName) {
-    return;
-  }
-
   isStarting.value = true;
   try {
-    const attempt = await createQuizAttempt({
-      quizId: quiz.value.id,
-      takerName: trimmedName,
-      accessCode: accessCode.value
-    });
+    const trimmedName = normalizeName();
 
     attemptStore.setAttempt({
-      attemptId: attempt.id,
+      sessionId: crypto.randomUUID(),
       quizId: quiz.value.id,
       quizSlug: quiz.value.slug,
       takerName: trimmedName,
-      startedAt: attempt.startedAt,
+      startedAt: new Date().toISOString(),
       accessCode: accessCode.value
     });
 
@@ -200,14 +183,13 @@ onMounted(loadQuiz);
 
             <div class="grid gap-3">
               <label class="text-lg font-extrabold" for="taker-name">
-                {{ t("participant.landing.yourName") }} <span class="text-red-500">*</span>
+                {{ t("participant.landing.yourName") }}
               </label>
               <p class="text-sm font-medium text-slate-600">
                 {{ t("participant.landing.yourNameHint") }}
               </p>
               <div
-                class="flex min-h-16 items-center gap-3 rounded-2xl border bg-white px-4 transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100"
-                :class="nameError ? 'border-red-300' : 'border-slate-300'"
+                class="flex min-h-16 items-center gap-3 rounded-2xl border border-slate-300 bg-white px-4 transition focus-within:border-emerald-500 focus-within:ring-4 focus-within:ring-emerald-100"
               >
                 <svg viewBox="0 0 24 24" class="h-6 w-6 shrink-0 text-slate-500" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true">
                   <circle cx="12" cy="8" r="4" />
@@ -220,14 +202,9 @@ onMounted(loadQuiz);
                   type="text"
                   autocomplete="name"
                   :placeholder="t('participant.landing.yourNamePlaceholder')"
-                  :aria-invalid="nameError ? 'true' : 'false'"
-                  aria-describedby="taker-name-error"
-                  @blur="takerName.trim() ? validateName() : undefined"
+                  @blur="normalizeName"
                 />
               </div>
-              <p id="taker-name-error" class="min-h-6 text-sm font-bold text-red-600" aria-live="polite">
-                {{ nameError }}
-              </p>
             </div>
 
             <button

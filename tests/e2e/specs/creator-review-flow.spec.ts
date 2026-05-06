@@ -80,7 +80,7 @@ test("creator can review participant answers after a public submission", async (
 
   const participantPage = await context.newPage();
   await participantPage.goto(shareUrl);
-  await participantPage.getByRole("textbox", { name: "Your name *" }).fill(participantName);
+  await participantPage.getByRole("textbox", { name: "Your name" }).fill(participantName);
   await participantPage.getByRole("button", { name: "Start quiz" }).click();
   await expect(participantPage).toHaveURL(/\/take$/);
   await saveEvidence(participantPage, "auto-05-quiz-taking.png");

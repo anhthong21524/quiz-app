@@ -3,10 +3,11 @@ import { defineStore } from "pinia";
 const storageKey = "quiz-app-public-attempt";
 
 export interface QuizAttemptSession {
-  attemptId: string;
+  sessionId: string;
   quizId: string;
   quizSlug: string;
-  takerName: string;
+  attemptId?: string;
+  takerName?: string;
   startedAt: string;
   accessCode?: string;
 }
