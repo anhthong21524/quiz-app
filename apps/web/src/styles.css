@@ -605,6 +605,13 @@ button {
   font-weight: 700;
 }
 
+.mobile-nav-action {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
 .mobile-nav-link.is-active {
   background: #e8fbf2;
   color: #10b981;
@@ -892,6 +899,10 @@ button {
     flex-wrap: nowrap;
   }
 
+  .header-actions--editor {
+    gap: 6px;
+  }
+
   .header-create-button {
     width: 40px;
     min-height: 40px;
@@ -937,8 +948,7 @@ button {
   }
 
   .header-signout-button {
-    padding: 0 12px;
-    font-size: 0.84rem;
+    display: none;
   }
 
   .mobile-nav-panel {
@@ -949,7 +959,13 @@ button {
     border-top: 1px solid rgba(232, 229, 223, 0.95);
   }
 
-  .app-footer {
+  .app-shell {
+    padding-bottom: 20px;
+  }
+
+  .app-footer:not(.quiz-taking-footer) {
+    position: static;
+    margin-top: 16px;
     padding: 10px var(--page-padding);
   }
 }
@@ -1149,6 +1165,14 @@ body:has(.app-shell.public-theme-dark:not(.public-shell)) {
 
   .brand-name {
     display: none;
+  }
+
+  .header-actions--editor .user-profile-button {
+    display: none;
+  }
+
+  .header-actions--editor .header-locale-select {
+    padding: 0 9px;
   }
 
   .user-menu-chevron {

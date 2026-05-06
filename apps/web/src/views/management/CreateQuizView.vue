@@ -1144,7 +1144,7 @@ function togglePrivate() {
                         v-for="difficulty in difficultyOptions"
                         :key="difficulty"
                         type="button"
-                        class="inline-flex h-8 items-center justify-center gap-1.5 rounded-xl border px-3 text-sm font-semibold transition"
+                        class="inline-flex min-h-9 items-center justify-center gap-1 rounded-xl border px-2 py-1 text-xs font-semibold leading-tight transition"
                         :class="configuration.difficulty === difficulty
                           ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
                           : 'border-gray-200 bg-white text-slate-700 hover:border-emerald-200 hover:text-emerald-700'"
@@ -1158,7 +1158,7 @@ function togglePrivate() {
                             <path d="m4 10 3 3 9-9" stroke-linecap="round" stroke-linejoin="round" />
                           </svg>
                         </span>
-                        <span>{{ difficultyLabel(difficulty) }}</span>
+                        <span class="whitespace-nowrap text-center">{{ difficultyLabel(difficulty) }}</span>
                       </button>
                     </div>
                   </div>
@@ -1189,12 +1189,15 @@ function togglePrivate() {
                           <span class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition" :class="configuration.isPrivate ? 'translate-x-6' : 'translate-x-1'"></span>
                         </button>
                       </div>
-                      <div class="mt-1.5 flex h-4 items-center gap-2" :class="!(configuration.isPrivate && activeQuizAccessCode) && 'invisible'">
+                      <div
+                        v-if="configuration.isPrivate && activeQuizAccessCode"
+                        class="mt-2 flex flex-wrap items-center gap-2 text-xs"
+                      >
                         <span class="text-xs font-bold text-amber-800">{{ t("createQuiz.fields.accessCode") }}</span>
                         <span class="font-mono text-sm font-extrabold tracking-[0.18em] text-amber-900">{{ activeQuizAccessCode }}</span>
                         <button
                           type="button"
-                          class="ml-auto inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-semibold transition"
+                          class="inline-flex items-center gap-1 rounded-lg px-2 py-0.5 text-xs font-semibold transition sm:ml-auto"
                           :class="accessCodeCopied
                             ? 'bg-amber-200 text-amber-900 cursor-default'
                             : 'bg-amber-100 text-amber-700 hover:bg-amber-200 hover:text-amber-900'"
@@ -1215,8 +1218,8 @@ function togglePrivate() {
                     <!-- Participant option rows -->
                     <div class="divide-y divide-gray-100 border-t border-gray-200 bg-white">
                       <!-- Show summary -->
-                      <div class="flex items-center justify-between gap-2 px-3 py-2">
-                        <p class="text-sm font-medium text-slate-700">{{ t("createQuiz.fields.showSummary") }}</p>
+                      <div class="flex items-center justify-between gap-3 px-3 py-2">
+                        <p class="min-w-0 flex-1 text-sm font-medium text-slate-700">{{ t("createQuiz.fields.showSummary") }}</p>
                         <span
                           v-if="isReadOnly"
                           class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
@@ -1235,8 +1238,8 @@ function togglePrivate() {
                         </button>
                       </div>
                       <!-- Allow answer review -->
-                      <div class="flex items-center justify-between gap-2 px-3 py-2">
-                        <p class="text-sm font-medium text-slate-700">{{ t("createQuiz.fields.allowAnswerReview") }}</p>
+                      <div class="flex items-center justify-between gap-3 px-3 py-2">
+                        <p class="min-w-0 flex-1 text-sm font-medium text-slate-700">{{ t("createQuiz.fields.allowAnswerReview") }}</p>
                         <span
                           v-if="isReadOnly"
                           class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
@@ -1255,8 +1258,8 @@ function togglePrivate() {
                         </button>
                       </div>
                       <!-- Allow retake -->
-                      <div class="flex items-center justify-between gap-2 px-3 py-2">
-                        <p class="text-sm font-medium text-slate-700">{{ t("createQuiz.fields.allowRetake") }}</p>
+                      <div class="flex items-center justify-between gap-3 px-3 py-2">
+                        <p class="min-w-0 flex-1 text-sm font-medium text-slate-700">{{ t("createQuiz.fields.allowRetake") }}</p>
                         <span
                           v-if="isReadOnly"
                           class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
@@ -1282,7 +1285,7 @@ function togglePrivate() {
           <template #footer>
               <!-- Read-only footer -->
               <template v-if="isReadOnly">
-                <div class="flex items-center gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                <div class="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
                   <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4 shrink-0">
                     <circle cx="10" cy="10" r="8" />
                     <path d="M10 6v4M10 14h.01" stroke-linecap="round" stroke-linejoin="round" />
@@ -1291,7 +1294,7 @@ function togglePrivate() {
                 </div>
                 <button
                   type="button"
-                  class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 sm:min-w-[180px]"
+                  class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 md:w-auto md:min-w-[180px]"
                   @click="currentStep = 2"
                 >
                   <span>{{ t("createQuiz.readOnly.viewQuestions") }}</span>
@@ -1306,7 +1309,7 @@ function togglePrivate() {
                   <span class="mr-1 inline-block rounded-lg bg-emerald-50 px-2 py-0.5 font-medium">{{ t("createQuiz.helper.tip") }}</span>
                   {{ isEditing ? t("createQuiz.helper.editTip") : t("createQuiz.helper.createTip") }}
                 </p>
-                <div class="flex items-center gap-2">
+                <div class="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
                   <!-- Import JSON (new quiz only) -->
                   <template v-if="!isEditing">
                     <input
@@ -1318,7 +1321,7 @@ function togglePrivate() {
                     />
                     <button
                       type="button"
-                      class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700"
+                      class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700 sm:w-auto"
                       @click="triggerImport"
                     >
                       <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" class="h-4 w-4">
@@ -1331,7 +1334,7 @@ function togglePrivate() {
                   <button
                     v-if="isEditing"
                     type="button"
-                    class="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                     :disabled="isSaving"
                     @click="saveConfigOnly"
                   >
@@ -1339,7 +1342,7 @@ function togglePrivate() {
                   </button>
                   <button
                     type="button"
-                    class="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 sm:min-w-[180px]"
+                    class="inline-flex h-10 w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-6 text-sm font-bold text-white shadow-sm transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:min-w-[180px]"
                     :disabled="isSaving"
                     @click="goToQuestionsStep"
                   >
@@ -1369,15 +1372,15 @@ function togglePrivate() {
               <label v-else class="block space-y-1.5">
                 <textarea
                   :value="currentQuestion.questionText"
-                  rows="2"
-                  class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                  rows="3"
+                  class="w-full resize-y rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   :placeholder="t('createQuiz.fields.questionPlaceholder')"
                   @input="updateQuestionText(($event.target as HTMLTextAreaElement).value)"
                 ></textarea>
               </label>
 
               <section class="space-y-2">
-                <div class="flex items-center justify-between gap-2">
+                <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                   <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.answerOptions") }}</span>
 
                   <!-- Read-only: multiple correct indicator -->
@@ -1387,7 +1390,7 @@ function togglePrivate() {
                   <button
                     v-else-if="!isReadOnly"
                     type="button"
-                    class="inline-flex items-center gap-2 text-sm text-slate-500"
+                    class="inline-flex items-center gap-2 self-start text-sm text-slate-500"
                     :aria-pressed="currentQuestion.multipleCorrect"
                     @click="toggleMultipleCorrect"
                   >
@@ -1448,8 +1451,8 @@ function togglePrivate() {
                 <span class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.explanation") }} <span class="font-normal text-slate-400">{{ t("createQuiz.fields.explanationOptional") }}</span></span>
                 <textarea
                   :value="currentQuestion.explanation"
-                  rows="1"
-                  class="w-full resize-none rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
+                  rows="2"
+                  class="w-full resize-y rounded-xl border border-gray-200 bg-white px-4 py-2 text-slate-900 outline-none transition placeholder:text-gray-400 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-100"
                   :placeholder="t('createQuiz.fields.explanationPlaceholder')"
                   @input="updateExplanation(($event.target as HTMLTextAreaElement).value)"
                 ></textarea>

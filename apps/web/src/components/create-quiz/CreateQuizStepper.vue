@@ -38,17 +38,17 @@ function isClickable(step: CreateQuizStep) {
 </script>
 
 <template>
-  <div class="flex items-center gap-3 overflow-x-auto py-1">
+  <div class="flex items-center gap-2 overflow-x-auto py-1 sm:gap-3">
     <template v-for="(step, index) in steps" :key="step.step">
       <button
         type="button"
-        class="flex items-center gap-3 rounded-xl pr-1 transition disabled:opacity-100"
+        class="flex shrink-0 items-center gap-2 rounded-xl pr-1 transition disabled:opacity-100 sm:gap-3"
         :class="isClickable(step.step) ? 'cursor-pointer' : 'cursor-default'"
         :disabled="!isClickable(step.step)"
         @click="emit('select', step.step)"
       >
         <span
-          class="flex h-9 w-9 items-center justify-center rounded-full border text-sm font-semibold transition-colors"
+          class="flex h-8 w-8 items-center justify-center rounded-full border text-xs font-semibold transition-colors sm:h-9 sm:w-9 sm:text-sm"
           :class="
             isCompleted(step.step)
               ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
@@ -71,7 +71,7 @@ function isClickable(step: CreateQuizStep) {
         </span>
 
         <span
-          class="whitespace-nowrap text-sm font-semibold transition-colors sm:text-base"
+          class="whitespace-nowrap text-xs font-semibold transition-colors sm:text-sm md:text-base"
           :class="
             isActive(step.step)
               ? 'text-emerald-700'
@@ -86,7 +86,7 @@ function isClickable(step: CreateQuizStep) {
 
       <div
         v-if="index < steps.length - 1"
-        class="h-0.5 min-w-12 flex-1 rounded-full"
+        class="h-0.5 min-w-8 flex-1 rounded-full sm:min-w-12"
         :class="currentStep > step.step ? 'bg-emerald-500' : 'bg-gray-200'"
       ></div>
     </template>

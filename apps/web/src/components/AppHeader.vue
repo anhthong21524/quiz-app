@@ -41,6 +41,9 @@ const localeOptions = computed(() => [
 const themeToggleLabel = computed(() =>
   isDark.value ? t("header.switchToLightTheme") : t("header.switchToDarkTheme")
 );
+const isManagementEditor = computed(
+  () => route.name === "create-quiz" || route.name === "edit-quiz-questions"
+);
 
 onMounted(() => {
   if (authStore.isAuthenticated) {
@@ -332,7 +335,7 @@ watch(() => route.fullPath, closeMenus);
       </RouterLink>
     </nav>
 
-    <div class="header-actions">
+    <div class="header-actions" :class="{ 'header-actions--editor': isManagementEditor }">
       <button
         class="header-create-button"
         type="button"
@@ -445,6 +448,12 @@ watch(() => route.fullPath, closeMenus);
       >
         {{ t("navigation.quizResults") }}
       </RouterLink>
+      <RouterLink class="mobile-nav-link" :to="{ name: 'profile' }" @click="closeMenus">
+        {{ t("settings.navigation.profile") }}
+      </RouterLink>
+      <button class="mobile-nav-link mobile-nav-action" type="button" @click="signOut">
+        {{ t("navigation.signOut") }}
+      </button>
     </nav>
   </header>
 </template>

@@ -662,6 +662,7 @@ export const messages = {
         showSummary: "Show summary",
         allowAnswerReview: "Allow answer review",
         allowRetake: "Allow retake",
+        questions: "Questions",
         question: "Question",
         questionPlaceholder: "Write your question here...",
         answerOptions: "Answer options",
@@ -689,6 +690,7 @@ export const messages = {
         saveConfiguration: "Save configuration",
         saveContinue: "Save & continue",
         saving: "Saving...",
+        importJson: "Import JSON",
         nextQuestion: "Next question",
         updateQuiz: "Update quiz",
         saveQuiz: "Save quiz"
@@ -1589,6 +1591,7 @@ export const messages = {
         showSummary: "Hiển thị tổng kết",
         allowAnswerReview: "Cho phép xem lại đáp án",
         allowRetake: "Cho phép làm lại",
+        questions: "Câu hỏi",
         question: "Câu hỏi",
         questionPlaceholder: "Nhập câu hỏi của bạn...",
         answerOptions: "Các lựa chọn đáp án",
@@ -1616,6 +1619,7 @@ export const messages = {
         saveConfiguration: "Lưu cấu hình",
         saveContinue: "Lưu và tiếp tục",
         saving: "Đang lưu...",
+        importJson: "Nhập JSON",
         nextQuestion: "Câu hỏi tiếp theo",
         updateQuiz: "Cập nhật bài trắc nghiệm",
         saveQuiz: "Lưu bài trắc nghiệm"
