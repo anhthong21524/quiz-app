@@ -5,6 +5,7 @@ import FieldErrorText from "../../components/forms/FieldErrorText.vue";
 import FormErrorBanner from "../../components/forms/FormErrorBanner.vue";
 import PasswordHint from "../../components/forms/PasswordHint.vue";
 import { env } from "../../config/env";
+import { useTheme } from "../../composables/useTheme";
 import { useI18n } from "../../i18n";
 import { getGoogleAuthStatus } from "../../services/auth-api";
 import { useAuthStore } from "../../stores/auth";
@@ -36,6 +37,7 @@ const BRAND_ROTATION_MS = 4000;
 const ADMIN_EMAIL = "admin@quiz.app";
 const ADMIN_PASSWORD = "admin1234";
 const { t, tm } = useI18n();
+const { isDark } = useTheme();
 
 const loginForm = reactive<LoginFormValues>({
   email: ADMIN_EMAIL,
@@ -249,7 +251,7 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <section class="login-page">
+  <section class="login-page" :class="{ 'is-dark': isDark }">
     <div class="login-card">
       <aside class="brand-panel" aria-hidden="true">
         <div class="brand-mark">
@@ -613,12 +615,40 @@ onBeforeUnmount(() => {
   --page-bg: #f0eeeb;
   --card-radius: 12px;
   --card-shadow: 0 4px 40px rgba(0, 0, 0, 0.12);
+  --card-bg: #ffffff;
+  --card-border: transparent;
   --brand-bg: #10b981;
   --brand-text-soft: rgba(255, 255, 255, 0.74);
   --panel-border: #e5e5e5;
   --field-border: #dddddd;
   --field-border-strong: #12c48b;
   --field-error: #c2410c;
+  --surface-soft: #f5f2ed;
+  --surface-soft-strong: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-secondary: #444444;
+  --text-muted: #a39a91;
+  --divider-line: #eeeeee;
+  --divider-text: #bbbbbb;
+  --field-bg: #ffffff;
+  --field-text: #1a1a1a;
+  --field-placeholder: #a39a91;
+  --social-bg: #ffffff;
+  --social-text: #333333;
+  --toggle-color: #938a82;
+  --toggle-hover-color: #4f4a44;
+  --toggle-hover-bg: #f5f2ee;
+  --auth-hint-muted: #64748b;
+  --auth-hint-accent: #047857;
+  --auth-hint-border: #cbd5e1;
+  --auth-hint-icon-bg: transparent;
+  --auth-hint-bg: #f8fafc;
+  --auth-hint-text: #475569;
+  --auth-hint-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+  --auth-error-border: rgba(194, 65, 12, 0.22);
+  --auth-error-bg: #fff7ed;
+  --auth-error-text: #9a3412;
+  --auth-field-error: #c2410c;
   --button-shadow: 0 12px 22px rgba(16, 185, 129, 0.18);
   min-height: calc(100vh - 128px);
   display: grid;
@@ -626,6 +656,45 @@ onBeforeUnmount(() => {
   padding: 32px 20px;
   background: var(--page-bg);
   font-family: "DM Sans", sans-serif;
+}
+
+.login-page.is-dark {
+  --page-bg: linear-gradient(180deg, rgba(2, 6, 23, 0.18) 0%, rgba(15, 23, 42, 0.94) 100%);
+  --card-shadow: 0 28px 64px rgba(2, 6, 23, 0.48);
+  --card-bg: #0f172a;
+  --card-border: rgba(148, 163, 184, 0.16);
+  --brand-bg: linear-gradient(180deg, #059669 0%, #047857 100%);
+  --brand-text-soft: rgba(226, 232, 240, 0.82);
+  --panel-border: #334155;
+  --field-border: #334155;
+  --field-border-strong: #34d399;
+  --field-error: #fb923c;
+  --surface-soft: #111827;
+  --surface-soft-strong: #1e293b;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #94a3b8;
+  --divider-line: #334155;
+  --divider-text: #64748b;
+  --field-bg: #020617;
+  --field-text: #f8fafc;
+  --field-placeholder: #64748b;
+  --social-bg: #111827;
+  --social-text: #e2e8f0;
+  --toggle-color: #94a3b8;
+  --toggle-hover-color: #f8fafc;
+  --toggle-hover-bg: #1e293b;
+  --auth-hint-muted: #94a3b8;
+  --auth-hint-accent: #34d399;
+  --auth-hint-border: #334155;
+  --auth-hint-icon-bg: #0f172a;
+  --auth-hint-bg: #0f172a;
+  --auth-hint-text: #cbd5e1;
+  --auth-hint-shadow: 0 18px 36px rgba(2, 6, 23, 0.42);
+  --auth-error-border: rgba(251, 146, 60, 0.32);
+  --auth-error-bg: rgba(124, 45, 18, 0.3);
+  --auth-error-text: #fdba74;
+  --auth-field-error: #fdba74;
 }
 
 .login-card {
@@ -637,7 +706,8 @@ onBeforeUnmount(() => {
   grid-template-columns: 340px minmax(0, 1fr);
   border-radius: var(--card-radius);
   overflow: hidden;
-  background: #ffffff;
+  border: 1px solid var(--card-border);
+  background: var(--card-bg);
   box-shadow: var(--card-shadow);
 }
 
@@ -715,7 +785,7 @@ onBeforeUnmount(() => {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background: #ffffff;
+  background: var(--card-bg);
   padding: 42px 44px;
 }
 
@@ -729,7 +799,7 @@ onBeforeUnmount(() => {
 
 .auth-title {
   margin: 0;
-  color: #1a1a1a;
+  color: var(--text-primary);
   font-size: 28px;
   line-height: 1.2;
   letter-spacing: 0;
@@ -768,14 +838,14 @@ onBeforeUnmount(() => {
   gap: 4px;
   padding: 4px;
   border-radius: 8px;
-  background: #f5f2ed;
+  background: var(--surface-soft);
 }
 
 .tab {
   border: 0;
   border-radius: 8px;
   background: transparent;
-  color: #9a8f84;
+  color: var(--text-muted);
   padding: 11px 16px;
   font-weight: 600;
   font-size: 14px;
@@ -787,7 +857,7 @@ onBeforeUnmount(() => {
 
 .tab:hover,
 .tab:focus-visible {
-  color: #312f2b;
+  color: var(--text-primary);
 }
 
 .tab:focus-visible,
@@ -801,8 +871,8 @@ onBeforeUnmount(() => {
 }
 
 .tab.is-active {
-  background: #ffffff;
-  color: #111111;
+  background: var(--surface-soft-strong);
+  color: var(--text-primary);
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
 }
 
@@ -824,8 +894,8 @@ onBeforeUnmount(() => {
   justify-content: center;
   gap: 8px;
   border: 1.5px solid var(--panel-border);
-  background: #ffffff;
-  color: #333333;
+  background: var(--social-bg);
+  color: var(--social-text);
   font-weight: 500;
   font-size: 13px;
 }
@@ -837,7 +907,7 @@ onBeforeUnmount(() => {
 
 .social-button:hover {
   transform: translateY(-1px);
-  border-color: #cec6bd;
+  border-color: var(--field-border-strong);
 }
 
 .social-button:disabled {
@@ -854,13 +924,13 @@ onBeforeUnmount(() => {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 8px;
-  color: #bbbbbb;
+  color: var(--divider-text);
   font-size: 11px;
 }
 
 .divider span {
   height: 1px;
-  background: #eeeeee;
+  background: var(--divider-line);
 }
 
 .divider p {
@@ -880,7 +950,7 @@ onBeforeUnmount(() => {
 }
 
 .field-group label {
-  color: #444444;
+  color: var(--text-secondary);
   font-size: 13px;
   font-weight: 500;
 }
@@ -891,8 +961,8 @@ onBeforeUnmount(() => {
   border: 1.5px solid var(--field-border);
   border-radius: 8px;
   padding: 10px 14px;
-  color: #1a1a1a;
-  background: #ffffff;
+  color: var(--field-text);
+  background: var(--field-bg);
   font-size: 14px;
   transition:
     border-color 0.18s ease,
@@ -900,7 +970,7 @@ onBeforeUnmount(() => {
 }
 
 .field-group input::placeholder {
-  color: #a39a91;
+  color: var(--field-placeholder);
 }
 
 .field-group input:focus {
@@ -928,7 +998,7 @@ onBeforeUnmount(() => {
   transform: translateY(-50%);
   border: 0;
   background: transparent;
-  color: #938a82;
+  color: var(--toggle-color);
   width: 36px;
   height: 36px;
   border-radius: 8px;
@@ -942,8 +1012,8 @@ onBeforeUnmount(() => {
 }
 
 .password-toggle:hover {
-  color: #4f4a44;
-  background: #f5f2ee;
+  color: var(--toggle-hover-color);
+  background: var(--toggle-hover-bg);
 }
 
 .form-links {
@@ -969,6 +1039,14 @@ onBeforeUnmount(() => {
 
 .text-link:hover {
   color: #059669;
+}
+
+.login-page.is-dark .text-link {
+  color: #34d399;
+}
+
+.login-page.is-dark .text-link:hover {
+  color: #6ee7b7;
 }
 
 .field-error,

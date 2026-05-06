@@ -14,7 +14,7 @@ defineProps<{
 <style scoped>
 .field-error-text {
   margin: 0;
-  color: #c2410c;
+  color: var(--auth-field-error, #c2410c);
   font-size: 0.88rem;
 }
 </style>

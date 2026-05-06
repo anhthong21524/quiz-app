@@ -279,11 +279,7 @@ button {
   background: #ffffff;
   color: #1e293b;
   transition:
-    border-color 0.2s ease,
-    background-color 0.2s ease,
-    color 0.2s ease,
-    transform 0.2s ease,
-    box-shadow 0.2s ease;
+    background-color 0.2s ease;
 }
 
 .public-icon-button,
@@ -298,10 +294,7 @@ button {
 .public-icon-button:hover,
 .public-login-button:hover,
 .public-mobile-menu-button:hover {
-  border-color: #a7f3d0;
   background: #ecfdf5;
-  color: #059669;
-  transform: translateY(-1px);
 }
 
 .app-shell.public-shell.public-theme-dark .public-icon-button,
@@ -317,9 +310,7 @@ button {
 .app-shell.public-shell.public-theme-dark .public-login-button:hover,
 .app-shell.public-shell.public-theme-dark .public-mobile-menu-button:hover,
 .app-shell.public-shell.public-theme-dark .public-icon-button.is-active {
-  border-color: #059669;
   background: #052e2b;
-  color: #6ee7b7;
 }
 
 .public-icon-button svg,

@@ -43,7 +43,7 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
 
           <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <RouterLink
-              class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-emerald-600 px-7 font-bold text-white shadow-[0_12px_24px_rgba(5,150,105,0.18)] transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200"
+              class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-emerald-600 px-7 font-bold text-white shadow-[0_12px_24px_rgba(5,150,105,0.18)] transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200"
               :to="{ name: 'public-quizzes' }"
             >
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
@@ -52,7 +52,7 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
               {{ t("home.primaryCta") }}
             </RouterLink>
             <RouterLink
-              class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-7 font-bold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:border-emerald-700 dark:hover:bg-slate-700 dark:focus-visible:ring-emerald-900"
+              class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-7 font-bold text-slate-900 shadow-sm transition hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700 dark:focus-visible:ring-emerald-900"
               :to="{ name: 'public-quizzes' }"
             >
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
@@ -174,7 +174,7 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
           </div>
           <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <RouterLink
-              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-7 font-bold text-slate-950 shadow-md transition hover:-translate-y-0.5 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 dark:bg-white dark:text-slate-950 dark:hover:bg-emerald-50"
+              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-7 font-bold text-slate-950 shadow-md transition hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 dark:bg-white dark:text-slate-950 dark:hover:bg-emerald-50"
               :to="{ name: 'public-quizzes' }"
               style="color: #020617;"
             >
@@ -184,7 +184,7 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
               {{ t("home.ctaBrowse") }}
             </RouterLink>
             <RouterLink
-              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-emerald-400 px-7 font-bold text-white transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 dark:border-emerald-300/40 dark:hover:bg-emerald-600"
+              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-emerald-400 px-7 font-bold text-white transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 dark:border-emerald-300/40 dark:hover:bg-emerald-600"
               :to="{ name: 'login' }"
             >
               {{ t("home.ctaRegister") }}

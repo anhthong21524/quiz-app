@@ -55,7 +55,7 @@ const passwordHintText = computed(() => getPasswordHintText());
   position: relative;
   width: fit-content;
   max-width: 100%;
-  color: #64748b;
+  color: var(--auth-hint-muted, #64748b);
   font-size: 0.82rem;
   line-height: 1.4;
 }
@@ -67,7 +67,7 @@ const passwordHintText = computed(() => getPasswordHintText());
   max-width: 100%;
   border: 0;
   background: transparent;
-  color: #64748b;
+  color: var(--auth-hint-muted, #64748b);
   padding: 0;
   font: inherit;
   text-align: left;
@@ -75,7 +75,7 @@ const passwordHintText = computed(() => getPasswordHintText());
 
 .password-hint-trigger:hover,
 .password-hint-trigger:focus-visible {
-  color: #047857;
+  color: var(--auth-hint-accent, #047857);
 }
 
 .password-hint-trigger:focus-visible {
@@ -90,8 +90,9 @@ const passwordHintText = computed(() => getPasswordHintText());
   display: inline-grid;
   place-items: center;
   border-radius: 50%;
-  border: 1px solid #cbd5e1;
-  color: #64748b;
+  border: 1px solid var(--auth-hint-border, #cbd5e1);
+  background: var(--auth-hint-icon-bg, transparent);
+  color: var(--auth-hint-muted, #64748b);
   font-size: 11px;
   font-weight: 700;
 }
@@ -105,11 +106,11 @@ const passwordHintText = computed(() => getPasswordHintText());
   display: grid;
   gap: 8px;
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  color: #475569;
+  border: 1px solid var(--auth-hint-border, #e2e8f0);
+  background: var(--auth-hint-bg, #f8fafc);
+  color: var(--auth-hint-text, #475569);
   padding: 10px 12px;
-  box-shadow: 0 14px 30px rgba(15, 23, 42, 0.12);
+  box-shadow: var(--auth-hint-shadow, 0 14px 30px rgba(15, 23, 42, 0.12));
   opacity: 0;
   visibility: hidden;
   transform: translateY(-4px);
@@ -145,6 +146,6 @@ const passwordHintText = computed(() => getPasswordHintText());
 }
 
 .password-hint-panel li.is-passing {
-  color: #047857;
+  color: var(--auth-hint-accent, #047857);
 }
 </style>

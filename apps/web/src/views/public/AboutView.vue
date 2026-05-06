@@ -39,13 +39,13 @@ const content = computed(() => aboutContent[locale.value]);
 
           <div class="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
             <RouterLink
-              class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-emerald-600 px-7 font-bold text-white shadow-[0_12px_24px_rgba(5,150,105,0.18)] transition hover:-translate-y-0.5 hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200"
+              class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl bg-emerald-600 px-7 font-bold text-white shadow-[0_12px_24px_rgba(5,150,105,0.18)] transition hover:bg-emerald-700 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-200"
               :to="startQuizRoute"
             >
               {{ content.primaryCta }}
             </RouterLink>
             <RouterLink
-              class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-7 font-bold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-emerald-200 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
+              class="inline-flex min-h-12 items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white px-7 font-bold text-slate-900 shadow-sm transition hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700"
               :to="{ name: 'public-quizzes' }"
             >
               {{ content.secondaryCta }}
@@ -199,14 +199,14 @@ const content = computed(() => aboutContent[locale.value]);
         </p>
         <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <RouterLink
-            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-7 font-bold text-slate-950 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/30 dark:bg-white dark:text-slate-950 dark:hover:bg-emerald-50"
+            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-7 font-bold text-slate-950 shadow-sm transition hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/30 dark:bg-white dark:text-slate-950 dark:hover:bg-emerald-50"
             :to="startQuizRoute"
             style="color: #020617;"
           >
             {{ content.primaryCta }}
           </RouterLink>
           <RouterLink
-            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/30 px-7 font-bold text-white transition hover:-translate-y-0.5 hover:bg-emerald-500 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/30"
+            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-white/30 px-7 font-bold text-white transition hover:bg-emerald-500 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/30"
             :to="{ name: 'public-quizzes' }"
           >
             {{ content.secondaryCta }}
