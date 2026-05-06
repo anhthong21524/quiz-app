@@ -174,8 +174,9 @@ const featureCards = computed(() => tm<FeatureCard[]>("home.featureCards"));
           </div>
           <div class="flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
             <RouterLink
-              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-7 font-bold text-emerald-700 shadow-md transition hover:-translate-y-0.5 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300"
+              class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-7 font-bold text-slate-950 shadow-md transition hover:-translate-y-0.5 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-emerald-300 dark:bg-white dark:text-slate-950 dark:hover:bg-emerald-50"
               :to="{ name: 'public-quizzes' }"
+              style="color: #020617;"
             >
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
                 <path d="M8 5.6v12.8a1 1 0 0 0 1.55.84l9.85-6.4a1 1 0 0 0 0-1.68L9.55 4.76A1 1 0 0 0 8 5.6Z" />

@@ -563,7 +563,7 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
         ]
       },
       createShot: {
-        src: "/guide-images/create-bài trắc nghiệm.jpg",
+        src: "/guide-images/create-quiz.jpg",
         alt: "Trang tạo bài trắc nghiệm",
         caption: "Trình tạo bài trắc nghiệm hướng dẫn bạn qua phần cấu hình, câu hỏi và phản hồi đáp án."
       },
@@ -595,7 +595,7 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
         ]
       },
       resultsShot: {
-        src: "/guide-images/bài trắc nghiệm-results.jpg",
+        src: "/guide-images/quiz-results.jpg",
         alt: "Trang kết quả bài trắc nghiệm",
         caption: "Kết quả giúp người tạo bài trắc nghiệm hiểu mức độ tham gia, điểm số và những phần người học còn vướng."
       },
@@ -629,7 +629,7 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
     },
     participant: {
       publicShot: {
-        src: "/guide-images/public-bài trắc nghiệmzes.jpg",
+        src: "/guide-images/public-quizzes.jpg",
         alt: "Trang bài trắc nghiệm công khai",
         caption: "Duyệt tất cả bài trắc nghiệm công khai đang khả dụng hoặc dùng mã truy cập để mở bài trắc nghiệm riêng tư."
       },
@@ -649,12 +649,12 @@ export const userGuidelineContent: Record<SupportedLocale, UserGuidelineContent>
           "Nếu bài trắc nghiệm có giới hạn thời gian, đồng hồ đếm ngược sẽ hiển thị trong lúc làm và hệ thống sẽ tự nộp khi hết giờ."
       },
       landingShot: {
-        src: "/guide-images/bài trắc nghiệm-landing.jpg",
+        src: "/guide-images/quiz-landing.jpg",
         alt: "Trang bắt đầu bài trắc nghiệm",
         caption: "Trang bắt đầu hiển thị tiêu đề, mô tả, giới hạn và ô nhập tên trước khi bài trắc nghiệm được mở."
       },
       takeShot: {
-        src: "/guide-images/bài trắc nghiệm-take.jpg",
+        src: "/guide-images/quiz-take.jpg",
         alt: "Màn hình làm bài trắc nghiệm",
         caption: "Trả lời từng câu hỏi, di chuyển bằng bộ điều hướng và nộp bài khi hoàn tất."
       },

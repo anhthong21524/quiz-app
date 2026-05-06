@@ -34,9 +34,10 @@ await shot("quiz-landing", `${BASE}/q/quiz-2-43981d`);
 
 // 5. Quiz taking view
 await shot("quiz-take", `${BASE}/q/quiz-2-43981d`, async (p) => {
-  await p.fill("input[placeholder*='name']", "Test User");
+  await p.fill("input[autocomplete='name']", "Test User");
   await p.click("button:has-text('Start quiz')");
-  await p.waitForLoadState("networkidle");
+  await p.waitForURL(/\/take$/, { timeout: 12000 });
+  await p.waitForSelector("button[role='radio']", { state: "visible", timeout: 12000 });
 });
 
 // Login for protected pages

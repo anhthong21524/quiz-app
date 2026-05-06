@@ -199,8 +199,9 @@ const content = computed(() => aboutContent[locale.value]);
         </p>
         <div class="mt-8 flex flex-col items-center gap-3 sm:flex-row sm:justify-center">
           <RouterLink
-            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-7 font-bold text-emerald-700 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/30"
+            class="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-white px-7 font-bold text-slate-950 shadow-sm transition hover:-translate-y-0.5 hover:bg-emerald-50 focus:outline-none focus-visible:ring-4 focus-visible:ring-white/30 dark:bg-white dark:text-slate-950 dark:hover:bg-emerald-50"
             :to="startQuizRoute"
+            style="color: #020617;"
           >
             {{ content.primaryCta }}
           </RouterLink>
