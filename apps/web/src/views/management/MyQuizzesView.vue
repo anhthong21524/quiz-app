@@ -131,6 +131,13 @@ const isInitialLoad = computed(
   () => quizStore.isLoading && quizStore.items.length === 0
 );
 
+// Only treat load failures with no cached data as page-blocking.
+// Action errors such as failed delete/unpublish should surface as toasts
+// without replacing the current quiz list.
+const pageError = computed(() =>
+  !quizStore.isLoading && quizStore.items.length === 0 ? quizStore.error : null
+);
+
 onMounted(async () => {
   if (!quizStore.items.length) {
     await quizStore.loadQuizzes();
@@ -218,7 +225,7 @@ const hasAnyQuizzes = computed(() => apiQuizzes.value.length > 0);
 
 const isFilteredEmpty = computed(
   () =>
-    !quizStore.error &&
+    !pageError.value &&
     !isInitialLoad.value &&
     hasAnyQuizzes.value &&
     filteredQuizzes.value.length === 0
@@ -412,8 +419,11 @@ function deleteQuiz(quiz: QuizListItem) {
       try {
         await quizStore.deleteQuiz(quiz.apiId!);
         showToast(t("myQuizzes.toasts.deleted"));
-      } catch {
-        showToast(t("myQuizzes.toasts.deleteFailed"), "error");
+      } catch (error) {
+        const message = isAppError(error) && error.userMessage
+          ? error.userMessage
+          : t("myQuizzes.toasts.deleteFailed");
+        showToast(message, "error");
       }
     }
   });
@@ -510,9 +520,9 @@ function copyPrivateCode(quiz: QuizListItem) {
           />
 
           <SectionErrorState
-            v-if="quizStore.error && !quizStore.isLoading"
-            :message="quizStore.error.userMessage"
-            :retryable="quizStore.error.isRetryable"
+            v-if="pageError"
+            :message="pageError.userMessage"
+            :retryable="pageError.isRetryable"
             :loading="quizStore.isLoading"
             :retry-label="t('myQuizzes.retry')"
             @retry="retryLoadQuizzes"

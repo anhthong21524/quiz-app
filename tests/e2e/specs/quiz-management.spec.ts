@@ -158,6 +158,154 @@ test("create and publish a quiz", async ({ page }) => {
   await page.getByRole("button", { name: "Done" }).click();
 });
 
+test("published quiz with attempts can be unpublished but cannot be deleted", async ({ request }) => {
+  const quizTitle = `Protected quiz ${Date.now()}`;
+
+  const adminLogin = await request.post(`${apiBaseUrl}/auth/login`, {
+    data: {
+      email: adminCredentials.email,
+      password: adminCredentials.password
+    }
+  });
+  expect(adminLogin.ok()).toBeTruthy();
+  const adminAuth = await adminLogin.json();
+
+  const createResponse = await request.post(`${apiBaseUrl}/quizzes`, {
+    headers: {
+      Authorization: `Bearer ${adminAuth.accessToken}`
+    },
+    data: {
+      title: quizTitle,
+      description: "A quiz that already has participant activity.",
+      subject: "Programming",
+      difficulty: "Easy",
+      questions: [
+        {
+          prompt: "Which package manager is configured for this monorepo?",
+          options: ["pnpm", "npm"],
+          correctOptionIndex: 0
+        }
+      ]
+    }
+  });
+  expect(createResponse.ok()).toBeTruthy();
+  const createdQuiz = await createResponse.json();
+
+  const publishResponse = await request.patch(`${apiBaseUrl}/quizzes/${createdQuiz.id}/publish`, {
+    headers: {
+      Authorization: `Bearer ${adminAuth.accessToken}`
+    }
+  });
+  expect(publishResponse.ok()).toBeTruthy();
+
+  const createAttemptResponse = await request.post(`${apiBaseUrl}/quizzes/${createdQuiz.id}/attempts`, {
+    data: {
+      takerName: "Attempted Participant"
+    }
+  });
+  expect(createAttemptResponse.ok()).toBeTruthy();
+  const createdAttempt = await createAttemptResponse.json();
+
+  const questionId = createdQuiz.questions[0]?.id ?? "question-0";
+  const submitAttemptResponse = await request.post(
+    `${apiBaseUrl}/quizzes/${createdQuiz.id}/attempts/${createdAttempt.id}/submit`,
+    {
+      data: {
+        answers: {
+          [questionId]: 0
+        },
+        timeTaken: 30
+      }
+    }
+  );
+  expect(submitAttemptResponse.ok()).toBeTruthy();
+
+  const unpublishResponse = await request.patch(`${apiBaseUrl}/quizzes/${createdQuiz.id}/unpublish`, {
+    headers: {
+      Authorization: `Bearer ${adminAuth.accessToken}`
+    }
+  });
+  expect(unpublishResponse.ok()).toBeTruthy();
+  const unpublishedQuiz = await unpublishResponse.json();
+  expect(unpublishedQuiz.status).toBe("unpublished");
+
+  const deleteResponse = await request.delete(`${apiBaseUrl}/quizzes/${createdQuiz.id}`, {
+    headers: {
+      Authorization: `Bearer ${adminAuth.accessToken}`
+    }
+  });
+  expect(deleteResponse.status()).toBe(409);
+  await expect(deleteResponse.json()).resolves.toMatchObject({
+    message: "Cannot delete: this quiz has 1 submission."
+  });
+});
+
+test("delete warning does not replace the quiz list", async ({ page, request }) => {
+  const quizTitle = `Delete warning ${Date.now()}`;
+
+  const adminLogin = await request.post(`${apiBaseUrl}/auth/login`, {
+    data: {
+      email: adminCredentials.email,
+      password: adminCredentials.password
+    }
+  });
+  expect(adminLogin.ok()).toBeTruthy();
+  const adminAuth = await adminLogin.json();
+
+  const createResponse = await request.post(`${apiBaseUrl}/quizzes`, {
+    headers: {
+      Authorization: `Bearer ${adminAuth.accessToken}`
+    },
+    data: {
+      title: quizTitle,
+      description: "Keeps the list visible after a blocked delete.",
+      subject: "Programming",
+      difficulty: "Easy",
+      questions: [
+        {
+          prompt: "Which package manager is configured for this monorepo?",
+          options: ["pnpm", "npm"],
+          correctOptionIndex: 0
+        }
+      ]
+    }
+  });
+
+  expect(createResponse.ok()).toBeTruthy();
+
+  await signInAsAdmin(page);
+  const quizRow = page.getByRole("row").filter({ hasText: quizTitle });
+  await expect(quizRow).toBeVisible();
+
+  const deleteUrl = /\/api\/quizzes\/[^/]+$/;
+  await page.route(deleteUrl, async (route) => {
+    if (route.request().method() !== "DELETE") {
+      await route.continue();
+      return;
+    }
+
+    await route.fulfill({
+      status: 409,
+      contentType: "application/json",
+      body: JSON.stringify({
+        statusCode: 409,
+        message: "Cannot delete: this quiz has 1 submission.",
+        error: "Conflict"
+      })
+    });
+  });
+
+  await quizRow.getByRole("button", { name: `More options for ${quizTitle}` }).click();
+  await quizRow.getByRole("menuitem", { name: "Delete" }).click();
+  await page.getByRole("dialog").getByRole("button", { name: "Delete" }).click();
+
+  await expect(page.getByRole("alert").filter({ hasText: "Cannot delete: this quiz has 1 submission." })).toBeVisible();
+  await expect(quizRow).toBeVisible();
+
+  await page.getByRole("link", { name: "My Quizzes" }).click();
+  await expect(quizRow).toBeVisible();
+});
+
 test("save quiz from guided creator and reopen it for editing", async ({ page }) => {
   const quizTitle = `Guided creator ${Date.now()}`;
   const quizDescription = "A short guided creator quiz for workspace tooling.";

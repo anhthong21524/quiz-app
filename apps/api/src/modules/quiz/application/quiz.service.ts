@@ -69,19 +69,9 @@ export class QuizService {
   async update(id: string, payload: UpdateQuizDto, user: AuthenticatedUser) {
     const existing = await this.quizRepository.findById(id);
     if (existing?.status === QuizStatus.PUBLISHED) {
-      const attempts = await this.attemptRepository.findByQuizId(id);
-      const activeCount    = attempts.filter((a) => !a.submittedAt).length;
-      const submittedCount = attempts.filter((a) =>  a.submittedAt).length;
-
-      if (activeCount > 0 || submittedCount > 0) {
-        const parts: string[] = [];
-        if (activeCount > 0)
-          parts.push(`${activeCount} participant${activeCount > 1 ? "s" : ""} currently taking it`);
-        if (submittedCount > 0)
-          parts.push(`${submittedCount} submission${submittedCount > 1 ? "s" : ""}`);
-        throw new ConflictException(
-          `Cannot edit: this quiz has ${parts.join(" and ")}.`
-        );
+      const conflictMessage = await this.getAttemptConflictMessage(id, "edit");
+      if (conflictMessage) {
+        throw new ConflictException(conflictMessage);
       }
     }
 
@@ -102,27 +92,16 @@ export class QuizService {
   }
 
   async unpublish(id: string, user: AuthenticatedUser) {
-    const attempts = await this.attemptRepository.findByQuizId(id);
-
-    const activeCount   = attempts.filter((a) => !a.submittedAt).length;
-    const submittedCount = attempts.filter((a) => a.submittedAt).length;
-
-    if (activeCount > 0 || submittedCount > 0) {
-      const parts: string[] = [];
-      if (activeCount > 0)
-        parts.push(`${activeCount} participant${activeCount > 1 ? "s" : ""} currently taking it`);
-      if (submittedCount > 0)
-        parts.push(`${submittedCount} submission${submittedCount > 1 ? "s" : ""}`);
-      throw new ConflictException(
-        `Cannot unpublish: this quiz has ${parts.join(" and ")}.`
-      );
-    }
-
     const quiz = await this.quizRepository.updateStatus(id, user.id, QuizStatus.UNPUBLISHED);
     return this.requireQuiz(quiz, id);
   }
 
   async delete(id: string, user: AuthenticatedUser): Promise<void> {
+    const conflictMessage = await this.getAttemptConflictMessage(id, "delete");
+    if (conflictMessage) {
+      throw new ConflictException(conflictMessage);
+    }
+
     const deleted = await this.quizRepository.delete(id, user.id);
     if (!deleted) {
       throw new NotFoundException(`Quiz ${id} was not found.`);
@@ -140,5 +119,25 @@ export class QuizService {
     }
 
     return quiz;
+  }
+
+  private async getAttemptConflictMessage(id: string, action: "edit" | "delete"): Promise<string | null> {
+    const attempts = await this.attemptRepository.findByQuizId(id);
+    const activeCount = attempts.filter((attempt) => !attempt.submittedAt).length;
+    const submittedCount = attempts.filter((attempt) => attempt.submittedAt).length;
+
+    if (activeCount === 0 && submittedCount === 0) {
+      return null;
+    }
+
+    const parts: string[] = [];
+    if (activeCount > 0) {
+      parts.push(`${activeCount} participant${activeCount > 1 ? "s" : ""} currently taking it`);
+    }
+    if (submittedCount > 0) {
+      parts.push(`${submittedCount} submission${submittedCount > 1 ? "s" : ""}`);
+    }
+
+    return `Cannot ${action}: this quiz has ${parts.join(" and ")}.`;
   }
 }

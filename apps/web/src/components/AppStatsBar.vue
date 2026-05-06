@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { computed } from "vue";
+import { useI18n } from "../i18n";
 
 type AppStatsBarTone = "neutral" | "green" | "amber" | "teal" | "gray";
 type AppStatsBarVariant = "pills" | "cards";
@@ -30,7 +31,7 @@ const props = withDefaults(defineProps<{
 }>(), {
   variant: "pills",
   height: "56px",
-  label: "Overview",
+  label: "",
   loading: false,
   empty: false,
   emptyTitle: "No stats yet",
@@ -45,9 +46,13 @@ const emit = defineEmits<{
   "item-click": [id: string];
 }>();
 
+const { t } = useI18n();
+
 const skeletonItems = computed(() =>
   Array.from({ length: props.loadingItemCount }, (_, index) => index)
 );
+
+const displayLabel = computed(() => props.label || t("common.overview"));
 </script>
 
 <template>
@@ -104,7 +109,7 @@ const skeletonItems = computed(() =>
     role="region"
     :aria-label="ariaLabel"
   >
-    <p v-if="variant === 'pills' && label" class="app-stats-bar__label">{{ label }}</p>
+    <p v-if="variant === 'pills' && displayLabel" class="app-stats-bar__label">{{ displayLabel }}</p>
 
     <dl v-if="variant === 'pills'" class="app-stats-bar__items">
       <component

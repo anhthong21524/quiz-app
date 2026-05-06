@@ -94,7 +94,7 @@ export function getUserMessage(error: AppError, context: MessageContext = "defau
   }
 
   if (
-    (context === "quiz_unpublish" || context === "quiz_save") &&
+    (context === "quiz_save" || context === "quiz_delete") &&
     error.category === "conflict" &&
     error.technicalMessage
   ) {
