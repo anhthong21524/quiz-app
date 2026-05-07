@@ -760,6 +760,12 @@ async function saveAndNext() {
     return;
   }
 
+  const allDone = questions.value.every(isQuestionComplete);
+  if (allDone) {
+    await submitQuiz();
+    return;
+  }
+
   if (currentQuestionIndex.value < questions.value.length - 1) {
     currentQuestionIndex.value += 1;
     return;
@@ -1485,6 +1491,7 @@ function togglePrivate() {
               >
                 <span>{{
                   isSaving ? t("createQuiz.actions.saving") :
+                  completedQuestions === questions.length ? (isEditing ? t("createQuiz.actions.updateQuiz") : t("createQuiz.actions.saveQuiz")) :
                   currentQuestionIndex < questions.length - 1 ? t("createQuiz.actions.nextQuestion") :
                   isEditing ? t("createQuiz.actions.updateQuiz") :
                   t("createQuiz.actions.saveQuiz")
