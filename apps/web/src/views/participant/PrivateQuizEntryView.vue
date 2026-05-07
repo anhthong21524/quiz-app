@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from "vue";
 import { RouterLink, useRouter } from "vue-router";
+import { useI18n } from "../../i18n";
 import { validatePrivateQuizCode } from "../../services/publicQuizApi";
 
+const { t } = useI18n();
 const router = useRouter();
 
 const codeInput = ref("");
@@ -26,7 +28,7 @@ async function submitCode() {
     const quiz = await validatePrivateQuizCode(code);
     router.push({ name: "public-quiz", params: { slug: quiz.slug }, query: { accessCode: code } });
   } catch {
-    codeError.value = "Invalid or expired code. Please check and try again.";
+    codeError.value = t("participant.privateEntry.invalidCode");
   } finally {
     isValidating.value = false;
   }
@@ -49,20 +51,20 @@ async function submitCode() {
           </svg>
         </div>
         <p class="text-sm font-extrabold uppercase tracking-[0.08em] text-amber-600 dark:text-amber-400">
-          Private quiz
+          {{ t('participant.privateEntry.eyebrow') }}
         </p>
         <h1 class="text-3xl font-extrabold tracking-normal text-slate-950 dark:text-white sm:text-4xl">
-          Enter your access code
+          {{ t('participant.privateEntry.title') }}
         </h1>
         <p class="text-sm leading-6 text-slate-600 dark:text-slate-400">
-          This quiz is private. Enter the 6-character code shared by the quiz creator to unlock it.
+          {{ t('participant.privateEntry.description') }}
         </p>
       </div>
 
       <!-- Code entry card -->
       <div class="grid gap-4 rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-2xl shadow-slate-900/10">
         <label class="grid gap-2" for="access-code">
-          <span class="text-sm font-extrabold text-slate-700 dark:text-slate-300">Access code</span>
+          <span class="text-sm font-extrabold text-slate-700 dark:text-slate-300">{{ t('participant.privateEntry.label') }}</span>
           <input
             id="access-code"
             ref="inputRef"
@@ -91,7 +93,7 @@ async function submitCode() {
                 <circle cx="12" cy="12" r="9" stroke-opacity="0.25" />
                 <path d="M12 3a9 9 0 0 1 9 9" stroke-linecap="round" />
               </svg>
-              Validating...
+              {{ t('participant.privateEntry.validating') }}
             </span>
             <span v-else class="sr-only" aria-live="polite"></span>
             <p v-if="!codeError && codeInput.length > 0" class="text-right text-xs tabular-nums text-slate-400 dark:text-slate-500 ml-auto">
@@ -103,12 +105,12 @@ async function submitCode() {
 
       <!-- Escape hatch -->
       <p class="text-center text-sm text-slate-500 dark:text-slate-400">
-        Don't have a code?
+        {{ t('participant.privateEntry.noCode') }}
         <RouterLink
           to="/quizzes"
           class="font-semibold text-amber-600 hover:text-amber-700 dark:text-amber-400 dark:hover:text-amber-300 transition"
         >
-          Browse public quizzes →
+          {{ t('participant.privateEntry.browsePublic') }}
         </RouterLink>
       </p>
 
