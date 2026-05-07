@@ -748,6 +748,16 @@ export const messages = {
         startQuiz: "Start quiz",
         loadMore: "Load more"
       },
+      privateEntry: {
+        eyebrow: "Private quiz",
+        title: "Enter your access code",
+        description: "This quiz is private. Enter the 6-character code shared by the quiz creator to unlock it.",
+        label: "Access code",
+        invalidCode: "Invalid or expired code. Please check and try again.",
+        validating: "Validating...",
+        noCode: "Don't have a code?",
+        browsePublic: "Browse public quizzes →"
+      },
       landing: {
         loadNotFound: "We could not find this quiz. Please check the link and try again.",
         loadUnavailable: "This quiz is not available yet. Please contact the quiz creator.",
@@ -1676,6 +1686,16 @@ export const messages = {
         timeMinutes: "{count} phút",
         startQuiz: "Bắt đầu bài trắc nghiệm",
         loadMore: "Xem thêm"
+      },
+      privateEntry: {
+        eyebrow: "Bài trắc nghiệm riêng tư",
+        title: "Nhập mã truy cập",
+        description: "Bài trắc nghiệm này ở chế độ riêng tư. Nhập mã 6 ký tự được chia sẻ bởi người tạo để mở khóa.",
+        label: "Mã truy cập",
+        invalidCode: "Mã không hợp lệ hoặc đã hết hạn. Vui lòng kiểm tra và thử lại.",
+        validating: "Đang xác thực...",
+        noCode: "Bạn không có mã?",
+        browsePublic: "Duyệt bài trắc nghiệm công khai →"
       },
       landing: {
         loadNotFound: "Chúng tôi không thể tìm thấy bài trắc nghiệm này. Vui lòng kiểm tra liên kết và thử lại.",
