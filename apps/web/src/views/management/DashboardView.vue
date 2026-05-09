@@ -563,7 +563,7 @@ watch(guideSlides, (slides) => {
 
 .hero-viewport {
   position: relative;
-  min-height: 252px;
+  height: 252px;
   overflow: hidden;
 }
 
