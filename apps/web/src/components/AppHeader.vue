@@ -19,7 +19,8 @@ const isPublicPage = computed(() =>
   route.name === "login" ||
   route.name === "public-quiz" ||
   route.name === "public-quiz-take" ||
-  route.name === "private-quiz-entry"
+  route.name === "user-quiz" ||
+  route.name === "user-quiz-take"
 );
 
 const username = computed(() => {

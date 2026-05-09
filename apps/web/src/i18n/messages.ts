@@ -78,9 +78,9 @@ export const messages = {
         title: "Sign in",
         description: "Sign in to Quiz App to create, manage, and publish quizzes."
       },
-      privateQuiz: {
-        title: "Private Quiz",
-        description: "Enter your private quiz access code to unlock and start the quiz."
+      userQuizzes: {
+        title: "Find User Quizzes",
+        description: "Enter a username to browse quizzes shared by that user."
       },
       publicQuiz: {
         title: "Public Quiz",
@@ -431,11 +431,13 @@ export const messages = {
       status: {
         published: "Published",
         inProgress: "In progress",
-        unpublished: "Unpublished"
+        unpublished: "Unpublished",
+        exposed: "Visible"
       },
       table: {
         actions: "Actions",
         privateQuizHint: "Private quiz - requires access code",
+        exposedQuizHint: "Shared — participants can find via username",
         notSavedYet: "Not saved yet"
       },
       grid: {
@@ -458,6 +460,12 @@ export const messages = {
         unpublishMessage:
           "\"{title}\" will no longer be visible to users. You can re-publish at any time.",
         unpublishConfirm: "Unpublish",
+        exposeTitle: "Expose quiz",
+        exposeMessage: "\"{title}\" will be discoverable by participants who search by your username.",
+        exposeConfirm: "Expose",
+        unexposeTitle: "Hide quiz",
+        unexposeMessage: "\"{title}\" will no longer appear in username searches.",
+        unexposeConfirm: "Hide",
         deleteTitle: "Delete quiz",
         deleteMessage: "\"{title}\" will be permanently deleted. This action cannot be undone.",
         deleteConfirm: "Delete"
@@ -467,6 +475,10 @@ export const messages = {
         publishFailed: "Failed to publish quiz",
         quizUnpublished: "Quiz unpublished successfully",
         unpublishFailed: "Failed to unpublish quiz",
+        quizExposed: "Quiz is now visible in username searches",
+        exposeFailed: "Failed to expose quiz",
+        quizUnexposed: "Quiz is now hidden from username searches",
+        unexposeFailed: "Failed to hide quiz",
         duplicated: "\"{title}\" duplicated successfully",
         duplicateFailed: "Failed to duplicate quiz",
         deleted: "Quiz deleted successfully",
@@ -659,6 +671,8 @@ export const messages = {
         privateQuiz: "Private quiz",
         privateHint: "Hidden. Requires an access code.",
         accessCode: "Code:",
+        exposeQuiz: "Expose to participants",
+        exposeHint: "Participants can find your quiz by entering your username.",
         showSummary: "Show summary",
         allowAnswerReview: "Allow answer review",
         allowRetake: "Allow retake",
@@ -746,7 +760,26 @@ export const messages = {
         untimed: "Untimed",
         timeMinutes: "{count} min",
         startQuiz: "Start quiz",
-        loadMore: "Load more"
+        loadMore: "Load more",
+        userTitle: "Looking for a user's quizzes?",
+        userDescription: "Enter a username to browse their shared quizzes.",
+        findByUser: "Find by username →",
+        clearSearch: "Clear"
+      },
+      userQuizzes: {
+        eyebrow: "User quizzes",
+        title: "Find quizzes by username",
+        description: "Enter the username of the quiz creator to browse their shared quizzes.",
+        label: "Username",
+        placeholder: "e.g. thorle9x",
+        search: "Search",
+        searching: "Searching...",
+        notFound: "No shared quizzes found for \"{username}\".",
+        loadError: "Could not load quizzes. Please try again.",
+        browsePublic: "Browse public quizzes →",
+        resultEyebrow: "Quizzes by {username}",
+        resultTitle: "Shared by {username}",
+        resultCount: "{count} quiz found"
       },
       privateEntry: {
         eyebrow: "Private quiz",
@@ -1015,9 +1048,9 @@ export const messages = {
         title: "Đăng nhập",
         description: "Đăng nhập vào Quiz App để tạo, quản lý và xuất bản bài trắc nghiệm."
       },
-      privateQuiz: {
-        title: "Bài trắc nghiệm riêng tư",
-        description: "Nhập mã truy cập bài trắc nghiệm riêng tư để mở khóa và bắt đầu bài trắc nghiệm."
+      userQuizzes: {
+        title: "Tìm bài trắc nghiệm theo người dùng",
+        description: "Nhập tên người dùng để duyệt các bài trắc nghiệm họ đã chia sẻ."
       },
       publicQuiz: {
         title: "Bài trắc nghiệm công khai",
@@ -1369,11 +1402,13 @@ export const messages = {
       status: {
         published: "Đã xuất bản",
         inProgress: "Đang soạn",
-        unpublished: "Chưa xuất bản"
+        unpublished: "Chưa xuất bản",
+        exposed: "Hiển thị"
       },
       table: {
         actions: "Thao tác",
         privateQuizHint: "Bài trắc nghiệm riêng tư - cần mã truy cập",
+        exposedQuizHint: "Đã chia sẻ — người tham gia có thể tìm qua tên người dùng",
         notSavedYet: "Chưa lưu"
       },
       grid: {
@@ -1397,6 +1432,12 @@ export const messages = {
         unpublishMessage:
           "\"{title}\" sẽ không còn hiển thị với người dùng. Bạn có thể xuất bản lại bất kỳ lúc nào.",
         unpublishConfirm: "Hủy xuất bản",
+        exposeTitle: "Hiển thị bài trắc nghiệm",
+        exposeMessage: "\"{title}\" sẽ xuất hiện khi người dùng tìm kiếm theo tên tài khoản của bạn.",
+        exposeConfirm: "Hiển thị",
+        unexposeTitle: "Ẩn bài trắc nghiệm",
+        unexposeMessage: "\"{title}\" sẽ không còn xuất hiện trong kết quả tìm kiếm theo tên tài khoản.",
+        unexposeConfirm: "Ẩn",
         deleteTitle: "Xóa bài trắc nghiệm",
         deleteMessage: "\"{title}\" sẽ bị xóa vĩnh viễn. Không thể hoàn tác thao tác này.",
         deleteConfirm: "Xóa"
@@ -1406,6 +1447,10 @@ export const messages = {
         publishFailed: "Xuất bản bài trắc nghiệm thất bại",
         quizUnpublished: "Đã hủy xuất bản bài trắc nghiệm thành công",
         unpublishFailed: "Hủy xuất bản bài trắc nghiệm thất bại",
+        quizExposed: "Bài trắc nghiệm đã được hiển thị trong kết quả tìm kiếm",
+        exposeFailed: "Hiển thị bài trắc nghiệm thất bại",
+        quizUnexposed: "Bài trắc nghiệm đã được ẩn khỏi kết quả tìm kiếm",
+        unexposeFailed: "Ẩn bài trắc nghiệm thất bại",
         duplicated: "Đã nhân bản \"{title}\" thành công",
         duplicateFailed: "Nhân bản bài trắc nghiệm thất bại",
         deleted: "Đã xóa bài trắc nghiệm thành công",
@@ -1598,6 +1643,8 @@ export const messages = {
         privateQuiz: "Bài trắc nghiệm riêng tư",
         privateHint: "Ẩn. Yêu cầu mã truy cập.",
         accessCode: "Mã:",
+        exposeQuiz: "Chia sẻ với người tham gia",
+        exposeHint: "Người tham gia có thể tìm bài của bạn bằng cách nhập tên người dùng của bạn.",
         showSummary: "Hiển thị tổng kết",
         allowAnswerReview: "Cho phép xem lại đáp án",
         allowRetake: "Cho phép làm lại",
@@ -1685,7 +1732,26 @@ export const messages = {
         untimed: "Không giới hạn",
         timeMinutes: "{count} phút",
         startQuiz: "Bắt đầu bài trắc nghiệm",
-        loadMore: "Xem thêm"
+        loadMore: "Xem thêm",
+        userTitle: "Tìm bài trắc nghiệm của người dùng?",
+        userDescription: "Nhập tên người dùng để duyệt bài trắc nghiệm họ đã chia sẻ.",
+        findByUser: "Tìm theo tên người dùng →",
+        clearSearch: "Xóa"
+      },
+      userQuizzes: {
+        eyebrow: "Bài trắc nghiệm của người dùng",
+        title: "Tìm bài trắc nghiệm theo tên người dùng",
+        description: "Nhập tên người dùng của người tạo bài trắc nghiệm để xem các bài họ đã chia sẻ.",
+        label: "Tên người dùng",
+        placeholder: "Ví dụ: thorle9x",
+        search: "Tìm kiếm",
+        searching: "Đang tìm...",
+        notFound: "Không tìm thấy bài trắc nghiệm nào được chia sẻ bởi \"{username}\".",
+        loadError: "Không thể tải bài trắc nghiệm. Vui lòng thử lại.",
+        browsePublic: "Duyệt bài trắc nghiệm công khai →",
+        resultEyebrow: "Bài trắc nghiệm của {username}",
+        resultTitle: "Chia sẻ bởi {username}",
+        resultCount: "Tìm thấy {count} bài trắc nghiệm"
       },
       privateEntry: {
         eyebrow: "Bài trắc nghiệm riêng tư",

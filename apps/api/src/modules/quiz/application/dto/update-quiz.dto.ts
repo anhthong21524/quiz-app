@@ -44,6 +44,10 @@ export class UpdateQuizDto {
   isPrivate?: boolean;
 
   @IsOptional()
+  @IsBoolean()
+  isExposed?: boolean;
+
+  @IsOptional()
   @IsString()
   @MaxLength(20)
   accessCode?: string;

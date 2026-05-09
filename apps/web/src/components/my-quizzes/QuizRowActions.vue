@@ -1,13 +1,15 @@
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, nextTick } from "vue";
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from "vue";
 import type { MyQuizStatus } from "./types";
 import { useI18n } from "../../i18n";
+import { useAuthStore } from "../../stores/auth";
 
 const props = defineProps<{
   title: string;
   status?: MyQuizStatus;
   isApiQuiz?: boolean;
   isPrivate?: boolean;
+  isExposed?: boolean;
 }>();
 
 const emit = defineEmits<{
@@ -15,6 +17,8 @@ const emit = defineEmits<{
   edit: [];
   publish: [];
   unpublish: [];
+  expose: [];
+  unexpose: [];
   duplicate: [];
   delete: [];
   share: [];
@@ -22,6 +26,8 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
+const authStore = useAuthStore();
+const canPublish = computed(() => authStore.isAdmin);
 
 const menuOpen = ref(false);
 const menuRef = ref<HTMLElement | null>(null);
@@ -99,9 +105,9 @@ onBeforeUnmount(() => {
       </svg>
     </button>
 
-    <!-- Share link for published public quizzes -->
+    <!-- Share link for public quizzes -->
     <button
-      v-if="isApiQuiz && isPublished() && !isPrivate"
+      v-if="isApiQuiz && !isPrivate"
       class="icon-button"
       type="button"
       :aria-label="t('myQuizzes.rowActions.shareQuiz', { title })"
@@ -151,8 +157,8 @@ onBeforeUnmount(() => {
         role="menu"
         :style="{ top: `${dropdownPos.top}px`, right: `${dropdownPos.right}px` }"
       >
-        <!-- Published → Unpublish -->
-        <template v-if="isPublished()">
+        <!-- Published → Unpublish (admin only) -->
+        <template v-if="isPublished() && canPublish">
           <button class="menu-item menu-item--orange" type="button" role="menuitem" @click="action(() => emit('unpublish'))">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <circle cx="12" cy="12" r="9" />
@@ -162,8 +168,8 @@ onBeforeUnmount(() => {
           </button>
         </template>
 
-        <!-- Unpublished / Draft → Publish -->
-        <template v-else>
+        <!-- Unpublished / Draft → Publish (admin only) -->
+        <template v-else-if="!isPublished() && canPublish">
           <button class="menu-item menu-item--green" type="button" role="menuitem" @click="action(() => emit('publish'))">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
               <circle cx="12" cy="12" r="9" />
@@ -173,7 +179,27 @@ onBeforeUnmount(() => {
           </button>
         </template>
 
-        <div class="menu-divider" />
+        <div v-if="canPublish" class="menu-divider" />
+
+        <!-- Expose / Unexpose (non-admin users) -->
+        <template v-if="!canPublish">
+          <button v-if="!props.isExposed" class="menu-item menu-item--teal" type="button" role="menuitem" @click="action(() => emit('expose'))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 19c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke-linecap="round" />
+            </svg>
+            {{ t("myQuizzes.actions.exposeConfirm") }}
+          </button>
+          <button v-else class="menu-item menu-item--orange" type="button" role="menuitem" @click="action(() => emit('unexpose'))">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+              <circle cx="12" cy="8" r="4" />
+              <path d="M4 19c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke-linecap="round" />
+              <path d="M18 3 6 21" stroke-linecap="round" />
+            </svg>
+            {{ t("myQuizzes.actions.unexposeConfirm") }}
+          </button>
+          <div class="menu-divider" />
+        </template>
 
         <button class="menu-item" type="button" role="menuitem" @click="action(() => emit('duplicate'))">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
@@ -282,6 +308,14 @@ onBeforeUnmount(() => {
 }
 
 .menu-item--green:hover {
+  background: #e9fbf2;
+}
+
+.menu-item--teal {
+  color: #0b7a52;
+}
+
+.menu-item--teal:hover {
   background: #e9fbf2;
 }
 

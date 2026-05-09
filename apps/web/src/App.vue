@@ -19,7 +19,8 @@ const usePublicLayout = computed(() =>
   route.name === "login" ||
   route.name === "public-quiz" ||
   route.name === "public-quiz-take" ||
-  route.name === "private-quiz-entry"
+  route.name === "user-quiz" ||
+  route.name === "user-quiz-take"
 );
 const useQuizTakingLayout = computed(() => route.name === "public-quiz-take");
 const currentYear = new Date().getFullYear();

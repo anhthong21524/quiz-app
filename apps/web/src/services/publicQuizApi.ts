@@ -152,6 +152,16 @@ export interface PrivateQuizInfo {
   subject?: string;
 }
 
+export async function getQuizzesByUsername(username: string): Promise<PublicQuizInfo[]> {
+  const response = await httpClient.get<unknown>(`/quizzes/by-username/${encodeURIComponent(username)}`);
+  if (!isPublicQuizApiResponseList(response.data)) {
+    throw new Error("User quizzes endpoint returned an incompatible response.");
+  }
+  return response.data.map((quiz) =>
+    normalizeQuiz(quiz, quiz.slug ?? quiz.id ?? quiz._id ?? slugifyTitle(quiz.title))
+  );
+}
+
 export async function validatePrivateQuizCode(code: string): Promise<PrivateQuizInfo> {
   const response = await httpClient.post<PublicQuizApiResponse>("/quizzes/access-code", { code: code.toUpperCase() });
   const data = response.data;

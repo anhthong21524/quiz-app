@@ -30,6 +30,7 @@ interface ConfigurationForm {
   timeLimitEnabled: boolean;
   timeLimitMinutes: number | null;
   isPrivate: boolean;
+  isExposed: boolean;
   allowSummary: boolean;
   allowReviewAnswers: boolean;
   allowRetake: boolean;
@@ -79,6 +80,7 @@ const configuration = reactive<ConfigurationForm>({
   timeLimitEnabled: false,
   timeLimitMinutes: null,
   isPrivate: false,
+  isExposed: false,
   allowSummary: true,
   allowReviewAnswers: true,
   allowRetake: true
@@ -217,6 +219,7 @@ function resetFlow() {
   configuration.timeLimitEnabled = false;
   configuration.timeLimitMinutes = null;
   configuration.isPrivate = false;
+  configuration.isExposed = false;
   configuration.allowSummary = true;
   configuration.allowReviewAnswers = true;
   configuration.allowRetake = true;
@@ -352,6 +355,7 @@ function populateEditFlow(quiz: Quiz) {
   configuration.timeLimitEnabled = quiz.timeLimit !== null && quiz.timeLimit !== undefined;
   configuration.timeLimitMinutes = quiz.timeLimit ?? null;
   configuration.isPrivate = quiz.isPrivate ?? false;
+  configuration.isExposed = quiz.isExposed ?? false;
   configuration.allowSummary = quiz.allowSummary ?? true;
   configuration.allowReviewAnswers = quiz.allowReviewAnswers ?? true;
   configuration.allowRetake = quiz.allowRetake ?? true;
@@ -412,6 +416,7 @@ async function goToQuestionsStep() {
         timeLimit: configuration.timeLimitEnabled ? configuration.timeLimitMinutes : null,
         isPrivate: configuration.isPrivate,
         accessCode: configuration.isPrivate ? activeQuizAccessCode.value : undefined,
+        isExposed: configuration.isExposed,
         allowSummary: configuration.allowSummary,
         allowReviewAnswers: configuration.allowReviewAnswers,
         allowRetake: configuration.allowRetake,
@@ -451,6 +456,7 @@ async function saveConfigOnly() {
       difficulty: configuration.difficulty,
       timeLimit: configuration.timeLimitEnabled ? configuration.timeLimitMinutes : null,
       isPrivate: configuration.isPrivate,
+      isExposed: configuration.isExposed,
       allowSummary: configuration.allowSummary,
       allowReviewAnswers: configuration.allowReviewAnswers,
       allowRetake: configuration.allowRetake
@@ -735,6 +741,7 @@ async function submitQuiz() {
       difficulty: configuration.difficulty,
       timeLimit: configuration.timeLimitEnabled ? configuration.timeLimitMinutes : null,
       isPrivate: configuration.isPrivate,
+      isExposed: configuration.isExposed,
       allowSummary: configuration.allowSummary,
       allowReviewAnswers: configuration.allowReviewAnswers,
       allowRetake: configuration.allowRetake,
@@ -877,6 +884,7 @@ function applyImportedQuiz(raw: unknown) {
     configuration.timeLimitMinutes = data.timeLimit;
   }
   if (typeof data.isPrivate === "boolean") configuration.isPrivate = data.isPrivate;
+  if (typeof data.isExposed === "boolean") configuration.isExposed = data.isExposed;
   if (typeof data.allowSummary === "boolean") configuration.allowSummary = data.allowSummary;
   if (typeof data.allowReviewAnswers === "boolean") configuration.allowReviewAnswers = data.allowReviewAnswers;
   if (typeof data.allowRetake === "boolean") configuration.allowRetake = data.allowRetake;
@@ -1217,6 +1225,32 @@ function togglePrivate() {
                             <path d="m4 10 4 4 8-8" stroke-linecap="round" stroke-linejoin="round" />
                           </svg>
                           <span>{{ accessCodeCopied ? t("common.copied") : t("common.copy") }}</span>
+                        </button>
+                      </div>
+                    </div>
+
+                    <!-- Expose to participants row -->
+                    <div class="bg-gray-50 border-t border-gray-200 px-3 py-2.5">
+                      <div class="flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                          <p class="text-sm font-semibold text-slate-700">{{ t("createQuiz.fields.exposeQuiz") }}</p>
+                          <p class="text-xs text-slate-500">{{ t("createQuiz.fields.exposeHint") }}</p>
+                        </div>
+                        <span
+                          v-if="isReadOnly"
+                          class="shrink-0 rounded-full px-2.5 py-1 text-xs font-semibold"
+                          :class="configuration.isExposed ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-slate-500'"
+                        >{{ configuration.isExposed ? t("createQuiz.states.on") : t("createQuiz.states.off") }}</span>
+                        <button
+                          v-else
+                          type="button"
+                          role="switch"
+                          :aria-checked="configuration.isExposed"
+                          class="relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition"
+                          :class="configuration.isExposed ? 'bg-emerald-500' : 'bg-gray-200'"
+                          @click="configuration.isExposed = !configuration.isExposed"
+                        >
+                          <span class="inline-block h-4 w-4 rounded-full bg-white shadow-sm transition" :class="configuration.isExposed ? 'translate-x-6' : 'translate-x-1'"></span>
                         </button>
                       </div>
                     </div>

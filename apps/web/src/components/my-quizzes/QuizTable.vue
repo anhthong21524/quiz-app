@@ -25,6 +25,8 @@ const emit = defineEmits<{
   edit: [quiz: QuizListItem];
   publish: [quiz: QuizListItem];
   unpublish: [quiz: QuizListItem];
+  expose: [quiz: QuizListItem];
+  unexpose: [quiz: QuizListItem];
   duplicate: [quiz: QuizListItem];
   delete: [quiz: QuizListItem];
   share: [quiz: QuizListItem];
@@ -86,11 +88,22 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
                 </svg>
                 {{ t("createQuiz.fields.privateQuiz") }}
               </span>
+              <span
+                v-if="quiz.isExposed"
+                class="ml-1 inline-flex items-center gap-1 rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-bold text-emerald-700"
+                :title="t('myQuizzes.table.exposedQuizHint')"
+              >
+                <svg class="h-3 w-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true">
+                  <circle cx="12" cy="8" r="3" />
+                  <path d="M4 19c0-3.3 3.6-6 8-6s8 2.7 8 6" stroke-linecap="round" />
+                </svg>
+                {{ t("createQuiz.fields.exposeQuiz") }}
+              </span>
             </div>
           </td>
           <td>{{ quiz.subject }}</td>
           <td>{{ quiz.questions }}</td>
-          <td><QuizStatusBadge :status="quiz.status" /></td>
+          <td><QuizStatusBadge :status="quiz.status" :is-exposed="quiz.isExposed" /></td>
           <td>{{ quiz.lastUpdatedLabel }}</td>
           <td class="col-actions-cell" @click.stop>
             <QuizRowActions
@@ -98,10 +111,13 @@ const paddedRows = computed<(QuizListItem | null)[]>(() => {
               :status="quiz.status"
               :is-api-quiz="Boolean(quiz.apiId)"
               :is-private="quiz.isPrivate"
+              :is-exposed="quiz.isExposed"
               @view="emit('view', quiz)"
               @edit="emit('edit', quiz)"
               @publish="emit('publish', quiz)"
               @unpublish="emit('unpublish', quiz)"
+              @expose="emit('expose', quiz)"
+              @unexpose="emit('unexpose', quiz)"
               @duplicate="emit('duplicate', quiz)"
               @delete="emit('delete', quiz)"
               @share="emit('share', quiz)"

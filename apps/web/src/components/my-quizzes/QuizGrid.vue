@@ -14,6 +14,8 @@ const emit = defineEmits<{
   edit: [quiz: QuizListItem];
   publish: [quiz: QuizListItem];
   unpublish: [quiz: QuizListItem];
+  expose: [quiz: QuizListItem];
+  unexpose: [quiz: QuizListItem];
   duplicate: [quiz: QuizListItem];
   delete: [quiz: QuizListItem];
   share: [quiz: QuizListItem];
@@ -32,7 +34,7 @@ const { t } = useI18n();
     >
       <div class="grid-card-topline">
         <QuizIconAvatar :icon="quiz.icon" />
-        <QuizStatusBadge :status="quiz.status" />
+        <QuizStatusBadge :status="quiz.status" :is-exposed="quiz.isExposed" />
       </div>
 
       <div class="grid-card-copy">
@@ -61,10 +63,13 @@ const { t } = useI18n();
           :status="quiz.status"
           :is-api-quiz="Boolean(quiz.apiId)"
           :is-private="quiz.isPrivate"
+          :is-exposed="quiz.isExposed"
           @view="emit('view', quiz)"
           @edit="emit('edit', quiz)"
           @publish="emit('publish', quiz)"
           @unpublish="emit('unpublish', quiz)"
+          @expose="emit('expose', quiz)"
+          @unexpose="emit('unexpose', quiz)"
           @duplicate="emit('duplicate', quiz)"
           @delete="emit('delete', quiz)"
           @share="emit('share', quiz)"

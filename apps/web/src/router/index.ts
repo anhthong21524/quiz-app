@@ -93,17 +93,17 @@ export const router = createRouter({
       meta: { bareLayout: true }
     },
     {
-      path: "/quizzes/private",
-      name: "private-quiz-entry",
-      component: () => import("../views/participant/PrivateQuizEntryView.vue"),
+      path: "/quizzes/user",
+      name: "user-quizzes",
+      component: () => import("../views/participant/UserQuizzesView.vue"),
       meta: {
         seo: {
-          titleKey: "seo.privateQuiz.title",
-          descriptionKey: "seo.privateQuiz.description",
-          canonicalPath: "/quizzes/private",
+          titleKey: "seo.userQuizzes.title",
+          descriptionKey: "seo.userQuizzes.description",
+          canonicalPath: "/quizzes/user",
           breadcrumbs: [
             { nameKey: "navigation.home", path: "/" },
-            { nameKey: "seo.privateQuiz.title", path: "/quizzes/private" }
+            { nameKey: "seo.userQuizzes.title", path: "/quizzes/user" }
           ]
         }
       }
@@ -129,6 +129,30 @@ export const router = createRouter({
           titleKey: "seo.takeQuiz.title",
           descriptionKey: "seo.takeQuiz.description",
           breadcrumbs: [{ nameKey: "seo.takeQuiz.title", path: "/q" }]
+        }
+      }
+    },
+    {
+      path: "/quiz/:username/:slug",
+      name: "user-quiz",
+      component: () => import("../views/participant/QuizLandingView.vue"),
+      meta: {
+        seo: {
+          titleKey: "seo.publicQuiz.title",
+          descriptionKey: "seo.publicQuiz.description",
+          breadcrumbs: [{ nameKey: "seo.publicQuiz.title", path: "/quiz" }]
+        }
+      }
+    },
+    {
+      path: "/quiz/:username/:slug/take",
+      name: "user-quiz-take",
+      component: () => import("../views/participant/QuizTakeView.vue"),
+      meta: {
+        seo: {
+          titleKey: "seo.takeQuiz.title",
+          descriptionKey: "seo.takeQuiz.description",
+          breadcrumbs: [{ nameKey: "seo.takeQuiz.title", path: "/quiz" }]
         }
       }
     },

@@ -57,6 +57,9 @@ export class QuizEntity {
   @Prop({ trim: true, uppercase: true, index: true, sparse: true })
   accessCode?: string;
 
+  @Prop({ type: Boolean, default: false })
+  isExposed!: boolean;
+
   @Prop({ type: Boolean, default: true })
   allowSummary!: boolean;
 

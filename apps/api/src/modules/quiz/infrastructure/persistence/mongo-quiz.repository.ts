@@ -84,6 +84,15 @@ export class MongoQuizRepository
     return quizzes.map((quiz) => normalizeQuiz(quiz));
   }
 
+  async findExposedByUsername(username: string): Promise<Quiz[]> {
+    const prefix = new RegExp(`^${username.toLowerCase()}@`, "i");
+    const quizzes = await this.getModel()
+      .find({ isExposed: true, ownerEmail: prefix })
+      .sort({ updatedAt: -1 })
+      .lean();
+    return quizzes.map((quiz) => normalizeQuiz(quiz));
+  }
+
   async findByAccessCode(code: string): Promise<Quiz | null> {
     const quiz = await this.getModel()
       .findOne({ accessCode: code.toUpperCase(), status: QuizStatus.PUBLISHED, isPrivate: true })
@@ -143,7 +152,8 @@ export class MongoQuizRepository
       title: `Copy of ${quiz.title ?? rest.title}`,
       status: QuizStatus.IN_PROGRESS,
       isPrivate: false,
-      accessCode: undefined
+      accessCode: undefined,
+      isExposed: false
     });
     return normalizeQuiz(copy.toObject());
   }

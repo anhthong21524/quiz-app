@@ -46,10 +46,6 @@ async function loadQuiz() {
       pageError.value = t("participant.landing.loadNotFound");
       return;
     }
-
-    if (!quiz.value.isPublished) {
-      pageError.value = t("participant.landing.loadUnavailable");
-    }
   } catch {
     pageError.value = t("participant.landing.loadFailed");
   } finally {
@@ -81,7 +77,11 @@ async function startQuiz() {
       accessCode: accessCode.value
     });
 
-    router.push({ name: "public-quiz-take", params: { slug: quiz.value.slug } });
+    const takeName = route.name === "user-quiz" ? "user-quiz-take" : "public-quiz-take";
+    const takeParams = route.name === "user-quiz"
+      ? { username: route.params.username, slug: quiz.value.slug }
+      : { slug: quiz.value.slug };
+    router.push({ name: takeName, params: takeParams });
   } finally {
     isStarting.value = false;
   }

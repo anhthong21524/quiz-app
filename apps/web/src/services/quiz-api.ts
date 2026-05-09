@@ -73,13 +73,14 @@ export interface QuizResultDetail {
 }
 
 export interface QuizPayload {
-  title: string;
-  description: string;
+  title?: string;
+  description?: string;
   subject?: string;
   difficulty?: Quiz["difficulty"];
   timeLimit?: number | null;
   isPrivate?: boolean;
   accessCode?: string;
+  isExposed?: boolean;
   allowSummary?: boolean;
   allowReviewAnswers?: boolean;
   allowRetake?: boolean;

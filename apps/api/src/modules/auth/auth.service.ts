@@ -174,8 +174,10 @@ export class AuthService implements OnModuleInit {
   }
 
   private issueTokens(payload: TokenPayload, user?: User): AuthTokens {
-    const accessToken = this.jwtService.sign(payload, { expiresIn: "15m" });
-    const refreshToken = this.jwtService.sign(payload, {
+    const isAdmin = payload.email === this.adminEmail;
+    const tokenData = { ...payload, isAdmin };
+    const accessToken = this.jwtService.sign(tokenData, { expiresIn: "15m" });
+    const refreshToken = this.jwtService.sign(tokenData, {
       secret: this.refreshSecret,
       expiresIn: "7d"
     });
@@ -184,12 +186,16 @@ export class AuthService implements OnModuleInit {
     return {
       accessToken,
       refreshToken,
-      user: user ? this.toAuthUser(user) : { email: payload.email }
+      user: user ? this.toAuthUser(user) : { email: payload.email, isAdmin }
     };
   }
 
   private toAuthUser(user: User): AuthUser {
-    return { email: user.email, ...(user.avatarUrl ? { avatarUrl: user.avatarUrl } : {}) };
+    return {
+      email: user.email,
+      isAdmin: user.email === this.adminEmail,
+      ...(user.avatarUrl ? { avatarUrl: user.avatarUrl } : {})
+    };
   }
 
   private normalizeEmail(email: string) {

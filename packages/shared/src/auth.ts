@@ -1,6 +1,7 @@
 export interface AuthUser {
   email: string;
   avatarUrl?: string;
+  isAdmin?: boolean;
 }
 
 export const AUTH_FIELD_LIMITS = {

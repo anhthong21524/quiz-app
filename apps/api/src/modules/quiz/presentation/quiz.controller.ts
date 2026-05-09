@@ -31,6 +31,12 @@ export class QuizController {
     return this.quizService.findPublished();
   }
 
+  @Get("by-username/:username")
+  @Public()
+  findByUsername(@Param("username") username: string) {
+    return this.quizService.findExposedByUsername(username);
+  }
+
   @Post("access-code")
   @Public()
   validateAccessCode(@Body() body: AccessCodeDto) {

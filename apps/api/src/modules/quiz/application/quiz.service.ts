@@ -9,6 +9,7 @@ import { QUIZ_REPOSITORY, QuizRepository } from "../domain/quiz.repository";
 export interface AuthenticatedUser {
   id: string;
   email: string;
+  isAdmin: boolean;
 }
 
 @Injectable()
@@ -44,6 +45,10 @@ export class QuizService {
     return this.quizRepository.findPublished();
   }
 
+  findExposedByUsername(username: string) {
+    return this.quizRepository.findExposedByUsername(username);
+  }
+
   async findBySlug(slug: string, accessCode?: string) {
     const quiz = await this.quizRepository.findBySlug(slug);
     if (!quiz) throw new NotFoundException(`Quiz ${slug} was not found.`);
@@ -75,11 +80,15 @@ export class QuizService {
       }
     }
 
-    const updateData = { ...payload } as typeof payload & { accessCode?: string };
+    const updateData = { ...payload } as typeof payload & { accessCode?: string; status?: QuizStatus };
     if (payload.isPrivate && !existing?.accessCode) {
       updateData.accessCode = payload.accessCode?.toUpperCase() || this.generateAccessCode();
     } else if (payload.isPrivate === false) {
       updateData.accessCode = undefined;
+    }
+
+    if (payload.isExposed === true && existing?.status === QuizStatus.IN_PROGRESS) {
+      updateData.status = QuizStatus.UNPUBLISHED;
     }
 
     const quiz = await this.quizRepository.update(id, user.id, updateData);
@@ -87,11 +96,17 @@ export class QuizService {
   }
 
   async publish(id: string, user: AuthenticatedUser) {
+    if (!user.isAdmin) {
+      throw new ForbiddenException("Only admins can publish quizzes.");
+    }
     const quiz = await this.quizRepository.updateStatus(id, user.id, QuizStatus.PUBLISHED);
     return this.requireQuiz(quiz, id);
   }
 
   async unpublish(id: string, user: AuthenticatedUser) {
+    if (!user.isAdmin) {
+      throw new ForbiddenException("Only admins can unpublish quizzes.");
+    }
     const quiz = await this.quizRepository.updateStatus(id, user.id, QuizStatus.UNPUBLISHED);
     return this.requireQuiz(quiz, id);
   }

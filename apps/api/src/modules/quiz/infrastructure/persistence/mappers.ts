@@ -22,6 +22,7 @@ export function normalizeQuiz(document: {
   status: Quiz["status"];
   isPrivate?: boolean;
   accessCode?: string;
+  isExposed?: boolean;
   allowSummary?: boolean;
   allowReviewAnswers?: boolean;
   allowRetake?: boolean;
@@ -46,6 +47,7 @@ export function normalizeQuiz(document: {
     status: document.status,
     isPrivate: document.isPrivate ?? false,
     accessCode: document.accessCode,
+    isExposed: document.isExposed ?? false,
     allowSummary: document.allowSummary ?? true,
     allowReviewAnswers: document.allowReviewAnswers ?? true,
     allowRetake: document.allowRetake ?? true,

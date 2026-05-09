@@ -137,6 +137,28 @@ export const useQuizStore = defineStore("quizzes", {
       }
     },
 
+    async setQuizExposed(id: string, exposed: boolean) {
+      this.isActionLoading = true;
+      this.error = null;
+      try {
+        const updatedQuiz = await updateQuiz(id, { isExposed: exposed });
+
+        const existingIndex = this.items.findIndex((q) => q.id === id);
+        if (existingIndex >= 0) {
+          this.items.splice(existingIndex, 1, updatedQuiz);
+        }
+        if (this.activeQuiz?.id === id) {
+          this.activeQuiz = updatedQuiz;
+        }
+        return updatedQuiz;
+      } catch (error) {
+        this.error = toAppError(error, "quiz_save");
+        throw this.error;
+      } finally {
+        this.isActionLoading = false;
+      }
+    },
+
     async deleteQuiz(id: string) {
       this.isActionLoading = true;
       this.error = null;

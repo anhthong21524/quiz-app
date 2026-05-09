@@ -22,6 +22,7 @@ import type {
 } from "../../components/my-quizzes/types";
 import { getQuizIcon, mapQuizStatus } from "../../lib/quiz-helpers";
 import { useQuizStore } from "../../stores/quizzes";
+import { useAuthStore } from "../../stores/auth";
 import { useToast } from "../../composables/useToast";
 import { isAppError } from "../../lib/api/errors";
 import { fetchQuizResultDetail } from "../../services/quiz-api";
@@ -29,6 +30,7 @@ import { useI18n } from "../../i18n";
 
 const router = useRouter();
 const quizStore = useQuizStore();
+const authStore = useAuthStore();
 const { show: showToast } = useToast();
 const { t } = useI18n();
 
@@ -322,7 +324,8 @@ function mapApiQuiz(quiz: Quiz): QuizListItem {
     lastUpdatedLabel: formatLastUpdated(quiz.updatedAt ?? quiz.createdAt),
     icon: getQuizIcon(subject),
     isPrivate: quiz.isPrivate ?? false,
-    accessCode: quiz.accessCode
+    accessCode: quiz.accessCode,
+    isExposed: quiz.isExposed ?? false
   };
 }
 
@@ -396,6 +399,44 @@ function unpublishQuiz(quiz: QuizListItem) {
   });
 }
 
+function exposeQuiz(quiz: QuizListItem) {
+  if (!quiz.apiId) return;
+
+  openConfirm({
+    title: t("myQuizzes.actions.exposeTitle"),
+    message: t("myQuizzes.actions.exposeMessage", { title: quiz.title }),
+    confirmLabel: t("myQuizzes.actions.exposeConfirm"),
+    danger: false,
+    onConfirm: async () => {
+      try {
+        await quizStore.setQuizExposed(quiz.apiId!, true);
+        showToast(t("myQuizzes.toasts.quizExposed"));
+      } catch {
+        showToast(t("myQuizzes.toasts.exposeFailed"), "error");
+      }
+    }
+  });
+}
+
+function unexposeQuiz(quiz: QuizListItem) {
+  if (!quiz.apiId) return;
+
+  openConfirm({
+    title: t("myQuizzes.actions.unexposeTitle"),
+    message: t("myQuizzes.actions.unexposeMessage", { title: quiz.title }),
+    confirmLabel: t("myQuizzes.actions.unexposeConfirm"),
+    danger: false,
+    onConfirm: async () => {
+      try {
+        await quizStore.setQuizExposed(quiz.apiId!, false);
+        showToast(t("myQuizzes.toasts.quizUnexposed"));
+      } catch {
+        showToast(t("myQuizzes.toasts.unexposeFailed"), "error");
+      }
+    }
+  });
+}
+
 async function duplicateQuiz(quiz: QuizListItem) {
   if (!quiz.apiId) return;
 
@@ -449,11 +490,15 @@ function shareQuiz(quiz: QuizListItem) {
   if (!quiz.apiId) return;
 
   const baseUrl = import.meta.env.VITE_SITE_URL ?? window.location.origin;
-  const identifier = quiz.slug ?? quiz.apiId;
+  const slug = quiz.slug ?? quiz.apiId;
+  const emailUsername = authStore.user?.email?.split("@")[0];
+  const url = emailUsername && quiz.slug
+    ? `${baseUrl}/quiz/${emailUsername}/${quiz.slug}`
+    : `${baseUrl}/q/${slug}`;
   shareState.value = {
     open: true,
     title: quiz.title,
-    url: `${baseUrl}/q/${identifier}`
+    url
   };
 }
 
@@ -540,6 +585,8 @@ function copyPrivateCode(quiz: QuizListItem) {
                 @edit="editQuiz"
                 @publish="publishQuiz"
                 @unpublish="unpublishQuiz"
+                @expose="exposeQuiz"
+                @unexpose="unexposeQuiz"
                 @duplicate="duplicateQuiz"
                 @delete="deleteQuiz"
                 @share="shareQuiz"
@@ -553,6 +600,8 @@ function copyPrivateCode(quiz: QuizListItem) {
                 @edit="editQuiz"
                 @publish="publishQuiz"
                 @unpublish="unpublishQuiz"
+                @expose="exposeQuiz"
+                @unexpose="unexposeQuiz"
                 @duplicate="duplicateQuiz"
                 @delete="deleteQuiz"
                 @share="shareQuiz"
@@ -567,6 +616,8 @@ function copyPrivateCode(quiz: QuizListItem) {
               @edit="editQuiz"
               @publish="publishQuiz"
               @unpublish="unpublishQuiz"
+              @expose="exposeQuiz"
+              @unexpose="unexposeQuiz"
               @duplicate="duplicateQuiz"
               @delete="deleteQuiz"
               @share="shareQuiz"

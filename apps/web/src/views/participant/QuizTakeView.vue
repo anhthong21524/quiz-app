@@ -414,10 +414,6 @@ async function loadQuiz() {
       pageError.value = t("participant.take.loadNotFound");
       return;
     }
-    if (!quiz.value.isPublished) {
-      pageError.value = t("participant.take.loadUnavailable");
-      return;
-    }
     if (!hasActiveAttempt.value) {
       pageError.value = t("participant.take.attemptExpired");
       return;

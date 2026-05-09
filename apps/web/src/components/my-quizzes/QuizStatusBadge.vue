@@ -4,23 +4,20 @@ import { useI18n } from "../../i18n";
 
 const props = defineProps<{
   status: MyQuizStatus;
+  isExposed?: boolean;
 }>();
 
 const { t } = useI18n();
 
 function statusClass() {
+  if (props.status !== "Published" && props.isExposed) return "is-exposed";
   return `is-${props.status.toLowerCase().replace(/\s+/g, "-")}`;
 }
 
 function labelForStatus(status: MyQuizStatus) {
-  if (status === "Published") {
-    return t("myQuizzes.status.published");
-  }
-
-  if (status === "In progress") {
-    return t("myQuizzes.status.inProgress");
-  }
-
+  if (status === "Published") return t("myQuizzes.status.published");
+  if (props.isExposed) return t("myQuizzes.status.exposed");
+  if (status === "In progress") return t("myQuizzes.status.inProgress");
   return t("myQuizzes.status.unpublished");
 }
 </script>
@@ -65,5 +62,10 @@ function labelForStatus(status: MyQuizStatus) {
 .status-badge.is-unpublished {
   background: #f2f4f7;
   color: #667287;
+}
+
+.status-badge.is-exposed {
+  background: #eef9f4;
+  color: #0b7a52;
 }
 </style>

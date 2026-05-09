@@ -10,6 +10,7 @@ export interface CreateQuizData {
   timeLimit?: number | null;
   isPrivate?: boolean;
   accessCode?: string;
+  isExposed?: boolean;
   allowSummary?: boolean;
   allowReviewAnswers?: boolean;
   allowRetake?: boolean;
@@ -25,6 +26,7 @@ export interface UpdateQuizData {
   status?: QuizStatus;
   isPrivate?: boolean;
   accessCode?: string;
+  isExposed?: boolean;
   allowSummary?: boolean;
   allowReviewAnswers?: boolean;
   allowRetake?: boolean;
@@ -35,6 +37,7 @@ export interface QuizRepository {
   create(data: CreateQuizData): Promise<Quiz>;
   findAll(ownerId: string): Promise<Quiz[]>;
   findPublished(): Promise<Quiz[]>;
+  findExposedByUsername(username: string): Promise<Quiz[]>;
   findById(id: string): Promise<Quiz | null>;
   findBySlug(slug: string): Promise<Quiz | null>;
   findByAccessCode(code: string): Promise<Quiz | null>;

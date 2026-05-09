@@ -29,6 +29,7 @@ export class InMemoryQuizRepository implements QuizRepository {
       status: QuizStatus.IN_PROGRESS,
       isPrivate: data.isPrivate ?? false,
       accessCode: data.accessCode,
+      isExposed: data.isExposed ?? false,
       allowSummary: data.allowSummary ?? true,
       allowReviewAnswers: data.allowReviewAnswers ?? true,
       allowRetake: data.allowRetake ?? true,
@@ -55,6 +56,15 @@ export class InMemoryQuizRepository implements QuizRepository {
   async findPublished(): Promise<Quiz[]> {
     return Array.from(this.quizzes.values())
       .filter((quiz) => quiz.status === QuizStatus.PUBLISHED && !quiz.isPrivate)
+      .sort((left, right) =>
+        (right.updatedAt ?? "").localeCompare(left.updatedAt ?? "")
+      );
+  }
+
+  async findExposedByUsername(username: string): Promise<Quiz[]> {
+    const prefix = username.toLowerCase() + "@";
+    return Array.from(this.quizzes.values())
+      .filter((quiz) => quiz.isExposed && (quiz.ownerEmail ?? "").startsWith(prefix))
       .sort((left, right) =>
         (right.updatedAt ?? "").localeCompare(left.updatedAt ?? "")
       );
@@ -129,6 +139,7 @@ export class InMemoryQuizRepository implements QuizRepository {
       status: QuizStatus.IN_PROGRESS,
       isPrivate: false,
       accessCode: undefined,
+      isExposed: false,
       questions: quiz.questions.map((q) => ({ ...q, id: randomUUID() })),
       createdAt: timestamp,
       updatedAt: timestamp

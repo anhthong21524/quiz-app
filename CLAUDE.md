@@ -112,7 +112,7 @@ Pages and cards must never produce a visible scrollbar. When adding new UI:
 
 Vue 3 SFCs with Pinia for state (`useQuizStore` in `stores/`), Vue Router for navigation, and Axios via `services/http.ts`. The API base URL comes from `src/config/env.ts` which reads `VITE_API_BASE_URL`. Quiz API calls live in `services/quiz-api.ts`; auth API calls live in `services/auth-api.ts`; store actions wrap them with loading/error state.
 
-Auth tokens (access + refresh) are stored in `sessionStorage`. The router guard in `router/index.ts` redirects unauthenticated users to `/login` for protected routes (`requiresAuth: true`), and redirects authenticated users away from `/login` to `/management`.
+Auth tokens (access + refresh) are stored in `localStorage` (persists across browser sessions). The router guard in `router/index.ts` redirects unauthenticated users to `/login` for protected routes (`requiresAuth: true`), and redirects authenticated users away from `/login` to `/management`.
 
 SEO metadata (title, description, canonical, breadcrumbs) is applied per-route via `services/seo.ts` in a `router.afterEach` hook.
 
@@ -124,11 +124,13 @@ SEO metadata (title, description, canonical, breadcrumbs) is applied per-route v
 | `/about` | `AboutView` | No |
 | `/guide` | `UserGuidelineView` | No |
 | `/quizzes` | `PublicQuizzesView` (browse published quizzes) | No |
-| `/quizzes/private` | `PrivateQuizEntryView` (access-code entry) | No |
+| `/quizzes/user` | `UserQuizzesView` (search quizzes by username) | No |
 | `/login` | `LoginView` | No |
 | `/auth/callback` | `AuthCallbackView` (Google OAuth) | No (bare layout) |
 | `/q/:slug` | `PublicQuizLandingPage` | No |
 | `/q/:slug/take` | `PublicQuizTakeView` | No |
+| `/quiz/:username/:slug` | `QuizLandingView` (user-scoped quiz landing) | No |
+| `/quiz/:username/:slug/take` | `QuizTakeView` (user-scoped quiz attempt) | No |
 | `/management` | `ManagementView` (dashboard) | Yes |
 | `/management/quizzes` | `MyQuizzesView` | Yes |
 | `/management/me/profile` | `ProfileView` | Yes |
@@ -163,6 +165,7 @@ Legacy redirects: `/home` → `/`, `/profile` → `/management/me/profile`, `/ac
 |--------|------|------|--------|
 | GET | `/api/quizzes` | Required | List quizzes for current user |
 | GET | `/api/quizzes/public` | Public | List all published quizzes |
+| GET | `/api/quizzes/by-username/:username` | Public | List quizzes owned by a specific user |
 | POST | `/api/quizzes/access-code` | Public | Validate a private quiz access code |
 | GET | `/api/quizzes/results/summary` | Required | Aggregate results summary for current user |
 | GET | `/api/quizzes/results/performance` | Required | Per-quiz performance stats for current user |

@@ -23,4 +23,5 @@ export interface QuizListItem {
   icon: MyQuizIcon;
   isPrivate?: boolean;
   accessCode?: string;
+  isExposed?: boolean;
 }
